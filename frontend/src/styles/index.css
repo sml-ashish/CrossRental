@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
+
+/*
+ * SML Crane Discovery & Vendor Portal — design tokens.
+ *
+ * Mirrors design.md: Sanghvi Movers brand red on a neutral slate chrome, with a
+ * compact, information-dense layout suited to someone reading this on a phone
+ * at a crane yard. Tailwind v4 is CSS-first, so the palette is declared here
+ * rather than in a tailwind.config file.
+ */
+
+@theme {
+  /* Brand red — primary action buttons use a three-stop gradient. */
+  --color-brand-50: #fff1f0;
+  --color-brand-100: #ffe1e0;
+  --color-brand-200: #ffc9c7;
+  --color-brand-300: #fa5a54;
+  --color-brand-400: #f83c36;
+  --color-brand-500: #f1221c;
+  --color-brand-600: #d91b16;
+  --color-brand-700: #b8130f;
+  --color-brand-800: #96100d;
+  --color-brand-900: #7a0d0b;
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-card: 0.75rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-slate-50 font-sans text-slate-700 antialiased;
+    /* Keeps long values such as a GSTIN or an account number from breaking a
+       dense table cell into an unreadable single column. */
+    overflow-wrap: break-word;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  /* Inputs inherit the compact density of the rest of the UI. */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* The one primary button style in the portal. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-b
+      from-brand-300 via-brand-500 to-brand-600 px-4 py-2.5 text-sm font-medium text-white
+      transition-colors hover:from-brand-500 hover:via-brand-600 hover:to-brand-700
+      disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white
+      px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors
+      hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900
+      placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
+      focus:outline-none;
+  }
+
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white;
+  }
+}

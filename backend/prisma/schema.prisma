@@ -1,0 +1,863 @@
+// Crane Discovery & Vendor Repository Platform — vendor portal data model.
+//
+// Conventions copied from the CustomerPulse backend (same owner, same stack):
+// camelCase columns with no @map, uuid() primary keys, SCREAMING_SNAKE enums,
+// driver-adapter client generated into src/generated/prisma.
+//
+// Source of truth for the shape of this file is VendorPortalImplementation.md
+// section 5. Reference data (State, CraneType) is seeded from the SAP
+// standard-values sheet in docs/vendorregistrationform.xlsx.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  vendor_user
+  admin_user
+  sales_user
+}
+
+enum OnboardingStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum NatureOfCompany {
+  PUBLIC_LTD
+  PRIVATE_LTD
+  PARTNERSHIP
+  PROPRIETORSHIP
+}
+
+enum GstFilingFrequency {
+  MONTHLY
+  QUARTERLY
+  COMPOSITE
+}
+
+enum MsmeCategory {
+  MICRO
+  SMALL
+  MEDIUM
+}
+
+enum BankAccountType {
+  SAVING
+  CURRENT
+  OTHER
+}
+
+// Office-use review block. Facilities get three states (the paper form's
+// "Adequate / Not Adequate / need to be improved"), manpower only two.
+enum FacilityStatus {
+  ADEQUATE
+  NOT_ADEQUATE
+  NEEDS_IMPROVEMENT
+}
+
+enum ManpowerStatus {
+  ADEQUATE
+  NOT_ADEQUATE
+}
+
+enum DocumentType {
+  CANCELLED_CHEQUE
+  GST_CERTIFICATE
+  PAN_COPY
+  OTHER
+}
+
+enum CraneStatus {
+  AVAILABLE
+  ENGAGED
+  UNDER_MAINTENANCE
+  // The last two are system-only (brief 6.1): the vendor dropdown never
+  // offers them, and a vendor cannot change a crane that is in one of them.
+  BOOKED
+  HIRED
+}
+
+enum OwnershipType {
+  VENDOR
+  SML
+}
+
+enum CoordinateSource {
+  auto
+  manual
+}
+
+// Brief 6.4: FLEET_APPROVAL_REQUIRED=false means crane changes are live
+// immediately, which is the default. The column exists so flipping the flag
+// needs no schema change and no deploy; the review UI is deliberately deferred.
+enum CraneApprovalStatus {
+  APPROVED
+  PENDING
+}
+
+enum RfqStatus {
+  DRAFT
+  SENT
+  CLOSED
+  CANCELLED
+}
+
+// Extension point for the future line-item status trail (BPD 6.5 / 7.2).
+enum RfqRollupStatus {
+  SENT
+  AWAITING_QUOTES
+  QUOTES_RECEIVED
+}
+
+enum EmailDeliveryStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum ResponseStatus {
+  PENDING
+  QUOTED
+  DECLINED
+  EXPIRED
+}
+
+enum RateBasis {
+  PER_DAY
+  PER_MONTH
+  LUMP_SUM
+}
+
+enum DurationUnit {
+  DAYS
+  MONTHS
+}
+
+enum QuotationStatus {
+  SUBMITTED
+  WITHDRAWN
+  UNDER_REVIEW
+  SHORTLISTED
+  REJECTED
+  // Selected === "Awarded" as the vendor sees it.
+  SELECTED
+  NOT_AWARDED
+}
+
+enum QuoteSource {
+  PORTAL
+}
+
+enum DistanceMethod {
+  road
+  straight_line
+}
+
+enum EmailLogStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum OtpPurpose {
+  LOGIN
+}
+
+enum AttachmentKind {
+  LOAD_CHART
+  OTHER
+}
+
+// ---------------------------------------------------------------------------
+// Reference data
+// ---------------------------------------------------------------------------
+
+model State {
+  code             String  @id
+  name             String  @unique
+  isUnionTerritory Boolean @default(false)
+
+  vendorsOperating StateVendorRegion[]
+  rfqs             Rfq[]
+  cranes           Crane[]
+
+  @@map("states")
+}
+
+// Operating regions are a multi-select over states. Kept as a join table
+// rather than a Postgres array so a bad state code can never be stored.
+model StateVendorRegion {
+  vendorId  String
+  stateCode String
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  state  State  @relation(fields: [stateCode], references: [code])
+
+  @@id([vendorId, stateCode])
+  @@map("vendor_operating_regions")
+}
+
+model CraneType {
+  code      String @id
+  name      String @unique
+  sortOrder Int    @default(0)
+
+  cranes        Crane[]
+  rfqCandidates Rfq[]   @relation("RfqCandidateType")
+
+  @@map("crane_types")
+}
+
+// ---------------------------------------------------------------------------
+// Vendor
+// ---------------------------------------------------------------------------
+
+model Vendor {
+  id            String  @id @default(uuid())
+  // Typed in by an admin, unique, may stay blank until SAP creates the
+  // vendor. Number range from the SAP standard-values sheet (10000001).
+  sapVendorCode String? @unique
+
+  // ---------------------------------------------------------------------------
+  // Onboarding inputs. These are nullable in the database because a vendor may
+  // save a partial form as a Draft (brief 7.2) and come back to it later.
+  // "Mandatory" in brief 5.1 is therefore enforced by validation at SUBMIT
+  // time (services/onboarding.service.ts), not by NOT NULL. An APPROVED vendor
+  // is guaranteed to have every field below populated.
+  // ---------------------------------------------------------------------------
+
+  name                 String?
+  natureOfCompany      NatureOfCompany?
+  registeredAddress    String?
+  telephone            String?
+  fax                  String?
+  email                String?
+  weeklyOffDays        String?
+  companySize          String?
+  pan                  String?
+  tan                  String?
+  gstn                 String?
+  gstCompositionOpted  Boolean?
+  gstr1FilingFrequency GstFilingFrequency?
+  cin                  String?
+  govtRegistrationType String?
+  govtRegistrationNo   String?
+  msmeCategory         MsmeCategory?
+
+  // Bank block. Account number and IFSC are AES-256-GCM encrypted at rest
+  // (see utils/crypto.ts); last4 is kept in clear so the UI can mask
+  // without decrypting. Sales users never receive these fields at all.
+  bankAccountHolderName String?
+  bankName              String?
+  bankBranch            String?
+  bankAccountType       BankAccountType?
+  bankAccountNoEnc      String?
+  bankAccountNoLast4    String?
+  bankIfscEnc           String?
+
+  codeOfConductAccepted  Boolean?
+  declarationName        String?
+  declarationDesignation String?
+  declarationDate        DateTime?
+
+  // Replaces the paper form's "Product range / HSN" block.
+  fleetSummary String?
+
+  onboardingStatus OnboardingStatus @default(DRAFT)
+  approvedById     String?
+  approvedBy       User?            @relation("VendorApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt       DateTime?
+  adminRemarks     String?
+
+  // Office-use review, admin only.
+  facilityStatus         FacilityStatus?
+  manpowerStatus         ManpowerStatus?
+  improvementRequirement String?
+  improvementPeriod      String?
+
+  // Count of active cranes, maintained by the crane service.
+  totalFleetSize Int @default(0)
+
+  operatingRegions StateVendorRegion[]
+  contacts         VendorContact[]
+  documents        VendorDocument[]
+  decisions        VendorDecision[]
+  users            User[]
+  invitations      VendorInvitation[]
+  cranes           Crane[]
+  rfqRecipients    RfqVendorRecipient[]
+  quotations       Quotation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@index([onboardingStatus])
+  @@map("vendors")
+}
+
+model VendorContact {
+  id       String @id @default(uuid())
+  vendorId String
+
+  name      String
+  mobile    String
+  telephone String?
+  // Unique so an approval can never try to create two portal logins for the
+  // same address. Postgres permits many NULLs under a unique index, which
+  // is what we want for contacts with no email.
+  email     String? @unique
+  isPrimary Boolean @default(false)
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vendorId])
+  @@map("vendor_contacts")
+}
+
+model VendorDocument {
+  id       String       @id @default(uuid())
+  vendorId String
+  docType  DocumentType
+
+  fileRef   String
+  fileName  String
+  mimeType  String?
+  sizeBytes Int?
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  uploadedAt DateTime @default(now())
+  uploadedBy String?
+
+  @@index([vendorId])
+  @@map("vendor_documents")
+}
+
+// ---------------------------------------------------------------------------
+// Onboarding invitations and decisions (M2)
+// ---------------------------------------------------------------------------
+
+/// A single-use invitation that lets a new vendor fill in the onboarding form.
+///
+/// Brief 8 lists "Vendor invitation / registration" as an email an admin or
+/// sales user sends, "replacing the current registration mail" where SML
+/// emailed a paper form to be returned by email. So onboarding is invite-gated
+/// rather than an open public sign-up: there is no endpoint anyone can POST a
+/// new vendor to without holding a token, which also keeps junk out of the
+/// admin approval queue.
+///
+/// Only the SHA-256 of the token is stored, so a leaked database does not hand
+/// over working invitations. Same reasoning as the activation and reset tokens
+/// on User.
+model VendorInvitation {
+  id String @id @default(uuid())
+
+  tokenHash String @unique
+
+  /// Prefills the form. Nullable so an admin can invite a company before it has
+  /// settled on a contact address.
+  email       String?
+  companyName String?
+  contactName String?
+
+  createdById String
+  createdBy   User   @relation("InvitationCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+
+  /// Set once the vendor opens the link and starts a draft. From then on the
+  /// draft vendor row owns the data and the invitation is only a pointer.
+  vendorId String?
+  vendor   Vendor? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  /// When the onboarding form was submitted. The invitation cannot be reopened
+  /// afterwards, so a vendor cannot edit an application already under review.
+  submittedAt DateTime?
+
+  revokedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vendorId])
+  @@index([email])
+  @@map("vendor_invitations")
+}
+
+/// An administrative decision on a submitted onboarding form. Kept as a row
+/// rather than only as fields on Vendor so a resubmission after a rejection has
+/// its own decision history.
+model VendorDecision {
+  id       String @id @default(uuid())
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  outcome DecisionOutcome
+  remarks String?
+
+  decidedById String?
+  decidedBy   User?   @relation("DecisionBy", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([vendorId])
+  @@map("vendor_decisions")
+}
+
+enum DecisionOutcome {
+  APPROVED
+  REJECTED
+}
+
+// ---------------------------------------------------------------------------
+// Users and auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  // Null until the activation link is used (vendors) or forever (internal
+  // users, who authenticate by OTP).
+  passwordHash String?
+  fullName     String?
+  role         UserRole
+
+  // Null for admin_user and sales_user. Every vendor_user is scoped to
+  // exactly one vendor and may only ever read/write that vendor's rows.
+  vendorId String?
+  vendor   Vendor? @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  isActive Boolean @default(true)
+
+  // First-time activation (vendors).
+  activationToken          String?   @unique
+  activationTokenExpiresAt DateTime?
+  activatedAt              DateTime?
+
+  // Forgot-password.
+  resetToken          String?   @unique
+  resetTokenExpiresAt DateTime?
+
+  lastLoginAt DateTime?
+
+  approvedVendors Vendor[]           @relation("VendorApprovedBy")
+  sentInvitations VendorInvitation[] @relation("InvitationCreatedBy")
+  vendorDecisions VendorDecision[]   @relation("DecisionBy")
+  otps            LoginOtp[]
+  createdRfqs     Rfq[]              @relation("RfqCreatedBy")
+  auditLogs       AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([vendorId])
+  @@index([role])
+  @@map("users")
+}
+
+model LoginOtp {
+  id      String     @id @default(uuid())
+  userId  String
+  purpose OtpPurpose @default(LOGIN)
+
+  // Hashed, never the code itself.
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+
+  ipAddress String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("login_otps")
+}
+
+// ---------------------------------------------------------------------------
+// Fleet
+// ---------------------------------------------------------------------------
+
+model Crane {
+  id       String @id @default(uuid())
+  vendorId String
+
+  typeOfCraneCode String
+  typeOfCrane     CraneType   @relation(fields: [typeOfCraneCode], references: [code])
+  capacityT       Decimal     @db.Decimal(10, 2)
+  currentStatus   CraneStatus
+  currentLocation String
+  stateCode       String
+  state           State       @relation(fields: [stateCode], references: [code])
+  make            String
+  model           String
+  yom             Int
+  mainBoomM       Decimal?    @db.Decimal(6, 2)
+  fixedJibM       Decimal?    @db.Decimal(6, 2)
+  luffingJibM     Decimal?    @db.Decimal(6, 2)
+  windJibM        Decimal?    @db.Decimal(6, 2)
+
+  // Mandatory, unique per vendor among active cranes. The uniqueness is a
+  // partial index added in a migration because Prisma cannot express it.
+  serialRegistrationNo String
+  pincode              String?
+
+  latitude         Decimal?          @db.Decimal(10, 7)
+  longitude        Decimal?          @db.Decimal(10, 7)
+  coordinateSource CoordinateSource?
+  geocodedBy       String?
+  geocodedAt       DateTime?
+
+  // Required when status is ENGAGED, cleared when it goes back to AVAILABLE.
+  availableFrom DateTime?
+
+  loadChartFileRef   String?
+  loadChartFileName  String?
+  loadChartMimeType  String?
+  loadChartSizeBytes Int?
+
+  ownershipType OwnershipType @default(VENDOR)
+  isActive      Boolean       @default(true)
+  remarks       String?
+
+  // APPROVED unless FLEET_APPROVAL_REQUIRED is on, in which case new and edited
+  // cranes arrive as PENDING until an admin releases them.
+  approvalStatus CraneApprovalStatus @default(APPROVED)
+
+  // Bumped on any status / location / available_from change. Drives the
+  // 30-day "due for update" and 60-day "stale" thresholds.
+  statusUpdatedAt DateTime @default(now())
+
+  vendor     Vendor      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  quotations Quotation[]
+  auditLogs  AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@index([vendorId, isActive])
+  @@index([stateCode])
+  @@index([currentStatus])
+  @@index([typeOfCraneCode])
+  @@map("cranes")
+}
+
+// ---------------------------------------------------------------------------
+// RFQ and quotation
+// ---------------------------------------------------------------------------
+
+model Rfq {
+  id        String @id @default(uuid())
+  rfqNumber String @unique
+
+  // Read-only snapshot of the SAP enquiry line item for now; a later phase
+  // replaces these with the live SAP feed.
+  enquiryNo String
+  lineNo    String
+
+  // A real foreign key, unlike the M1 original. M4's candidate picker filters
+  // on `crane.typeOfCraneCode === rfq.craneType`, so a typo stored here would
+  // return zero vendors and look like "no cranes match" rather than a typo.
+  craneType    String
+  craneTypeRef CraneType @relation("RfqCandidateType", fields: [craneType], references: [code])
+  capacityT    Decimal   @db.Decimal(10, 2)
+  quantity     Int       @default(1)
+
+  siteLocation         String
+  siteStateCode        String
+  siteState            State             @relation(fields: [siteStateCode], references: [code])
+  sitePincode          String?
+  siteLatitude         Decimal?          @db.Decimal(10, 7)
+  siteLongitude        Decimal?          @db.Decimal(10, 7)
+  siteCoordinateSource CoordinateSource?
+
+  requiredStartDate DateTime
+  durationValue     Decimal      @db.Decimal(10, 2)
+  durationUnit      DurationUnit
+
+  configuration String?
+
+  otCharges               String?
+  breakdownTerms          String?
+  dieselScope             String?
+  workingHoursShift       String?
+  craneAgeCriteriaYears   Int?
+  accommodationConveyance String?
+  paymentTerms            String?
+  notes                   String?
+
+  // The remaining rows of the 31-row "Cross Rental Enquiry Template" in
+  // docs/CR Enquiry from SP.xlsx, so nothing on the paper form is lost.
+  commercialTermsExtra Json?
+
+  smlContactName   String?
+  smlContactMobile String?
+  smlContactEmail  String?
+
+  submissionDeadline DateTime
+  status             RfqStatus        @default(DRAFT)
+  rollupStatus       RfqRollupStatus?
+  cancelledAt        DateTime?
+  cancelReason       String?
+
+  createdById String
+  createdBy   User      @relation("RfqCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sentAt      DateTime?
+
+  recipients  RfqVendorRecipient[]
+  quotations  Quotation[]
+  attachments RfqAttachment[]
+
+  @@index([status])
+  @@index([submissionDeadline])
+  @@map("rfqs")
+}
+
+model RfqAttachment {
+  id    String @id @default(uuid())
+  rfqId String
+
+  fileRef   String
+  fileName  String
+  mimeType  String?
+  sizeBytes Int?
+
+  rfq Rfq @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+
+  uploadedAt DateTime @default(now())
+  uploadedBy String?
+
+  @@map("rfq_attachments")
+}
+
+model RfqVendorRecipient {
+  id       String @id @default(uuid())
+  rfqId    String
+  vendorId String
+
+  // The addresses the dispatch actually used.
+  emails String[]
+
+  emailDeliveryStatus EmailDeliveryStatus @default(QUEUED)
+  emailDeliveryError  String?
+
+  firstViewedAt DateTime?
+
+  responseStatus ResponseStatus @default(PENDING)
+  respondedAt    DateTime?
+  declineReason  String?
+  declineNote    String?
+
+  reminderCount  Int       @default(0)
+  lastReminderAt DateTime?
+
+  // The cranes and distances the sales user saw when the RFQ was sent.
+  // Snapshots are never recomputed — crane locations move.
+  candidateSnapshot Json?
+
+  rfq    Rfq    @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([rfqId, vendorId])
+  @@index([vendorId])
+  @@index([responseStatus])
+  @@map("rfq_vendor_recipients")
+}
+
+model Quotation {
+  id       String @id @default(uuid())
+  rfqId    String
+  vendorId String
+  craneId  String
+
+  version  Int     @default(1)
+  isLatest Boolean @default(true)
+
+  rentalRate          Decimal   @db.Decimal(14, 2)
+  rateBasis           RateBasis
+  mobilisationCharges Decimal   @default(0) @db.Decimal(14, 2)
+  totalQuotedValue    Decimal   @db.Decimal(14, 2)
+  // Human-readable working shown to the vendor before they submit, kept so
+  // the receipt and history can reproduce it exactly.
+  calculationNote     String?
+
+  availabilityConfirmed Boolean
+  availableFrom         DateTime?
+  validityDate          DateTime
+
+  acceptsCommercialTerms Boolean
+  deviationText          String?
+  remarks                String?
+
+  // System-generated advisories (brief 6.7). Shown to the vendor before
+  // they submit and to sales afterwards. Never block submission.
+  warnings Json?
+
+  submittedAt DateTime    @default(now())
+  source      QuoteSource @default(PORTAL)
+
+  // Crane state/location/coords at the moment of quoting, plus the distance
+  // that was shown. Stored, never recalculated.
+  craneLocationSnapshot Json?
+  distanceToSiteKm      Decimal?        @db.Decimal(10, 2)
+  distanceMethod        DistanceMethod?
+
+  status QuotationStatus @default(SUBMITTED)
+
+  rfq    Rfq    @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  crane  Crane  @relation(fields: [craneId], references: [id])
+
+  attachments QuotationAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Versions are scoped per crane: a vendor quoting two different cranes on
+  // the same RFQ keeps two independent version series.
+  @@unique([rfqId, vendorId, craneId, version])
+  @@index([rfqId, isLatest])
+  @@index([vendorId, status])
+  @@map("quotations")
+}
+
+model QuotationAttachment {
+  id          String         @id @default(uuid())
+  quotationId String
+  kind        AttachmentKind @default(OTHER)
+
+  fileRef   String
+  fileName  String
+  mimeType  String?
+  sizeBytes Int?
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  uploadedAt DateTime @default(now())
+
+  @@map("quotation_attachments")
+}
+
+// ---------------------------------------------------------------------------
+// Support tables
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id       String @id @default(uuid())
+  entity   String
+  entityId String
+  action   String
+
+  // Status, location, approval and crane-field changes. Bank details are
+  // never written here — see services/audit.service.ts.
+  oldValue Json?
+  newValue Json?
+
+  actorId   String?
+  actor     User?   @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole String?
+  actorName String?
+  ipAddress String?
+
+  craneId String?
+  crane   Crane?  @relation(fields: [craneId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model EmailLog {
+  id       String         @id @default(uuid())
+  toEmail  String
+  ccEmail  String?
+  template String
+  subject  String
+  status   EmailLogStatus @default(QUEUED)
+  error    String?
+
+  entity   String?
+  entityId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("email_logs")
+}
+
+model DistanceCache {
+  id String @id @default(uuid())
+
+  originLat Decimal @db.Decimal(10, 7)
+  originLng Decimal @db.Decimal(10, 7)
+  destLat   Decimal @db.Decimal(10, 7)
+  destLng   Decimal @db.Decimal(10, 7)
+
+  roadDistanceKm Decimal @db.Decimal(10, 2)
+  provider       String
+
+  calculatedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([originLat, originLng, destLat, destLng])
+  @@map("distance_cache")
+}
+
+// Key/value store for the thresholds and switches the brief calls
+// configurable: fleet_approval_required, stale-data windows, reminder lead
+// times, distance cache lifetime.
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@map("app_settings")
+}
+
+// Per-calendar-year RFQ counter behind RFQ-2026-0001.
+model RfqSequence {
+  year Int @id
+  last Int @default(0)
+
+  @@map("rfq_sequences")
+}
+
+// Email bodies live in the database so they can be edited without a deploy.
+// Seeded from services/emailTemplates.ts; {{placeholders}} are substituted
+// at send time.
+model EmailTemplate {
+  key       String   @id
+  subject   String
+  bodyHtml  String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
