@@ -15,9 +15,13 @@ import {
   gstinPanMismatch,
   ifscField,
   longText,
+  micrField,
+  mobileField,
+  panCompanyTypeMismatch,
   panField,
   pastOrTodayField,
   phoneField,
+  pincodeField,
   shortText,
   stateCodeList,
 } from "../validation/vendorFields";
@@ -105,7 +109,14 @@ export const onboardingSchema = z.object({
   natureOfCompany: z.enum(["PUBLIC_LTD", "PRIVATE_LTD", "PARTNERSHIP", "PROPRIETORSHIP"], {
     message: "Select the nature of the company",
   }),
-  registeredAddress: longText.min(5, "Registered address is required"),
+  // Structured address (brief 5.1). Line 1, city, district, state and pincode
+  // are mandatory; line 2 is the optional second line.
+  addressLine1: shortText.min(5, "Address line 1 is required"),
+  addressLine2: optionalTrimmed(200),
+  city: shortText.min(2, "City is required"),
+  district: shortText.min(2, "District is required"),
+  stateCode: z.string().trim().toUpperCase().length(2, "Select the state"),
+  pincode: pincodeField,
   telephone: phoneField,
   fax: optionalTrimmed(50),
   email: emailField,
@@ -115,26 +126,47 @@ export const onboardingSchema = z.object({
   // Registration
   pan: panField,
   tan: optionalTrimmed(10),
-  gstn: gstnField,
-  gstCompositionOpted: z.boolean().optional(),
+
+  // GST block. Whether the vendor is registered drives the rest, so the
+  // choice itself is a required field (brief 5.1: "Mandatory choice"); the
+  // consequences are enforced at submit, not here, so a draft can be parked
+  // half-way through the block.
+  gstRegistered: z.boolean(),
+  gstn: gstnField.optional(),
+  gstRegistrationType: optionalChoice(["REGULAR", "COMPOSITE", "SEZ", "EOU"]),
   gstr1FilingFrequency: optionalChoice(["MONTHLY", "QUARTERLY", "COMPOSITE"]),
   cin: optionalTrimmed(21),
   govtRegistrationType: optionalTrimmed(100),
   govtRegistrationNo: optionalTrimmed(100),
+
+  // MSME block
+  msmeRegistered: z.boolean(),
   msmeCategory: optionalChoice(["MICRO", "SMALL", "MEDIUM"]),
+  msmeRegNo: optionalTrimmed(50),
+  msmeExemptionDate: pastOrTodayField.optional(),
+
+  // TDS block
+  tdsLowerDeduction: z.boolean(),
+  tdsCertificateNo: optionalTrimmed(100),
+  tdsSection: optionalTrimmed(20),
+  tdsRatePercent: z.number().int().min(0).max(100).optional(),
+  tdsValidFrom: pastOrTodayField.optional(),
+  tdsValidTo: pastOrTodayField.optional(),
 
   operatingRegions: stateCodeList(1, "state"),
 
   // Contact persons. Brief 7.2 has a repeatable section; exactly one must be
-  // primary, and the primary contact's email becomes the login.
+  // primary, and the primary contact's email becomes the login. receivesRfqs
+  // (brief 5.3) marks the contacts who get the RFQ emails.
   contacts: z
     .array(
       z.object({
         name: shortText.min(2, "Contact name is required"),
-        mobile: phoneField,
+        mobile: mobileField,
         telephone: optionalTrimmed(50),
         email: optionalEmail,
         isPrimary: z.boolean().default(false),
+        receivesRfqs: z.boolean().default(false),
       }),
     )
     .min(1, "Add at least one contact person")
@@ -159,6 +191,11 @@ export const onboardingSchema = z.object({
   // Submit checks these against the stored values instead.
   bankAccountNo: accountNoField.optional(),
   bankIfsc: ifscField.optional(),
+  bankMicr: micrField.optional(),
+  // Foreign-bank fields (brief 5.1): optional, only meaningful for accounts
+  // outside India.
+  bankIban: optionalTrimmed(34),
+  bankSwift: optionalTrimmed(11),
 
   // Fleet summary + declaration
   fleetSummary: longText.min(5, "Describe the crane categories and approximate fleet size"),
@@ -168,20 +205,70 @@ export const onboardingSchema = z.object({
   declarationName: shortText.min(2, "Your name is required"),
   declarationDesignation: shortText.min(2, "Your designation is required"),
   declarationDate: pastOrTodayField,
+
+  // Communication preferences: email is the only channel for now, so this is
+  // the vendor's notes on how they want to be reached.
+  communicationNotes: optionalTrimmed(500),
 });
 
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 
 /**
- * Cross-field rules that Zod cannot express on a single field. Returns a list
- * rather than throwing so `submit` can report every problem at once — a vendor
- * filling a long form should not fix one field per round trip.
+ * Cross-field and conditional rules that a single field cannot carry (brief
+ * 5.1). Returns a list rather than throwing so `submit` can report every
+ * problem at once — a vendor filling a long form should not fix one field per
+ * round trip. Draft saves deliberately skip these: parking a half-finished GST
+ * block must not require having decided `gstRegistered` first.
+ */
+export function onboardingSubmitProblems(input: OnboardingInput): string[] {
+  const problems: string[] = [];
+
+  // GST: registered means a GSTN and a registration type; unregistered means
+  // neither (the GSTN column is stored as null, brief 5.1).
+  if (input.gstRegistered) {
+    if (!input.gstn) problems.push("GSTIN is required for a GST-registered vendor");
+    if (!input.gstRegistrationType) problems.push("GST registration type is required for a GST-registered vendor");
+  } else if (input.gstn || input.gstRegistrationType) {
+    problems.push("GSTIN and registration type only apply to a GST-registered vendor");
+  }
+
+  // The PAN embedded in the GSTIN must match the PAN entered (brief 5.1).
+  if (input.gstn && input.pan && gstinPanMismatch(input.gstn, input.pan)) {
+    problems.push("The PAN embedded in the GSTIN does not match the PAN you entered");
+  }
+
+  // The PAN's 4th letter must match the nature of the company (brief 5.1).
+  if (input.pan && panCompanyTypeMismatch(input.pan, input.natureOfCompany)) {
+    problems.push("The 4th letter of the PAN does not match the nature of the company (C for a company, F for a partnership, P for a proprietorship)");
+  }
+
+  // MSME: category and registration number are required when registered
+  // (brief 5.1); the exemption date stays optional.
+  if (input.msmeRegistered) {
+    if (!input.msmeCategory) problems.push("MSME category is required for an MSME-registered vendor");
+    if (!input.msmeRegNo) problems.push("MSME registration number is required for an MSME-registered vendor");
+  }
+
+  // TDS: certificate number, section, rate and the validity window are
+  // required when a lower deduction is claimed (brief 5.1).
+  if (input.tdsLowerDeduction) {
+    if (!input.tdsCertificateNo) problems.push("TDS certificate number is required for a lower-deduction claim");
+    if (!input.tdsSection) problems.push("TDS section is required for a lower-deduction claim");
+    if (input.tdsRatePercent === undefined) problems.push("TDS rate is required for a lower-deduction claim");
+    if (!input.tdsValidFrom) problems.push("TDS valid-from date is required for a lower-deduction claim");
+    if (!input.tdsValidTo) problems.push("TDS valid-to date is required for a lower-deduction claim");
+  }
+
+  return problems;
+}
+
+/**
+ * Advisory checks reported on submit but never blocking (brief 7.2). A CIN on
+ * a proprietorship is odd but harmless; the submit endpoint returns these so
+ * the UI can show them without failing the submission.
  */
 export function onboardingWarnings(input: OnboardingInput): string[] {
   const warnings: string[] = [];
-  if (gstinPanMismatch(input.gstn, input.pan)) {
-    warnings.push("The PAN embedded in the GSTIN does not match the PAN you entered.");
-  }
   if (input.cin && input.natureOfCompany !== "PUBLIC_LTD" && input.natureOfCompany !== "PRIVATE_LTD") {
     warnings.push("A CIN applies to a company. You have selected a different nature of company.");
   }
@@ -354,15 +441,31 @@ export function isEditableStatus(status: string): boolean {
   return status === "DRAFT" || status === "REJECTED";
 }
 
-/** Document types brief 7.2 requires: cancelled cheque, GST certificate, PAN copy. */
-export const REQUIRED_DOCUMENTS = ["CANCELLED_CHEQUE", "GST_CERTIFICATE", "PAN_COPY"] as const;
+/**
+ * Documents every submit needs (brief 7.2): the cancelled cheque and PAN copy
+ * for everyone, plus the signed declaration page (open item 4 — the checkbox
+ * stands, and the scan of the signed page is uploaded beside it).
+ */
+export const REQUIRED_DOCUMENTS = ["CANCELLED_CHEQUE", "PAN_COPY", "DECLARATION_SCAN"] as const;
 
 export const REQUIRED_DOCUMENT_LABELS: Record<string, string> = {
   CANCELLED_CHEQUE: "Cancelled cheque",
   GST_CERTIFICATE: "GST certificate",
   PAN_COPY: "PAN copy",
+  DECLARATION_SCAN: "Signed declaration page",
+  TDS_CERTIFICATE: "TDS exemption certificate",
+  MSME_CERTIFICATE: "MSME registration certificate",
   OTHER: "Other supporting document",
 };
+
+/**
+ * The full list for a given form state: a GST-registered vendor also owes the
+ * GST certificate (brief 7.2's "if applicable"), and an unregistered vendor
+ * does not.
+ */
+export function requiredDocumentsFor(gstRegistered: boolean): string[] {
+  return gstRegistered ? [...REQUIRED_DOCUMENTS, "GST_CERTIFICATE"] : [...REQUIRED_DOCUMENTS];
+}
 
 export async function loadByToken(token: string): Promise<OnboardingView> {
   const invitation = await resolveInvitation(token);
@@ -393,7 +496,7 @@ export async function loadByToken(token: string): Promise<OnboardingView> {
       fileName: d.fileName,
       uploadedAt: d.uploadedAt.toISOString(),
     })),
-    missingDocuments: REQUIRED_DOCUMENTS.filter((d) => !uploaded.has(d)),
+    missingDocuments: requiredDocumentsFor(vendor?.gstRegistered === true).filter((d) => !uploaded.has(d)),
   };
 }
 
@@ -402,7 +505,12 @@ function shapeDraft(vendor: VendorDraftRow) {
   return {
     name: vendor.name ?? "",
     natureOfCompany: vendor.natureOfCompany ?? undefined,
-    registeredAddress: vendor.registeredAddress ?? "",
+    addressLine1: vendor.addressLine1 ?? "",
+    addressLine2: vendor.addressLine2 ?? "",
+    city: vendor.city ?? "",
+    district: vendor.district ?? "",
+    stateCode: vendor.stateCode ?? "",
+    pincode: vendor.pincode ?? "",
     telephone: vendor.telephone ?? "",
     fax: vendor.fax ?? "",
     email: vendor.email ?? "",
@@ -410,13 +518,23 @@ function shapeDraft(vendor: VendorDraftRow) {
     companySize: vendor.companySize ?? "",
     pan: vendor.pan ?? "",
     tan: vendor.tan ?? "",
+    gstRegistered: vendor.gstRegistered ?? undefined,
     gstn: vendor.gstn ?? "",
-    gstCompositionOpted: vendor.gstCompositionOpted ?? undefined,
+    gstRegistrationType: vendor.gstRegistrationType ?? undefined,
     gstr1FilingFrequency: vendor.gstr1FilingFrequency ?? undefined,
     cin: vendor.cin ?? "",
     govtRegistrationType: vendor.govtRegistrationType ?? "",
     govtRegistrationNo: vendor.govtRegistrationNo ?? "",
+    msmeRegistered: vendor.msmeRegistered ?? undefined,
     msmeCategory: vendor.msmeCategory ?? undefined,
+    msmeRegNo: vendor.msmeRegNo ?? "",
+    msmeExemptionDate: vendor.msmeExemptionDate?.toISOString().slice(0, 10) ?? "",
+    tdsLowerDeduction: vendor.tdsLowerDeduction ?? undefined,
+    tdsCertificateNo: vendor.tdsCertificateNo ?? "",
+    tdsSection: vendor.tdsSection ?? "",
+    tdsRatePercent: vendor.tdsRatePercent ?? undefined,
+    tdsValidFrom: vendor.tdsValidFrom?.toISOString().slice(0, 10) ?? "",
+    tdsValidTo: vendor.tdsValidTo?.toISOString().slice(0, 10) ?? "",
     operatingRegions: vendor.operatingRegions.map((r) => r.stateCode),
     contacts: vendor.contacts.map((c) => ({
       name: c.name,
@@ -424,6 +542,7 @@ function shapeDraft(vendor: VendorDraftRow) {
       telephone: c.telephone ?? "",
       email: c.email ?? "",
       isPrimary: c.isPrimary,
+      receivesRfqs: c.receivesRfqs,
     })),
     bankAccountHolderName: vendor.bankAccountHolderName ?? "",
     bankName: vendor.bankName ?? "",
@@ -437,11 +556,15 @@ function shapeDraft(vendor: VendorDraftRow) {
       : null,
     bankIfsc: "",
     bankIfscMasked: vendor.bankIfscEnc ? "hidden" : null,
+    bankMicr: vendor.bankMicr ?? "",
+    bankIban: vendor.bankIban ?? "",
+    bankSwift: vendor.bankSwift ?? "",
     fleetSummary: vendor.fleetSummary ?? "",
     codeOfConductAccepted: vendor.codeOfConductAccepted ?? false,
     declarationName: vendor.declarationName ?? "",
     declarationDesignation: vendor.declarationDesignation ?? "",
     declarationDate: vendor.declarationDate?.toISOString().slice(0, 10) ?? "",
+    communicationNotes: vendor.communicationNotes ?? "",
   };
 }
 
@@ -451,7 +574,12 @@ type VendorDraftRow = {
   adminRemarks: string | null;
   name: string | null;
   natureOfCompany: string | null;
-  registeredAddress: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  district: string | null;
+  stateCode: string | null;
+  pincode: string | null;
   telephone: string | null;
   fax: string | null;
   email: string | null;
@@ -459,13 +587,23 @@ type VendorDraftRow = {
   companySize: string | null;
   pan: string | null;
   tan: string | null;
+  gstRegistered: boolean | null;
   gstn: string | null;
-  gstCompositionOpted: boolean | null;
+  gstRegistrationType: string | null;
   gstr1FilingFrequency: string | null;
   cin: string | null;
   govtRegistrationType: string | null;
   govtRegistrationNo: string | null;
+  msmeRegistered: boolean | null;
   msmeCategory: string | null;
+  msmeRegNo: string | null;
+  msmeExemptionDate: Date | null;
+  tdsLowerDeduction: boolean | null;
+  tdsCertificateNo: string | null;
+  tdsSection: string | null;
+  tdsRatePercent: number | null;
+  tdsValidFrom: Date | null;
+  tdsValidTo: Date | null;
   fleetSummary: string | null;
   codeOfConductAccepted: boolean | null;
   declarationName: string | null;
@@ -477,6 +615,10 @@ type VendorDraftRow = {
   bankAccountType: string | null;
   bankAccountNoLast4: string | null;
   bankIfscEnc: string | null;
+  bankMicr: string | null;
+  bankIban: string | null;
+  bankSwift: string | null;
+  communicationNotes: string | null;
   operatingRegions: { stateCode: string }[];
   contacts: {
     id: string;
@@ -485,6 +627,7 @@ type VendorDraftRow = {
     telephone: string | null;
     email: string | null;
     isPrimary: boolean;
+    receivesRfqs: boolean;
   }[];
   documents: { docType: string; fileName: string; uploadedAt: Date }[];
   decisions: { remarks: string | null; createdAt: Date }[];
@@ -500,7 +643,12 @@ async function loadVendorDraft(vendorId: string): Promise<VendorDraftRow | null>
       adminRemarks: true,
       name: true,
       natureOfCompany: true,
-      registeredAddress: true,
+      addressLine1: true,
+      addressLine2: true,
+      city: true,
+      district: true,
+      stateCode: true,
+      pincode: true,
       telephone: true,
       fax: true,
       email: true,
@@ -508,13 +656,23 @@ async function loadVendorDraft(vendorId: string): Promise<VendorDraftRow | null>
       companySize: true,
       pan: true,
       tan: true,
+      gstRegistered: true,
       gstn: true,
-      gstCompositionOpted: true,
+      gstRegistrationType: true,
       gstr1FilingFrequency: true,
       cin: true,
       govtRegistrationType: true,
       govtRegistrationNo: true,
+      msmeRegistered: true,
       msmeCategory: true,
+      msmeRegNo: true,
+      msmeExemptionDate: true,
+      tdsLowerDeduction: true,
+      tdsCertificateNo: true,
+      tdsSection: true,
+      tdsRatePercent: true,
+      tdsValidFrom: true,
+      tdsValidTo: true,
       fleetSummary: true,
       codeOfConductAccepted: true,
       declarationName: true,
@@ -526,9 +684,21 @@ async function loadVendorDraft(vendorId: string): Promise<VendorDraftRow | null>
       bankAccountType: true,
       bankAccountNoLast4: true,
       bankIfscEnc: true,
+      bankMicr: true,
+      bankIban: true,
+      bankSwift: true,
+      communicationNotes: true,
       operatingRegions: { select: { stateCode: true } },
       contacts: {
-        select: { id: true, name: true, mobile: true, telephone: true, email: true, isPrimary: true },
+        select: {
+          id: true,
+          name: true,
+          mobile: true,
+          telephone: true,
+          email: true,
+          isPrimary: true,
+          receivesRfqs: true,
+        },
         orderBy: { isPrimary: "desc" },
       },
       documents: { select: { docType: true, fileName: true, uploadedAt: true } },
@@ -577,7 +747,12 @@ function vendorDataFrom(input: Partial<OnboardingInput>) {
 
   setText("name", "name", input.name);
   setEnum("natureOfCompany", "natureOfCompany");
-  setText("registeredAddress", "registeredAddress", input.registeredAddress);
+  setText("addressLine1", "addressLine1", input.addressLine1);
+  setText("addressLine2", "addressLine2", input.addressLine2);
+  setText("city", "city", input.city);
+  setText("district", "district", input.district);
+  setText("stateCode", "stateCode", input.stateCode);
+  setText("pincode", "pincode", input.pincode);
   setText("telephone", "telephone", input.telephone);
   setText("fax", "fax", input.fax);
   setText("email", "email", input.email);
@@ -585,13 +760,19 @@ function vendorDataFrom(input: Partial<OnboardingInput>) {
   setText("companySize", "companySize", input.companySize);
   setText("pan", "pan", input.pan);
   setText("tan", "tan", input.tan);
+  setEnum("gstRegistered", "gstRegistered");
   setText("gstn", "gstn", input.gstn);
-  setEnum("gstCompositionOpted", "gstCompositionOpted");
+  setEnum("gstRegistrationType", "gstRegistrationType");
   setEnum("gstr1FilingFrequency", "gstr1FilingFrequency");
   setText("cin", "cin", input.cin);
   setText("govtRegistrationType", "govtRegistrationType", input.govtRegistrationType);
   setText("govtRegistrationNo", "govtRegistrationNo", input.govtRegistrationNo);
+  setEnum("msmeRegistered", "msmeRegistered");
   setEnum("msmeCategory", "msmeCategory");
+  setText("msmeRegNo", "msmeRegNo", input.msmeRegNo);
+  setEnum("tdsLowerDeduction", "tdsLowerDeduction");
+  setText("tdsCertificateNo", "tdsCertificateNo", input.tdsCertificateNo);
+  setText("tdsSection", "tdsSection", input.tdsSection);
   setText("fleetSummary", "fleetSummary", input.fleetSummary);
   setEnum("codeOfConductAccepted", "codeOfConductAccepted");
   setText("declarationName", "declarationName", input.declarationName);
@@ -602,11 +783,27 @@ function vendorDataFrom(input: Partial<OnboardingInput>) {
   if (input.declarationDate !== undefined) {
     data["declarationDate"] = input.declarationDate ? new Date(input.declarationDate) : null;
   }
+  if (input.msmeExemptionDate !== undefined) {
+    data["msmeExemptionDate"] = input.msmeExemptionDate ? new Date(input.msmeExemptionDate) : null;
+  }
+  if (input.tdsRatePercent !== undefined) {
+    data["tdsRatePercent"] = input.tdsRatePercent ?? null;
+  }
+  if (input.tdsValidFrom !== undefined) {
+    data["tdsValidFrom"] = input.tdsValidFrom ? new Date(input.tdsValidFrom) : null;
+  }
+  if (input.tdsValidTo !== undefined) {
+    data["tdsValidTo"] = input.tdsValidTo ? new Date(input.tdsValidTo) : null;
+  }
 
   setText("bankAccountHolderName", "bankAccountHolderName", input.bankAccountHolderName);
   setText("bankName", "bankName", input.bankName);
   setText("bankBranch", "bankBranch", input.bankBranch);
   setEnum("bankAccountType", "bankAccountType");
+  setText("bankMicr", "bankMicr", input.bankMicr);
+  setText("bankIban", "bankIban", input.bankIban);
+  setText("bankSwift", "bankSwift", input.bankSwift);
+  setText("communicationNotes", "communicationNotes", input.communicationNotes);
 
   return data;
 }
@@ -750,11 +947,36 @@ export async function saveDraft(params: {
   if (!full.bankAccountNo && !previous?.last4) problems.push("Bank account number is required");
   if (!full.bankIfsc && !previous?.hasIfsc) problems.push("IFSC is required");
 
-  // Brief 7.2 makes the cancelled cheque, GST certificate and PAN copy part of
-  // the registration, so a submit without them is incomplete. Checked before
-  // anything is written: a vendor must not reach SUBMITTED — and therefore an
-  // admin's queue — with documents still outstanding.
-  const uploaded = new Set(
+  // Cross-field and conditional rules from brief 5.1: GST consequences, the
+  // PAN inside the GSTIN, the PAN's company-type letter, and the MSME/TDS
+  // blocks. Hard blocks, unlike the advisory warnings below.
+  problems.push(...onboardingSubmitProblems(full));
+
+  // P0 A8: PAN and GSTN are unique across vendors. The columns are @unique, so
+  // a duplicate would be refused anyway — but as a raw 409 "value already in
+  // use". Naming the field here tells the vendor which number collided.
+  const duplicate = await prisma.vendor.findFirst({
+    where: {
+      NOT: { id: vendorId },
+      OR: [{ pan: full.pan }, ...(full.gstn ? [{ gstn: full.gstn }] : [])],
+    },
+    select: { pan: true, gstn: true },
+  });
+  if (duplicate) {
+    if (duplicate.pan === full.pan) {
+      problems.push("A vendor is already registered with this PAN");
+    }
+    if (full.gstn && duplicate.gstn === full.gstn) {
+      problems.push("A vendor is already registered with this GSTIN");
+    }
+  }
+
+  // Brief 7.2 makes the cheque, PAN copy and signed declaration part of the
+  // registration — plus the GST certificate when the vendor is registered —
+  // so a submit without them is incomplete. Checked before anything is
+  // written: a vendor must not reach SUBMITTED — and therefore an admin's
+  // queue — with documents still outstanding.
+  const uploaded = new Set<string>(
     (
       await prisma.vendorDocument.findMany({
         where: { vendorId },
@@ -762,7 +984,7 @@ export async function saveDraft(params: {
       })
     ).map((d) => d.docType),
   );
-  for (const docType of REQUIRED_DOCUMENTS) {
+  for (const docType of requiredDocumentsFor(full.gstRegistered)) {
     if (!uploaded.has(docType)) {
       problems.push(`${REQUIRED_DOCUMENT_LABELS[docType] ?? docType} has not been uploaded`);
     }
@@ -802,7 +1024,18 @@ export async function saveDraft(params: {
   // Brief 7.2: "On submit, status is Submitted, and the admin is notified."
   const vendor = await prisma.vendor.findUniqueOrThrow({
     where: { id: vendorId },
-    select: { name: true, email: true, pan: true, gstn: true, registeredAddress: true },
+    select: {
+      name: true,
+      email: true,
+      pan: true,
+      gstn: true,
+      addressLine1: true,
+      addressLine2: true,
+      city: true,
+      district: true,
+      addressState: { select: { name: true } },
+      pincode: true,
+    },
   });
 
   await sendTemplate({
@@ -813,7 +1046,13 @@ export async function saveDraft(params: {
       vendorEmail: vendor.email ?? "",
       pan: vendor.pan ?? "",
       gstn: vendor.gstn ?? "",
-      registeredAddress: vendor.registeredAddress ?? "",
+      registeredAddress: [
+        vendor.addressLine1,
+        vendor.addressLine2,
+        [vendor.city, vendor.district, vendor.addressState?.name, vendor.pincode].filter(Boolean).join(" "),
+      ]
+        .filter(Boolean)
+        .join(", "),
       reviewUrl: portalUrl(`/app/vendors/${vendorId}`),
     },
     entity: "vendor",
@@ -867,6 +1106,7 @@ async function replaceContacts(
         telephone: contact.telephone || null,
         email: contact.email?.toLowerCase() ?? null,
         isPrimary: contact.isPrimary,
+        receivesRfqs: contact.receivesRfqs,
       },
     });
   }
@@ -903,11 +1143,26 @@ export async function assertSubmittable(vendorId: string): Promise<void> {
     select: {
       name: true,
       natureOfCompany: true,
-      registeredAddress: true,
+      addressLine1: true,
+      city: true,
+      district: true,
+      stateCode: true,
+      pincode: true,
       telephone: true,
       email: true,
       pan: true,
+      gstRegistered: true,
       gstn: true,
+      gstRegistrationType: true,
+      msmeRegistered: true,
+      msmeCategory: true,
+      msmeRegNo: true,
+      tdsLowerDeduction: true,
+      tdsCertificateNo: true,
+      tdsSection: true,
+      tdsRatePercent: true,
+      tdsValidFrom: true,
+      tdsValidTo: true,
       bankName: true,
       bankBranch: true,
       bankAccountType: true,
@@ -919,7 +1174,7 @@ export async function assertSubmittable(vendorId: string): Promise<void> {
       declarationDate: true,
       fleetSummary: true,
       operatingRegions: { select: { stateCode: true } },
-      contacts: { select: { name: true, mobile: true, email: true, isPrimary: true } },
+      contacts: { select: { name: true, mobile: true, email: true, isPrimary: true, receivesRfqs: true } },
       documents: { select: { docType: true } },
     },
   });
@@ -933,11 +1188,33 @@ export async function assertSubmittable(vendorId: string): Promise<void> {
 
   need("Company name", vendor.name);
   need("Nature of company", vendor.natureOfCompany);
-  need("Registered address", vendor.registeredAddress);
+  need("Address line 1", vendor.addressLine1);
+  need("City", vendor.city);
+  need("District", vendor.district);
+  need("State", vendor.stateCode);
+  need("Pincode", vendor.pincode);
   need("Telephone", vendor.telephone);
   need("Email", vendor.email);
   need("PAN", vendor.pan);
-  need("GSTIN", vendor.gstn);
+
+  // Same conditional rules as the submit path (brief 5.1): an approved vendor
+  // must be complete whichever blocks were filled in.
+  if (vendor.gstRegistered) {
+    need("GSTIN", vendor.gstn);
+    need("GST registration type", vendor.gstRegistrationType);
+  }
+  if (vendor.msmeRegistered) {
+    need("MSME category", vendor.msmeCategory);
+    need("MSME registration number", vendor.msmeRegNo);
+  }
+  if (vendor.tdsLowerDeduction) {
+    need("TDS certificate number", vendor.tdsCertificateNo);
+    need("TDS section", vendor.tdsSection);
+    need("TDS rate", vendor.tdsRatePercent);
+    need("TDS valid-from date", vendor.tdsValidFrom);
+    need("TDS valid-to date", vendor.tdsValidTo);
+  }
+
   need("Bank name", vendor.bankName);
   need("Bank branch", vendor.bankBranch);
   need("Bank account type", vendor.bankAccountType);
@@ -957,8 +1234,8 @@ export async function assertSubmittable(vendorId: string): Promise<void> {
     else need("Primary contact email", primary.email);
   }
 
-  const uploaded = new Set(vendor.documents.map((d) => d.docType));
-  for (const doc of REQUIRED_DOCUMENTS) {
+  const uploaded = new Set<string>(vendor.documents.map((d) => d.docType));
+  for (const doc of requiredDocumentsFor(vendor.gstRegistered === true)) {
     if (!uploaded.has(doc)) problems.push(REQUIRED_DOCUMENT_LABELS[doc]);
   }
 

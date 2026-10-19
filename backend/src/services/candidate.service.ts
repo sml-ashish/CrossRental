@@ -1,7 +1,14 @@
 import { prisma } from "../lib/database";
 import { distancesTo, type Distance } from "./distance.service";
 import { getSettings } from "../utils/settings";
-import { CraneStatus, OnboardingStatus } from "../generated/prisma/client";
+import { reservationWindowForRfq } from "./reservations.service";
+import {
+  CapacityRule,
+  CraneStatus,
+  ReservationStatus,
+  OnboardingStatus,
+} from "../generated/prisma/client";
+import type { DurationUnit, OwnershipType } from "../generated/prisma/client";
 
 /**
  * The candidate picker (brief 6.9): which vendor cranes could answer this RFQ,
@@ -15,14 +22,13 @@ import { CraneStatus, OnboardingStatus } from "../generated/prisma/client";
  * time and refuses. Both rules are enforced, in the right place, rather than one
  * being stretched to cover the other.
  *
- * **Capacity matches as "at least".** The brief says "match the RFQ crane type
- * and capacity" without saying which way round. A 2500 t crawler is a legitimate
- * answer to a 400 t requirement and routinely the only one in the district, so
- * an exact-equality reading would hide real options from the sales user. The
- * rule is a single named constant so the decision is easy to find and reverse.
+ * **Capacity matches as "at least" unless the RFQ says otherwise.** The brief
+ * says "match the RFQ crane type and capacity" without saying which way round.
+ * A 2500 t crawler is a legitimate answer to a 400 t requirement and routinely
+ * the only one in the district, so the default is "at least"; brief A3 lets
+ * each RFQ choose Exact when the customer genuinely means it, which switches
+ * the filter to equality for that enquiry alone.
  */
-
-const CAPACITY_MATCH = "gte" as const;
 
 export interface CandidateCrane {
   craneId: string;
@@ -40,6 +46,13 @@ export interface CandidateCrane {
   stateName: string;
   availableFrom: string | null;
   loadChartFileName: string | null;
+  /** Brief 6.9 boom warnings (P2): the offered crane's own lengths, in metres. */
+  mainBoomM: number | null;
+  fixedJibM: number | null;
+  luffingJibM: number | null;
+  windJibM: number | null;
+  /** P2: drives the mobilisation rate band lookup. */
+  ownershipType: OwnershipType;
   /** True when the crane is Engaged but free by the required start date. */
   availableInTime: boolean;
   locationUnverified: boolean;
@@ -73,8 +86,12 @@ export interface CandidateList {
   distancesAvailable: boolean;
   located: CandidateGroup[];
   unverified: CandidateCrane[];
-  capacityMatch: typeof CAPACITY_MATCH;
+  capacityMatch: "gte" | "equals";
   capacityRule: string;
+  /** Brief C3: true when the RFQ has no fixed start, so date checks were skipped. */
+  startDateTbc: boolean;
+  /** The notice to show beside the list when dates could not be checked. */
+  notice: string | null;
 }
 
 const CANDIDATE_SELECT = {
@@ -90,6 +107,11 @@ const CANDIDATE_SELECT = {
   stateCode: true,
   availableFrom: true,
   loadChartFileName: true,
+  mainBoomM: true,
+  fixedJibM: true,
+  luffingJibM: true,
+  windJibM: true,
+  ownershipType: true,
   latitude: true,
   longitude: true,
   statusUpdatedAt: true,
@@ -111,6 +133,11 @@ type CandidateRow = {
   stateCode: string;
   availableFrom: Date | null;
   loadChartFileName: string | null;
+  mainBoomM: unknown;
+  fixedJibM: unknown;
+  luffingJibM: unknown;
+  windJibM: unknown;
+  ownershipType: string;
   latitude: unknown;
   longitude: unknown;
   statusUpdatedAt: Date;
@@ -142,7 +169,14 @@ export interface CandidateRfq {
   id: string;
   craneType: string;
   capacityT: unknown;
+  /** Brief A3: AT_LEAST admits a bigger crane; EXACT only the stated tonnage. */
+  capacityRule?: CapacityRule;
   requiredStartDate: Date;
+  /** Brief B3: the window whose overlapping reservations disqualify a crane. */
+  durationValue: unknown;
+  durationUnit: DurationUnit;
+  startDateTbc?: boolean;
+  workingDaysPerMonth?: number | null;
   siteLocation: string;
   siteStateCode: string;
   siteLatitude: unknown;
@@ -163,15 +197,22 @@ export async function candidatesForRfq(
 ): Promise<CandidateList> {
   const settings = await getSettings();
   const required = num(rfq.capacityT) ?? 0;
+  const tbc = rfq.startDateTbc === true;
 
-  const rows = (await prisma.crane.findMany({
+  let rows = (await prisma.crane.findMany({
     where: {
       isActive: true,
       typeOfCraneCode: rfq.craneType,
-      // "At least" the required capacity — see CAPACITY_MATCH above.
+      // "At least" the required capacity unless the RFQ demands an exact match.
       capacityT:
-        CAPACITY_MATCH === "gte" ? { gte: required } : { equals: required },
-      vendor: { onboardingStatus: OnboardingStatus.APPROVED },
+        (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
+          ? { equals: required }
+          : { gte: required },
+      // P0 B2: a suspended vendor's cranes leave the candidate set entirely.
+      vendor: {
+        onboardingStatus: OnboardingStatus.APPROVED,
+        suspendedAt: null,
+      },
       // Available, or Engaged and free by the time the work starts.
       //
       // Engaged with a null available_from is *excluded*, not admitted. The form
@@ -184,16 +225,44 @@ export async function candidatesForRfq(
       // It is dropped rather than parked in "unverified": that bucket means
       // "location unverified" (brief 6.9), and reusing it for an availability
       // problem would mislabel why the crane is unusable.
+      //
+      // Brief C3: when the start date is TBC there is no date to compare, so
+      // the timing filter is skipped (an Engaged crane is admitted however its
+      // release date reads) and the list carries a notice saying so.
       OR: [
         { currentStatus: CraneStatus.AVAILABLE },
-        {
-          currentStatus: CraneStatus.ENGAGED,
-          availableFrom: { lte: rfq.requiredStartDate },
-        },
+        tbc
+          ? { currentStatus: CraneStatus.ENGAGED }
+          : {
+              currentStatus: CraneStatus.ENGAGED,
+              availableFrom: { lte: rfq.requiredStartDate },
+            },
       ],
     },
     select: CANDIDATE_SELECT,
   })) as unknown as CandidateRow[];
+
+  // Brief B3: the booking that disqualifies a crane is an overlapping ACTIVE
+  // reservation, not a stored Booked/Hired status. Filtered in one extra query
+  // for the whole set rather than per crane. A TBC start date has no window to
+  // overlap, so nothing is filtered (brief C3 threads the notice through).
+  const window = reservationWindowForRfq(rfq, {
+    rateDayBasis: settings.rateDayBasis,
+    workingDaysPerMonth: rfq.workingDaysPerMonth,
+  });
+  if (window && rows.length > 0) {
+    const conflicts = await prisma.reservation.findMany({
+      where: {
+        status: ReservationStatus.ACTIVE,
+        craneId: { in: rows.map((r) => r.id) },
+        startDate: { lte: window.end },
+        endDate: { gte: window.start },
+      },
+      select: { craneId: true },
+    });
+    const busy = new Set(conflicts.map((c) => c.craneId));
+    rows = rows.filter((row) => !busy.has(row.id));
+  }
 
   const siteLat = num(rfq.siteLatitude);
   const siteLng = num(rfq.siteLongitude);
@@ -241,7 +310,13 @@ export async function candidatesForRfq(
       stateName: row.state.name,
       availableFrom: row.availableFrom ? row.availableFrom.toISOString() : null,
       loadChartFileName: row.loadChartFileName,
+      mainBoomM: num(row.mainBoomM),
+      fixedJibM: num(row.fixedJibM),
+      luffingJibM: num(row.luffingJibM),
+      windJibM: num(row.windJibM),
+      ownershipType: row.ownershipType as OwnershipType,
       availableInTime:
+        tbc ||
         row.currentStatus !== CraneStatus.ENGAGED ||
         (row.availableFrom !== null &&
           row.availableFrom.getTime() <= rfq.requiredStartDate.getTime()),
@@ -319,7 +394,17 @@ export async function candidatesForRfq(
       return a.nearestKm - b.nearestKm;
     }),
     unverified: unverifiedCranes,
-    capacityMatch: CAPACITY_MATCH,
-    capacityRule: `Cranes of this type with at least ${required} t capacity`,
+    capacityMatch:
+      (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
+        ? "equals"
+        : "gte",
+    capacityRule:
+      (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
+        ? `Cranes of this type with exactly ${required} t capacity`
+        : `Cranes of this type with at least ${required} t capacity`,
+    startDateTbc: tbc,
+    notice: tbc
+      ? "The start date is to be confirmed, so cranes are not checked against the work dates. Confirm availability with each vendor before committing."
+      : null,
   };
 }

@@ -32,31 +32,40 @@ router.use(apiLimiter, requireAuth);
  */
 const canReadFleet = requireAnyCapability("fleet:edit_own", "fleet:view_all");
 
+/**
+ * Brief D1: a vendor writes their own fleet (`fleet:edit_own`); an SML user
+ * writes any approved vendor's (`fleet:edit_all`). The service marks the latter
+ * "on behalf of" and emails the vendor.
+ */
+const canWriteFleet = requireAnyCapability("fleet:edit_own", "fleet:edit_all");
+
 // --- reads ---
 router.get("/", canReadFleet, crane.list);
 router.get("/:craneId", canReadFleet, crane.detail);
+/** BPD 6.11 crane detail: calendar, maintenance flags and transport cost. */
+router.get("/:craneId/profile", requireCapability("fleet:view_all"), crane.profile);
 
-// --- the vendor's own fleet: writes ---
-router.post("/", requireCapability("fleet:edit_own"), crane.create);
-router.put("/:craneId", requireCapability("fleet:edit_own"), crane.update);
+// --- the vendor's own fleet, or any vendor's on their behalf ---
+router.post("/", canWriteFleet, crane.create);
+router.put("/:craneId", canWriteFleet, crane.update);
 
 /** Quick actions from brief 7.4. */
-router.patch("/:craneId/status-location", requireCapability("fleet:edit_own"), crane.quickUpdate);
-router.get("/:craneId/duplicate", requireCapability("fleet:edit_own"), crane.duplicatePrefill);
-router.post("/:craneId/confirm-accurate", requireCapability("fleet:edit_own"), crane.confirmAccurate);
+router.patch("/:craneId/status-location", canWriteFleet, crane.quickUpdate);
+router.get("/:craneId/duplicate", canReadFleet, crane.duplicatePrefill);
+router.post("/:craneId/confirm-accurate", canWriteFleet, crane.confirmAccurate);
 
 // Soft delete, never a hard delete (brief 7.4).
-router.post("/:craneId/deactivate", requireCapability("fleet:edit_own"), crane.deactivate);
-router.post("/:craneId/reactivate", requireCapability("fleet:edit_own"), crane.reactivate);
+router.post("/:craneId/deactivate", canWriteFleet, crane.deactivate);
+router.post("/:craneId/reactivate", canWriteFleet, crane.reactivate);
 
 // Load chart (brief 5.2).
 router.post(
   "/:craneId/load-chart",
-  requireCapability("fleet:edit_own"),
+  canWriteFleet,
   uploadSingle("file"),
   crane.uploadChart,
 );
-router.get("/:craneId/load-chart", requireCapability("fleet:edit_own"), crane.downloadChart);
+router.get("/:craneId/load-chart", canReadFleet, crane.downloadChart);
 
 // --- internal read + fleet approval (brief 6.4) ---
 router.patch("/:craneId/approval", requireCapability("vendor:approve"), crane.setApproval);

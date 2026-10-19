@@ -13,6 +13,7 @@
     "prisma:studio": "prisma studio",
     "seed": "ts-node src/lib/seed.ts",
     "test": "vitest run",
+    "test:quick": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "doctor": "./scripts/doctor.sh"
   },

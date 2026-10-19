@@ -23,6 +23,7 @@ import {
   type SeededVendor,
 } from "./harness";
 import { INTERNAL_USERS, VENDOR_PASSWORD, VENDOR_USERS } from "./fixtures";
+import { setSetting } from "../utils/settings";
 
 /**
  * Milestone 5: the vendor's own RFQ inbox and quotations (brief 6.7, 7.6–7.8).
@@ -341,6 +342,64 @@ describe("vendor quotation access", () => {
     expect(history.status).toBe(404);
   });
 
+  it("exposes only the field whitelist, never customer identity or budget", async () => {
+    const rfq = await dispatchedRfq();
+    const detail = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenA,
+    });
+    expect(detail.status).toBe(200);
+
+    // The vendor sees the job, SML's own contact, and their own response — no
+    // more. Pinning the key set means an internal field added to the select
+    // fails here rather than silently reaching vendors (brief 6.6).
+    expect(Object.keys(detail.body.rfq).sort()).toEqual(
+      [
+        "applicationDescription",
+        "capacityNote",
+        "capacityRule",
+        "capacityT",
+        "commercialTerms",
+        "configuration",
+        "craneType",
+        "craneTypeName",
+        "durationUnit",
+        "durationValue",
+        "enquiryNo",
+        "jibLengthM",
+        "lineNo",
+        "loadDescription",
+        "locked",
+        "mainBoomM",
+        "notes",
+        "quantity",
+        "requiredStartDate",
+        "rfqId",
+        "rfqNumber",
+        "siteLocation",
+        "sitePincode",
+        "siteStateCode",
+        "siteStateName",
+        "smlContact",
+        "startDateTbc",
+        "submissionDeadline",
+      ].sort(),
+    );
+
+    // No customer name, address or budget key anywhere in the payload.
+    const keys = new Set<string>();
+    const walk = (value: unknown): void => {
+      if (Array.isArray(value)) value.forEach(walk);
+      else if (value && typeof value === "object") {
+        for (const [k, v] of Object.entries(value)) {
+          keys.add(k.toLowerCase());
+          walk(v);
+        }
+      }
+    };
+    walk(detail.body);
+    expect([...keys].some((k) => /customer|budget/.test(k))).toBe(false);
+  });
+
   it("answers 404 for another vendor's quotation id on every action", async () => {
     const rfq = await dispatchedRfq();
     await giveLoadChart(ctx.a.craneId);
@@ -581,6 +640,83 @@ describe("quotation total", () => {
     expect(stored.calculationNote).toContain("2,10,000.00");
   });
 
+  it("adds demobilisation and defaults the tax basis to exclusive of GST", async () => {
+    const rfq = await dispatchedRfq();
+    const res = await submitQuote(rfq.id, {
+      mobilisationCharges: 10_000,
+      demobilisationCharges: 5_000,
+      taxBasis: "INCLUSIVE_OF_GST",
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.quotation.totalQuotedValue).toBe(215_000);
+    expect(res.body.quotation.calculationNote).toContain("demobilisation");
+    const stored = await appPrisma.quotation.findFirstOrThrow({
+      where: { rfqId: rfq.id },
+    });
+    expect(Number(stored.demobilisationCharges)).toBe(5_000);
+    expect(stored.taxBasis).toBe("INCLUSIVE_OF_GST");
+  });
+
+  it("defaults demobilisation to zero and tax basis to exclusive of GST", async () => {
+    const rfq = await dispatchedRfq();
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(201);
+    const stored = await appPrisma.quotation.findFirstOrThrow({
+      where: { rfqId: rfq.id },
+    });
+    expect(Number(stored.demobilisationCharges)).toBe(0);
+    expect(stored.taxBasis).toBe("EXCLUSIVE_OF_GST");
+  });
+
+  it("refuses a negative demobilisation charge", async () => {
+    const rfq = await dispatchedRfq();
+    const res = (await submitQuote(rfq.id, { demobilisationCharges: -1 })) as unknown as {
+      status: number;
+    };
+    expect(res.status).toBe(400);
+  });
+
+  it("carries demobilisation and tax basis into the received-quotations view", async () => {
+    const rfq = await dispatchedRfq();
+    await submitQuote(rfq.id, {
+      demobilisationCharges: 7_500,
+      taxBasis: "INCLUSIVE_OF_GST",
+    });
+    const res = await call(app, "GET", `/api/rfqs/${rfq.id}`, { token: ctx.salesToken });
+    expect(res.status, JSON.stringify(res.body).slice(0, 400)).toBe(200);
+    const quotation = res.body.rfq.quotations[0];
+    expect(quotation).toBeDefined();
+    expect(Number(quotation.demobilisationCharges)).toBe(7_500);
+    expect(quotation.taxBasis).toBe("INCLUSIVE_OF_GST");
+  });
+
+  it("prices a month by the RFQ's working days when the day basis says so (brief 6/A3)", async () => {
+    const rfq = await dispatchedRfq({
+      durationValue: 2,
+      durationUnit: "MONTHS",
+      workingDaysPerMonth: 20,
+    });
+    await giveLoadChart(ctx.a.craneId);
+    await setSetting("RATE_DAY_BASIS", "WORKING_DAYS_PER_MONTH", "tests");
+    try {
+      const res = await submitQuote(rfq.id, {
+        rentalRate: 1_000,
+        rateBasis: "PER_DAY",
+        mobilisationCharges: 0,
+        demobilisationCharges: 0,
+      });
+      expect(res.status, JSON.stringify(res.body).slice(0, 400)).toBe(201);
+      // 2 months × 20 working days = 40 days at 1,000/day each — 60 days under the calendar basis.
+      const stored = await appPrisma.quotation.findFirstOrThrow({
+        where: { rfqId: rfq.id },
+      });
+      expect(Number(stored.totalQuotedValue)).toBe(40_000);
+    } finally {
+      await setSetting("RATE_DAY_BASIS", "CALENDAR_DAYS", "tests");
+    }
+  });
+
   it("previews the same total without storing anything", async () => {
     const rfq = await dispatchedRfq();
     const res = await call(
@@ -667,6 +803,68 @@ describe("quotation blocks", () => {
     expect(res.status).toBe(201);
   });
 
+  it("refuses a crane with an overlapping active reservation (brief B3)", async () => {
+    const rfq = await dispatchedRfq();
+    await giveLoadChart(ctx.a.craneId);
+    // The RFQ window is roughly [+30, +150] days, so a reservation inside it is
+    // a clash even though the stored status is Available.
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.a.craneId,
+        startDate: inDays(40),
+        endDate: inDays(50),
+        type: "BLOCKED",
+        status: "ACTIVE",
+      },
+    });
+
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/reserved/i);
+  });
+
+  it("ignores the reservation check for a TBC start date (brief C3)", async () => {
+    const rfq = await dispatchedRfq({ startDateTbc: true });
+    await giveLoadChart(ctx.a.craneId);
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.a.craneId,
+        startDate: inDays(0),
+        endDate: inDays(10),
+        type: "BLOCKED",
+        status: "ACTIVE",
+      },
+    });
+
+    // With no fixed start there is no window to clash with, so the quote goes
+    // through and carries the notice as a warning instead.
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(201);
+    const quotation = await appPrisma.quotation.findFirstOrThrow({
+      where: { rfqId: rfq.id },
+    });
+    expect(quotation.warnings).toEqual(
+      expect.arrayContaining([expect.objectContaining({ code: "start_date_tbc" })]),
+    );
+  });
+
+  it("allows a crane whose reservation does not overlap the RFQ window (brief B3)", async () => {
+    const rfq = await dispatchedRfq();
+    await giveLoadChart(ctx.a.craneId);
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.a.craneId,
+        startDate: inDays(200),
+        endDate: inDays(210),
+        type: "BLOCKED",
+        status: "ACTIVE",
+      },
+    });
+
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(201);
+  });
+
   it("requires a rental rate above zero", async () => {
     const rfq = await dispatchedRfq();
     await giveLoadChart(ctx.a.craneId);
@@ -692,6 +890,17 @@ describe("quotation blocks", () => {
     const res = await submitQuote(rfq.id, { availabilityConfirmed: false });
     expect(res.status).toBe(400);
     expect(await appPrisma.quotation.count()).toBe(0);
+  });
+
+  it("drops the availability requirement when the start date is TBC (brief A3)", async () => {
+    const rfq = await dispatchedRfq({ startDateTbc: true });
+    await giveLoadChart(ctx.a.craneId);
+
+    const res = await submitQuote(rfq.id, { availabilityConfirmed: false });
+    expect(res.status, JSON.stringify(res.body).slice(0, 400)).toBe(201);
+    expect(
+      res.body.quotation.warnings.map((w: { code: string }) => w.code),
+    ).toContain("start_date_tbc");
   });
 
   it("requires a validity date of today or later", async () => {
@@ -835,6 +1044,53 @@ describe("quotation warnings", () => {
       where: { rfqId: rfq.id },
     });
     expect(Array.isArray(stored.warnings)).toBe(true);
+  });
+
+  it("warns when the crane's main boom is shorter than required (brief A3)", async () => {
+    const rfq = await dispatchedRfq({ mainBoomM: 60 });
+    await giveLoadChart(ctx.a.craneId);
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { mainBoomM: 40 },
+    });
+
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(201);
+    expect(
+      res.body.quotation.warnings.map((w: { code: string }) => w.code),
+    ).toContain("boom_shorter_than_required");
+  });
+
+  it("warns when the crane's jib is shorter than required (P0 A6)", async () => {
+    const rfq = await dispatchedRfq({ jibLengthM: 30 });
+    await giveLoadChart(ctx.a.craneId);
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { fixedJibM: 20 },
+    });
+
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(201);
+    expect(
+      res.body.quotation.warnings.map((w: { code: string }) => w.code),
+    ).toContain("jib_shorter_than_required");
+  });
+
+  it("does not warn about a jib when the crane has no jib recorded (P0 A6)", async () => {
+    // "Unknown" is not "too short": a crane whose jib is not on file must not
+    // read as a shortfall, or every vendor would see a warning on every quote.
+    const rfq = await dispatchedRfq({ jibLengthM: 60 });
+    await giveLoadChart(ctx.a.craneId);
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { fixedJibM: null, luffingJibM: null, windJibM: null },
+    });
+
+    const res = await submitQuote(rfq.id);
+    expect(res.status).toBe(201);
+    expect(
+      res.body.quotation.warnings.map((w: { code: string }) => w.code),
+    ).not.toContain("jib_shorter_than_required");
   });
 
   it("warns when capacity differs in either direction", async () => {
@@ -1317,6 +1573,36 @@ describe("declining an RFQ", () => {
     expect(recipient.responseStatus).toBe("DECLINED");
     expect(recipient.declineReason).toBe("No crane of this type in range");
     expect(recipient.respondedAt).not.toBeNull();
+  });
+
+  it("surfaces the vendor's offer note to the RFQ creator (brief C4)", async () => {
+    const rfq = await dispatchedRfq();
+    await call(app, "POST", `/api/vendor/rfqs/${rfq.id}/decline`, {
+      token: ctx.vendorTokenA,
+      body: {
+        reason: "No crane free for those dates",
+        note: "We can offer a 250 t crawler from Pune; contact XYZ Cranes on 98xxxxxx21.",
+      },
+    });
+
+    const tracking = await call(app, "GET", `/api/rfqs/${rfq.id}`, {
+      token: ctx.salesToken,
+    });
+    const recipient = (
+      tracking.body.rfq.recipients as Array<{
+        responseStatus: string;
+        declineReason: string | null;
+        declineNote: string | null;
+      }>
+    ).find((r) => r.responseStatus === "DECLINED");
+    expect(recipient?.declineReason).toBe("No crane free for those dates");
+    expect(recipient?.declineNote).toMatch(/250 t crawler/);
+
+    // The vendor sees their own note recorded against the response too.
+    const vendorView = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenA,
+    });
+    expect(vendorView.body.response.declineNote).toMatch(/XYZ Cranes/);
   });
 
   it("refuses a second decline", async () => {

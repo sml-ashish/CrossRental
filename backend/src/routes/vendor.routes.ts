@@ -58,11 +58,35 @@ router.get(
   requireCapability("vendor:view_all"),
   approval.vendorDetail,
 );
+/** BPD 6.10 discovery view: fleet, categories and participation (no bank). */
+router.get(
+  "/:vendorId/profile",
+  apiLimiter,
+  requireAuth,
+  requireCapability("vendor:view_all"),
+  vendor.insight,
+);
 router.get(
   "/:vendorId/documents/:docType",
   apiLimiter,
   requireAuth,
   approval.downloadDocument,
+);
+
+// --- SAP vendor creation sheet (admin only; brief D3) ---
+// Declared before "/:vendorId/approve" purely for readability; the paths do not
+// overlap. Both are gated admin-only because the sheet includes bank details.
+router.get(
+  "/:vendorId/sap-sheet",
+  apiLimiter,
+  requireAuth,
+  approval.sapSheet,
+);
+router.get(
+  "/:vendorId/sap-sheet.xls",
+  apiLimiter,
+  requireAuth,
+  approval.exportSapSheet,
 );
 
 // --- decisions (admin only) ---

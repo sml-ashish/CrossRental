@@ -397,15 +397,21 @@ export const ModelName = {
   Crane: 'Crane',
   Rfq: 'Rfq',
   RfqAttachment: 'RfqAttachment',
+  Reservation: 'Reservation',
   RfqVendorRecipient: 'RfqVendorRecipient',
   Quotation: 'Quotation',
   QuotationAttachment: 'QuotationAttachment',
+  Enquiry: 'Enquiry',
+  EnquiryLineItem: 'EnquiryLineItem',
+  EnquirySequence: 'EnquirySequence',
   AuditLog: 'AuditLog',
   EmailLog: 'EmailLog',
   DistanceCache: 'DistanceCache',
   AppSetting: 'AppSetting',
   RfqSequence: 'RfqSequence',
-  EmailTemplate: 'EmailTemplate'
+  EmailTemplate: 'EmailTemplate',
+  RecommendationSnapshot: 'RecommendationSnapshot',
+  MobilisationRate: 'MobilisationRate'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "state" | "stateVendorRegion" | "craneType" | "vendor" | "vendorContact" | "vendorDocument" | "vendorInvitation" | "vendorDecision" | "user" | "loginOtp" | "crane" | "rfq" | "rfqAttachment" | "rfqVendorRecipient" | "quotation" | "quotationAttachment" | "auditLog" | "emailLog" | "distanceCache" | "appSetting" | "rfqSequence" | "emailTemplate"
+    modelProps: "state" | "stateVendorRegion" | "craneType" | "vendor" | "vendorContact" | "vendorDocument" | "vendorInvitation" | "vendorDecision" | "user" | "loginOtp" | "crane" | "rfq" | "rfqAttachment" | "reservation" | "rfqVendorRecipient" | "quotation" | "quotationAttachment" | "enquiry" | "enquiryLineItem" | "enquirySequence" | "auditLog" | "emailLog" | "distanceCache" | "appSetting" | "rfqSequence" | "emailTemplate" | "recommendationSnapshot" | "mobilisationRate"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1387,6 +1393,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Reservation: {
+      payload: Prisma.$ReservationPayload<ExtArgs>
+      fields: Prisma.ReservationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReservationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReservationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        findFirst: {
+          args: Prisma.ReservationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReservationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        findMany: {
+          args: Prisma.ReservationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>[]
+        }
+        create: {
+          args: Prisma.ReservationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        createMany: {
+          args: Prisma.ReservationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReservationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>[]
+        }
+        delete: {
+          args: Prisma.ReservationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        update: {
+          args: Prisma.ReservationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReservationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReservationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReservationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReservationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationPayload>
+        }
+        aggregate: {
+          args: Prisma.ReservationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReservation>
+        }
+        groupBy: {
+          args: Prisma.ReservationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReservationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReservationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReservationCountAggregateOutputType> | number
+        }
+      }
+    }
     RfqVendorRecipient: {
       payload: Prisma.$RfqVendorRecipientPayload<ExtArgs>
       fields: Prisma.RfqVendorRecipientFieldRefs
@@ -1606,6 +1686,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.QuotationAttachmentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.QuotationAttachmentCountAggregateOutputType> | number
+        }
+      }
+    }
+    Enquiry: {
+      payload: Prisma.$EnquiryPayload<ExtArgs>
+      fields: Prisma.EnquiryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EnquiryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EnquiryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>
+        }
+        findFirst: {
+          args: Prisma.EnquiryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EnquiryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>
+        }
+        findMany: {
+          args: Prisma.EnquiryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>[]
+        }
+        create: {
+          args: Prisma.EnquiryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>
+        }
+        createMany: {
+          args: Prisma.EnquiryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EnquiryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>[]
+        }
+        delete: {
+          args: Prisma.EnquiryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>
+        }
+        update: {
+          args: Prisma.EnquiryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>
+        }
+        deleteMany: {
+          args: Prisma.EnquiryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EnquiryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EnquiryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>[]
+        }
+        upsert: {
+          args: Prisma.EnquiryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryPayload>
+        }
+        aggregate: {
+          args: Prisma.EnquiryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEnquiry>
+        }
+        groupBy: {
+          args: Prisma.EnquiryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnquiryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EnquiryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnquiryCountAggregateOutputType> | number
+        }
+      }
+    }
+    EnquiryLineItem: {
+      payload: Prisma.$EnquiryLineItemPayload<ExtArgs>
+      fields: Prisma.EnquiryLineItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EnquiryLineItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EnquiryLineItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>
+        }
+        findFirst: {
+          args: Prisma.EnquiryLineItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EnquiryLineItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>
+        }
+        findMany: {
+          args: Prisma.EnquiryLineItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>[]
+        }
+        create: {
+          args: Prisma.EnquiryLineItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>
+        }
+        createMany: {
+          args: Prisma.EnquiryLineItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EnquiryLineItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>[]
+        }
+        delete: {
+          args: Prisma.EnquiryLineItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>
+        }
+        update: {
+          args: Prisma.EnquiryLineItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.EnquiryLineItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EnquiryLineItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EnquiryLineItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.EnquiryLineItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquiryLineItemPayload>
+        }
+        aggregate: {
+          args: Prisma.EnquiryLineItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEnquiryLineItem>
+        }
+        groupBy: {
+          args: Prisma.EnquiryLineItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnquiryLineItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EnquiryLineItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnquiryLineItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    EnquirySequence: {
+      payload: Prisma.$EnquirySequencePayload<ExtArgs>
+      fields: Prisma.EnquirySequenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EnquirySequenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EnquirySequenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>
+        }
+        findFirst: {
+          args: Prisma.EnquirySequenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EnquirySequenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>
+        }
+        findMany: {
+          args: Prisma.EnquirySequenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>[]
+        }
+        create: {
+          args: Prisma.EnquirySequenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>
+        }
+        createMany: {
+          args: Prisma.EnquirySequenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EnquirySequenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>[]
+        }
+        delete: {
+          args: Prisma.EnquirySequenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>
+        }
+        update: {
+          args: Prisma.EnquirySequenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>
+        }
+        deleteMany: {
+          args: Prisma.EnquirySequenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EnquirySequenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EnquirySequenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>[]
+        }
+        upsert: {
+          args: Prisma.EnquirySequenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EnquirySequencePayload>
+        }
+        aggregate: {
+          args: Prisma.EnquirySequenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEnquirySequence>
+        }
+        groupBy: {
+          args: Prisma.EnquirySequenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnquirySequenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EnquirySequenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EnquirySequenceCountAggregateOutputType> | number
         }
       }
     }
@@ -2053,6 +2355,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RecommendationSnapshot: {
+      payload: Prisma.$RecommendationSnapshotPayload<ExtArgs>
+      fields: Prisma.RecommendationSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecommendationSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecommendationSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.RecommendationSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecommendationSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.RecommendationSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.RecommendationSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.RecommendationSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecommendationSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.RecommendationSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>
+        }
+        update: {
+          args: Prisma.RecommendationSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecommendationSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecommendationSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecommendationSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecommendationSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.RecommendationSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecommendationSnapshot>
+        }
+        groupBy: {
+          args: Prisma.RecommendationSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecommendationSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecommendationSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecommendationSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
+    MobilisationRate: {
+      payload: Prisma.$MobilisationRatePayload<ExtArgs>
+      fields: Prisma.MobilisationRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MobilisationRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MobilisationRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>
+        }
+        findFirst: {
+          args: Prisma.MobilisationRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MobilisationRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>
+        }
+        findMany: {
+          args: Prisma.MobilisationRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>[]
+        }
+        create: {
+          args: Prisma.MobilisationRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>
+        }
+        createMany: {
+          args: Prisma.MobilisationRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MobilisationRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>[]
+        }
+        delete: {
+          args: Prisma.MobilisationRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>
+        }
+        update: {
+          args: Prisma.MobilisationRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.MobilisationRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MobilisationRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MobilisationRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.MobilisationRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MobilisationRatePayload>
+        }
+        aggregate: {
+          args: Prisma.MobilisationRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMobilisationRate>
+        }
+        groupBy: {
+          args: Prisma.MobilisationRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MobilisationRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MobilisationRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MobilisationRateCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2123,7 +2573,12 @@ export const VendorScalarFieldEnum = {
   sapVendorCode: 'sapVendorCode',
   name: 'name',
   natureOfCompany: 'natureOfCompany',
-  registeredAddress: 'registeredAddress',
+  addressLine1: 'addressLine1',
+  addressLine2: 'addressLine2',
+  city: 'city',
+  district: 'district',
+  stateCode: 'stateCode',
+  pincode: 'pincode',
   telephone: 'telephone',
   fax: 'fax',
   email: 'email',
@@ -2131,13 +2586,23 @@ export const VendorScalarFieldEnum = {
   companySize: 'companySize',
   pan: 'pan',
   tan: 'tan',
+  gstRegistered: 'gstRegistered',
+  gstRegistrationType: 'gstRegistrationType',
   gstn: 'gstn',
-  gstCompositionOpted: 'gstCompositionOpted',
   gstr1FilingFrequency: 'gstr1FilingFrequency',
   cin: 'cin',
   govtRegistrationType: 'govtRegistrationType',
   govtRegistrationNo: 'govtRegistrationNo',
+  msmeRegistered: 'msmeRegistered',
   msmeCategory: 'msmeCategory',
+  msmeRegNo: 'msmeRegNo',
+  msmeExemptionDate: 'msmeExemptionDate',
+  tdsLowerDeduction: 'tdsLowerDeduction',
+  tdsCertificateNo: 'tdsCertificateNo',
+  tdsSection: 'tdsSection',
+  tdsRatePercent: 'tdsRatePercent',
+  tdsValidFrom: 'tdsValidFrom',
+  tdsValidTo: 'tdsValidTo',
   bankAccountHolderName: 'bankAccountHolderName',
   bankName: 'bankName',
   bankBranch: 'bankBranch',
@@ -2145,19 +2610,32 @@ export const VendorScalarFieldEnum = {
   bankAccountNoEnc: 'bankAccountNoEnc',
   bankAccountNoLast4: 'bankAccountNoLast4',
   bankIfscEnc: 'bankIfscEnc',
+  bankMicr: 'bankMicr',
+  bankIban: 'bankIban',
+  bankSwift: 'bankSwift',
   codeOfConductAccepted: 'codeOfConductAccepted',
   declarationName: 'declarationName',
   declarationDesignation: 'declarationDesignation',
   declarationDate: 'declarationDate',
   fleetSummary: 'fleetSummary',
+  communicationNotes: 'communicationNotes',
   onboardingStatus: 'onboardingStatus',
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
   adminRemarks: 'adminRemarks',
+  suspendedAt: 'suspendedAt',
+  suspendedById: 'suspendedById',
+  suspendReason: 'suspendReason',
   facilityStatus: 'facilityStatus',
   manpowerStatus: 'manpowerStatus',
   improvementRequirement: 'improvementRequirement',
   improvementPeriod: 'improvementPeriod',
+  vendorOrigin: 'vendorOrigin',
+  vendorType: 'vendorType',
+  purchaseOrg: 'purchaseOrg',
+  paymentTerm: 'paymentTerm',
+  withholdingTaxType: 'withholdingTaxType',
+  legalForm: 'legalForm',
   totalFleetSize: 'totalFleetSize',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -2175,6 +2653,7 @@ export const VendorContactScalarFieldEnum = {
   telephone: 'telephone',
   email: 'email',
   isPrimary: 'isPrimary',
+  receivesRfqs: 'receivesRfqs',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2286,6 +2765,8 @@ export const CraneScalarFieldEnum = {
   geocodedBy: 'geocodedBy',
   geocodedAt: 'geocodedAt',
   availableFrom: 'availableFrom',
+  expectedReadyDate: 'expectedReadyDate',
+  updatedOnBehalf: 'updatedOnBehalf',
   loadChartFileRef: 'loadChartFileRef',
   loadChartFileName: 'loadChartFileName',
   loadChartMimeType: 'loadChartMimeType',
@@ -2311,6 +2792,14 @@ export const RfqScalarFieldEnum = {
   craneType: 'craneType',
   capacityT: 'capacityT',
   quantity: 'quantity',
+  capacityRule: 'capacityRule',
+  capacityNote: 'capacityNote',
+  applicationDescription: 'applicationDescription',
+  loadDescription: 'loadDescription',
+  mainBoomM: 'mainBoomM',
+  jibLengthM: 'jibLengthM',
+  startDateTbc: 'startDateTbc',
+  workingDaysPerMonth: 'workingDaysPerMonth',
   siteLocation: 'siteLocation',
   siteStateCode: 'siteStateCode',
   sitePincode: 'sitePincode',
@@ -2329,6 +2818,12 @@ export const RfqScalarFieldEnum = {
   accommodationConveyance: 'accommodationConveyance',
   paymentTerms: 'paymentTerms',
   notes: 'notes',
+  mobilisationTerms: 'mobilisationTerms',
+  supportCrane: 'supportCrane',
+  steelMatsGroundPrep: 'steelMatsGroundPrep',
+  ehsHrRequirements: 'ehsHrRequirements',
+  insuranceTerms: 'insuranceTerms',
+  extensionClause: 'extensionClause',
   commercialTermsExtra: 'commercialTermsExtra',
   smlContactName: 'smlContactName',
   smlContactMobile: 'smlContactMobile',
@@ -2338,6 +2833,7 @@ export const RfqScalarFieldEnum = {
   rollupStatus: 'rollupStatus',
   cancelledAt: 'cancelledAt',
   cancelReason: 'cancelReason',
+  enquiryLineId: 'enquiryLineId',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -2359,6 +2855,27 @@ export const RfqAttachmentScalarFieldEnum = {
 } as const
 
 export type RfqAttachmentScalarFieldEnum = (typeof RfqAttachmentScalarFieldEnum)[keyof typeof RfqAttachmentScalarFieldEnum]
+
+
+export const ReservationScalarFieldEnum = {
+  id: 'id',
+  craneId: 'craneId',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  type: 'type',
+  status: 'status',
+  rfqId: 'rfqId',
+  quotationId: 'quotationId',
+  enquiryLineId: 'enquiryLineId',
+  createdById: 'createdById',
+  releasedById: 'releasedById',
+  releasedAt: 'releasedAt',
+  releaseReason: 'releaseReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
 
 
 export const RfqVendorRecipientScalarFieldEnum = {
@@ -2393,6 +2910,8 @@ export const QuotationScalarFieldEnum = {
   rentalRate: 'rentalRate',
   rateBasis: 'rateBasis',
   mobilisationCharges: 'mobilisationCharges',
+  demobilisationCharges: 'demobilisationCharges',
+  taxBasis: 'taxBasis',
   totalQuotedValue: 'totalQuotedValue',
   calculationNote: 'calculationNote',
   availabilityConfirmed: 'availabilityConfirmed',
@@ -2408,6 +2927,10 @@ export const QuotationScalarFieldEnum = {
   distanceToSiteKm: 'distanceToSiteKm',
   distanceMethod: 'distanceMethod',
   status: 'status',
+  statusReasonCode: 'statusReasonCode',
+  statusReasonText: 'statusReasonText',
+  statusChangedAt: 'statusChangedAt',
+  statusChangedById: 'statusChangedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2429,6 +2952,102 @@ export const QuotationAttachmentScalarFieldEnum = {
 export type QuotationAttachmentScalarFieldEnum = (typeof QuotationAttachmentScalarFieldEnum)[keyof typeof QuotationAttachmentScalarFieldEnum]
 
 
+export const EnquiryScalarFieldEnum = {
+  id: 'id',
+  enquiryNo: 'enquiryNo',
+  externalReference: 'externalReference',
+  enquiryDate: 'enquiryDate',
+  source: 'source',
+  salesPartnerName: 'salesPartnerName',
+  crOwnerId: 'crOwnerId',
+  customerName: 'customerName',
+  customerAddress: 'customerAddress',
+  siteLocation: 'siteLocation',
+  siteStateCode: 'siteStateCode',
+  sitePincode: 'sitePincode',
+  region: 'region',
+  siteLatitude: 'siteLatitude',
+  siteLongitude: 'siteLongitude',
+  siteCoordinateSource: 'siteCoordinateSource',
+  businessVertical: 'businessVertical',
+  crossRentalFlag: 'crossRentalFlag',
+  overallStatus: 'overallStatus',
+  notes: 'notes',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnquiryScalarFieldEnum = (typeof EnquiryScalarFieldEnum)[keyof typeof EnquiryScalarFieldEnum]
+
+
+export const EnquiryLineItemScalarFieldEnum = {
+  id: 'id',
+  enquiryId: 'enquiryId',
+  lineNo: 'lineNo',
+  craneTypeCode: 'craneTypeCode',
+  capacityT: 'capacityT',
+  capacityRule: 'capacityRule',
+  capacityNote: 'capacityNote',
+  quantity: 'quantity',
+  applicationDescription: 'applicationDescription',
+  loadDescription: 'loadDescription',
+  liftLoadT: 'liftLoadT',
+  workingRadiusM: 'workingRadiusM',
+  requiredMainBoomM: 'requiredMainBoomM',
+  requiredFixedJibM: 'requiredFixedJibM',
+  requiredLuffingJibM: 'requiredLuffingJibM',
+  requiredWindJibM: 'requiredWindJibM',
+  configurationNotes: 'configurationNotes',
+  requiredStartDate: 'requiredStartDate',
+  startDateTbc: 'startDateTbc',
+  durationValue: 'durationValue',
+  durationUnit: 'durationUnit',
+  workingDaysPerMonth: 'workingDaysPerMonth',
+  mobilisationTerms: 'mobilisationTerms',
+  demobilisationTerms: 'demobilisationTerms',
+  otCharges: 'otCharges',
+  breakdownTerms: 'breakdownTerms',
+  dieselScope: 'dieselScope',
+  workingHoursShift: 'workingHoursShift',
+  accommodationConveyance: 'accommodationConveyance',
+  paymentTerms: 'paymentTerms',
+  supportCraneScope: 'supportCraneScope',
+  steelMatsGroundPrepScope: 'steelMatsGroundPrepScope',
+  ehsHrCompliance: 'ehsHrCompliance',
+  insuranceTerms: 'insuranceTerms',
+  extensionClause: 'extensionClause',
+  craneAgeCriteriaYears: 'craneAgeCriteriaYears',
+  otherTerms: 'otherTerms',
+  additionalManpowerScope: 'additionalManpowerScope',
+  intraSiteMovementScope: 'intraSiteMovementScope',
+  prereleaseTerms: 'prereleaseTerms',
+  ppeScope: 'ppeScope',
+  rowScope: 'rowScope',
+  rentalBudget: 'rentalBudget',
+  rentalBudgetValue: 'rentalBudgetValue',
+  internalNotes: 'internalNotes',
+  poSapReference: 'poSapReference',
+  trailStatus: 'trailStatus',
+  selectedSource: 'selectedSource',
+  closureStatus: 'closureStatus',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnquiryLineItemScalarFieldEnum = (typeof EnquiryLineItemScalarFieldEnum)[keyof typeof EnquiryLineItemScalarFieldEnum]
+
+
+export const EnquirySequenceScalarFieldEnum = {
+  year: 'year',
+  last: 'last'
+} as const
+
+export type EnquirySequenceScalarFieldEnum = (typeof EnquirySequenceScalarFieldEnum)[keyof typeof EnquirySequenceScalarFieldEnum]
+
+
 export const AuditLogScalarFieldEnum = {
   id: 'id',
   entity: 'entity',
@@ -2440,6 +3059,7 @@ export const AuditLogScalarFieldEnum = {
   actorRole: 'actorRole',
   actorName: 'actorName',
   ipAddress: 'ipAddress',
+  onBehalfOfVendor: 'onBehalfOfVendor',
   craneId: 'craneId',
   createdAt: 'createdAt'
 } as const
@@ -2507,6 +3127,36 @@ export const EmailTemplateScalarFieldEnum = {
 export type EmailTemplateScalarFieldEnum = (typeof EmailTemplateScalarFieldEnum)[keyof typeof EmailTemplateScalarFieldEnum]
 
 
+export const RecommendationSnapshotScalarFieldEnum = {
+  id: 'id',
+  enquiryLineId: 'enquiryLineId',
+  trigger: 'trigger',
+  provider: 'provider',
+  site: 'site',
+  smlSet: 'smlSet',
+  vendorSet: 'vendorSet',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type RecommendationSnapshotScalarFieldEnum = (typeof RecommendationSnapshotScalarFieldEnum)[keyof typeof RecommendationSnapshotScalarFieldEnum]
+
+
+export const MobilisationRateScalarFieldEnum = {
+  id: 'id',
+  craneTypeCode: 'craneTypeCode',
+  capacityMinT: 'capacityMinT',
+  capacityMaxT: 'capacityMaxT',
+  ownershipType: 'ownershipType',
+  ratePerKm: 'ratePerKm',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MobilisationRateScalarFieldEnum = (typeof MobilisationRateScalarFieldEnum)[keyof typeof MobilisationRateScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2521,6 +3171,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -2604,6 +3261,20 @@ export type ListEnumNatureOfCompanyFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'GstRegistrationType'
+ */
+export type EnumGstRegistrationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GstRegistrationType'>
+    
+
+
+/**
+ * Reference to a field of type 'GstRegistrationType[]'
+ */
+export type ListEnumGstRegistrationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GstRegistrationType[]'>
+    
+
+
+/**
  * Reference to a field of type 'GstFilingFrequency'
  */
 export type EnumGstFilingFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GstFilingFrequency'>
@@ -2632,20 +3303,6 @@ export type ListEnumMsmeCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
- * Reference to a field of type 'BankAccountType'
- */
-export type EnumBankAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankAccountType'>
-    
-
-
-/**
- * Reference to a field of type 'BankAccountType[]'
- */
-export type ListEnumBankAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankAccountType[]'>
-    
-
-
-/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -2656,6 +3313,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BankAccountType'
+ */
+export type EnumBankAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankAccountType'>
+    
+
+
+/**
+ * Reference to a field of type 'BankAccountType[]'
+ */
+export type ListEnumBankAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BankAccountType[]'>
     
 
 
@@ -2828,6 +3499,20 @@ export type ListEnumCraneApprovalStatusFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'CapacityRule'
+ */
+export type EnumCapacityRuleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CapacityRule'>
+    
+
+
+/**
+ * Reference to a field of type 'CapacityRule[]'
+ */
+export type ListEnumCapacityRuleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CapacityRule[]'>
+    
+
+
+/**
  * Reference to a field of type 'DurationUnit'
  */
 export type EnumDurationUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DurationUnit'>
@@ -2884,6 +3569,34 @@ export type ListEnumRfqRollupStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'ReservationType'
+ */
+export type EnumReservationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReservationType'>
+    
+
+
+/**
+ * Reference to a field of type 'ReservationType[]'
+ */
+export type ListEnumReservationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReservationType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ReservationStatus'
+ */
+export type EnumReservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReservationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ReservationStatus[]'
+ */
+export type ListEnumReservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReservationStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'EmailDeliveryStatus'
  */
 export type EnumEmailDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailDeliveryStatus'>
@@ -2922,6 +3635,20 @@ export type EnumRateBasisFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'RateBasis[]'
  */
 export type ListEnumRateBasisFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RateBasis[]'>
+    
+
+
+/**
+ * Reference to a field of type 'TaxBasisOfQuotation'
+ */
+export type EnumTaxBasisOfQuotationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaxBasisOfQuotation'>
+    
+
+
+/**
+ * Reference to a field of type 'TaxBasisOfQuotation[]'
+ */
+export type ListEnumTaxBasisOfQuotationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaxBasisOfQuotation[]'>
     
 
 
@@ -2978,6 +3705,48 @@ export type EnumAttachmentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'AttachmentKind[]'
  */
 export type ListEnumAttachmentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttachmentKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EnquirySource'
+ */
+export type EnumEnquirySourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquirySource'>
+    
+
+
+/**
+ * Reference to a field of type 'EnquirySource[]'
+ */
+export type ListEnumEnquirySourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquirySource[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EnquiryOverallStatus'
+ */
+export type EnumEnquiryOverallStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquiryOverallStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EnquiryOverallStatus[]'
+ */
+export type ListEnumEnquiryOverallStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquiryOverallStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EnquiryLineTrailStatus'
+ */
+export type EnumEnquiryLineTrailStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquiryLineTrailStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EnquiryLineTrailStatus[]'
+ */
+export type ListEnumEnquiryLineTrailStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquiryLineTrailStatus[]'>
     
 
 
@@ -3131,15 +3900,21 @@ export type GlobalOmitConfig = {
   crane?: Prisma.CraneOmit
   rfq?: Prisma.RfqOmit
   rfqAttachment?: Prisma.RfqAttachmentOmit
+  reservation?: Prisma.ReservationOmit
   rfqVendorRecipient?: Prisma.RfqVendorRecipientOmit
   quotation?: Prisma.QuotationOmit
   quotationAttachment?: Prisma.QuotationAttachmentOmit
+  enquiry?: Prisma.EnquiryOmit
+  enquiryLineItem?: Prisma.EnquiryLineItemOmit
+  enquirySequence?: Prisma.EnquirySequenceOmit
   auditLog?: Prisma.AuditLogOmit
   emailLog?: Prisma.EmailLogOmit
   distanceCache?: Prisma.DistanceCacheOmit
   appSetting?: Prisma.AppSettingOmit
   rfqSequence?: Prisma.RfqSequenceOmit
   emailTemplate?: Prisma.EmailTemplateOmit
+  recommendationSnapshot?: Prisma.RecommendationSnapshotOmit
+  mobilisationRate?: Prisma.MobilisationRateOmit
 }
 
 /* Types for Logging */

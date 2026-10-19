@@ -60,6 +60,13 @@ const MSME_OPTIONS = [
   { value: "MEDIUM", label: "Medium" },
 ] as const;
 
+const GST_REGISTRATION_OPTIONS = [
+  { value: "REGULAR", label: "Regular" },
+  { value: "COMPOSITE", label: "Composition scheme" },
+  { value: "SEZ", label: "SEZ unit" },
+  { value: "EOU", label: "EOU unit" },
+] as const;
+
 type FormErrors = Record<string, string>;
 
 /** Flattens the backend's field errors into something a form can render. */
@@ -160,6 +167,14 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
   }, [state?.documents]);
 
   const missing = state?.missingDocuments ?? [];
+
+  // The GST certificate is only asked of a GST-registered vendor (open item
+  // 2): the backend enforces this too, but the upload list must not offer a
+  // row an unregistered vendor can never satisfy.
+  const uploadDocs: DocType[] = useMemo(
+    () => (form?.gstRegistered ? [...REQUIRED_DOC_TYPES, "GST_CERTIFICATE"] : REQUIRED_DOC_TYPES),
+    [form?.gstRegistered],
+  );
 
   if (!token) {
     return (
@@ -359,20 +374,54 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
               invalid={Boolean(fieldErrors["natureOfCompany"])}
             />
           </Field>
-          <Field
-            label="Registered address"
-            htmlFor="registeredAddress"
-            required
-            error={fieldErrors["registeredAddress"]}
-          >
-            <TextArea
-              id="registeredAddress"
-              value={form.registeredAddress}
-              onChange={(v) => set("registeredAddress", v)}
-              disabled={readOnly}
-              invalid={Boolean(fieldErrors["registeredAddress"])}
-            />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Address line 1" htmlFor="addressLine1" required error={fieldErrors["addressLine1"]}>
+              <TextInput
+                id="addressLine1"
+                value={form.addressLine1}
+                onChange={(v) => set("addressLine1", v)}
+                disabled={readOnly}
+                invalid={Boolean(fieldErrors["addressLine1"])}
+              />
+            </Field>
+            <Field label="Address line 2" htmlFor="addressLine2">
+              <TextInput
+                id="addressLine2"
+                value={form.addressLine2}
+                onChange={(v) => set("addressLine2", v)}
+                disabled={readOnly}
+              />
+            </Field>
+            <Field label="City" htmlFor="city" required error={fieldErrors["city"]}>
+              <TextInput
+                id="city"
+                value={form.city}
+                onChange={(v) => set("city", v)}
+                disabled={readOnly}
+                invalid={Boolean(fieldErrors["city"])}
+              />
+            </Field>
+            <Field label="District" htmlFor="district" required error={fieldErrors["district"]}>
+              <TextInput
+                id="district"
+                value={form.district}
+                onChange={(v) => set("district", v)}
+                disabled={readOnly}
+                invalid={Boolean(fieldErrors["district"])}
+              />
+            </Field>
+            <StateSelect value={form.stateCode} onChange={(v) => set("stateCode", v)} disabled={readOnly} error={fieldErrors["stateCode"]} />
+            <Field label="Pincode" htmlFor="pincode" required error={fieldErrors["pincode"]}>
+              <TextInput
+                id="pincode"
+                value={form.pincode}
+                onChange={(v) => set("pincode", v.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                disabled={readOnly}
+                invalid={Boolean(fieldErrors["pincode"])}
+              />
+            </Field>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Telephone" htmlFor="telephone" required error={fieldErrors["telephone"]}>
               <TextInput
@@ -467,13 +516,27 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
                   />
                 </Field>
               </div>
-              <div className="mt-3 flex items-center justify-between gap-3">
+              <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
                 <Checkbox
                   id={`contact-primary-${index}`}
                   checked={contact.isPrimary}
                   disabled={readOnly}
                   onChange={(checked) => makePrimary(setContacts, index, checked)}
                   label="Primary contact"
+                />
+                <Checkbox
+                  id={`contact-rfqs-${index}`}
+                  checked={contact.receivesRfqs}
+                  disabled={readOnly}
+                  onChange={(checked) => setContacts((cs) => cs.map((c, i) => (i === index ? { ...c, receivesRfqs: checked } : c)))}
+                  label={
+                    <span className="whitespace-nowrap">
+                      Receives RFQ emails
+                      <span className="block text-xs font-normal text-slate-500">
+                        Falls back to the primary contact if nobody is ticked.
+                      </span>
+                    </span>
+                  }
                 />
                 {form.contacts.length > 1 ? (
                   <button
@@ -525,42 +588,78 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
                 disabled={readOnly}
               />
             </Field>
-            <Field label="GSTIN" htmlFor="gstn" required error={fieldErrors["gstn"]}>
-              <TextInput
-                id="gstn"
-                value={form.gstn}
-                onChange={(v) => set("gstn", v.toUpperCase())}
-                className="font-mono uppercase"
-                disabled={readOnly}
-                invalid={Boolean(fieldErrors["gstn"])}
-              />
-            </Field>
+          </div>
+          <Field label="Is the company GST-registered?" htmlFor="gstRegistered" required>
+            <div className="flex gap-6 pt-1">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="gstRegistered"
+                  checked={form.gstRegistered === true}
+                  disabled={readOnly}
+                  onChange={() => set("gstRegistered", true)}
+                />
+                Yes
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="gstRegistered"
+                  checked={form.gstRegistered === false}
+                  disabled={readOnly}
+                  onChange={() => set("gstRegistered", false)}
+                />
+                No
+              </label>
+            </div>
+          </Field>
+          {form.gstRegistered ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="GSTIN" htmlFor="gstn" required error={fieldErrors["gstn"]}>
+                <TextInput
+                  id="gstn"
+                  value={form.gstn}
+                  onChange={(v) => set("gstn", v.toUpperCase())}
+                  className="font-mono uppercase"
+                  disabled={readOnly}
+                  invalid={Boolean(fieldErrors["gstn"])}
+                />
+              </Field>
+              <Field
+                label="GST registration type"
+                htmlFor="gstRegistrationType"
+                required
+                error={fieldErrors["gstRegistrationType"]}
+              >
+                <Select
+                  id="gstRegistrationType"
+                  value={form.gstRegistrationType}
+                  onChange={(v) => set("gstRegistrationType", v)}
+                  options={GST_REGISTRATION_OPTIONS}
+                  placeholder="Select"
+                  disabled={readOnly}
+                  invalid={Boolean(fieldErrors["gstRegistrationType"])}
+                />
+              </Field>
+              <Field label="GSTR-1 filing frequency" htmlFor="gstr1FilingFrequency">
+                <Select
+                  id="gstr1FilingFrequency"
+                  value={form.gstr1FilingFrequency}
+                  onChange={(v) => set("gstr1FilingFrequency", v)}
+                  options={GSTR1_OPTIONS}
+                  placeholder="Not applicable"
+                  disabled={readOnly}
+                />
+              </Field>
+            </div>
+          ) : null}
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="CIN" htmlFor="cin" hint="Only for a company.">
               <TextInput
                 id="cin"
                 value={form.cin}
                 onChange={(v) => set("cin", v.toUpperCase())}
                 className="font-mono uppercase"
-                disabled={readOnly}
-              />
-            </Field>
-            <Field label="GSTR-1 filing frequency" htmlFor="gstr1FilingFrequency">
-              <Select
-                id="gstr1FilingFrequency"
-                value={form.gstr1FilingFrequency}
-                onChange={(v) => set("gstr1FilingFrequency", v)}
-                options={GSTR1_OPTIONS}
-                placeholder="Not applicable"
-                disabled={readOnly}
-              />
-            </Field>
-            <Field label="MSME category" htmlFor="msmeCategory">
-              <Select
-                id="msmeCategory"
-                value={form.msmeCategory}
-                onChange={(v) => set("msmeCategory", v)}
-                options={MSME_OPTIONS}
-                placeholder="Not registered"
                 disabled={readOnly}
               />
             </Field>
@@ -581,13 +680,138 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
               />
             </Field>
           </div>
-          <Checkbox
-            id="gstCompositionOpted"
-            checked={form.gstCompositionOpted}
-            onChange={(v) => set("gstCompositionOpted", v)}
-            disabled={readOnly}
-            label="We are registered under the GST composition scheme"
-          />
+          <div>
+            <Field label="Is the company registered as an MSME?" htmlFor="msmeRegistered" required>
+              <div className="flex gap-6 pt-1">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="msmeRegistered"
+                    checked={form.msmeRegistered === true}
+                    disabled={readOnly}
+                    onChange={() => set("msmeRegistered", true)}
+                  />
+                  Yes
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="msmeRegistered"
+                    checked={form.msmeRegistered === false}
+                    disabled={readOnly}
+                    onChange={() => set("msmeRegistered", false)}
+                  />
+                  No
+                </label>
+              </div>
+            </Field>
+            {form.msmeRegistered ? (
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                <Field label="MSME category" htmlFor="msmeCategory" required error={fieldErrors["msmeCategory"]}>
+                  <Select
+                    id="msmeCategory"
+                    value={form.msmeCategory}
+                    onChange={(v) => set("msmeCategory", v)}
+                    options={MSME_OPTIONS}
+                    placeholder="Select"
+                    disabled={readOnly}
+                    invalid={Boolean(fieldErrors["msmeCategory"])}
+                  />
+                </Field>
+                <Field
+                  label="MSME registration number"
+                  htmlFor="msmeRegNo"
+                  required
+                  error={fieldErrors["msmeRegNo"]}
+                >
+                  <TextInput
+                    id="msmeRegNo"
+                    value={form.msmeRegNo}
+                    onChange={(v) => set("msmeRegNo", v)}
+                    disabled={readOnly}
+                    invalid={Boolean(fieldErrors["msmeRegNo"])}
+                  />
+                </Field>
+                <Field
+                  label="Exemption certificate date"
+                  htmlFor="msmeExemptionDate"
+                  hint="Only if you hold a certificate of exemption from MSME registration. Optional."
+                >
+                  <TextInput
+                    id="msmeExemptionDate"
+                    type="date"
+                    value={form.msmeExemptionDate}
+                    onChange={(v) => set("msmeExemptionDate", v)}
+                    disabled={readOnly}
+                  />
+                </Field>
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <Checkbox
+              id="tdsLowerDeduction"
+              checked={form.tdsLowerDeduction}
+              onChange={(v) => set("tdsLowerDeduction", v)}
+              disabled={readOnly}
+              label="We hold a certificate for a lower TDS deduction"
+            />
+            {form.tdsLowerDeduction ? (
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                <Field
+                  label="Certificate number"
+                  htmlFor="tdsCertificateNo"
+                  required
+                  error={fieldErrors["tdsCertificateNo"]}
+                >
+                  <TextInput
+                    id="tdsCertificateNo"
+                    value={form.tdsCertificateNo}
+                    onChange={(v) => set("tdsCertificateNo", v)}
+                    disabled={readOnly}
+                    invalid={Boolean(fieldErrors["tdsCertificateNo"])}
+                  />
+                </Field>
+                <Field label="Section" htmlFor="tdsSection" required error={fieldErrors["tdsSection"]}>
+                  <TextInput
+                    id="tdsSection"
+                    value={form.tdsSection}
+                    onChange={(v) => set("tdsSection", v)}
+                    disabled={readOnly}
+                    invalid={Boolean(fieldErrors["tdsSection"])}
+                  />
+                </Field>
+                <Field label="Rate (%)" htmlFor="tdsRatePercent" required error={fieldErrors["tdsRatePercent"]}>
+                  <TextInput
+                    id="tdsRatePercent"
+                    value={form.tdsRatePercent}
+                    onChange={(v) => set("tdsRatePercent", v.replace(/[^\d]/g, "").slice(0, 3))}
+                    inputMode="numeric"
+                    disabled={readOnly}
+                    invalid={Boolean(fieldErrors["tdsRatePercent"])}
+                  />
+                </Field>
+                <Field label="Valid from" htmlFor="tdsValidFrom" required error={fieldErrors["tdsValidFrom"]}>
+                  <TextInput
+                    id="tdsValidFrom"
+                    type="date"
+                    value={form.tdsValidFrom}
+                    onChange={(v) => set("tdsValidFrom", v)}
+                    disabled={readOnly}
+                  />
+                </Field>
+                <Field label="Valid to" htmlFor="tdsValidTo" required error={fieldErrors["tdsValidTo"]}>
+                  <TextInput
+                    id="tdsValidTo"
+                    type="date"
+                    value={form.tdsValidTo}
+                    onChange={(v) => set("tdsValidTo", v)}
+                    disabled={readOnly}
+                  />
+                </Field>
+              </div>
+            ) : null}
+          </div>
         </Section>
 
         <OperatingRegionsSection form={form} set={set} disabled={readOnly} />
@@ -669,6 +893,40 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
                 disabled={readOnly}
               />
             </Field>
+            <Field label="MICR" htmlFor="bankMicr" hint="9 digits, printed on the cheque leaf.">
+              <TextInput
+                id="bankMicr"
+                value={form.bankMicr}
+                onChange={(v) => set("bankMicr", v.replace(/\D/g, "").slice(0, 9))}
+                inputMode="numeric"
+                disabled={readOnly}
+              />
+            </Field>
+            <Field
+              label="IBAN"
+              htmlFor="bankIban"
+              hint="For a bank account outside India only."
+            >
+              <TextInput
+                id="bankIban"
+                value={form.bankIban}
+                onChange={(v) => set("bankIban", v.toUpperCase())}
+                disabled={readOnly}
+              />
+            </Field>
+            <Field
+              label="SWIFT code"
+              htmlFor="bankSwift"
+              hint="For a bank account outside India only."
+            >
+              <TextInput
+                id="bankSwift"
+                value={form.bankSwift}
+                onChange={(v) => set("bankSwift", v.toUpperCase())}
+                className="font-mono uppercase"
+                disabled={readOnly}
+              />
+            </Field>
           </div>
         </Section>
 
@@ -694,12 +952,15 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
           </Field>
         </Section>
 
-        <Section title="Documents" description="All three are required before the form can be submitted.">
+        <Section
+          title="Documents"
+          description="The cancelled cheque, PAN copy and signed declaration page are required for everyone; the GST certificate only if you are GST-registered."
+        >
           {uploadMutation.isError ? (
             <Alert title="The upload was rejected">{(uploadMutation.error as Error).message}</Alert>
           ) : null}
           <ul className="space-y-2.5">
-            {REQUIRED_DOC_TYPES.map((docType) => {
+            {uploadDocs.map((docType) => {
               const uploaded = uploadedByType.get(docType);
               return (
                 <li
@@ -748,6 +1009,22 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
               Still to upload: {missing.map((docType) => DOCUMENT_LABELS[docType]).join(", ")}.
             </p>
           ) : null}
+        </Section>
+
+        <Section
+          title="Communication preferences"
+          description="The portal communicates by email today. Note here how you would like to be reached otherwise."
+        >
+          <Field label="Preferences" htmlFor="communicationNotes">
+            <TextArea
+              id="communicationNotes"
+              rows={3}
+              value={form.communicationNotes}
+              onChange={(v) => set("communicationNotes", v)}
+              placeholder="e.g. Email the site office, copy the proprietor on quotes."
+              disabled={readOnly}
+            />
+          </Field>
         </Section>
 
         <Section title="Declaration">
@@ -831,6 +1108,50 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
         </div>
       </div>
     </Shell>
+  );
+}
+
+/**
+ * The state dropdown for the structured address (brief 5.1). Sits on the same
+ * reference-data query as operating regions, so both stay consistent and the
+ * fetch happens once.
+ */
+function StateSelect({
+  value,
+  onChange,
+  disabled,
+  error,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  error?: string;
+}) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["onboarding", "reference-data"],
+    queryFn: () => api<{ states: { code: string; name: string }[] }>("/onboarding/reference-data", { anonymous: true }),
+  });
+
+  const states = data?.states ?? [];
+
+  return (
+    <Field
+      label="State"
+      htmlFor="stateCode"
+      required
+      error={error}
+      hint={isLoading ? "Loading states" : undefined}
+    >
+      <Select
+        id="stateCode"
+        value={value}
+        onChange={onChange}
+        options={states.map((s) => ({ value: s.code, label: s.name }))}
+        placeholder="Select"
+        disabled={disabled || isLoading || states.length === 0}
+        invalid={Boolean(error)}
+      />
+    </Field>
   );
 }
 
@@ -944,7 +1265,7 @@ function removeContact(setContacts: ContactsUpdater, index: number) {
 function addContact(setContacts: ContactsUpdater) {
   setContacts((contacts) => [
     ...contacts,
-    { name: "", mobile: "", telephone: "", email: "", isPrimary: false },
+    { name: "", mobile: "", telephone: "", email: "", isPrimary: false, receivesRfqs: false },
   ]);
 }
 

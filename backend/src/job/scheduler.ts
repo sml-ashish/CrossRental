@@ -9,9 +9,8 @@ import cron, { ScheduledTask } from "node-cron";
  * rows currently in the right state — because the cron expression and a
  * manual run can overlap.
  *
- * Planned, by milestone:
- *   M3  crane stale-data reminders
- *   M4  RFQ deadline expiry, automatic pre-deadline reminders
+ * The defaults M7 wires up live in `registerJobs.ts`: stale-fleet reminders,
+ * RFQ pre-deadline reminders and the RFQ expiry sweep.
  */
 
 export interface JobDefinition {

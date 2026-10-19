@@ -12,7 +12,7 @@ import {
 } from "@/lib/rfqs";
 import { fetchReferenceData } from "@/lib/fleet";
 import { Alert } from "@/components/ui/alert";
-import { Field, Section, Select, TextArea, TextInput } from "@/components/ui/form";
+import { Checkbox, Field, Section, Select, TextArea, TextInput } from "@/components/ui/form";
 import { Spinner } from "@/components/ui/spinner";
 
 /**
@@ -191,6 +191,23 @@ export function RfqFormPage() {
                 invalid={Boolean(fieldErrors.capacityT)}
               />
             </Field>
+            <Field
+              label="Capacity rule"
+              htmlFor="rfq-capacity-rule"
+              hint='Exact only offers cranes of exactly this tonnage; the default admits bigger ones.'
+            >
+              <Select
+                id="rfq-capacity-rule"
+                value={form.capacityRule}
+                onChange={(v) => set("capacityRule", v as RfqForm["capacityRule"])}
+                options={[
+                  { value: "AT_LEAST", label: "At least" },
+                  { value: "EXACT", label: "Exactly" },
+                ]}
+                placeholder="At least"
+                disabled={locked}
+              />
+            </Field>
             <Field label="Quantity" htmlFor="rfq-quantity" required error={fieldErrors.quantity}>
               <TextInput
                 id="rfq-quantity"
@@ -202,6 +219,74 @@ export function RfqFormPage() {
               />
             </Field>
           </div>
+          <Field
+            label="Capacity note"
+            htmlFor="rfq-capacity-note"
+            hint="Context for the capacity choice — matching still keys on tonnes."
+          >
+            <TextInput
+              id="rfq-capacity-note"
+              value={form.capacityNote}
+              onChange={(v) => set("capacityNote", v)}
+              disabled={locked}
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Main boom required (m)"
+              htmlFor="rfq-main-boom"
+              error={fieldErrors.mainBoomM}
+            >
+              <TextInput
+                id="rfq-main-boom"
+                value={form.mainBoomM}
+                onChange={(v) => set("mainBoomM", v)}
+                inputMode="decimal"
+                disabled={locked}
+                invalid={Boolean(fieldErrors.mainBoomM)}
+              />
+            </Field>
+            <Field
+              label="Jib length required (m)"
+              htmlFor="rfq-jib"
+              error={fieldErrors.jibLengthM}
+            >
+              <TextInput
+                id="rfq-jib"
+                value={form.jibLengthM}
+                onChange={(v) => set("jibLengthM", v)}
+                inputMode="decimal"
+                disabled={locked}
+                invalid={Boolean(fieldErrors.jibLengthM)}
+              />
+            </Field>
+          </div>
+          <Field
+            label="Application"
+            htmlFor="rfq-application"
+            hint="What the crane is there to do, shown to vendors verbatim."
+          >
+            <TextArea
+              id="rfq-application"
+              value={form.applicationDescription}
+              onChange={(v) => set("applicationDescription", v)}
+              disabled={locked}
+              placeholder="Erecting a 60 m lattice tower at the plant's new furnace line"
+            />
+          </Field>
+          <Field
+            label="Load details"
+            htmlFor="rfq-load"
+            hint="What it will lift, shown to vendors verbatim."
+          >
+            <TextArea
+              id="rfq-load"
+              value={form.loadDescription}
+              onChange={(v) => set("loadDescription", v)}
+              disabled={locked}
+              placeholder="Base section, 40 t at 20 m radius"
+            />
+          </Field>
           <Field
             label="Configuration"
             htmlFor="rfq-configuration"
@@ -295,11 +380,25 @@ export function RfqFormPage() {
         </Section>
 
         <Section title="Deployment">
+          <Checkbox
+            id="rfq-start-tbc"
+            checked={form.startDateTbc}
+            disabled={locked}
+            onChange={(checked) => set("startDateTbc", checked)}
+            label={
+              <span className="whitespace-nowrap">
+                Start date to be confirmed
+                <span className="block text-xs font-normal text-slate-500">
+                  Vendors are not asked to confirm availability; they are told why.
+                </span>
+              </span>
+            }
+          />
           <div className="grid gap-4 sm:grid-cols-3">
             <Field
               label="Required start date"
               htmlFor="rfq-start"
-              required
+              required={!form.startDateTbc}
               error={fieldErrors.requiredStartDate}
             >
               <TextInput
@@ -334,6 +433,23 @@ export function RfqFormPage() {
                 disabled={locked}
               />
             </Field>
+            {form.durationUnit === "MONTHS" ? (
+              <Field
+                label="Working days per month"
+                htmlFor="rfq-working-days"
+                error={fieldErrors.workingDaysPerMonth}
+                hint="Used to convert the duration into days when the day basis is set to working days."
+              >
+                <TextInput
+                  id="rfq-working-days"
+                  value={form.workingDaysPerMonth}
+                  onChange={(v) => set("workingDaysPerMonth", v)}
+                  inputMode="numeric"
+                  disabled={locked}
+                  invalid={Boolean(fieldErrors.workingDaysPerMonth)}
+                />
+              </Field>
+            ) : null}
           </div>
           <Field
             label="Submission deadline"
@@ -427,7 +543,60 @@ export function RfqFormPage() {
                 placeholder="30 days from invoice"
               />
             </Field>
+            <Field label="Support crane" htmlFor="rfq-support-crane">
+              <TextInput
+                id="rfq-support-crane"
+                value={form.supportCrane}
+                onChange={(v) => set("supportCrane", v)}
+                disabled={locked}
+                placeholder="Not in scope"
+              />
+            </Field>
+            <Field label="Steel mats & ground prep" htmlFor="rfq-steel-mats">
+              <TextInput
+                id="rfq-steel-mats"
+                value={form.steelMatsGroundPrep}
+                onChange={(v) => set("steelMatsGroundPrep", v)}
+                disabled={locked}
+                placeholder="To vendor"
+              />
+            </Field>
+            <Field label="EHS / HR requirements" htmlFor="rfq-ehs">
+              <TextInput
+                id="rfq-ehs"
+                value={form.ehsHrRequirements}
+                onChange={(v) => set("ehsHrRequirements", v)}
+                disabled={locked}
+                placeholder="As per site rules"
+              />
+            </Field>
+            <Field label="Insurance" htmlFor="rfq-insurance">
+              <TextInput
+                id="rfq-insurance"
+                value={form.insuranceTerms}
+                onChange={(v) => set("insuranceTerms", v)}
+                disabled={locked}
+                placeholder="To vendor"
+              />
+            </Field>
+            <Field label="Extension clause" htmlFor="rfq-extension">
+              <TextInput
+                id="rfq-extension"
+                value={form.extensionClause}
+                onChange={(v) => set("extensionClause", v)}
+                disabled={locked}
+                placeholder="As per agreement"
+              />
+            </Field>
           </div>
+          <Field label="Mobilisation & demobilisation" htmlFor="rfq-mobilisation">
+            <TextArea
+              id="rfq-mobilisation"
+              value={form.mobilisationTerms}
+              onChange={(v) => set("mobilisationTerms", v)}
+              disabled={locked}
+            />
+          </Field>
           <Field label="Notes" htmlFor="rfq-notes">
             <TextArea
               id="rfq-notes"

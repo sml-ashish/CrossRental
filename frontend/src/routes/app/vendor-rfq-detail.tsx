@@ -5,6 +5,7 @@ import { AlertTriangle, History, Paperclip, Send, Undo2, XCircle } from "lucide-
 import {
   RATE_BASIS_LABELS,
   declineRfq,
+  extraTermRows,
   formatInr,
   getVendorRfq,
   listQuotationHistory,
@@ -18,7 +19,16 @@ import {
   type VendorRfqDetail,
 } from "@/lib/quotations";
 import { ApiError } from "@/lib/api";
-import { listCranes, type Crane } from "@/lib/fleet";
+import {
+  createCrane,
+  CRANE_STATUS_LABELS,
+  EMPTY_CRANE_FORM,
+  fetchReferenceData,
+  listCranes,
+  VENDOR_STATUSES,
+  type Crane,
+  type CraneForm,
+} from "@/lib/fleet";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Checkbox, Field, ReadOnlyValue, Section, Select, TextArea, TextInput } from "@/components/ui/form";
@@ -54,6 +64,8 @@ const EMPTY_FORM = {
   rentalRate: "",
   rateBasis: "PER_MONTH",
   mobilisationCharges: "",
+  demobilisationCharges: "",
+  taxBasis: "EXCLUSIVE_OF_GST",
   availabilityConfirmed: false,
   availableFrom: "",
   validityDate: "",
@@ -125,9 +137,13 @@ export function VendorRfqDetailPage() {
         <DeclinePanel rfqId={rfqId} />
       ) : null}
 
-      {response.responseStatus === "DECLINED" && response.declineReason ? (
+      {response.responseStatus === "DECLINED" &&
+      (response.declineReason || response.declineNote) ? (
         <Alert tone="info" title="You declined this RFQ">
-          {response.declineNote ? `${response.declineReason} — ${response.declineNote}` : response.declineReason}
+          {response.declineReason ? <p>{response.declineReason}</p> : null}
+          {response.declineNote ? (
+            <p className="mt-0.5 whitespace-pre-line text-slate-600">{response.declineNote}</p>
+          ) : null}
         </Alert>
       ) : null}
 
@@ -190,7 +206,7 @@ function DeadlineBanner({
           : "emerald";
 
   const message = locked
-    ? "This RFQ is closed. You can still read it and your quotes remain on record."
+    ? "This RFQ is finalised. You can still read it and your quotes remain on record."
     : responseStatus === "QUOTED"
       ? "Quote received. You can revise it until the deadline."
       : responseStatus === "DECLINED"
@@ -212,15 +228,24 @@ function DeadlineBanner({
 
 function RequirementCard({ rfq }: { rfq: VendorRfqDetail["rfq"] }) {
   const terms = rfq.commercialTerms;
-  const hasTerms = Object.values(terms).some((value) => value);
+  const extraRows = extraTermRows(terms.extra);
+  const hasTerms =
+    Object.entries(terms).some(([key, value]) => key !== "extra" && value) ||
+    extraRows.length > 0;
 
   return (
     <Section title="Requirement" description="As SML issued it. These fields are not editable.">
       <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <ReadOnlyValue label="Crane type" value={rfq.craneTypeName} />
-        <ReadOnlyValue label="Capacity" value={`${rfq.capacityT} t`} />
+        <ReadOnlyValue
+          label="Capacity"
+          value={`${rfq.capacityT} t${rfq.capacityRule === "EXACT" ? " (exact)" : " (at least)"}`}
+        />
         <ReadOnlyValue label="Quantity" value={String(rfq.quantity)} />
-        <ReadOnlyValue label="Required start" value={formatCalendarDate(rfq.requiredStartDate)} />
+        <ReadOnlyValue
+          label="Required start"
+          value={rfq.startDateTbc ? "To be confirmed" : formatCalendarDate(rfq.requiredStartDate)}
+        />
         <ReadOnlyValue
           label="Duration"
           value={`${rfq.durationValue} ${rfq.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}`}
@@ -228,6 +253,21 @@ function RequirementCard({ rfq }: { rfq: VendorRfqDetail["rfq"] }) {
         <ReadOnlyValue label="Configuration" value={rfq.configuration ?? "—"} />
         <ReadOnlyValue label="Site" value={`${rfq.siteLocation}, ${rfq.siteStateName}`} />
         <ReadOnlyValue label="PIN code" value={rfq.sitePincode ?? "—"} mono />
+        {rfq.capacityNote ? (
+          <ReadOnlyValue label="Capacity note" value={rfq.capacityNote} />
+        ) : null}
+        {rfq.applicationDescription ? (
+          <ReadOnlyValue label="Application" value={rfq.applicationDescription} />
+        ) : null}
+        {rfq.loadDescription ? (
+          <ReadOnlyValue label="Load details" value={rfq.loadDescription} />
+        ) : null}
+        {rfq.mainBoomM !== null ? (
+          <ReadOnlyValue label="Main boom required" value={`${rfq.mainBoomM} m`} />
+        ) : null}
+        {rfq.jibLengthM !== null ? (
+          <ReadOnlyValue label="Jib length required" value={`${rfq.jibLengthM} m`} />
+        ) : null}
       </dl>
 
       {rfq.notes ? (
@@ -249,7 +289,25 @@ function RequirementCard({ rfq }: { rfq: VendorRfqDetail["rfq"] }) {
               <ReadOnlyValue label="Accommodation / conveyance" value={terms.accommodationConveyance} />
             ) : null}
             {terms.paymentTerms ? <ReadOnlyValue label="Payment terms" value={terms.paymentTerms} /> : null}
-            {terms.extra ? <ReadOnlyValue label="Other" value={terms.extra} /> : null}
+            {terms.mobilisationTerms ? (
+              <ReadOnlyValue label="Mobilisation / demobilisation" value={terms.mobilisationTerms} />
+            ) : null}
+            {terms.supportCrane ? <ReadOnlyValue label="Support crane" value={terms.supportCrane} /> : null}
+            {terms.steelMatsGroundPrep ? (
+              <ReadOnlyValue label="Steel mats / ground prep" value={terms.steelMatsGroundPrep} />
+            ) : null}
+            {terms.ehsHrRequirements ? (
+              <ReadOnlyValue label="EHS / HR" value={terms.ehsHrRequirements} />
+            ) : null}
+            {terms.insuranceTerms ? (
+              <ReadOnlyValue label="Insurance" value={terms.insuranceTerms} />
+            ) : null}
+            {terms.extensionClause ? (
+              <ReadOnlyValue label="Extension clause" value={terms.extensionClause} />
+            ) : null}
+            {extraRows.map((row) => (
+              <ReadOnlyValue key={row.key} label={row.label} value={row.value} />
+            ))}
           </dl>
         </div>
       ) : null}
@@ -299,7 +357,10 @@ function DeclinePanel({ rfqId }: { rfqId: string }) {
   }
 
   return (
-    <Section title="Decline this RFQ" description="The reason is shared with the SML user who issued it.">
+    <Section
+      title="Decline this RFQ"
+      description="The reason is shared with the SML user who issued it. If this crane is not available, please use the note to list other cranes you can offer — with make, model, capacity, YOM, type and location — or contacts of other agencies who have the equipment."
+    >
       {decline.error ? <Alert>{(decline.error as ApiError).message}</Alert> : null}
       <Field
         label="Reason"
@@ -323,8 +384,18 @@ function DeclinePanel({ rfqId }: { rfqId: string }) {
           ))}
         </datalist>
       </Field>
-      <Field label="Note (optional)" htmlFor="decline-note">
-        <TextArea id="decline-note" value={note} onChange={setNote} rows={2} />
+      <Field
+        label="Note (optional)"
+        htmlFor="decline-note"
+        hint="What else you can offer: other cranes in your fleet, or contacts of agencies who have this equipment."
+      >
+        <TextArea
+          id="decline-note"
+          value={note}
+          onChange={setNote}
+          rows={3}
+          placeholder="e.g. We can offer a 250 t crawler (Liebherr LTM 1250, 2019) from Pune, or contact XYZ Cranes on 98xxxxxx21."
+        />
       </Field>
       <div className="flex gap-2">
         <button
@@ -504,6 +575,11 @@ function QuotationCard({
           value={`${formatInr(quotation.rentalRate)} ${RATE_BASIS_LABELS[quotation.rateBasis].toLowerCase()}`}
         />
         <ReadOnlyValue label="Mobilisation" value={formatInr(quotation.mobilisationCharges)} />
+        <ReadOnlyValue label="Demobilisation" value={formatInr(quotation.demobilisationCharges)} />
+        <ReadOnlyValue
+          label="Tax basis"
+          value={quotation.taxBasis === "INCLUSIVE_OF_GST" ? "Inclusive of GST" : "Exclusive of GST"}
+        />
         <ReadOnlyValue label="Valid until" value={formatCalendarDate(quotation.validityDate)} />
         <ReadOnlyValue
           label="Distance"
@@ -579,6 +655,8 @@ function RevisePanel({
     rentalRate: String(quotation.rentalRate),
     rateBasis: quotation.rateBasis,
     mobilisationCharges: String(quotation.mobilisationCharges),
+    demobilisationCharges: String(quotation.demobilisationCharges ?? ""),
+    taxBasis: quotation.taxBasis ?? "EXCLUSIVE_OF_GST",
     availabilityConfirmed: quotation.availabilityConfirmed,
     availableFrom: quotation.availableFrom ?? "",
     validityDate: quotation.validityDate,
@@ -654,6 +732,7 @@ function QuoteForm({
 }) {
   const [chart, setChart] = useState<File | null>(null);
   const [warningsAcknowledged, setWarningsAcknowledged] = useState(false);
+  const [addingCrane, setAddingCrane] = useState(false);
   const error = mutation.error as ApiError | null;
 
   // The backend owns the arithmetic (brief 6.4), so the live figure comes from
@@ -736,7 +815,28 @@ function QuoteForm({
           options={craneOptions(cranes, lockedCraneFallback)}
           placeholder={cranesLoading ? "Loading your cranes…" : "Select a crane"}
         />
+        {!craneLocked ? (
+          <div className="mt-2">
+            <button
+              type="button"
+              className="text-xs font-medium text-blue-700 underline underline-offset-2"
+              onClick={() => setAddingCrane((open) => !open)}
+            >
+              {addingCrane ? "Hide the add-crane form" : "Crane not in your fleet? Add it here"}
+            </button>
+          </div>
+        ) : null}
       </Field>
+
+      {addingCrane && !craneLocked ? (
+        <InlineCraneAdd
+          onCancel={() => setAddingCrane(false)}
+          onCreated={(craneId) => {
+            set("craneId", craneId);
+            setAddingCrane(false);
+          }}
+        />
+      ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Rental rate" htmlFor="quote-rate" required error={error?.fieldError("rentalRate")}>
@@ -774,6 +874,32 @@ function QuoteForm({
             inputMode="decimal"
             placeholder="0.00"
             invalid={Boolean(error?.fieldError("mobilisationCharges"))}
+          />
+        </Field>
+        <Field
+          label="Demobilisation charges"
+          htmlFor="quote-demob"
+          hint="Return transport. Added to the total beside mobilisation."
+          error={error?.fieldError("demobilisationCharges")}
+        >
+          <TextInput
+            id="quote-demob"
+            value={form.demobilisationCharges}
+            onChange={(value) => set("demobilisationCharges", value)}
+            inputMode="decimal"
+            placeholder="0.00"
+            invalid={Boolean(error?.fieldError("demobilisationCharges"))}
+          />
+        </Field>
+        <Field label="Tax basis" htmlFor="quote-tax" hint="A declaration for comparing quotes; it does not change the total.">
+          <Select
+            id="quote-tax"
+            value={form.taxBasis}
+            onChange={(value) => set("taxBasis", value as FormState["taxBasis"])}
+            options={[
+              { value: "EXCLUSIVE_OF_GST", label: "Exclusive of GST" },
+              { value: "INCLUSIVE_OF_GST", label: "Inclusive of GST" },
+            ]}
           />
         </Field>
         <Field label="Quote valid until" htmlFor="quote-validity" required error={error?.fieldError("validityDate")}>
@@ -919,6 +1045,158 @@ function QuoteForm({
   );
 }
 
+/**
+ * Brief D2: add a crane without leaving the quotation. It is deliberately a
+ * subset of the fleet form — only the fields a quote cannot proceed without
+ * (brief 5.2's mandatory set). Anything else is finished later on My Fleet,
+ * because a vendor mid-quote should not be made to run the whole screen.
+ *
+ * It posts through the same `createCrane` endpoint as My Fleet, so the duplicate
+ * rule, the coordinates and the status rules are enforced in exactly one place.
+ */
+function InlineCraneAdd({
+  onCreated,
+  onCancel,
+}: {
+  onCreated: (craneId: string) => void;
+  onCancel: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState<CraneForm>({ ...EMPTY_CRANE_FORM });
+  const [availableFrom, setAvailableFrom] = useState("");
+  const reference = useQuery({
+    queryKey: ["fleet", "reference-data"],
+    queryFn: fetchReferenceData,
+    staleTime: 5 * 60_000,
+  });
+
+  const create = useMutation({
+    mutationFn: () =>
+      createCrane(form, {
+        availableFrom: form.currentStatus === "ENGAGED" ? availableFrom : null,
+      }),
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ["cranes"] });
+      onCreated(result.crane.id);
+    },
+  });
+
+  const error = create.error as ApiError | null;
+  const set = <K extends keyof CraneForm>(key: K, value: CraneForm[K]) =>
+    setForm((previous) => ({ ...previous, [key]: value }));
+
+  const craneTypes = (reference.data?.craneTypes ?? []).map((c) => ({ value: c.code, label: c.name }));
+  const states = (reference.data?.states ?? []).map((s) => ({ value: s.code, label: s.name }));
+  const engaged = form.currentStatus === "ENGAGED";
+
+  return (
+    <div className="rounded-md border border-blue-200 bg-blue-50/40 p-4">
+      <p className="text-sm font-medium text-slate-900">Add a crane to your fleet</p>
+      <p className="mt-0.5 text-xs text-slate-500">
+        The essentials. You can complete the rest — boom and jib lengths, map pin, load chart — on My
+        Fleet afterwards.
+      </p>
+
+      {error ? <Alert title="Could not add this crane">{error.message}</Alert> : null}
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Field label="Type of crane" htmlFor="inline-type" required error={error?.fieldError("typeOfCraneCode")}>
+          <Select
+            id="inline-type"
+            value={form.typeOfCraneCode}
+            onChange={(value) => set("typeOfCraneCode", value)}
+            options={craneTypes}
+            placeholder="Select a type"
+            invalid={Boolean(error?.fieldError("typeOfCraneCode"))}
+          />
+        </Field>
+        <Field label="Capacity (t)" htmlFor="inline-capacity" required error={error?.fieldError("capacityT")}>
+          <TextInput
+            id="inline-capacity"
+            value={form.capacityT}
+            onChange={(value) => set("capacityT", value)}
+            inputMode="numeric"
+            invalid={Boolean(error?.fieldError("capacityT"))}
+          />
+        </Field>
+        <Field label="Make" htmlFor="inline-make" required error={error?.fieldError("make")}>
+          <TextInput id="inline-make" value={form.make} onChange={(value) => set("make", value)} invalid={Boolean(error?.fieldError("make"))} />
+        </Field>
+        <Field label="Model" htmlFor="inline-model" required error={error?.fieldError("model")}>
+          <TextInput id="inline-model" value={form.model} onChange={(value) => set("model", value)} invalid={Boolean(error?.fieldError("model"))} />
+        </Field>
+        <Field label="Year of manufacture" htmlFor="inline-yom" required error={error?.fieldError("yom")} hint="Four digits.">
+          <TextInput id="inline-yom" value={form.yom} onChange={(value) => set("yom", value)} inputMode="numeric" placeholder="2021" invalid={Boolean(error?.fieldError("yom"))} />
+        </Field>
+        <Field label="Main boom (m)" htmlFor="inline-boom" required error={error?.fieldError("mainBoomM")}>
+          <TextInput id="inline-boom" value={form.mainBoomM} onChange={(value) => set("mainBoomM", value)} inputMode="numeric" invalid={Boolean(error?.fieldError("mainBoomM"))} />
+        </Field>
+        <Field
+          label="Serial / registration number"
+          htmlFor="inline-serial"
+          required
+          error={error?.fieldError("serialRegistrationNo")}
+          hint="Unique among your active cranes."
+        >
+          <TextInput id="inline-serial" value={form.serialRegistrationNo} onChange={(value) => set("serialRegistrationNo", value)} invalid={Boolean(error?.fieldError("serialRegistrationNo"))} />
+        </Field>
+        <Field label="Status" htmlFor="inline-status" required>
+          <Select
+            id="inline-status"
+            value={form.currentStatus}
+            onChange={(value) => set("currentStatus", value)}
+            options={VENDOR_STATUSES.map((status) => ({ value: status, label: CRANE_STATUS_LABELS[status] }))}
+          />
+        </Field>
+        <Field label="Current location" htmlFor="inline-location" required error={error?.fieldError("currentLocation")} className="sm:col-span-2">
+          <TextInput id="inline-location" value={form.currentLocation} onChange={(value) => set("currentLocation", value)} placeholder="e.g. Ahmedabad Yard" invalid={Boolean(error?.fieldError("currentLocation"))} />
+        </Field>
+        <Field label="State" htmlFor="inline-state" required error={error?.fieldError("stateCode")}>
+          <Select
+            id="inline-state"
+            value={form.stateCode}
+            onChange={(value) => set("stateCode", value)}
+            options={states}
+            placeholder="Select a state"
+            invalid={Boolean(error?.fieldError("stateCode"))}
+          />
+        </Field>
+        {engaged ? (
+          <Field
+            label="Available from"
+            htmlFor="inline-available-from"
+            required
+            error={error?.fieldError("availableFrom")}
+            hint="Today or later."
+          >
+            <TextInput
+              id="inline-available-from"
+              type="date"
+              value={availableFrom}
+              onChange={setAvailableFrom}
+              invalid={Boolean(error?.fieldError("availableFrom"))}
+            />
+          </Field>
+        ) : null}
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <button
+          type="button"
+          className="btn-primary px-4 py-2 text-sm"
+          disabled={create.isPending}
+          onClick={() => create.mutate()}
+        >
+          {create.isPending ? "Adding…" : "Add crane and use it"}
+        </button>
+        <button type="button" className="btn-secondary px-4 py-2 text-sm" onClick={onCancel} disabled={create.isPending}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function PreviewPanel({ preview, loading }: { preview?: QuotationPreview; loading: boolean }) {
   if (!preview) {
     return (
@@ -937,6 +1215,7 @@ function PreviewPanel({ preview, loading }: { preview?: QuotationPreview; loadin
       <dl className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
         <ReadOnlyValue label="Rental charge" value={formatInr(preview.rentalCharge)} />
         <ReadOnlyValue label="Mobilisation" value={formatInr(preview.mobilisationCharges)} />
+        <ReadOnlyValue label="Demobilisation" value={formatInr(preview.demobilisationCharges)} />
         <ReadOnlyValue
           label="Distance"
           value={
@@ -1071,6 +1350,8 @@ function toInput(form: FormState): QuoteInput {
     rentalRate: form.rentalRate,
     rateBasis: form.rateBasis as QuoteInput["rateBasis"],
     mobilisationCharges: form.mobilisationCharges || 0,
+    demobilisationCharges: form.demobilisationCharges || 0,
+    taxBasis: (form.taxBasis as QuoteInput["taxBasis"]) ?? "EXCLUSIVE_OF_GST",
     availabilityConfirmed: form.availabilityConfirmed,
     availableFrom: form.availableFrom || null,
     validityDate: form.validityDate,

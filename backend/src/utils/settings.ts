@@ -14,9 +14,17 @@ export const SETTING_KEYS = [
   "STALE_FLAG_DAYS",
   "STALE_REMINDER_REPEAT_DAYS",
   "RFQ_REMINDER_LEAD_HOURS",
+  "RFQ_REMINDER_MIN_WINDOW_HOURS",
+  "RATE_DAY_BASIS",
+  // P3: how the comparison screen ranks comparable quotations. Open item 5's
+  // working assumption is total estimated cost ascending; kept configurable.
+  "QUOTE_RANK_RULE",
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];
+
+export type RateDayBasis = "CALENDAR_DAYS" | "WORKING_DAYS_PER_MONTH";
+export type QuoteRankRule = "TOTAL_ESTIMATED_COST";
 
 export interface PortalSettings {
   fleetApprovalRequired: boolean;
@@ -24,6 +32,9 @@ export interface PortalSettings {
   staleFlagDays: number;
   staleReminderRepeatDays: number;
   rfqReminderLeadHours: number;
+  rfqReminderMinWindowHours: number;
+  rateDayBasis: RateDayBasis;
+  quoteRankRule: QuoteRankRule;
 }
 
 const FALLBACK: PortalSettings = {
@@ -32,6 +43,15 @@ const FALLBACK: PortalSettings = {
   staleFlagDays: env.defaultSettings.STALE_FLAG_DAYS,
   staleReminderRepeatDays: env.defaultSettings.STALE_REMINDER_REPEAT_DAYS,
   rfqReminderLeadHours: env.defaultSettings.RFQ_REMINDER_LEAD_HOURS,
+  rfqReminderMinWindowHours: env.defaultSettings.RFQ_REMINDER_MIN_WINDOW_HOURS,
+  rateDayBasis:
+    env.defaultSettings.RATE_DAY_BASIS === "WORKING_DAYS_PER_MONTH"
+      ? "WORKING_DAYS_PER_MONTH"
+      : "CALENDAR_DAYS",
+  quoteRankRule:
+    env.defaultSettings.QUOTE_RANK_RULE === "TOTAL_ESTIMATED_COST"
+      ? "TOTAL_ESTIMATED_COST"
+      : "TOTAL_ESTIMATED_COST",
 };
 
 let cache: { value: PortalSettings; loadedAt: number } | null = null;
@@ -70,6 +90,20 @@ export async function getSettings(): Promise<PortalSettings> {
       map.get("RFQ_REMINDER_LEAD_HOURS") ?? "",
       FALLBACK.rfqReminderLeadHours,
     ),
+    rfqReminderMinWindowHours: parseNumber(
+      map.get("RFQ_REMINDER_MIN_WINDOW_HOURS") ?? "",
+      FALLBACK.rfqReminderMinWindowHours,
+    ),
+    rateDayBasis:
+      map.get("RATE_DAY_BASIS") === "WORKING_DAYS_PER_MONTH"
+        ? "WORKING_DAYS_PER_MONTH"
+        : map.get("RATE_DAY_BASIS") === "CALENDAR_DAYS"
+          ? "CALENDAR_DAYS"
+          : FALLBACK.rateDayBasis,
+    quoteRankRule:
+      map.get("QUOTE_RANK_RULE") === "TOTAL_ESTIMATED_COST"
+        ? "TOTAL_ESTIMATED_COST"
+        : FALLBACK.quoteRankRule,
   };
 
   cache = { value, loadedAt: Date.now() };

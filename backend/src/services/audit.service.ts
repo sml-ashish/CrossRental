@@ -56,6 +56,8 @@ export interface AuditInput {
   craneId?: string;
   ipAddress?: string;
   actor?: AuthedRequest["user"] | null;
+  /** Brief D1: an SML user made this change for the vendor. */
+  onBehalfOfVendor?: boolean;
 }
 
 /**
@@ -76,6 +78,7 @@ export async function recordAudit(input: AuditInput): Promise<void> {
         actorRole: input.actor?.role ?? null,
         actorName: input.actor?.email ?? null,
         ipAddress: input.ipAddress ?? null,
+        onBehalfOfVendor: input.onBehalfOfVendor ?? false,
       },
     });
   } catch (err) {

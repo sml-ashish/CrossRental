@@ -116,15 +116,22 @@ Replaces the paper registration form. The flow, end to end:
 
 1. An admin or sales user opens **Vendor Onboarding** and sends an invitation.
    The email carries a link to `/onboarding/start?token=…`.
-2. The vendor opens the link and fills the form in sections — Company, Contact
-   persons, Registration, Bank, Fleet summary, Declaration — saving as they go.
-   No account is needed; the token in the link is the credential.
-3. They upload a cancelled cheque, a GST certificate and a PAN copy, then submit.
+2. The vendor opens the link and fills the form in sections — Company (with a
+   structured address and the SML states), Contact persons, Registration (GST,
+   MSME and TDS blocks asked conditionally, as the paper form does), Bank,
+   Fleet summary, Declaration — saving as they go. No account is needed; the
+   token in the link is the credential.
+3. They upload a cancelled cheque, a PAN copy and a scan of the signed
+   declaration page — plus a GST certificate when they are GST-registered —
+   then submit.
 4. The vendor appears in the approval queue. An admin checks the detail view,
    fills the office-use block and approves or rejects.
 5. **Approval is what creates the login.** The vendor is emailed an activation
    link; before that they cannot sign in, and rejection returns the form to them
    for correction with the admin's remarks.
+6. Cross-field checks run at submit: the PAN's 4th letter must match the nature
+   of the company (C company, F partnership, P proprietorship), the GSTIN must
+   embed the PAN, and unregistered vendors must leave the GST block empty.
 
 To try it without sending mail, send an invitation as the admin, then copy the
 link shown under the form — it is displayed once, because only a hash of the
@@ -257,11 +264,18 @@ once routing starts working, with nothing in the data to tell the two apart.
 
 ### Deadlines and expiry
 
-Extending a deadline notifies recipients who are still `Pending` and does not
-revive one already `Expired` — `Expired` is a status the vendor has been shown, so
-rewriting it would contradict their own view. The automatic sweeps (reminders and
-the expiry pass) are M7; M4 ships both as callable functions plus
-`POST /api/rfqs/expire-pending` so the rules can be run by hand today.
+Extending a deadline notifies recipients who are still `Pending` and *revives*
+those the expiry sweep sent to `Expired` back to `Pending` (brief C1) — the sweep
+only ever expires recipients who never responded, so a later deadline hands them
+their window back instead of dead-lettering them over a date sales has since
+moved. A recipient who declined stays declined, and one who quoted stays quoted.
+The automatic reminder fires inside the smaller of the configured lead time and
+half the RFQ's send-to-deadline window, and is suppressed entirely when that
+window is shorter than `RFQ_REMINDER_MIN_WINDOW_HOURS` (default 4) — a vendor
+handed a two-hour window needs no nudge (brief C2). The automatic sweeps
+(reminders and the expiry pass) arrived with M7 and now run on cron timers; M4
+also ships both as callable functions plus `POST /api/rfqs/expire-pending` so
+the rules can be run by hand.
 
 ### Trying it
 
@@ -375,17 +389,119 @@ Two things are **not** built, on purpose:
   say, a written mobilisation quote is **an open question for the brief's owner**,
   not a decision taken here.
 
+## Award, dashboard and reminders (M7)
+
+### Awarding a quotation (brief 6.7)
+
+When SML decides, an admin marks one quotation the winner:
+
+```
+POST /api/rfqs/:rfqId/quotations/:quotationId/award     (admin only)
+```
+
+One act, in a transaction: the selected quotation becomes `SELECTED` and the
+winning crane gets a dated **`BOOKED` reservation** (brief 5.3/6.1 — the booking
+is a reservation now, not a status flag; Booked/Hired are derived from it). The
+window comes from the RFQ's start date and duration, or from the explicit dates
+the admin enters when the start date is TBC. On the award that reaches the RFQ's
+`quantity`, every other **live** quotation becomes `NOT_AWARDED` (superseded and
+withdrawn versions are left alone — their vendor already knows that state and
+rewriting it would contradict the history) and the RFQ is finalised.
+`quotation_awarded` goes to the winner — with the reserved period — and
+`quotation_not_awarded` to everyone passed over, each with the optional free-text
+reason the admin typed, rendered through the same escaping as every other free
+text in mail.
+
+Only the latest + `SUBMITTED` quotation on an RFQ that is still open is
+awardable, and a crane that is Under Maintenance or already has an overlapping
+active reservation cannot be booked again. A quantity-2 RFQ is awarded in two
+steps: the first is partial and leaves the other quotations open. The award is
+audited.
+
+On the screen it is an **Award** button in the RFQ detail's quotation table,
+admin-only, with a confirm step that names what it will do. Once the quantity is
+reached the RFQ reads finalised and the vendors covered.
+
+### The vendor dashboard (brief 7.5)
+
+**Dashboard** is the vendor's landing screen after sign-in. One read
+(`GET /api/vendor/dashboard`) returns counters and, because a counter is only
+useful if it leads somewhere, the rows behind it:
+
+- **Fleet counters** — active cranes, how many need a status update, how many
+  are Booked or Hired (bookings are SML's doing; the vendor sees, cannot set).
+- **Cranes due for an update** — the `statusUpdatedAt` staleness window from
+  `app_settings`, each row linking into the crane's edit screen.
+- **The RFQ side** — open, awaiting-your-quote, awarded and not-awarded counts,
+  with the ten nearest-deadline RFQs listed, overdue rows colored red at the top
+  rather than hidden.
+- **Quotation counters** — series submitted (a version rollout counts once),
+  awarded and not awarded.
+
+### The reminder sweeps (brief 6.5)
+
+Three schedules registered at boot in `job/registerJobs.ts`:
+
+| Job | Cadence | What |
+| --- | ------- | ---- |
+| stale-fleet-reminders | daily | Cranes past the staleness window get one email to the vendor's addresses. Silence within the repeat window: the same crane is not nagged daily, checked against `EmailLog`. |
+| rfq-reminders | hourly | RFQs whose deadline is inside the lead hours (default 24) email every still-`PENDING` recipient. At most one automated reminder per day per vendor, bumped on the recipient row. |
+| rfq-expiry | hourly | The same expiry sweep `POST /rfqs/expire-pending` runs by hand: past-deadline `PENDING` recipients become `EXPIRED`. |
+
+Thresholds are `app_settings` keys, adjustable without a deploy.
+`RFQ_REMINDER_LEAD_HOURS` widens the sprint `STALE_DUE_DAYS` etc.; the same
+cadence the fleet uses, because one familiar window outlives a clever one.
+
 ## Status
 
 M1 (foundation), M2 (vendor onboarding and approval), M3 (fleet management),
-M4 (RFQ creation, dispatch and tracking) and **M5** (vendor RFQ inbox,
-quotations, versions and history, on both the API and the vendor screens) are
-complete. See "Vendor quotations (M5)" above.
+M4 (RFQ creation, dispatch and tracking), **M5** (vendor RFQ inbox, quotations,
+versions and history, on both the API and the vendor screens), **M7** (award
+outcome, vendor dashboard and the reminder sweeps) and **M8** (hardening) are
+complete. On top of the milestones, the revised brief's rework phases A–E are
+built: the SAP-aligned fields and admin settings (A), the dated reservation
+entity and derived Booked/Hired (B), the RFQ lifecycle fixes — deadline-extension
+revival, reminder timing, TBC start date, decline notes (C), on-behalf fleet
+updates, the inline quotation crane add, the SAP vendor creation sheet with
+admin-editable office-use master lists, and `expected_ready_date` (D), and the
+access-isolation, upload, rate-limit, masking, geocoding/email-failure and
+field-validation tests (E). See "Vendor quotations (M5)" and "Award, dashboard
+and reminders (M7)" above.
 
-Verified at the time of writing: backend `tsc` and build clean, 275/275 tests
-(69 RFQ, 66 quotations, 58 fleet, 52 onboarding, 14 access isolation, 11 calendar
-dates, 5 rate limit), frontend typecheck and build clean, and both end-to-end
-scripts green against a running server — 32/32 for onboarding, 53/53 for fleet.
+**P0** (portal gap check and admin basics) is the first phase of the platform
+roadmap in `plan/`. Section A checked the built portal against the revised design
+and fixed what was missing: the six RFQ terms a CR enquiry line carries
+(mobilisation/demobilisation, support crane, steel mats and ground prep, EHS/HR,
+insurance, extension clause), the jib-shortfall warning, the contact-mobile rule
+(ten digits, no leading zero), a friendly duplicate-PAN/GSTIN message on submit,
+and the seven-day invitation expiry. Section B added the admin screen: the
+dashboard counters, internal user management (create, role, enable/disable, reset
+credentials) and vendor suspension/reinstate, enforced at login, dispatch and the
+candidate picker.
+
+**P1** (native enquiry intake, enquiry screens, sourcing workspace) is the
+current phase. The enquiry and line-item tables were added (31 template fields,
+including the five scope terms — additional manpower, intra-site movement,
+pre-release, PPE and ROW — plus an internal-only block), with an RFQ now able to
+link back to the line it was raised from. Status is event driven: a
+forward-only trail moves a line as an RFQ is sent, a quotation arrives or an
+award books it, and the enquiry header rolls up from its lines. An RFQ raised
+from a line is prefilled from the **vendor-safe** subset only — customer name and
+address, rental budget, internal notes, PO/SAP reference and the Sales Partner's
+name cannot cross over, and a test asserts their absence by string. There is no
+SML crane fleet in this platform (all cranes are vendor cranes), so internal
+fulfilment is a manual line outcome rather than a machine match; the design
+stores it as Fulfilled Internally with no crane record. Screens: the enquiry list,
+the intake form, the detail with the trail, and the line workspace with vendor
+recommendations, RFQ history and quotations.
+
+Verified at the time of writing: backend `tsc` clean and 388/388 tests, frontend
+typecheck and build clean, and both end-to-end scripts green against a running
+server — 32/32 for onboarding, 53/53 for fleet. Phase E added
+`validation.test.ts` (PAN, GSTIN and the GSTIN-embeds-PAN rule, IFSC,
+mobile/telephone, account number, MICR, pincode, CIN) and a vendor-RFQ-detail
+contract test pinning the response to its key whitelist and asserting no
+customer-identity or budget key is present.
 
 The vendor flow was additionally walked end to end against a running server with
 a seeded database — vendor sign-in, inbox, detail, preview, multipart submission

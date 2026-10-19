@@ -92,6 +92,13 @@ export interface VendorRfqDetail {
     craneType: string;
     craneTypeName: string;
     capacityT: number;
+    capacityRule: "AT_LEAST" | "EXACT";
+    capacityNote: string | null;
+    applicationDescription: string | null;
+    loadDescription: string | null;
+    mainBoomM: number | null;
+    jibLengthM: number | null;
+    startDateTbc: boolean;
     quantity: number;
     siteLocation: string;
     siteStateCode: string;
@@ -108,7 +115,13 @@ export interface VendorRfqDetail {
       workingHoursShift: string | null;
       accommodationConveyance: string | null;
       paymentTerms: string | null;
-      extra: string | null;
+      mobilisationTerms: string | null;
+      supportCrane: string | null;
+      steelMatsGroundPrep: string | null;
+      ehsHrRequirements: string | null;
+      insuranceTerms: string | null;
+      extensionClause: string | null;
+      extra: Record<string, string | number | boolean | null> | null;
     };
     smlContact: { name: string | null; mobile: string | null; email: string | null };
     submissionDeadline: string;
@@ -126,6 +139,42 @@ export interface VendorRfqDetail {
   quotations: VendorQuotation[];
 }
 
+/**
+ * The RFQ's free-form "extra terms" bag: the demobilisation term plus the scope
+ * rows of the CR enquiry template that have no column of their own. Keys come
+ * from the enquiry line, so they are mapped to labels here and anything unknown
+ * falls back to a spaced-out version of the key.
+ */
+const EXTRA_TERM_LABELS: Record<string, string> = {
+  demobilisationTerms: "Demobilisation terms",
+  additionalManpowerScope: "Additional manpower",
+  intraSiteMovementScope: "Intra-site movement",
+  prereleaseTerms: "Pre-release terms",
+  ppeScope: "PPE",
+  rowScope: "Right of way (ROW)",
+};
+
+function humanizeExtraKey(key: string): string {
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
+
+/** Flattens the extra-terms bag into labelled rows, dropping blanks. */
+export function extraTermRows(
+  extra: Record<string, string | number | boolean | null> | null | undefined,
+): { key: string; label: string; value: string }[] {
+  if (!extra) return [];
+  return Object.entries(extra)
+    .filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== "")
+    .map(([key, value]) => ({
+      key,
+      label: EXTRA_TERM_LABELS[key] ?? humanizeExtraKey(key),
+      value: String(value),
+    }));
+}
+
 export interface VendorQuotation {
   quotationId: string;
   craneId: string;
@@ -135,6 +184,12 @@ export interface VendorQuotation {
   rentalRate: number;
   rateBasis: RateBasis;
   mobilisationCharges: number;
+  demobilisationCharges: number;
+  /**
+   * Whether the total already includes GST (brief A2). A declaration for
+   * like-for-like comparison; it never changes the arithmetic.
+   */
+  taxBasis: "EXCLUSIVE_OF_GST" | "INCLUSIVE_OF_GST";
   totalQuotedValue: number;
   calculationNote: string | null;
   availabilityConfirmed: boolean;
@@ -160,6 +215,12 @@ export interface VendorQuotation {
 export interface QuotationPreview {
   rentalCharge: number;
   mobilisationCharges: number;
+  demobilisationCharges: number;
+  /**
+   * Whether the total already includes GST (brief A2). A declaration for
+   * like-for-like comparison; it never changes the arithmetic.
+   */
+  taxBasis: "EXCLUSIVE_OF_GST" | "INCLUSIVE_OF_GST";
   totalQuotedValue: number;
   calculationNote: string;
   warnings: VendorWarning[];
@@ -186,6 +247,8 @@ export interface QuotationSeries {
     rentalRate: number;
     rateBasis: RateBasis;
     mobilisationCharges: number;
+    demobilisationCharges: number;
+    taxBasis: "EXCLUSIVE_OF_GST" | "INCLUSIVE_OF_GST";
     totalQuotedValue: number;
     calculationNote: string | null;
     validityDate: string;
@@ -200,6 +263,9 @@ export interface QuoteInput {
   rentalRate: number | string;
   rateBasis: RateBasis;
   mobilisationCharges: number | string;
+  /** Defaults to 0 on the server; blank input is fine. */
+  demobilisationCharges: number | string;
+  taxBasis?: "EXCLUSIVE_OF_GST" | "INCLUSIVE_OF_GST";
   availabilityConfirmed: boolean;
   availableFrom?: string | null;
   validityDate: string;
@@ -254,6 +320,7 @@ export function submitQuotation(
     };
   }>(`/vendor/rfqs/${rfqId}/quotations`, loadChart, {
     method: "POST",
+    field: "loadChart",
     fields: { ...input },
   });
 }
@@ -274,6 +341,7 @@ export function reviseQuotation(
     };
   }>(`/vendor/rfqs/quotations/${quotationId}/revisions`, loadChart, {
     method: "POST",
+    field: "loadChart",
     fields: { ...input },
   });
 }

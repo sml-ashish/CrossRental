@@ -27,10 +27,12 @@ export type AggregateVendor = {
 }
 
 export type VendorAvgAggregateOutputType = {
+  tdsRatePercent: number | null
   totalFleetSize: number | null
 }
 
 export type VendorSumAggregateOutputType = {
+  tdsRatePercent: number | null
   totalFleetSize: number | null
 }
 
@@ -39,7 +41,12 @@ export type VendorMinAggregateOutputType = {
   sapVendorCode: string | null
   name: string | null
   natureOfCompany: $Enums.NatureOfCompany | null
-  registeredAddress: string | null
+  addressLine1: string | null
+  addressLine2: string | null
+  city: string | null
+  district: string | null
+  stateCode: string | null
+  pincode: string | null
   telephone: string | null
   fax: string | null
   email: string | null
@@ -47,13 +54,23 @@ export type VendorMinAggregateOutputType = {
   companySize: string | null
   pan: string | null
   tan: string | null
+  gstRegistered: boolean | null
+  gstRegistrationType: $Enums.GstRegistrationType | null
   gstn: string | null
-  gstCompositionOpted: boolean | null
   gstr1FilingFrequency: $Enums.GstFilingFrequency | null
   cin: string | null
   govtRegistrationType: string | null
   govtRegistrationNo: string | null
+  msmeRegistered: boolean | null
   msmeCategory: $Enums.MsmeCategory | null
+  msmeRegNo: string | null
+  msmeExemptionDate: Date | null
+  tdsLowerDeduction: boolean | null
+  tdsCertificateNo: string | null
+  tdsSection: string | null
+  tdsRatePercent: number | null
+  tdsValidFrom: Date | null
+  tdsValidTo: Date | null
   bankAccountHolderName: string | null
   bankName: string | null
   bankBranch: string | null
@@ -61,19 +78,32 @@ export type VendorMinAggregateOutputType = {
   bankAccountNoEnc: string | null
   bankAccountNoLast4: string | null
   bankIfscEnc: string | null
+  bankMicr: string | null
+  bankIban: string | null
+  bankSwift: string | null
   codeOfConductAccepted: boolean | null
   declarationName: string | null
   declarationDesignation: string | null
   declarationDate: Date | null
   fleetSummary: string | null
+  communicationNotes: string | null
   onboardingStatus: $Enums.OnboardingStatus | null
   approvedById: string | null
   approvedAt: Date | null
   adminRemarks: string | null
+  suspendedAt: Date | null
+  suspendedById: string | null
+  suspendReason: string | null
   facilityStatus: $Enums.FacilityStatus | null
   manpowerStatus: $Enums.ManpowerStatus | null
   improvementRequirement: string | null
   improvementPeriod: string | null
+  vendorOrigin: string | null
+  vendorType: string | null
+  purchaseOrg: string | null
+  paymentTerm: string | null
+  withholdingTaxType: string | null
+  legalForm: string | null
   totalFleetSize: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -85,7 +115,12 @@ export type VendorMaxAggregateOutputType = {
   sapVendorCode: string | null
   name: string | null
   natureOfCompany: $Enums.NatureOfCompany | null
-  registeredAddress: string | null
+  addressLine1: string | null
+  addressLine2: string | null
+  city: string | null
+  district: string | null
+  stateCode: string | null
+  pincode: string | null
   telephone: string | null
   fax: string | null
   email: string | null
@@ -93,13 +128,23 @@ export type VendorMaxAggregateOutputType = {
   companySize: string | null
   pan: string | null
   tan: string | null
+  gstRegistered: boolean | null
+  gstRegistrationType: $Enums.GstRegistrationType | null
   gstn: string | null
-  gstCompositionOpted: boolean | null
   gstr1FilingFrequency: $Enums.GstFilingFrequency | null
   cin: string | null
   govtRegistrationType: string | null
   govtRegistrationNo: string | null
+  msmeRegistered: boolean | null
   msmeCategory: $Enums.MsmeCategory | null
+  msmeRegNo: string | null
+  msmeExemptionDate: Date | null
+  tdsLowerDeduction: boolean | null
+  tdsCertificateNo: string | null
+  tdsSection: string | null
+  tdsRatePercent: number | null
+  tdsValidFrom: Date | null
+  tdsValidTo: Date | null
   bankAccountHolderName: string | null
   bankName: string | null
   bankBranch: string | null
@@ -107,19 +152,32 @@ export type VendorMaxAggregateOutputType = {
   bankAccountNoEnc: string | null
   bankAccountNoLast4: string | null
   bankIfscEnc: string | null
+  bankMicr: string | null
+  bankIban: string | null
+  bankSwift: string | null
   codeOfConductAccepted: boolean | null
   declarationName: string | null
   declarationDesignation: string | null
   declarationDate: Date | null
   fleetSummary: string | null
+  communicationNotes: string | null
   onboardingStatus: $Enums.OnboardingStatus | null
   approvedById: string | null
   approvedAt: Date | null
   adminRemarks: string | null
+  suspendedAt: Date | null
+  suspendedById: string | null
+  suspendReason: string | null
   facilityStatus: $Enums.FacilityStatus | null
   manpowerStatus: $Enums.ManpowerStatus | null
   improvementRequirement: string | null
   improvementPeriod: string | null
+  vendorOrigin: string | null
+  vendorType: string | null
+  purchaseOrg: string | null
+  paymentTerm: string | null
+  withholdingTaxType: string | null
+  legalForm: string | null
   totalFleetSize: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -131,7 +189,12 @@ export type VendorCountAggregateOutputType = {
   sapVendorCode: number
   name: number
   natureOfCompany: number
-  registeredAddress: number
+  addressLine1: number
+  addressLine2: number
+  city: number
+  district: number
+  stateCode: number
+  pincode: number
   telephone: number
   fax: number
   email: number
@@ -139,13 +202,23 @@ export type VendorCountAggregateOutputType = {
   companySize: number
   pan: number
   tan: number
+  gstRegistered: number
+  gstRegistrationType: number
   gstn: number
-  gstCompositionOpted: number
   gstr1FilingFrequency: number
   cin: number
   govtRegistrationType: number
   govtRegistrationNo: number
+  msmeRegistered: number
   msmeCategory: number
+  msmeRegNo: number
+  msmeExemptionDate: number
+  tdsLowerDeduction: number
+  tdsCertificateNo: number
+  tdsSection: number
+  tdsRatePercent: number
+  tdsValidFrom: number
+  tdsValidTo: number
   bankAccountHolderName: number
   bankName: number
   bankBranch: number
@@ -153,19 +226,32 @@ export type VendorCountAggregateOutputType = {
   bankAccountNoEnc: number
   bankAccountNoLast4: number
   bankIfscEnc: number
+  bankMicr: number
+  bankIban: number
+  bankSwift: number
   codeOfConductAccepted: number
   declarationName: number
   declarationDesignation: number
   declarationDate: number
   fleetSummary: number
+  communicationNotes: number
   onboardingStatus: number
   approvedById: number
   approvedAt: number
   adminRemarks: number
+  suspendedAt: number
+  suspendedById: number
+  suspendReason: number
   facilityStatus: number
   manpowerStatus: number
   improvementRequirement: number
   improvementPeriod: number
+  vendorOrigin: number
+  vendorType: number
+  purchaseOrg: number
+  paymentTerm: number
+  withholdingTaxType: number
+  legalForm: number
   totalFleetSize: number
   createdAt: number
   updatedAt: number
@@ -175,10 +261,12 @@ export type VendorCountAggregateOutputType = {
 
 
 export type VendorAvgAggregateInputType = {
+  tdsRatePercent?: true
   totalFleetSize?: true
 }
 
 export type VendorSumAggregateInputType = {
+  tdsRatePercent?: true
   totalFleetSize?: true
 }
 
@@ -187,7 +275,12 @@ export type VendorMinAggregateInputType = {
   sapVendorCode?: true
   name?: true
   natureOfCompany?: true
-  registeredAddress?: true
+  addressLine1?: true
+  addressLine2?: true
+  city?: true
+  district?: true
+  stateCode?: true
+  pincode?: true
   telephone?: true
   fax?: true
   email?: true
@@ -195,13 +288,23 @@ export type VendorMinAggregateInputType = {
   companySize?: true
   pan?: true
   tan?: true
+  gstRegistered?: true
+  gstRegistrationType?: true
   gstn?: true
-  gstCompositionOpted?: true
   gstr1FilingFrequency?: true
   cin?: true
   govtRegistrationType?: true
   govtRegistrationNo?: true
+  msmeRegistered?: true
   msmeCategory?: true
+  msmeRegNo?: true
+  msmeExemptionDate?: true
+  tdsLowerDeduction?: true
+  tdsCertificateNo?: true
+  tdsSection?: true
+  tdsRatePercent?: true
+  tdsValidFrom?: true
+  tdsValidTo?: true
   bankAccountHolderName?: true
   bankName?: true
   bankBranch?: true
@@ -209,19 +312,32 @@ export type VendorMinAggregateInputType = {
   bankAccountNoEnc?: true
   bankAccountNoLast4?: true
   bankIfscEnc?: true
+  bankMicr?: true
+  bankIban?: true
+  bankSwift?: true
   codeOfConductAccepted?: true
   declarationName?: true
   declarationDesignation?: true
   declarationDate?: true
   fleetSummary?: true
+  communicationNotes?: true
   onboardingStatus?: true
   approvedById?: true
   approvedAt?: true
   adminRemarks?: true
+  suspendedAt?: true
+  suspendedById?: true
+  suspendReason?: true
   facilityStatus?: true
   manpowerStatus?: true
   improvementRequirement?: true
   improvementPeriod?: true
+  vendorOrigin?: true
+  vendorType?: true
+  purchaseOrg?: true
+  paymentTerm?: true
+  withholdingTaxType?: true
+  legalForm?: true
   totalFleetSize?: true
   createdAt?: true
   updatedAt?: true
@@ -233,7 +349,12 @@ export type VendorMaxAggregateInputType = {
   sapVendorCode?: true
   name?: true
   natureOfCompany?: true
-  registeredAddress?: true
+  addressLine1?: true
+  addressLine2?: true
+  city?: true
+  district?: true
+  stateCode?: true
+  pincode?: true
   telephone?: true
   fax?: true
   email?: true
@@ -241,13 +362,23 @@ export type VendorMaxAggregateInputType = {
   companySize?: true
   pan?: true
   tan?: true
+  gstRegistered?: true
+  gstRegistrationType?: true
   gstn?: true
-  gstCompositionOpted?: true
   gstr1FilingFrequency?: true
   cin?: true
   govtRegistrationType?: true
   govtRegistrationNo?: true
+  msmeRegistered?: true
   msmeCategory?: true
+  msmeRegNo?: true
+  msmeExemptionDate?: true
+  tdsLowerDeduction?: true
+  tdsCertificateNo?: true
+  tdsSection?: true
+  tdsRatePercent?: true
+  tdsValidFrom?: true
+  tdsValidTo?: true
   bankAccountHolderName?: true
   bankName?: true
   bankBranch?: true
@@ -255,19 +386,32 @@ export type VendorMaxAggregateInputType = {
   bankAccountNoEnc?: true
   bankAccountNoLast4?: true
   bankIfscEnc?: true
+  bankMicr?: true
+  bankIban?: true
+  bankSwift?: true
   codeOfConductAccepted?: true
   declarationName?: true
   declarationDesignation?: true
   declarationDate?: true
   fleetSummary?: true
+  communicationNotes?: true
   onboardingStatus?: true
   approvedById?: true
   approvedAt?: true
   adminRemarks?: true
+  suspendedAt?: true
+  suspendedById?: true
+  suspendReason?: true
   facilityStatus?: true
   manpowerStatus?: true
   improvementRequirement?: true
   improvementPeriod?: true
+  vendorOrigin?: true
+  vendorType?: true
+  purchaseOrg?: true
+  paymentTerm?: true
+  withholdingTaxType?: true
+  legalForm?: true
   totalFleetSize?: true
   createdAt?: true
   updatedAt?: true
@@ -279,7 +423,12 @@ export type VendorCountAggregateInputType = {
   sapVendorCode?: true
   name?: true
   natureOfCompany?: true
-  registeredAddress?: true
+  addressLine1?: true
+  addressLine2?: true
+  city?: true
+  district?: true
+  stateCode?: true
+  pincode?: true
   telephone?: true
   fax?: true
   email?: true
@@ -287,13 +436,23 @@ export type VendorCountAggregateInputType = {
   companySize?: true
   pan?: true
   tan?: true
+  gstRegistered?: true
+  gstRegistrationType?: true
   gstn?: true
-  gstCompositionOpted?: true
   gstr1FilingFrequency?: true
   cin?: true
   govtRegistrationType?: true
   govtRegistrationNo?: true
+  msmeRegistered?: true
   msmeCategory?: true
+  msmeRegNo?: true
+  msmeExemptionDate?: true
+  tdsLowerDeduction?: true
+  tdsCertificateNo?: true
+  tdsSection?: true
+  tdsRatePercent?: true
+  tdsValidFrom?: true
+  tdsValidTo?: true
   bankAccountHolderName?: true
   bankName?: true
   bankBranch?: true
@@ -301,19 +460,32 @@ export type VendorCountAggregateInputType = {
   bankAccountNoEnc?: true
   bankAccountNoLast4?: true
   bankIfscEnc?: true
+  bankMicr?: true
+  bankIban?: true
+  bankSwift?: true
   codeOfConductAccepted?: true
   declarationName?: true
   declarationDesignation?: true
   declarationDate?: true
   fleetSummary?: true
+  communicationNotes?: true
   onboardingStatus?: true
   approvedById?: true
   approvedAt?: true
   adminRemarks?: true
+  suspendedAt?: true
+  suspendedById?: true
+  suspendReason?: true
   facilityStatus?: true
   manpowerStatus?: true
   improvementRequirement?: true
   improvementPeriod?: true
+  vendorOrigin?: true
+  vendorType?: true
+  purchaseOrg?: true
+  paymentTerm?: true
+  withholdingTaxType?: true
+  legalForm?: true
   totalFleetSize?: true
   createdAt?: true
   updatedAt?: true
@@ -412,7 +584,12 @@ export type VendorGroupByOutputType = {
   sapVendorCode: string | null
   name: string | null
   natureOfCompany: $Enums.NatureOfCompany | null
-  registeredAddress: string | null
+  addressLine1: string | null
+  addressLine2: string | null
+  city: string | null
+  district: string | null
+  stateCode: string | null
+  pincode: string | null
   telephone: string | null
   fax: string | null
   email: string | null
@@ -420,13 +597,23 @@ export type VendorGroupByOutputType = {
   companySize: string | null
   pan: string | null
   tan: string | null
+  gstRegistered: boolean | null
+  gstRegistrationType: $Enums.GstRegistrationType | null
   gstn: string | null
-  gstCompositionOpted: boolean | null
   gstr1FilingFrequency: $Enums.GstFilingFrequency | null
   cin: string | null
   govtRegistrationType: string | null
   govtRegistrationNo: string | null
+  msmeRegistered: boolean | null
   msmeCategory: $Enums.MsmeCategory | null
+  msmeRegNo: string | null
+  msmeExemptionDate: Date | null
+  tdsLowerDeduction: boolean | null
+  tdsCertificateNo: string | null
+  tdsSection: string | null
+  tdsRatePercent: number | null
+  tdsValidFrom: Date | null
+  tdsValidTo: Date | null
   bankAccountHolderName: string | null
   bankName: string | null
   bankBranch: string | null
@@ -434,19 +621,32 @@ export type VendorGroupByOutputType = {
   bankAccountNoEnc: string | null
   bankAccountNoLast4: string | null
   bankIfscEnc: string | null
+  bankMicr: string | null
+  bankIban: string | null
+  bankSwift: string | null
   codeOfConductAccepted: boolean | null
   declarationName: string | null
   declarationDesignation: string | null
   declarationDate: Date | null
   fleetSummary: string | null
+  communicationNotes: string | null
   onboardingStatus: $Enums.OnboardingStatus
   approvedById: string | null
   approvedAt: Date | null
   adminRemarks: string | null
+  suspendedAt: Date | null
+  suspendedById: string | null
+  suspendReason: string | null
   facilityStatus: $Enums.FacilityStatus | null
   manpowerStatus: $Enums.ManpowerStatus | null
   improvementRequirement: string | null
   improvementPeriod: string | null
+  vendorOrigin: string | null
+  vendorType: string | null
+  purchaseOrg: string | null
+  paymentTerm: string | null
+  withholdingTaxType: string | null
+  legalForm: string | null
   totalFleetSize: number
   createdAt: Date
   updatedAt: Date
@@ -481,7 +681,12 @@ export type VendorWhereInput = {
   sapVendorCode?: Prisma.StringNullableFilter<"Vendor"> | string | null
   name?: Prisma.StringNullableFilter<"Vendor"> | string | null
   natureOfCompany?: Prisma.EnumNatureOfCompanyNullableFilter<"Vendor"> | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressLine1?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressLine2?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  city?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  district?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  stateCode?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  pincode?: Prisma.StringNullableFilter<"Vendor"> | string | null
   telephone?: Prisma.StringNullableFilter<"Vendor"> | string | null
   fax?: Prisma.StringNullableFilter<"Vendor"> | string | null
   email?: Prisma.StringNullableFilter<"Vendor"> | string | null
@@ -489,13 +694,23 @@ export type VendorWhereInput = {
   companySize?: Prisma.StringNullableFilter<"Vendor"> | string | null
   pan?: Prisma.StringNullableFilter<"Vendor"> | string | null
   tan?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  gstRegistered?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  gstRegistrationType?: Prisma.EnumGstRegistrationTypeNullableFilter<"Vendor"> | $Enums.GstRegistrationType | null
   gstn?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  gstCompositionOpted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
   gstr1FilingFrequency?: Prisma.EnumGstFilingFrequencyNullableFilter<"Vendor"> | $Enums.GstFilingFrequency | null
   cin?: Prisma.StringNullableFilter<"Vendor"> | string | null
   govtRegistrationType?: Prisma.StringNullableFilter<"Vendor"> | string | null
   govtRegistrationNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  msmeRegistered?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
   msmeCategory?: Prisma.EnumMsmeCategoryNullableFilter<"Vendor"> | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  msmeExemptionDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  tdsLowerDeduction?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  tdsCertificateNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tdsSection?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tdsRatePercent?: Prisma.IntNullableFilter<"Vendor"> | number | null
+  tdsValidFrom?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  tdsValidTo?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
   bankAccountHolderName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankBranch?: Prisma.StringNullableFilter<"Vendor"> | string | null
@@ -503,24 +718,39 @@ export type VendorWhereInput = {
   bankAccountNoEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankAccountNoLast4?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankIfscEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankMicr?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankIban?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankSwift?: Prisma.StringNullableFilter<"Vendor"> | string | null
   codeOfConductAccepted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
   declarationName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   declarationDesignation?: Prisma.StringNullableFilter<"Vendor"> | string | null
   declarationDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
   fleetSummary?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  communicationNotes?: Prisma.StringNullableFilter<"Vendor"> | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFilter<"Vendor"> | $Enums.OnboardingStatus
   approvedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
   adminRemarks?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  suspendedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  suspendReason?: Prisma.StringNullableFilter<"Vendor"> | string | null
   facilityStatus?: Prisma.EnumFacilityStatusNullableFilter<"Vendor"> | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.EnumManpowerStatusNullableFilter<"Vendor"> | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.StringNullableFilter<"Vendor"> | string | null
   improvementPeriod?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorOrigin?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  purchaseOrg?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  paymentTerm?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  withholdingTaxType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  legalForm?: Prisma.StringNullableFilter<"Vendor"> | string | null
   totalFleetSize?: Prisma.IntFilter<"Vendor"> | number
   createdAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
   updatedBy?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressState?: Prisma.XOR<Prisma.StateNullableScalarRelationFilter, Prisma.StateWhereInput> | null
   approvedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  suspendedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   operatingRegions?: Prisma.StateVendorRegionListRelationFilter
   contacts?: Prisma.VendorContactListRelationFilter
   documents?: Prisma.VendorDocumentListRelationFilter
@@ -537,7 +767,12 @@ export type VendorOrderByWithRelationInput = {
   sapVendorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   natureOfCompany?: Prisma.SortOrderInput | Prisma.SortOrder
-  registeredAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
+  stateCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  pincode?: Prisma.SortOrderInput | Prisma.SortOrder
   telephone?: Prisma.SortOrderInput | Prisma.SortOrder
   fax?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -545,13 +780,23 @@ export type VendorOrderByWithRelationInput = {
   companySize?: Prisma.SortOrderInput | Prisma.SortOrder
   pan?: Prisma.SortOrderInput | Prisma.SortOrder
   tan?: Prisma.SortOrderInput | Prisma.SortOrder
+  gstRegistered?: Prisma.SortOrderInput | Prisma.SortOrder
+  gstRegistrationType?: Prisma.SortOrderInput | Prisma.SortOrder
   gstn?: Prisma.SortOrderInput | Prisma.SortOrder
-  gstCompositionOpted?: Prisma.SortOrderInput | Prisma.SortOrder
   gstr1FilingFrequency?: Prisma.SortOrderInput | Prisma.SortOrder
   cin?: Prisma.SortOrderInput | Prisma.SortOrder
   govtRegistrationType?: Prisma.SortOrderInput | Prisma.SortOrder
   govtRegistrationNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  msmeRegistered?: Prisma.SortOrderInput | Prisma.SortOrder
   msmeCategory?: Prisma.SortOrderInput | Prisma.SortOrder
+  msmeRegNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  msmeExemptionDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsLowerDeduction?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsCertificateNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsSection?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsRatePercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsValidFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsValidTo?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccountHolderName?: Prisma.SortOrderInput | Prisma.SortOrder
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
   bankBranch?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -559,24 +804,39 @@ export type VendorOrderByWithRelationInput = {
   bankAccountNoEnc?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccountNoLast4?: Prisma.SortOrderInput | Prisma.SortOrder
   bankIfscEnc?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankMicr?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankIban?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankSwift?: Prisma.SortOrderInput | Prisma.SortOrder
   codeOfConductAccepted?: Prisma.SortOrderInput | Prisma.SortOrder
   declarationName?: Prisma.SortOrderInput | Prisma.SortOrder
   declarationDesignation?: Prisma.SortOrderInput | Prisma.SortOrder
   declarationDate?: Prisma.SortOrderInput | Prisma.SortOrder
   fleetSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  communicationNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   onboardingStatus?: Prisma.SortOrder
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   adminRemarks?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendReason?: Prisma.SortOrderInput | Prisma.SortOrder
   facilityStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   manpowerStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   improvementRequirement?: Prisma.SortOrderInput | Prisma.SortOrder
   improvementPeriod?: Prisma.SortOrderInput | Prisma.SortOrder
+  vendorOrigin?: Prisma.SortOrderInput | Prisma.SortOrder
+  vendorType?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchaseOrg?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTerm?: Prisma.SortOrderInput | Prisma.SortOrder
+  withholdingTaxType?: Prisma.SortOrderInput | Prisma.SortOrder
+  legalForm?: Prisma.SortOrderInput | Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressState?: Prisma.StateOrderByWithRelationInput
   approvedBy?: Prisma.UserOrderByWithRelationInput
+  suspendedBy?: Prisma.UserOrderByWithRelationInput
   operatingRegions?: Prisma.StateVendorRegionOrderByRelationAggregateInput
   contacts?: Prisma.VendorContactOrderByRelationAggregateInput
   documents?: Prisma.VendorDocumentOrderByRelationAggregateInput
@@ -591,26 +851,41 @@ export type VendorOrderByWithRelationInput = {
 export type VendorWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   sapVendorCode?: string
+  pan?: string
+  gstn?: string
   AND?: Prisma.VendorWhereInput | Prisma.VendorWhereInput[]
   OR?: Prisma.VendorWhereInput[]
   NOT?: Prisma.VendorWhereInput | Prisma.VendorWhereInput[]
   name?: Prisma.StringNullableFilter<"Vendor"> | string | null
   natureOfCompany?: Prisma.EnumNatureOfCompanyNullableFilter<"Vendor"> | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressLine1?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressLine2?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  city?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  district?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  stateCode?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  pincode?: Prisma.StringNullableFilter<"Vendor"> | string | null
   telephone?: Prisma.StringNullableFilter<"Vendor"> | string | null
   fax?: Prisma.StringNullableFilter<"Vendor"> | string | null
   email?: Prisma.StringNullableFilter<"Vendor"> | string | null
   weeklyOffDays?: Prisma.StringNullableFilter<"Vendor"> | string | null
   companySize?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  pan?: Prisma.StringNullableFilter<"Vendor"> | string | null
   tan?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  gstn?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  gstCompositionOpted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  gstRegistered?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  gstRegistrationType?: Prisma.EnumGstRegistrationTypeNullableFilter<"Vendor"> | $Enums.GstRegistrationType | null
   gstr1FilingFrequency?: Prisma.EnumGstFilingFrequencyNullableFilter<"Vendor"> | $Enums.GstFilingFrequency | null
   cin?: Prisma.StringNullableFilter<"Vendor"> | string | null
   govtRegistrationType?: Prisma.StringNullableFilter<"Vendor"> | string | null
   govtRegistrationNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  msmeRegistered?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
   msmeCategory?: Prisma.EnumMsmeCategoryNullableFilter<"Vendor"> | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  msmeExemptionDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  tdsLowerDeduction?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  tdsCertificateNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tdsSection?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tdsRatePercent?: Prisma.IntNullableFilter<"Vendor"> | number | null
+  tdsValidFrom?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  tdsValidTo?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
   bankAccountHolderName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankBranch?: Prisma.StringNullableFilter<"Vendor"> | string | null
@@ -618,24 +893,39 @@ export type VendorWhereUniqueInput = Prisma.AtLeast<{
   bankAccountNoEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankAccountNoLast4?: Prisma.StringNullableFilter<"Vendor"> | string | null
   bankIfscEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankMicr?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankIban?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankSwift?: Prisma.StringNullableFilter<"Vendor"> | string | null
   codeOfConductAccepted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
   declarationName?: Prisma.StringNullableFilter<"Vendor"> | string | null
   declarationDesignation?: Prisma.StringNullableFilter<"Vendor"> | string | null
   declarationDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
   fleetSummary?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  communicationNotes?: Prisma.StringNullableFilter<"Vendor"> | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFilter<"Vendor"> | $Enums.OnboardingStatus
   approvedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
   adminRemarks?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  suspendedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  suspendReason?: Prisma.StringNullableFilter<"Vendor"> | string | null
   facilityStatus?: Prisma.EnumFacilityStatusNullableFilter<"Vendor"> | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.EnumManpowerStatusNullableFilter<"Vendor"> | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.StringNullableFilter<"Vendor"> | string | null
   improvementPeriod?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorOrigin?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  purchaseOrg?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  paymentTerm?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  withholdingTaxType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  legalForm?: Prisma.StringNullableFilter<"Vendor"> | string | null
   totalFleetSize?: Prisma.IntFilter<"Vendor"> | number
   createdAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
   updatedBy?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressState?: Prisma.XOR<Prisma.StateNullableScalarRelationFilter, Prisma.StateWhereInput> | null
   approvedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  suspendedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   operatingRegions?: Prisma.StateVendorRegionListRelationFilter
   contacts?: Prisma.VendorContactListRelationFilter
   documents?: Prisma.VendorDocumentListRelationFilter
@@ -645,14 +935,19 @@ export type VendorWhereUniqueInput = Prisma.AtLeast<{
   cranes?: Prisma.CraneListRelationFilter
   rfqRecipients?: Prisma.RfqVendorRecipientListRelationFilter
   quotations?: Prisma.QuotationListRelationFilter
-}, "id" | "sapVendorCode">
+}, "id" | "sapVendorCode" | "pan" | "gstn">
 
 export type VendorOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   sapVendorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   natureOfCompany?: Prisma.SortOrderInput | Prisma.SortOrder
-  registeredAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
+  stateCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  pincode?: Prisma.SortOrderInput | Prisma.SortOrder
   telephone?: Prisma.SortOrderInput | Prisma.SortOrder
   fax?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -660,13 +955,23 @@ export type VendorOrderByWithAggregationInput = {
   companySize?: Prisma.SortOrderInput | Prisma.SortOrder
   pan?: Prisma.SortOrderInput | Prisma.SortOrder
   tan?: Prisma.SortOrderInput | Prisma.SortOrder
+  gstRegistered?: Prisma.SortOrderInput | Prisma.SortOrder
+  gstRegistrationType?: Prisma.SortOrderInput | Prisma.SortOrder
   gstn?: Prisma.SortOrderInput | Prisma.SortOrder
-  gstCompositionOpted?: Prisma.SortOrderInput | Prisma.SortOrder
   gstr1FilingFrequency?: Prisma.SortOrderInput | Prisma.SortOrder
   cin?: Prisma.SortOrderInput | Prisma.SortOrder
   govtRegistrationType?: Prisma.SortOrderInput | Prisma.SortOrder
   govtRegistrationNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  msmeRegistered?: Prisma.SortOrderInput | Prisma.SortOrder
   msmeCategory?: Prisma.SortOrderInput | Prisma.SortOrder
+  msmeRegNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  msmeExemptionDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsLowerDeduction?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsCertificateNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsSection?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsRatePercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsValidFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  tdsValidTo?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccountHolderName?: Prisma.SortOrderInput | Prisma.SortOrder
   bankName?: Prisma.SortOrderInput | Prisma.SortOrder
   bankBranch?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -674,19 +979,32 @@ export type VendorOrderByWithAggregationInput = {
   bankAccountNoEnc?: Prisma.SortOrderInput | Prisma.SortOrder
   bankAccountNoLast4?: Prisma.SortOrderInput | Prisma.SortOrder
   bankIfscEnc?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankMicr?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankIban?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankSwift?: Prisma.SortOrderInput | Prisma.SortOrder
   codeOfConductAccepted?: Prisma.SortOrderInput | Prisma.SortOrder
   declarationName?: Prisma.SortOrderInput | Prisma.SortOrder
   declarationDesignation?: Prisma.SortOrderInput | Prisma.SortOrder
   declarationDate?: Prisma.SortOrderInput | Prisma.SortOrder
   fleetSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  communicationNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   onboardingStatus?: Prisma.SortOrder
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   adminRemarks?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendReason?: Prisma.SortOrderInput | Prisma.SortOrder
   facilityStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   manpowerStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   improvementRequirement?: Prisma.SortOrderInput | Prisma.SortOrder
   improvementPeriod?: Prisma.SortOrderInput | Prisma.SortOrder
+  vendorOrigin?: Prisma.SortOrderInput | Prisma.SortOrder
+  vendorType?: Prisma.SortOrderInput | Prisma.SortOrder
+  purchaseOrg?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentTerm?: Prisma.SortOrderInput | Prisma.SortOrder
+  withholdingTaxType?: Prisma.SortOrderInput | Prisma.SortOrder
+  legalForm?: Prisma.SortOrderInput | Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -706,7 +1024,12 @@ export type VendorScalarWhereWithAggregatesInput = {
   sapVendorCode?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   natureOfCompany?: Prisma.EnumNatureOfCompanyNullableWithAggregatesFilter<"Vendor"> | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  addressLine1?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  addressLine2?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  district?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  stateCode?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  pincode?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   telephone?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   fax?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
@@ -714,13 +1037,23 @@ export type VendorScalarWhereWithAggregatesInput = {
   companySize?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   pan?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   tan?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  gstRegistered?: Prisma.BoolNullableWithAggregatesFilter<"Vendor"> | boolean | null
+  gstRegistrationType?: Prisma.EnumGstRegistrationTypeNullableWithAggregatesFilter<"Vendor"> | $Enums.GstRegistrationType | null
   gstn?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
-  gstCompositionOpted?: Prisma.BoolNullableWithAggregatesFilter<"Vendor"> | boolean | null
   gstr1FilingFrequency?: Prisma.EnumGstFilingFrequencyNullableWithAggregatesFilter<"Vendor"> | $Enums.GstFilingFrequency | null
   cin?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   govtRegistrationType?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   govtRegistrationNo?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  msmeRegistered?: Prisma.BoolNullableWithAggregatesFilter<"Vendor"> | boolean | null
   msmeCategory?: Prisma.EnumMsmeCategoryNullableWithAggregatesFilter<"Vendor"> | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  msmeExemptionDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Vendor"> | Date | string | null
+  tdsLowerDeduction?: Prisma.BoolNullableWithAggregatesFilter<"Vendor"> | boolean | null
+  tdsCertificateNo?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  tdsSection?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  tdsRatePercent?: Prisma.IntNullableWithAggregatesFilter<"Vendor"> | number | null
+  tdsValidFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"Vendor"> | Date | string | null
+  tdsValidTo?: Prisma.DateTimeNullableWithAggregatesFilter<"Vendor"> | Date | string | null
   bankAccountHolderName?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   bankName?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   bankBranch?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
@@ -728,19 +1061,32 @@ export type VendorScalarWhereWithAggregatesInput = {
   bankAccountNoEnc?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   bankAccountNoLast4?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   bankIfscEnc?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  bankMicr?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  bankIban?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  bankSwift?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   codeOfConductAccepted?: Prisma.BoolNullableWithAggregatesFilter<"Vendor"> | boolean | null
   declarationName?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   declarationDesignation?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   declarationDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Vendor"> | Date | string | null
   fleetSummary?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  communicationNotes?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusWithAggregatesFilter<"Vendor"> | $Enums.OnboardingStatus
   approvedById?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Vendor"> | Date | string | null
   adminRemarks?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Vendor"> | Date | string | null
+  suspendedById?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  suspendReason?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   facilityStatus?: Prisma.EnumFacilityStatusNullableWithAggregatesFilter<"Vendor"> | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.EnumManpowerStatusNullableWithAggregatesFilter<"Vendor"> | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   improvementPeriod?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  vendorOrigin?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  purchaseOrg?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  paymentTerm?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  withholdingTaxType?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
+  legalForm?: Prisma.StringNullableWithAggregatesFilter<"Vendor"> | string | null
   totalFleetSize?: Prisma.IntWithAggregatesFilter<"Vendor"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Vendor"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Vendor"> | Date | string
@@ -752,7 +1098,11 @@ export type VendorCreateInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -760,13 +1110,23 @@ export type VendorCreateInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -774,23 +1134,37 @@ export type VendorCreateInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -807,7 +1181,12 @@ export type VendorUncheckedCreateInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -815,13 +1194,23 @@ export type VendorUncheckedCreateInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -829,19 +1218,32 @@ export type VendorUncheckedCreateInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -862,7 +1264,11 @@ export type VendorUpdateInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -870,13 +1276,23 @@ export type VendorUpdateInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -884,23 +1300,37 @@ export type VendorUpdateInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -917,7 +1347,12 @@ export type VendorUncheckedUpdateInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -925,13 +1360,23 @@ export type VendorUncheckedUpdateInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -939,19 +1384,32 @@ export type VendorUncheckedUpdateInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -972,7 +1430,12 @@ export type VendorCreateManyInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -980,13 +1443,23 @@ export type VendorCreateManyInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -994,19 +1467,32 @@ export type VendorCreateManyInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1018,7 +1504,11 @@ export type VendorUpdateManyMutationInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1026,13 +1516,23 @@ export type VendorUpdateManyMutationInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1040,18 +1540,30 @@ export type VendorUpdateManyMutationInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1063,7 +1575,12 @@ export type VendorUncheckedUpdateManyInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1071,13 +1588,23 @@ export type VendorUncheckedUpdateManyInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1085,23 +1612,46 @@ export type VendorUncheckedUpdateManyInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type VendorListRelationFilter = {
+  every?: Prisma.VendorWhereInput
+  some?: Prisma.VendorWhereInput
+  none?: Prisma.VendorWhereInput
+}
+
+export type VendorOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type VendorScalarRelationFilter = {
@@ -1114,7 +1664,12 @@ export type VendorCountOrderByAggregateInput = {
   sapVendorCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   natureOfCompany?: Prisma.SortOrder
-  registeredAddress?: Prisma.SortOrder
+  addressLine1?: Prisma.SortOrder
+  addressLine2?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  district?: Prisma.SortOrder
+  stateCode?: Prisma.SortOrder
+  pincode?: Prisma.SortOrder
   telephone?: Prisma.SortOrder
   fax?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -1122,13 +1677,23 @@ export type VendorCountOrderByAggregateInput = {
   companySize?: Prisma.SortOrder
   pan?: Prisma.SortOrder
   tan?: Prisma.SortOrder
+  gstRegistered?: Prisma.SortOrder
+  gstRegistrationType?: Prisma.SortOrder
   gstn?: Prisma.SortOrder
-  gstCompositionOpted?: Prisma.SortOrder
   gstr1FilingFrequency?: Prisma.SortOrder
   cin?: Prisma.SortOrder
   govtRegistrationType?: Prisma.SortOrder
   govtRegistrationNo?: Prisma.SortOrder
+  msmeRegistered?: Prisma.SortOrder
   msmeCategory?: Prisma.SortOrder
+  msmeRegNo?: Prisma.SortOrder
+  msmeExemptionDate?: Prisma.SortOrder
+  tdsLowerDeduction?: Prisma.SortOrder
+  tdsCertificateNo?: Prisma.SortOrder
+  tdsSection?: Prisma.SortOrder
+  tdsRatePercent?: Prisma.SortOrder
+  tdsValidFrom?: Prisma.SortOrder
+  tdsValidTo?: Prisma.SortOrder
   bankAccountHolderName?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
   bankBranch?: Prisma.SortOrder
@@ -1136,19 +1701,32 @@ export type VendorCountOrderByAggregateInput = {
   bankAccountNoEnc?: Prisma.SortOrder
   bankAccountNoLast4?: Prisma.SortOrder
   bankIfscEnc?: Prisma.SortOrder
+  bankMicr?: Prisma.SortOrder
+  bankIban?: Prisma.SortOrder
+  bankSwift?: Prisma.SortOrder
   codeOfConductAccepted?: Prisma.SortOrder
   declarationName?: Prisma.SortOrder
   declarationDesignation?: Prisma.SortOrder
   declarationDate?: Prisma.SortOrder
   fleetSummary?: Prisma.SortOrder
+  communicationNotes?: Prisma.SortOrder
   onboardingStatus?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   adminRemarks?: Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrder
+  suspendedById?: Prisma.SortOrder
+  suspendReason?: Prisma.SortOrder
   facilityStatus?: Prisma.SortOrder
   manpowerStatus?: Prisma.SortOrder
   improvementRequirement?: Prisma.SortOrder
   improvementPeriod?: Prisma.SortOrder
+  vendorOrigin?: Prisma.SortOrder
+  vendorType?: Prisma.SortOrder
+  purchaseOrg?: Prisma.SortOrder
+  paymentTerm?: Prisma.SortOrder
+  withholdingTaxType?: Prisma.SortOrder
+  legalForm?: Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -1156,6 +1734,7 @@ export type VendorCountOrderByAggregateInput = {
 }
 
 export type VendorAvgOrderByAggregateInput = {
+  tdsRatePercent?: Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
 }
 
@@ -1164,7 +1743,12 @@ export type VendorMaxOrderByAggregateInput = {
   sapVendorCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   natureOfCompany?: Prisma.SortOrder
-  registeredAddress?: Prisma.SortOrder
+  addressLine1?: Prisma.SortOrder
+  addressLine2?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  district?: Prisma.SortOrder
+  stateCode?: Prisma.SortOrder
+  pincode?: Prisma.SortOrder
   telephone?: Prisma.SortOrder
   fax?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -1172,13 +1756,23 @@ export type VendorMaxOrderByAggregateInput = {
   companySize?: Prisma.SortOrder
   pan?: Prisma.SortOrder
   tan?: Prisma.SortOrder
+  gstRegistered?: Prisma.SortOrder
+  gstRegistrationType?: Prisma.SortOrder
   gstn?: Prisma.SortOrder
-  gstCompositionOpted?: Prisma.SortOrder
   gstr1FilingFrequency?: Prisma.SortOrder
   cin?: Prisma.SortOrder
   govtRegistrationType?: Prisma.SortOrder
   govtRegistrationNo?: Prisma.SortOrder
+  msmeRegistered?: Prisma.SortOrder
   msmeCategory?: Prisma.SortOrder
+  msmeRegNo?: Prisma.SortOrder
+  msmeExemptionDate?: Prisma.SortOrder
+  tdsLowerDeduction?: Prisma.SortOrder
+  tdsCertificateNo?: Prisma.SortOrder
+  tdsSection?: Prisma.SortOrder
+  tdsRatePercent?: Prisma.SortOrder
+  tdsValidFrom?: Prisma.SortOrder
+  tdsValidTo?: Prisma.SortOrder
   bankAccountHolderName?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
   bankBranch?: Prisma.SortOrder
@@ -1186,19 +1780,32 @@ export type VendorMaxOrderByAggregateInput = {
   bankAccountNoEnc?: Prisma.SortOrder
   bankAccountNoLast4?: Prisma.SortOrder
   bankIfscEnc?: Prisma.SortOrder
+  bankMicr?: Prisma.SortOrder
+  bankIban?: Prisma.SortOrder
+  bankSwift?: Prisma.SortOrder
   codeOfConductAccepted?: Prisma.SortOrder
   declarationName?: Prisma.SortOrder
   declarationDesignation?: Prisma.SortOrder
   declarationDate?: Prisma.SortOrder
   fleetSummary?: Prisma.SortOrder
+  communicationNotes?: Prisma.SortOrder
   onboardingStatus?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   adminRemarks?: Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrder
+  suspendedById?: Prisma.SortOrder
+  suspendReason?: Prisma.SortOrder
   facilityStatus?: Prisma.SortOrder
   manpowerStatus?: Prisma.SortOrder
   improvementRequirement?: Prisma.SortOrder
   improvementPeriod?: Prisma.SortOrder
+  vendorOrigin?: Prisma.SortOrder
+  vendorType?: Prisma.SortOrder
+  purchaseOrg?: Prisma.SortOrder
+  paymentTerm?: Prisma.SortOrder
+  withholdingTaxType?: Prisma.SortOrder
+  legalForm?: Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -1210,7 +1817,12 @@ export type VendorMinOrderByAggregateInput = {
   sapVendorCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   natureOfCompany?: Prisma.SortOrder
-  registeredAddress?: Prisma.SortOrder
+  addressLine1?: Prisma.SortOrder
+  addressLine2?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  district?: Prisma.SortOrder
+  stateCode?: Prisma.SortOrder
+  pincode?: Prisma.SortOrder
   telephone?: Prisma.SortOrder
   fax?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -1218,13 +1830,23 @@ export type VendorMinOrderByAggregateInput = {
   companySize?: Prisma.SortOrder
   pan?: Prisma.SortOrder
   tan?: Prisma.SortOrder
+  gstRegistered?: Prisma.SortOrder
+  gstRegistrationType?: Prisma.SortOrder
   gstn?: Prisma.SortOrder
-  gstCompositionOpted?: Prisma.SortOrder
   gstr1FilingFrequency?: Prisma.SortOrder
   cin?: Prisma.SortOrder
   govtRegistrationType?: Prisma.SortOrder
   govtRegistrationNo?: Prisma.SortOrder
+  msmeRegistered?: Prisma.SortOrder
   msmeCategory?: Prisma.SortOrder
+  msmeRegNo?: Prisma.SortOrder
+  msmeExemptionDate?: Prisma.SortOrder
+  tdsLowerDeduction?: Prisma.SortOrder
+  tdsCertificateNo?: Prisma.SortOrder
+  tdsSection?: Prisma.SortOrder
+  tdsRatePercent?: Prisma.SortOrder
+  tdsValidFrom?: Prisma.SortOrder
+  tdsValidTo?: Prisma.SortOrder
   bankAccountHolderName?: Prisma.SortOrder
   bankName?: Prisma.SortOrder
   bankBranch?: Prisma.SortOrder
@@ -1232,19 +1854,32 @@ export type VendorMinOrderByAggregateInput = {
   bankAccountNoEnc?: Prisma.SortOrder
   bankAccountNoLast4?: Prisma.SortOrder
   bankIfscEnc?: Prisma.SortOrder
+  bankMicr?: Prisma.SortOrder
+  bankIban?: Prisma.SortOrder
+  bankSwift?: Prisma.SortOrder
   codeOfConductAccepted?: Prisma.SortOrder
   declarationName?: Prisma.SortOrder
   declarationDesignation?: Prisma.SortOrder
   declarationDate?: Prisma.SortOrder
   fleetSummary?: Prisma.SortOrder
+  communicationNotes?: Prisma.SortOrder
   onboardingStatus?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   adminRemarks?: Prisma.SortOrder
+  suspendedAt?: Prisma.SortOrder
+  suspendedById?: Prisma.SortOrder
+  suspendReason?: Prisma.SortOrder
   facilityStatus?: Prisma.SortOrder
   manpowerStatus?: Prisma.SortOrder
   improvementRequirement?: Prisma.SortOrder
   improvementPeriod?: Prisma.SortOrder
+  vendorOrigin?: Prisma.SortOrder
+  vendorType?: Prisma.SortOrder
+  purchaseOrg?: Prisma.SortOrder
+  paymentTerm?: Prisma.SortOrder
+  withholdingTaxType?: Prisma.SortOrder
+  legalForm?: Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -1252,6 +1887,7 @@ export type VendorMinOrderByAggregateInput = {
 }
 
 export type VendorSumOrderByAggregateInput = {
+  tdsRatePercent?: Prisma.SortOrder
   totalFleetSize?: Prisma.SortOrder
 }
 
@@ -1260,14 +1896,46 @@ export type VendorNullableScalarRelationFilter = {
   isNot?: Prisma.VendorWhereInput | null
 }
 
-export type VendorListRelationFilter = {
-  every?: Prisma.VendorWhereInput
-  some?: Prisma.VendorWhereInput
-  none?: Prisma.VendorWhereInput
+export type VendorCreateNestedManyWithoutAddressStateInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutAddressStateInput, Prisma.VendorUncheckedCreateWithoutAddressStateInput> | Prisma.VendorCreateWithoutAddressStateInput[] | Prisma.VendorUncheckedCreateWithoutAddressStateInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutAddressStateInput | Prisma.VendorCreateOrConnectWithoutAddressStateInput[]
+  createMany?: Prisma.VendorCreateManyAddressStateInputEnvelope
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
 }
 
-export type VendorOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type VendorUncheckedCreateNestedManyWithoutAddressStateInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutAddressStateInput, Prisma.VendorUncheckedCreateWithoutAddressStateInput> | Prisma.VendorCreateWithoutAddressStateInput[] | Prisma.VendorUncheckedCreateWithoutAddressStateInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutAddressStateInput | Prisma.VendorCreateOrConnectWithoutAddressStateInput[]
+  createMany?: Prisma.VendorCreateManyAddressStateInputEnvelope
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+}
+
+export type VendorUpdateManyWithoutAddressStateNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutAddressStateInput, Prisma.VendorUncheckedCreateWithoutAddressStateInput> | Prisma.VendorCreateWithoutAddressStateInput[] | Prisma.VendorUncheckedCreateWithoutAddressStateInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutAddressStateInput | Prisma.VendorCreateOrConnectWithoutAddressStateInput[]
+  upsert?: Prisma.VendorUpsertWithWhereUniqueWithoutAddressStateInput | Prisma.VendorUpsertWithWhereUniqueWithoutAddressStateInput[]
+  createMany?: Prisma.VendorCreateManyAddressStateInputEnvelope
+  set?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  disconnect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  delete?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  update?: Prisma.VendorUpdateWithWhereUniqueWithoutAddressStateInput | Prisma.VendorUpdateWithWhereUniqueWithoutAddressStateInput[]
+  updateMany?: Prisma.VendorUpdateManyWithWhereWithoutAddressStateInput | Prisma.VendorUpdateManyWithWhereWithoutAddressStateInput[]
+  deleteMany?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
+}
+
+export type VendorUncheckedUpdateManyWithoutAddressStateNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutAddressStateInput, Prisma.VendorUncheckedCreateWithoutAddressStateInput> | Prisma.VendorCreateWithoutAddressStateInput[] | Prisma.VendorUncheckedCreateWithoutAddressStateInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutAddressStateInput | Prisma.VendorCreateOrConnectWithoutAddressStateInput[]
+  upsert?: Prisma.VendorUpsertWithWhereUniqueWithoutAddressStateInput | Prisma.VendorUpsertWithWhereUniqueWithoutAddressStateInput[]
+  createMany?: Prisma.VendorCreateManyAddressStateInputEnvelope
+  set?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  disconnect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  delete?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  update?: Prisma.VendorUpdateWithWhereUniqueWithoutAddressStateInput | Prisma.VendorUpdateWithWhereUniqueWithoutAddressStateInput[]
+  updateMany?: Prisma.VendorUpdateManyWithWhereWithoutAddressStateInput | Prisma.VendorUpdateManyWithWhereWithoutAddressStateInput[]
+  deleteMany?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
 }
 
 export type VendorCreateNestedOneWithoutOperatingRegionsInput = {
@@ -1296,6 +1964,10 @@ export type NullableBoolFieldUpdateOperationsInput = {
   set?: boolean | null
 }
 
+export type NullableEnumGstRegistrationTypeFieldUpdateOperationsInput = {
+  set?: $Enums.GstRegistrationType | null
+}
+
 export type NullableEnumGstFilingFrequencyFieldUpdateOperationsInput = {
   set?: $Enums.GstFilingFrequency | null
 }
@@ -1304,12 +1976,20 @@ export type NullableEnumMsmeCategoryFieldUpdateOperationsInput = {
   set?: $Enums.MsmeCategory | null
 }
 
-export type NullableEnumBankAccountTypeFieldUpdateOperationsInput = {
-  set?: $Enums.BankAccountType | null
-}
-
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableEnumBankAccountTypeFieldUpdateOperationsInput = {
+  set?: $Enums.BankAccountType | null
 }
 
 export type EnumOnboardingStatusFieldUpdateOperationsInput = {
@@ -1399,10 +2079,24 @@ export type VendorCreateNestedManyWithoutApprovedByInput = {
   connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
 }
 
+export type VendorCreateNestedManyWithoutSuspendedByInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutSuspendedByInput, Prisma.VendorUncheckedCreateWithoutSuspendedByInput> | Prisma.VendorCreateWithoutSuspendedByInput[] | Prisma.VendorUncheckedCreateWithoutSuspendedByInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutSuspendedByInput | Prisma.VendorCreateOrConnectWithoutSuspendedByInput[]
+  createMany?: Prisma.VendorCreateManySuspendedByInputEnvelope
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+}
+
 export type VendorUncheckedCreateNestedManyWithoutApprovedByInput = {
   create?: Prisma.XOR<Prisma.VendorCreateWithoutApprovedByInput, Prisma.VendorUncheckedCreateWithoutApprovedByInput> | Prisma.VendorCreateWithoutApprovedByInput[] | Prisma.VendorUncheckedCreateWithoutApprovedByInput[]
   connectOrCreate?: Prisma.VendorCreateOrConnectWithoutApprovedByInput | Prisma.VendorCreateOrConnectWithoutApprovedByInput[]
   createMany?: Prisma.VendorCreateManyApprovedByInputEnvelope
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+}
+
+export type VendorUncheckedCreateNestedManyWithoutSuspendedByInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutSuspendedByInput, Prisma.VendorUncheckedCreateWithoutSuspendedByInput> | Prisma.VendorCreateWithoutSuspendedByInput[] | Prisma.VendorUncheckedCreateWithoutSuspendedByInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutSuspendedByInput | Prisma.VendorCreateOrConnectWithoutSuspendedByInput[]
+  createMany?: Prisma.VendorCreateManySuspendedByInputEnvelope
   connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
 }
 
@@ -1430,6 +2124,20 @@ export type VendorUpdateManyWithoutApprovedByNestedInput = {
   deleteMany?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
 }
 
+export type VendorUpdateManyWithoutSuspendedByNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutSuspendedByInput, Prisma.VendorUncheckedCreateWithoutSuspendedByInput> | Prisma.VendorCreateWithoutSuspendedByInput[] | Prisma.VendorUncheckedCreateWithoutSuspendedByInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutSuspendedByInput | Prisma.VendorCreateOrConnectWithoutSuspendedByInput[]
+  upsert?: Prisma.VendorUpsertWithWhereUniqueWithoutSuspendedByInput | Prisma.VendorUpsertWithWhereUniqueWithoutSuspendedByInput[]
+  createMany?: Prisma.VendorCreateManySuspendedByInputEnvelope
+  set?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  disconnect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  delete?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  update?: Prisma.VendorUpdateWithWhereUniqueWithoutSuspendedByInput | Prisma.VendorUpdateWithWhereUniqueWithoutSuspendedByInput[]
+  updateMany?: Prisma.VendorUpdateManyWithWhereWithoutSuspendedByInput | Prisma.VendorUpdateManyWithWhereWithoutSuspendedByInput[]
+  deleteMany?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
+}
+
 export type VendorUncheckedUpdateManyWithoutApprovedByNestedInput = {
   create?: Prisma.XOR<Prisma.VendorCreateWithoutApprovedByInput, Prisma.VendorUncheckedCreateWithoutApprovedByInput> | Prisma.VendorCreateWithoutApprovedByInput[] | Prisma.VendorUncheckedCreateWithoutApprovedByInput[]
   connectOrCreate?: Prisma.VendorCreateOrConnectWithoutApprovedByInput | Prisma.VendorCreateOrConnectWithoutApprovedByInput[]
@@ -1441,6 +2149,20 @@ export type VendorUncheckedUpdateManyWithoutApprovedByNestedInput = {
   connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
   update?: Prisma.VendorUpdateWithWhereUniqueWithoutApprovedByInput | Prisma.VendorUpdateWithWhereUniqueWithoutApprovedByInput[]
   updateMany?: Prisma.VendorUpdateManyWithWhereWithoutApprovedByInput | Prisma.VendorUpdateManyWithWhereWithoutApprovedByInput[]
+  deleteMany?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
+}
+
+export type VendorUncheckedUpdateManyWithoutSuspendedByNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutSuspendedByInput, Prisma.VendorUncheckedCreateWithoutSuspendedByInput> | Prisma.VendorCreateWithoutSuspendedByInput[] | Prisma.VendorUncheckedCreateWithoutSuspendedByInput[]
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutSuspendedByInput | Prisma.VendorCreateOrConnectWithoutSuspendedByInput[]
+  upsert?: Prisma.VendorUpsertWithWhereUniqueWithoutSuspendedByInput | Prisma.VendorUpsertWithWhereUniqueWithoutSuspendedByInput[]
+  createMany?: Prisma.VendorCreateManySuspendedByInputEnvelope
+  set?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  disconnect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  delete?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  connect?: Prisma.VendorWhereUniqueInput | Prisma.VendorWhereUniqueInput[]
+  update?: Prisma.VendorUpdateWithWhereUniqueWithoutSuspendedByInput | Prisma.VendorUpdateWithWhereUniqueWithoutSuspendedByInput[]
+  updateMany?: Prisma.VendorUpdateManyWithWhereWithoutSuspendedByInput | Prisma.VendorUpdateManyWithWhereWithoutSuspendedByInput[]
   deleteMany?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
 }
 
@@ -1486,12 +2208,16 @@ export type VendorUpdateOneRequiredWithoutQuotationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutQuotationsInput, Prisma.VendorUpdateWithoutQuotationsInput>, Prisma.VendorUncheckedUpdateWithoutQuotationsInput>
 }
 
-export type VendorCreateWithoutOperatingRegionsInput = {
+export type VendorCreateWithoutAddressStateInput = {
   id?: string
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -1499,13 +2225,23 @@ export type VendorCreateWithoutOperatingRegionsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -1513,23 +2249,304 @@ export type VendorCreateWithoutOperatingRegionsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
+  operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
+  contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
+  decisions?: Prisma.VendorDecisionCreateNestedManyWithoutVendorInput
+  users?: Prisma.UserCreateNestedManyWithoutVendorInput
+  invitations?: Prisma.VendorInvitationCreateNestedManyWithoutVendorInput
+  cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
+  rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutAddressStateInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedById?: string | null
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  operatingRegions?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutVendorInput
+  contacts?: Prisma.VendorContactUncheckedCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentUncheckedCreateNestedManyWithoutVendorInput
+  decisions?: Prisma.VendorDecisionUncheckedCreateNestedManyWithoutVendorInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutVendorInput
+  invitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutVendorInput
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutAddressStateInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutAddressStateInput, Prisma.VendorUncheckedCreateWithoutAddressStateInput>
+}
+
+export type VendorCreateManyAddressStateInputEnvelope = {
+  data: Prisma.VendorCreateManyAddressStateInput | Prisma.VendorCreateManyAddressStateInput[]
+  skipDuplicates?: boolean
+}
+
+export type VendorUpsertWithWhereUniqueWithoutAddressStateInput = {
+  where: Prisma.VendorWhereUniqueInput
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutAddressStateInput, Prisma.VendorUncheckedUpdateWithoutAddressStateInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutAddressStateInput, Prisma.VendorUncheckedCreateWithoutAddressStateInput>
+}
+
+export type VendorUpdateWithWhereUniqueWithoutAddressStateInput = {
+  where: Prisma.VendorWhereUniqueInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutAddressStateInput, Prisma.VendorUncheckedUpdateWithoutAddressStateInput>
+}
+
+export type VendorUpdateManyWithWhereWithoutAddressStateInput = {
+  where: Prisma.VendorScalarWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateManyMutationInput, Prisma.VendorUncheckedUpdateManyWithoutAddressStateInput>
+}
+
+export type VendorScalarWhereInput = {
+  AND?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
+  OR?: Prisma.VendorScalarWhereInput[]
+  NOT?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
+  id?: Prisma.StringFilter<"Vendor"> | string
+  sapVendorCode?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  name?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  natureOfCompany?: Prisma.EnumNatureOfCompanyNullableFilter<"Vendor"> | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  addressLine2?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  city?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  district?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  stateCode?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  pincode?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  telephone?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  fax?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  email?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  weeklyOffDays?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  companySize?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  pan?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tan?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  gstRegistered?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  gstRegistrationType?: Prisma.EnumGstRegistrationTypeNullableFilter<"Vendor"> | $Enums.GstRegistrationType | null
+  gstn?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  gstr1FilingFrequency?: Prisma.EnumGstFilingFrequencyNullableFilter<"Vendor"> | $Enums.GstFilingFrequency | null
+  cin?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  govtRegistrationType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  govtRegistrationNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  msmeRegistered?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  msmeCategory?: Prisma.EnumMsmeCategoryNullableFilter<"Vendor"> | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  msmeExemptionDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  tdsLowerDeduction?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  tdsCertificateNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tdsSection?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  tdsRatePercent?: Prisma.IntNullableFilter<"Vendor"> | number | null
+  tdsValidFrom?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  tdsValidTo?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  bankAccountHolderName?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankName?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankBranch?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankAccountType?: Prisma.EnumBankAccountTypeNullableFilter<"Vendor"> | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankAccountNoLast4?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankIfscEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankMicr?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankIban?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  bankSwift?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  codeOfConductAccepted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
+  declarationName?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  declarationDesignation?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  declarationDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  fleetSummary?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  communicationNotes?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFilter<"Vendor"> | $Enums.OnboardingStatus
+  approvedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  approvedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  adminRemarks?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  suspendedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
+  suspendedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  suspendReason?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  facilityStatus?: Prisma.EnumFacilityStatusNullableFilter<"Vendor"> | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.EnumManpowerStatusNullableFilter<"Vendor"> | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  improvementPeriod?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorOrigin?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  vendorType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  purchaseOrg?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  paymentTerm?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  withholdingTaxType?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  legalForm?: Prisma.StringNullableFilter<"Vendor"> | string | null
+  totalFleetSize?: Prisma.IntFilter<"Vendor"> | number
+  createdAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
+  updatedBy?: Prisma.StringNullableFilter<"Vendor"> | string | null
+}
+
+export type VendorCreateWithoutOperatingRegionsInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
+  approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
   decisions?: Prisma.VendorDecisionCreateNestedManyWithoutVendorInput
@@ -1545,7 +2562,12 @@ export type VendorUncheckedCreateWithoutOperatingRegionsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -1553,13 +2575,23 @@ export type VendorUncheckedCreateWithoutOperatingRegionsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -1567,19 +2599,32 @@ export type VendorUncheckedCreateWithoutOperatingRegionsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1615,7 +2660,11 @@ export type VendorUpdateWithoutOperatingRegionsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1623,13 +2672,23 @@ export type VendorUpdateWithoutOperatingRegionsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1637,23 +2696,37 @@ export type VendorUpdateWithoutOperatingRegionsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
   decisions?: Prisma.VendorDecisionUpdateManyWithoutVendorNestedInput
@@ -1669,7 +2742,12 @@ export type VendorUncheckedUpdateWithoutOperatingRegionsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1677,13 +2755,23 @@ export type VendorUncheckedUpdateWithoutOperatingRegionsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1691,19 +2779,32 @@ export type VendorUncheckedUpdateWithoutOperatingRegionsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1723,7 +2824,11 @@ export type VendorCreateWithoutContactsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -1731,13 +2836,23 @@ export type VendorCreateWithoutContactsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -1745,23 +2860,37 @@ export type VendorCreateWithoutContactsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
   decisions?: Prisma.VendorDecisionCreateNestedManyWithoutVendorInput
@@ -1777,7 +2906,12 @@ export type VendorUncheckedCreateWithoutContactsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -1785,13 +2919,23 @@ export type VendorUncheckedCreateWithoutContactsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -1799,19 +2943,32 @@ export type VendorUncheckedCreateWithoutContactsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1847,7 +3004,11 @@ export type VendorUpdateWithoutContactsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1855,13 +3016,23 @@ export type VendorUpdateWithoutContactsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1869,23 +3040,37 @@ export type VendorUpdateWithoutContactsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
   decisions?: Prisma.VendorDecisionUpdateManyWithoutVendorNestedInput
@@ -1901,7 +3086,12 @@ export type VendorUncheckedUpdateWithoutContactsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1909,13 +3099,23 @@ export type VendorUncheckedUpdateWithoutContactsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1923,19 +3123,32 @@ export type VendorUncheckedUpdateWithoutContactsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1955,7 +3168,11 @@ export type VendorCreateWithoutDocumentsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -1963,13 +3180,23 @@ export type VendorCreateWithoutDocumentsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -1977,23 +3204,37 @@ export type VendorCreateWithoutDocumentsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   decisions?: Prisma.VendorDecisionCreateNestedManyWithoutVendorInput
@@ -2009,7 +3250,12 @@ export type VendorUncheckedCreateWithoutDocumentsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2017,13 +3263,23 @@ export type VendorUncheckedCreateWithoutDocumentsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2031,19 +3287,32 @@ export type VendorUncheckedCreateWithoutDocumentsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2079,7 +3348,11 @@ export type VendorUpdateWithoutDocumentsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2087,13 +3360,23 @@ export type VendorUpdateWithoutDocumentsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2101,23 +3384,37 @@ export type VendorUpdateWithoutDocumentsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   decisions?: Prisma.VendorDecisionUpdateManyWithoutVendorNestedInput
@@ -2133,7 +3430,12 @@ export type VendorUncheckedUpdateWithoutDocumentsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2141,13 +3443,23 @@ export type VendorUncheckedUpdateWithoutDocumentsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2155,19 +3467,32 @@ export type VendorUncheckedUpdateWithoutDocumentsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2187,7 +3512,11 @@ export type VendorCreateWithoutInvitationsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2195,13 +3524,23 @@ export type VendorCreateWithoutInvitationsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2209,23 +3548,37 @@ export type VendorCreateWithoutInvitationsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -2241,7 +3594,12 @@ export type VendorUncheckedCreateWithoutInvitationsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2249,13 +3607,23 @@ export type VendorUncheckedCreateWithoutInvitationsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2263,19 +3631,32 @@ export type VendorUncheckedCreateWithoutInvitationsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2311,7 +3692,11 @@ export type VendorUpdateWithoutInvitationsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2319,13 +3704,23 @@ export type VendorUpdateWithoutInvitationsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2333,23 +3728,37 @@ export type VendorUpdateWithoutInvitationsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -2365,7 +3774,12 @@ export type VendorUncheckedUpdateWithoutInvitationsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2373,13 +3787,23 @@ export type VendorUncheckedUpdateWithoutInvitationsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2387,19 +3811,32 @@ export type VendorUncheckedUpdateWithoutInvitationsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2419,7 +3856,11 @@ export type VendorCreateWithoutDecisionsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2427,13 +3868,23 @@ export type VendorCreateWithoutDecisionsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2441,23 +3892,37 @@ export type VendorCreateWithoutDecisionsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -2473,7 +3938,12 @@ export type VendorUncheckedCreateWithoutDecisionsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2481,13 +3951,23 @@ export type VendorUncheckedCreateWithoutDecisionsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2495,19 +3975,32 @@ export type VendorUncheckedCreateWithoutDecisionsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2543,7 +4036,11 @@ export type VendorUpdateWithoutDecisionsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2551,13 +4048,23 @@ export type VendorUpdateWithoutDecisionsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2565,23 +4072,37 @@ export type VendorUpdateWithoutDecisionsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -2597,7 +4118,12 @@ export type VendorUncheckedUpdateWithoutDecisionsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2605,13 +4131,23 @@ export type VendorUncheckedUpdateWithoutDecisionsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2619,19 +4155,32 @@ export type VendorUncheckedUpdateWithoutDecisionsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2651,7 +4200,11 @@ export type VendorCreateWithoutUsersInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2659,13 +4212,23 @@ export type VendorCreateWithoutUsersInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2673,23 +4236,37 @@ export type VendorCreateWithoutUsersInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -2705,7 +4282,12 @@ export type VendorUncheckedCreateWithoutUsersInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2713,13 +4295,23 @@ export type VendorUncheckedCreateWithoutUsersInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2727,19 +4319,32 @@ export type VendorUncheckedCreateWithoutUsersInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2764,7 +4369,11 @@ export type VendorCreateWithoutApprovedByInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2772,13 +4381,23 @@ export type VendorCreateWithoutApprovedByInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2786,22 +4405,36 @@ export type VendorCreateWithoutApprovedByInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -2818,7 +4451,12 @@ export type VendorUncheckedCreateWithoutApprovedByInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -2826,13 +4464,23 @@ export type VendorUncheckedCreateWithoutApprovedByInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -2840,18 +4488,31 @@ export type VendorUncheckedCreateWithoutApprovedByInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2877,6 +4538,180 @@ export type VendorCreateManyApprovedByInputEnvelope = {
   skipDuplicates?: boolean
 }
 
+export type VendorCreateWithoutSuspendedByInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
+  approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
+  contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
+  decisions?: Prisma.VendorDecisionCreateNestedManyWithoutVendorInput
+  users?: Prisma.UserCreateNestedManyWithoutVendorInput
+  invitations?: Prisma.VendorInvitationCreateNestedManyWithoutVendorInput
+  cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
+  rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutSuspendedByInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedById?: string | null
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  operatingRegions?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutVendorInput
+  contacts?: Prisma.VendorContactUncheckedCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentUncheckedCreateNestedManyWithoutVendorInput
+  decisions?: Prisma.VendorDecisionUncheckedCreateNestedManyWithoutVendorInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutVendorInput
+  invitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutVendorInput
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutSuspendedByInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutSuspendedByInput, Prisma.VendorUncheckedCreateWithoutSuspendedByInput>
+}
+
+export type VendorCreateManySuspendedByInputEnvelope = {
+  data: Prisma.VendorCreateManySuspendedByInput | Prisma.VendorCreateManySuspendedByInput[]
+  skipDuplicates?: boolean
+}
+
 export type VendorUpsertWithoutUsersInput = {
   update: Prisma.XOR<Prisma.VendorUpdateWithoutUsersInput, Prisma.VendorUncheckedUpdateWithoutUsersInput>
   create: Prisma.XOR<Prisma.VendorCreateWithoutUsersInput, Prisma.VendorUncheckedCreateWithoutUsersInput>
@@ -2893,7 +4728,11 @@ export type VendorUpdateWithoutUsersInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2901,13 +4740,23 @@ export type VendorUpdateWithoutUsersInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2915,23 +4764,37 @@ export type VendorUpdateWithoutUsersInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -2947,7 +4810,12 @@ export type VendorUncheckedUpdateWithoutUsersInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2955,13 +4823,23 @@ export type VendorUncheckedUpdateWithoutUsersInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2969,19 +4847,32 @@ export type VendorUncheckedUpdateWithoutUsersInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3012,53 +4903,20 @@ export type VendorUpdateManyWithWhereWithoutApprovedByInput = {
   data: Prisma.XOR<Prisma.VendorUpdateManyMutationInput, Prisma.VendorUncheckedUpdateManyWithoutApprovedByInput>
 }
 
-export type VendorScalarWhereInput = {
-  AND?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
-  OR?: Prisma.VendorScalarWhereInput[]
-  NOT?: Prisma.VendorScalarWhereInput | Prisma.VendorScalarWhereInput[]
-  id?: Prisma.StringFilter<"Vendor"> | string
-  sapVendorCode?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  name?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  natureOfCompany?: Prisma.EnumNatureOfCompanyNullableFilter<"Vendor"> | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  telephone?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  fax?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  email?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  weeklyOffDays?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  companySize?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  pan?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  tan?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  gstn?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  gstCompositionOpted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
-  gstr1FilingFrequency?: Prisma.EnumGstFilingFrequencyNullableFilter<"Vendor"> | $Enums.GstFilingFrequency | null
-  cin?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  govtRegistrationType?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  govtRegistrationNo?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  msmeCategory?: Prisma.EnumMsmeCategoryNullableFilter<"Vendor"> | $Enums.MsmeCategory | null
-  bankAccountHolderName?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  bankName?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  bankBranch?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  bankAccountType?: Prisma.EnumBankAccountTypeNullableFilter<"Vendor"> | $Enums.BankAccountType | null
-  bankAccountNoEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  bankAccountNoLast4?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  bankIfscEnc?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  codeOfConductAccepted?: Prisma.BoolNullableFilter<"Vendor"> | boolean | null
-  declarationName?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  declarationDesignation?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  declarationDate?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
-  fleetSummary?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  onboardingStatus?: Prisma.EnumOnboardingStatusFilter<"Vendor"> | $Enums.OnboardingStatus
-  approvedById?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  approvedAt?: Prisma.DateTimeNullableFilter<"Vendor"> | Date | string | null
-  adminRemarks?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  facilityStatus?: Prisma.EnumFacilityStatusNullableFilter<"Vendor"> | $Enums.FacilityStatus | null
-  manpowerStatus?: Prisma.EnumManpowerStatusNullableFilter<"Vendor"> | $Enums.ManpowerStatus | null
-  improvementRequirement?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  improvementPeriod?: Prisma.StringNullableFilter<"Vendor"> | string | null
-  totalFleetSize?: Prisma.IntFilter<"Vendor"> | number
-  createdAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Vendor"> | Date | string
-  updatedBy?: Prisma.StringNullableFilter<"Vendor"> | string | null
+export type VendorUpsertWithWhereUniqueWithoutSuspendedByInput = {
+  where: Prisma.VendorWhereUniqueInput
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutSuspendedByInput, Prisma.VendorUncheckedUpdateWithoutSuspendedByInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutSuspendedByInput, Prisma.VendorUncheckedCreateWithoutSuspendedByInput>
+}
+
+export type VendorUpdateWithWhereUniqueWithoutSuspendedByInput = {
+  where: Prisma.VendorWhereUniqueInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutSuspendedByInput, Prisma.VendorUncheckedUpdateWithoutSuspendedByInput>
+}
+
+export type VendorUpdateManyWithWhereWithoutSuspendedByInput = {
+  where: Prisma.VendorScalarWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateManyMutationInput, Prisma.VendorUncheckedUpdateManyWithoutSuspendedByInput>
 }
 
 export type VendorCreateWithoutCranesInput = {
@@ -3066,7 +4924,11 @@ export type VendorCreateWithoutCranesInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3074,13 +4936,23 @@ export type VendorCreateWithoutCranesInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3088,23 +4960,37 @@ export type VendorCreateWithoutCranesInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -3120,7 +5006,12 @@ export type VendorUncheckedCreateWithoutCranesInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3128,13 +5019,23 @@ export type VendorUncheckedCreateWithoutCranesInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3142,19 +5043,32 @@ export type VendorUncheckedCreateWithoutCranesInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3190,7 +5104,11 @@ export type VendorUpdateWithoutCranesInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3198,13 +5116,23 @@ export type VendorUpdateWithoutCranesInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3212,23 +5140,37 @@ export type VendorUpdateWithoutCranesInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -3244,7 +5186,12 @@ export type VendorUncheckedUpdateWithoutCranesInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3252,13 +5199,23 @@ export type VendorUncheckedUpdateWithoutCranesInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3266,19 +5223,32 @@ export type VendorUncheckedUpdateWithoutCranesInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3298,7 +5268,11 @@ export type VendorCreateWithoutRfqRecipientsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3306,13 +5280,23 @@ export type VendorCreateWithoutRfqRecipientsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3320,23 +5304,37 @@ export type VendorCreateWithoutRfqRecipientsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -3352,7 +5350,12 @@ export type VendorUncheckedCreateWithoutRfqRecipientsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3360,13 +5363,23 @@ export type VendorUncheckedCreateWithoutRfqRecipientsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3374,19 +5387,32 @@ export type VendorUncheckedCreateWithoutRfqRecipientsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3422,7 +5448,11 @@ export type VendorUpdateWithoutRfqRecipientsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3430,13 +5460,23 @@ export type VendorUpdateWithoutRfqRecipientsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3444,23 +5484,37 @@ export type VendorUpdateWithoutRfqRecipientsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -3476,7 +5530,12 @@ export type VendorUncheckedUpdateWithoutRfqRecipientsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3484,13 +5543,23 @@ export type VendorUncheckedUpdateWithoutRfqRecipientsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3498,19 +5567,32 @@ export type VendorUncheckedUpdateWithoutRfqRecipientsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3530,7 +5612,11 @@ export type VendorCreateWithoutQuotationsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3538,13 +5624,23 @@ export type VendorCreateWithoutQuotationsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3552,23 +5648,37 @@ export type VendorCreateWithoutQuotationsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
   approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
   operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
   contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
   documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
@@ -3584,7 +5694,12 @@ export type VendorUncheckedCreateWithoutQuotationsInput = {
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3592,13 +5707,23 @@ export type VendorUncheckedCreateWithoutQuotationsInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3606,19 +5731,32 @@ export type VendorUncheckedCreateWithoutQuotationsInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
   approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3654,7 +5792,11 @@ export type VendorUpdateWithoutQuotationsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3662,13 +5804,23 @@ export type VendorUpdateWithoutQuotationsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3676,23 +5828,37 @@ export type VendorUpdateWithoutQuotationsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
   approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -3708,7 +5874,12 @@ export type VendorUncheckedUpdateWithoutQuotationsInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3716,13 +5887,23 @@ export type VendorUncheckedUpdateWithoutQuotationsInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3730,19 +5911,32 @@ export type VendorUncheckedUpdateWithoutQuotationsInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3757,12 +5951,16 @@ export type VendorUncheckedUpdateWithoutQuotationsInput = {
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
 }
 
-export type VendorCreateManyApprovedByInput = {
+export type VendorCreateManyAddressStateInput = {
   id?: string
   sapVendorCode?: string | null
   name?: string | null
   natureOfCompany?: $Enums.NatureOfCompany | null
-  registeredAddress?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
   telephone?: string | null
   fax?: string | null
   email?: string | null
@@ -3770,13 +5968,23 @@ export type VendorCreateManyApprovedByInput = {
   companySize?: string | null
   pan?: string | null
   tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
   gstn?: string | null
-  gstCompositionOpted?: boolean | null
   gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
   cin?: string | null
   govtRegistrationType?: string | null
   govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
   msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
   bankAccountHolderName?: string | null
   bankName?: string | null
   bankBranch?: string | null
@@ -3784,18 +5992,415 @@ export type VendorCreateManyApprovedByInput = {
   bankAccountNoEnc?: string | null
   bankAccountNoLast4?: string | null
   bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
   codeOfConductAccepted?: boolean | null
   declarationName?: string | null
   declarationDesignation?: string | null
   declarationDate?: Date | string | null
   fleetSummary?: string | null
+  communicationNotes?: string | null
   onboardingStatus?: $Enums.OnboardingStatus
+  approvedById?: string | null
   approvedAt?: Date | string | null
   adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
   facilityStatus?: $Enums.FacilityStatus | null
   manpowerStatus?: $Enums.ManpowerStatus | null
   improvementRequirement?: string | null
   improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+}
+
+export type VendorUpdateWithoutAddressStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
+  operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
+  contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
+  decisions?: Prisma.VendorDecisionUpdateManyWithoutVendorNestedInput
+  users?: Prisma.UserUpdateManyWithoutVendorNestedInput
+  invitations?: Prisma.VendorInvitationUpdateManyWithoutVendorNestedInput
+  cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutAddressStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatingRegions?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutVendorNestedInput
+  contacts?: Prisma.VendorContactUncheckedUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUncheckedUpdateManyWithoutVendorNestedInput
+  decisions?: Prisma.VendorDecisionUncheckedUpdateManyWithoutVendorNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutVendorNestedInput
+  invitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutVendorNestedInput
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateManyWithoutAddressStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type VendorCreateManyApprovedByInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+}
+
+export type VendorCreateManySuspendedByInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedById?: string | null
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
   totalFleetSize?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3807,7 +6412,11 @@ export type VendorUpdateWithoutApprovedByInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3815,13 +6424,23 @@ export type VendorUpdateWithoutApprovedByInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3829,22 +6448,36 @@ export type VendorUpdateWithoutApprovedByInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
   operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
   contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
   documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
@@ -3861,7 +6494,12 @@ export type VendorUncheckedUpdateWithoutApprovedByInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3869,13 +6507,23 @@ export type VendorUncheckedUpdateWithoutApprovedByInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3883,18 +6531,31 @@ export type VendorUncheckedUpdateWithoutApprovedByInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3915,7 +6576,12 @@ export type VendorUncheckedUpdateManyWithoutApprovedByInput = {
   sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
-  registeredAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3923,13 +6589,23 @@ export type VendorUncheckedUpdateManyWithoutApprovedByInput = {
   companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
   gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gstCompositionOpted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
   cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3937,18 +6613,268 @@ export type VendorUncheckedUpdateManyWithoutApprovedByInput = {
   bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
   manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
   improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type VendorUpdateWithoutSuspendedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
+  approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
+  contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
+  decisions?: Prisma.VendorDecisionUpdateManyWithoutVendorNestedInput
+  users?: Prisma.UserUpdateManyWithoutVendorNestedInput
+  invitations?: Prisma.VendorInvitationUpdateManyWithoutVendorNestedInput
+  cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutSuspendedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatingRegions?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutVendorNestedInput
+  contacts?: Prisma.VendorContactUncheckedUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUncheckedUpdateManyWithoutVendorNestedInput
+  decisions?: Prisma.VendorDecisionUncheckedUpdateManyWithoutVendorNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutVendorNestedInput
+  invitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutVendorNestedInput
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateManyWithoutSuspendedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4063,7 +6989,12 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   sapVendorCode?: boolean
   name?: boolean
   natureOfCompany?: boolean
-  registeredAddress?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  district?: boolean
+  stateCode?: boolean
+  pincode?: boolean
   telephone?: boolean
   fax?: boolean
   email?: boolean
@@ -4071,13 +7002,23 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   companySize?: boolean
   pan?: boolean
   tan?: boolean
+  gstRegistered?: boolean
+  gstRegistrationType?: boolean
   gstn?: boolean
-  gstCompositionOpted?: boolean
   gstr1FilingFrequency?: boolean
   cin?: boolean
   govtRegistrationType?: boolean
   govtRegistrationNo?: boolean
+  msmeRegistered?: boolean
   msmeCategory?: boolean
+  msmeRegNo?: boolean
+  msmeExemptionDate?: boolean
+  tdsLowerDeduction?: boolean
+  tdsCertificateNo?: boolean
+  tdsSection?: boolean
+  tdsRatePercent?: boolean
+  tdsValidFrom?: boolean
+  tdsValidTo?: boolean
   bankAccountHolderName?: boolean
   bankName?: boolean
   bankBranch?: boolean
@@ -4085,24 +7026,39 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   bankAccountNoEnc?: boolean
   bankAccountNoLast4?: boolean
   bankIfscEnc?: boolean
+  bankMicr?: boolean
+  bankIban?: boolean
+  bankSwift?: boolean
   codeOfConductAccepted?: boolean
   declarationName?: boolean
   declarationDesignation?: boolean
   declarationDate?: boolean
   fleetSummary?: boolean
+  communicationNotes?: boolean
   onboardingStatus?: boolean
   approvedById?: boolean
   approvedAt?: boolean
   adminRemarks?: boolean
+  suspendedAt?: boolean
+  suspendedById?: boolean
+  suspendReason?: boolean
   facilityStatus?: boolean
   manpowerStatus?: boolean
   improvementRequirement?: boolean
   improvementPeriod?: boolean
+  vendorOrigin?: boolean
+  vendorType?: boolean
+  purchaseOrg?: boolean
+  paymentTerm?: boolean
+  withholdingTaxType?: boolean
+  legalForm?: boolean
   totalFleetSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   updatedBy?: boolean
+  addressState?: boolean | Prisma.Vendor$addressStateArgs<ExtArgs>
   approvedBy?: boolean | Prisma.Vendor$approvedByArgs<ExtArgs>
+  suspendedBy?: boolean | Prisma.Vendor$suspendedByArgs<ExtArgs>
   operatingRegions?: boolean | Prisma.Vendor$operatingRegionsArgs<ExtArgs>
   contacts?: boolean | Prisma.Vendor$contactsArgs<ExtArgs>
   documents?: boolean | Prisma.Vendor$documentsArgs<ExtArgs>
@@ -4120,7 +7076,12 @@ export type VendorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   sapVendorCode?: boolean
   name?: boolean
   natureOfCompany?: boolean
-  registeredAddress?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  district?: boolean
+  stateCode?: boolean
+  pincode?: boolean
   telephone?: boolean
   fax?: boolean
   email?: boolean
@@ -4128,13 +7089,23 @@ export type VendorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   companySize?: boolean
   pan?: boolean
   tan?: boolean
+  gstRegistered?: boolean
+  gstRegistrationType?: boolean
   gstn?: boolean
-  gstCompositionOpted?: boolean
   gstr1FilingFrequency?: boolean
   cin?: boolean
   govtRegistrationType?: boolean
   govtRegistrationNo?: boolean
+  msmeRegistered?: boolean
   msmeCategory?: boolean
+  msmeRegNo?: boolean
+  msmeExemptionDate?: boolean
+  tdsLowerDeduction?: boolean
+  tdsCertificateNo?: boolean
+  tdsSection?: boolean
+  tdsRatePercent?: boolean
+  tdsValidFrom?: boolean
+  tdsValidTo?: boolean
   bankAccountHolderName?: boolean
   bankName?: boolean
   bankBranch?: boolean
@@ -4142,24 +7113,39 @@ export type VendorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   bankAccountNoEnc?: boolean
   bankAccountNoLast4?: boolean
   bankIfscEnc?: boolean
+  bankMicr?: boolean
+  bankIban?: boolean
+  bankSwift?: boolean
   codeOfConductAccepted?: boolean
   declarationName?: boolean
   declarationDesignation?: boolean
   declarationDate?: boolean
   fleetSummary?: boolean
+  communicationNotes?: boolean
   onboardingStatus?: boolean
   approvedById?: boolean
   approvedAt?: boolean
   adminRemarks?: boolean
+  suspendedAt?: boolean
+  suspendedById?: boolean
+  suspendReason?: boolean
   facilityStatus?: boolean
   manpowerStatus?: boolean
   improvementRequirement?: boolean
   improvementPeriod?: boolean
+  vendorOrigin?: boolean
+  vendorType?: boolean
+  purchaseOrg?: boolean
+  paymentTerm?: boolean
+  withholdingTaxType?: boolean
+  legalForm?: boolean
   totalFleetSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   updatedBy?: boolean
+  addressState?: boolean | Prisma.Vendor$addressStateArgs<ExtArgs>
   approvedBy?: boolean | Prisma.Vendor$approvedByArgs<ExtArgs>
+  suspendedBy?: boolean | Prisma.Vendor$suspendedByArgs<ExtArgs>
 }, ExtArgs["result"]["vendor"]>
 
 export type VendorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -4167,7 +7153,12 @@ export type VendorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   sapVendorCode?: boolean
   name?: boolean
   natureOfCompany?: boolean
-  registeredAddress?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  district?: boolean
+  stateCode?: boolean
+  pincode?: boolean
   telephone?: boolean
   fax?: boolean
   email?: boolean
@@ -4175,13 +7166,23 @@ export type VendorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   companySize?: boolean
   pan?: boolean
   tan?: boolean
+  gstRegistered?: boolean
+  gstRegistrationType?: boolean
   gstn?: boolean
-  gstCompositionOpted?: boolean
   gstr1FilingFrequency?: boolean
   cin?: boolean
   govtRegistrationType?: boolean
   govtRegistrationNo?: boolean
+  msmeRegistered?: boolean
   msmeCategory?: boolean
+  msmeRegNo?: boolean
+  msmeExemptionDate?: boolean
+  tdsLowerDeduction?: boolean
+  tdsCertificateNo?: boolean
+  tdsSection?: boolean
+  tdsRatePercent?: boolean
+  tdsValidFrom?: boolean
+  tdsValidTo?: boolean
   bankAccountHolderName?: boolean
   bankName?: boolean
   bankBranch?: boolean
@@ -4189,24 +7190,39 @@ export type VendorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   bankAccountNoEnc?: boolean
   bankAccountNoLast4?: boolean
   bankIfscEnc?: boolean
+  bankMicr?: boolean
+  bankIban?: boolean
+  bankSwift?: boolean
   codeOfConductAccepted?: boolean
   declarationName?: boolean
   declarationDesignation?: boolean
   declarationDate?: boolean
   fleetSummary?: boolean
+  communicationNotes?: boolean
   onboardingStatus?: boolean
   approvedById?: boolean
   approvedAt?: boolean
   adminRemarks?: boolean
+  suspendedAt?: boolean
+  suspendedById?: boolean
+  suspendReason?: boolean
   facilityStatus?: boolean
   manpowerStatus?: boolean
   improvementRequirement?: boolean
   improvementPeriod?: boolean
+  vendorOrigin?: boolean
+  vendorType?: boolean
+  purchaseOrg?: boolean
+  paymentTerm?: boolean
+  withholdingTaxType?: boolean
+  legalForm?: boolean
   totalFleetSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   updatedBy?: boolean
+  addressState?: boolean | Prisma.Vendor$addressStateArgs<ExtArgs>
   approvedBy?: boolean | Prisma.Vendor$approvedByArgs<ExtArgs>
+  suspendedBy?: boolean | Prisma.Vendor$suspendedByArgs<ExtArgs>
 }, ExtArgs["result"]["vendor"]>
 
 export type VendorSelectScalar = {
@@ -4214,7 +7230,12 @@ export type VendorSelectScalar = {
   sapVendorCode?: boolean
   name?: boolean
   natureOfCompany?: boolean
-  registeredAddress?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  district?: boolean
+  stateCode?: boolean
+  pincode?: boolean
   telephone?: boolean
   fax?: boolean
   email?: boolean
@@ -4222,13 +7243,23 @@ export type VendorSelectScalar = {
   companySize?: boolean
   pan?: boolean
   tan?: boolean
+  gstRegistered?: boolean
+  gstRegistrationType?: boolean
   gstn?: boolean
-  gstCompositionOpted?: boolean
   gstr1FilingFrequency?: boolean
   cin?: boolean
   govtRegistrationType?: boolean
   govtRegistrationNo?: boolean
+  msmeRegistered?: boolean
   msmeCategory?: boolean
+  msmeRegNo?: boolean
+  msmeExemptionDate?: boolean
+  tdsLowerDeduction?: boolean
+  tdsCertificateNo?: boolean
+  tdsSection?: boolean
+  tdsRatePercent?: boolean
+  tdsValidFrom?: boolean
+  tdsValidTo?: boolean
   bankAccountHolderName?: boolean
   bankName?: boolean
   bankBranch?: boolean
@@ -4236,28 +7267,43 @@ export type VendorSelectScalar = {
   bankAccountNoEnc?: boolean
   bankAccountNoLast4?: boolean
   bankIfscEnc?: boolean
+  bankMicr?: boolean
+  bankIban?: boolean
+  bankSwift?: boolean
   codeOfConductAccepted?: boolean
   declarationName?: boolean
   declarationDesignation?: boolean
   declarationDate?: boolean
   fleetSummary?: boolean
+  communicationNotes?: boolean
   onboardingStatus?: boolean
   approvedById?: boolean
   approvedAt?: boolean
   adminRemarks?: boolean
+  suspendedAt?: boolean
+  suspendedById?: boolean
+  suspendReason?: boolean
   facilityStatus?: boolean
   manpowerStatus?: boolean
   improvementRequirement?: boolean
   improvementPeriod?: boolean
+  vendorOrigin?: boolean
+  vendorType?: boolean
+  purchaseOrg?: boolean
+  paymentTerm?: boolean
+  withholdingTaxType?: boolean
+  legalForm?: boolean
   totalFleetSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   updatedBy?: boolean
 }
 
-export type VendorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sapVendorCode" | "name" | "natureOfCompany" | "registeredAddress" | "telephone" | "fax" | "email" | "weeklyOffDays" | "companySize" | "pan" | "tan" | "gstn" | "gstCompositionOpted" | "gstr1FilingFrequency" | "cin" | "govtRegistrationType" | "govtRegistrationNo" | "msmeCategory" | "bankAccountHolderName" | "bankName" | "bankBranch" | "bankAccountType" | "bankAccountNoEnc" | "bankAccountNoLast4" | "bankIfscEnc" | "codeOfConductAccepted" | "declarationName" | "declarationDesignation" | "declarationDate" | "fleetSummary" | "onboardingStatus" | "approvedById" | "approvedAt" | "adminRemarks" | "facilityStatus" | "manpowerStatus" | "improvementRequirement" | "improvementPeriod" | "totalFleetSize" | "createdAt" | "updatedAt" | "updatedBy", ExtArgs["result"]["vendor"]>
+export type VendorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sapVendorCode" | "name" | "natureOfCompany" | "addressLine1" | "addressLine2" | "city" | "district" | "stateCode" | "pincode" | "telephone" | "fax" | "email" | "weeklyOffDays" | "companySize" | "pan" | "tan" | "gstRegistered" | "gstRegistrationType" | "gstn" | "gstr1FilingFrequency" | "cin" | "govtRegistrationType" | "govtRegistrationNo" | "msmeRegistered" | "msmeCategory" | "msmeRegNo" | "msmeExemptionDate" | "tdsLowerDeduction" | "tdsCertificateNo" | "tdsSection" | "tdsRatePercent" | "tdsValidFrom" | "tdsValidTo" | "bankAccountHolderName" | "bankName" | "bankBranch" | "bankAccountType" | "bankAccountNoEnc" | "bankAccountNoLast4" | "bankIfscEnc" | "bankMicr" | "bankIban" | "bankSwift" | "codeOfConductAccepted" | "declarationName" | "declarationDesignation" | "declarationDate" | "fleetSummary" | "communicationNotes" | "onboardingStatus" | "approvedById" | "approvedAt" | "adminRemarks" | "suspendedAt" | "suspendedById" | "suspendReason" | "facilityStatus" | "manpowerStatus" | "improvementRequirement" | "improvementPeriod" | "vendorOrigin" | "vendorType" | "purchaseOrg" | "paymentTerm" | "withholdingTaxType" | "legalForm" | "totalFleetSize" | "createdAt" | "updatedAt" | "updatedBy", ExtArgs["result"]["vendor"]>
 export type VendorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  addressState?: boolean | Prisma.Vendor$addressStateArgs<ExtArgs>
   approvedBy?: boolean | Prisma.Vendor$approvedByArgs<ExtArgs>
+  suspendedBy?: boolean | Prisma.Vendor$suspendedByArgs<ExtArgs>
   operatingRegions?: boolean | Prisma.Vendor$operatingRegionsArgs<ExtArgs>
   contacts?: boolean | Prisma.Vendor$contactsArgs<ExtArgs>
   documents?: boolean | Prisma.Vendor$documentsArgs<ExtArgs>
@@ -4270,16 +7316,22 @@ export type VendorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VendorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  addressState?: boolean | Prisma.Vendor$addressStateArgs<ExtArgs>
   approvedBy?: boolean | Prisma.Vendor$approvedByArgs<ExtArgs>
+  suspendedBy?: boolean | Prisma.Vendor$suspendedByArgs<ExtArgs>
 }
 export type VendorIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  addressState?: boolean | Prisma.Vendor$addressStateArgs<ExtArgs>
   approvedBy?: boolean | Prisma.Vendor$approvedByArgs<ExtArgs>
+  suspendedBy?: boolean | Prisma.Vendor$suspendedByArgs<ExtArgs>
 }
 
 export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Vendor"
   objects: {
+    addressState: Prisma.$StatePayload<ExtArgs> | null
     approvedBy: Prisma.$UserPayload<ExtArgs> | null
+    suspendedBy: Prisma.$UserPayload<ExtArgs> | null
     operatingRegions: Prisma.$StateVendorRegionPayload<ExtArgs>[]
     contacts: Prisma.$VendorContactPayload<ExtArgs>[]
     documents: Prisma.$VendorDocumentPayload<ExtArgs>[]
@@ -4295,7 +7347,12 @@ export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     sapVendorCode: string | null
     name: string | null
     natureOfCompany: $Enums.NatureOfCompany | null
-    registeredAddress: string | null
+    addressLine1: string | null
+    addressLine2: string | null
+    city: string | null
+    district: string | null
+    stateCode: string | null
+    pincode: string | null
     telephone: string | null
     fax: string | null
     email: string | null
@@ -4303,13 +7360,23 @@ export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     companySize: string | null
     pan: string | null
     tan: string | null
+    gstRegistered: boolean | null
+    gstRegistrationType: $Enums.GstRegistrationType | null
     gstn: string | null
-    gstCompositionOpted: boolean | null
     gstr1FilingFrequency: $Enums.GstFilingFrequency | null
     cin: string | null
     govtRegistrationType: string | null
     govtRegistrationNo: string | null
+    msmeRegistered: boolean | null
     msmeCategory: $Enums.MsmeCategory | null
+    msmeRegNo: string | null
+    msmeExemptionDate: Date | null
+    tdsLowerDeduction: boolean | null
+    tdsCertificateNo: string | null
+    tdsSection: string | null
+    tdsRatePercent: number | null
+    tdsValidFrom: Date | null
+    tdsValidTo: Date | null
     bankAccountHolderName: string | null
     bankName: string | null
     bankBranch: string | null
@@ -4317,19 +7384,32 @@ export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     bankAccountNoEnc: string | null
     bankAccountNoLast4: string | null
     bankIfscEnc: string | null
+    bankMicr: string | null
+    bankIban: string | null
+    bankSwift: string | null
     codeOfConductAccepted: boolean | null
     declarationName: string | null
     declarationDesignation: string | null
     declarationDate: Date | null
     fleetSummary: string | null
+    communicationNotes: string | null
     onboardingStatus: $Enums.OnboardingStatus
     approvedById: string | null
     approvedAt: Date | null
     adminRemarks: string | null
+    suspendedAt: Date | null
+    suspendedById: string | null
+    suspendReason: string | null
     facilityStatus: $Enums.FacilityStatus | null
     manpowerStatus: $Enums.ManpowerStatus | null
     improvementRequirement: string | null
     improvementPeriod: string | null
+    vendorOrigin: string | null
+    vendorType: string | null
+    purchaseOrg: string | null
+    paymentTerm: string | null
+    withholdingTaxType: string | null
+    legalForm: string | null
     totalFleetSize: number
     createdAt: Date
     updatedAt: Date
@@ -4728,7 +7808,9 @@ readonly fields: VendorFieldRefs;
  */
 export interface Prisma__VendorClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  addressState<T extends Prisma.Vendor$addressStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$addressStateArgs<ExtArgs>>): Prisma.Prisma__StateClient<runtime.Types.Result.GetResult<Prisma.$StatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   approvedBy<T extends Prisma.Vendor$approvedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$approvedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  suspendedBy<T extends Prisma.Vendor$suspendedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$suspendedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   operatingRegions<T extends Prisma.Vendor$operatingRegionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$operatingRegionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StateVendorRegionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contacts<T extends Prisma.Vendor$contactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$contactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documents<T extends Prisma.Vendor$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4771,7 +7853,12 @@ export interface VendorFieldRefs {
   readonly sapVendorCode: Prisma.FieldRef<"Vendor", 'String'>
   readonly name: Prisma.FieldRef<"Vendor", 'String'>
   readonly natureOfCompany: Prisma.FieldRef<"Vendor", 'NatureOfCompany'>
-  readonly registeredAddress: Prisma.FieldRef<"Vendor", 'String'>
+  readonly addressLine1: Prisma.FieldRef<"Vendor", 'String'>
+  readonly addressLine2: Prisma.FieldRef<"Vendor", 'String'>
+  readonly city: Prisma.FieldRef<"Vendor", 'String'>
+  readonly district: Prisma.FieldRef<"Vendor", 'String'>
+  readonly stateCode: Prisma.FieldRef<"Vendor", 'String'>
+  readonly pincode: Prisma.FieldRef<"Vendor", 'String'>
   readonly telephone: Prisma.FieldRef<"Vendor", 'String'>
   readonly fax: Prisma.FieldRef<"Vendor", 'String'>
   readonly email: Prisma.FieldRef<"Vendor", 'String'>
@@ -4779,13 +7866,23 @@ export interface VendorFieldRefs {
   readonly companySize: Prisma.FieldRef<"Vendor", 'String'>
   readonly pan: Prisma.FieldRef<"Vendor", 'String'>
   readonly tan: Prisma.FieldRef<"Vendor", 'String'>
+  readonly gstRegistered: Prisma.FieldRef<"Vendor", 'Boolean'>
+  readonly gstRegistrationType: Prisma.FieldRef<"Vendor", 'GstRegistrationType'>
   readonly gstn: Prisma.FieldRef<"Vendor", 'String'>
-  readonly gstCompositionOpted: Prisma.FieldRef<"Vendor", 'Boolean'>
   readonly gstr1FilingFrequency: Prisma.FieldRef<"Vendor", 'GstFilingFrequency'>
   readonly cin: Prisma.FieldRef<"Vendor", 'String'>
   readonly govtRegistrationType: Prisma.FieldRef<"Vendor", 'String'>
   readonly govtRegistrationNo: Prisma.FieldRef<"Vendor", 'String'>
+  readonly msmeRegistered: Prisma.FieldRef<"Vendor", 'Boolean'>
   readonly msmeCategory: Prisma.FieldRef<"Vendor", 'MsmeCategory'>
+  readonly msmeRegNo: Prisma.FieldRef<"Vendor", 'String'>
+  readonly msmeExemptionDate: Prisma.FieldRef<"Vendor", 'DateTime'>
+  readonly tdsLowerDeduction: Prisma.FieldRef<"Vendor", 'Boolean'>
+  readonly tdsCertificateNo: Prisma.FieldRef<"Vendor", 'String'>
+  readonly tdsSection: Prisma.FieldRef<"Vendor", 'String'>
+  readonly tdsRatePercent: Prisma.FieldRef<"Vendor", 'Int'>
+  readonly tdsValidFrom: Prisma.FieldRef<"Vendor", 'DateTime'>
+  readonly tdsValidTo: Prisma.FieldRef<"Vendor", 'DateTime'>
   readonly bankAccountHolderName: Prisma.FieldRef<"Vendor", 'String'>
   readonly bankName: Prisma.FieldRef<"Vendor", 'String'>
   readonly bankBranch: Prisma.FieldRef<"Vendor", 'String'>
@@ -4793,19 +7890,32 @@ export interface VendorFieldRefs {
   readonly bankAccountNoEnc: Prisma.FieldRef<"Vendor", 'String'>
   readonly bankAccountNoLast4: Prisma.FieldRef<"Vendor", 'String'>
   readonly bankIfscEnc: Prisma.FieldRef<"Vendor", 'String'>
+  readonly bankMicr: Prisma.FieldRef<"Vendor", 'String'>
+  readonly bankIban: Prisma.FieldRef<"Vendor", 'String'>
+  readonly bankSwift: Prisma.FieldRef<"Vendor", 'String'>
   readonly codeOfConductAccepted: Prisma.FieldRef<"Vendor", 'Boolean'>
   readonly declarationName: Prisma.FieldRef<"Vendor", 'String'>
   readonly declarationDesignation: Prisma.FieldRef<"Vendor", 'String'>
   readonly declarationDate: Prisma.FieldRef<"Vendor", 'DateTime'>
   readonly fleetSummary: Prisma.FieldRef<"Vendor", 'String'>
+  readonly communicationNotes: Prisma.FieldRef<"Vendor", 'String'>
   readonly onboardingStatus: Prisma.FieldRef<"Vendor", 'OnboardingStatus'>
   readonly approvedById: Prisma.FieldRef<"Vendor", 'String'>
   readonly approvedAt: Prisma.FieldRef<"Vendor", 'DateTime'>
   readonly adminRemarks: Prisma.FieldRef<"Vendor", 'String'>
+  readonly suspendedAt: Prisma.FieldRef<"Vendor", 'DateTime'>
+  readonly suspendedById: Prisma.FieldRef<"Vendor", 'String'>
+  readonly suspendReason: Prisma.FieldRef<"Vendor", 'String'>
   readonly facilityStatus: Prisma.FieldRef<"Vendor", 'FacilityStatus'>
   readonly manpowerStatus: Prisma.FieldRef<"Vendor", 'ManpowerStatus'>
   readonly improvementRequirement: Prisma.FieldRef<"Vendor", 'String'>
   readonly improvementPeriod: Prisma.FieldRef<"Vendor", 'String'>
+  readonly vendorOrigin: Prisma.FieldRef<"Vendor", 'String'>
+  readonly vendorType: Prisma.FieldRef<"Vendor", 'String'>
+  readonly purchaseOrg: Prisma.FieldRef<"Vendor", 'String'>
+  readonly paymentTerm: Prisma.FieldRef<"Vendor", 'String'>
+  readonly withholdingTaxType: Prisma.FieldRef<"Vendor", 'String'>
+  readonly legalForm: Prisma.FieldRef<"Vendor", 'String'>
   readonly totalFleetSize: Prisma.FieldRef<"Vendor", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Vendor", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Vendor", 'DateTime'>
@@ -5211,9 +8321,47 @@ export type VendorDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
+ * Vendor.addressState
+ */
+export type Vendor$addressStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the State
+   */
+  select?: Prisma.StateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the State
+   */
+  omit?: Prisma.StateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StateInclude<ExtArgs> | null
+  where?: Prisma.StateWhereInput
+}
+
+/**
  * Vendor.approvedBy
  */
 export type Vendor$approvedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Vendor.suspendedBy
+ */
+export type Vendor$suspendedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the User
    */

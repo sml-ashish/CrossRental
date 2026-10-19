@@ -18,13 +18,16 @@ export type TemplateKey =
   | "password_reset"
   | "login_otp"
   | "fleet_update_reminder"
+  | "fleet_updated_on_behalf"
   | "rfq_invitation"
   | "rfq_reminder"
   | "quotation_receipt"
   | "quotation_received"
   | "quotation_awarded"
   | "quotation_not_awarded"
-  | "rfq_deadline_changed";
+  | "rfq_deadline_changed"
+  | "reservation_released"
+  | "internal_user_created";
 
 export type TemplateVars = Record<string, string | number | null | undefined | Raw>;
 

@@ -7,10 +7,11 @@ import { can } from "../utils/rbac";
 import { decryptField } from "../utils/crypto";
 import {
   inviteVendor,
-  REQUIRED_DOCUMENTS,
   REQUIRED_DOCUMENT_LABELS,
+  requiredDocumentsFor,
 } from "../services/onboarding.service";
 import { approveVendor, rejectVendor, resendActivation } from "../services/approval.service";
+import { buildSapSheet, renderSapSheetXls } from "../services/sapSheet.service";
 import { readOnboardingDocument } from "../services/documents.service";
 import type { OfficeUseReview } from "../services/approval.service";
 
@@ -53,6 +54,12 @@ function officeUseFrom(body: unknown): OfficeUseReview {
     manpowerStatus: pick("manpowerStatus") as OfficeUseReview["manpowerStatus"],
     improvementRequirement: pick("improvementRequirement"),
     improvementPeriod: pick("improvementPeriod"),
+    vendorOrigin: pick("vendorOrigin"),
+    vendorType: pick("vendorType"),
+    purchaseOrg: pick("purchaseOrg"),
+    paymentTerm: pick("paymentTerm"),
+    withholdingTaxType: pick("withholdingTaxType"),
+    legalForm: pick("legalForm"),
   };
 }
 
@@ -148,7 +155,12 @@ export const listVendors = asyncHandler(async (req: Request, res: Response) => {
       adminRemarks: true,
       approvedAt: true,
       totalFleetSize: true,
-      registeredAddress: true,
+      addressLine1: true,
+      addressLine2: true,
+      city: true,
+      district: true,
+      stateCode: true,
+      pincode: true,
       operatingRegions: { select: { stateCode: true } },
       updatedAt: true,
       // Bank columns are deliberately absent: this list is readable by sales.
@@ -207,7 +219,13 @@ export const vendorDetail = asyncHandler(async (req: Request, res: Response) => 
       sapVendorCode: true,
       name: true,
       natureOfCompany: true,
-      registeredAddress: true,
+      addressLine1: true,
+      addressLine2: true,
+      city: true,
+      district: true,
+      stateCode: true,
+      addressState: { select: { name: true } },
+      pincode: true,
       telephone: true,
       fax: true,
       email: true,
@@ -215,18 +233,32 @@ export const vendorDetail = asyncHandler(async (req: Request, res: Response) => 
       companySize: true,
       pan: true,
       tan: true,
+      gstRegistered: true,
       gstn: true,
-      gstCompositionOpted: true,
+      gstRegistrationType: true,
       gstr1FilingFrequency: true,
       cin: true,
       govtRegistrationType: true,
       govtRegistrationNo: true,
+      msmeRegistered: true,
       msmeCategory: true,
+      msmeRegNo: true,
+      msmeExemptionDate: true,
+      tdsLowerDeduction: true,
+      tdsCertificateNo: true,
+      tdsSection: true,
+      tdsRatePercent: true,
+      tdsValidFrom: true,
+      tdsValidTo: true,
       fleetSummary: true,
       codeOfConductAccepted: true,
       declarationName: true,
       declarationDesignation: true,
       declarationDate: true,
+      bankMicr: true,
+      bankIban: true,
+      bankSwift: true,
+      communicationNotes: true,
       onboardingStatus: true,
       adminRemarks: true,
       approvedAt: true,
@@ -234,7 +266,16 @@ export const vendorDetail = asyncHandler(async (req: Request, res: Response) => 
       manpowerStatus: true,
       improvementRequirement: true,
       improvementPeriod: true,
+      vendorOrigin: true,
+      vendorType: true,
+      purchaseOrg: true,
+      paymentTerm: true,
+      withholdingTaxType: true,
+      legalForm: true,
       totalFleetSize: true,
+      // P0 B2: the detail screen shows suspension state and its reason.
+      suspendedAt: true,
+      suspendReason: true,
       createdAt: true,
       updatedAt: true,
       // Encrypted bank columns. Prisma cannot narrow a select on a runtime
@@ -245,7 +286,15 @@ export const vendorDetail = asyncHandler(async (req: Request, res: Response) => 
       bankIfscEnc: true,
       operatingRegions: { select: { stateCode: true } },
       contacts: {
-        select: { id: true, name: true, mobile: true, telephone: true, email: true, isPrimary: true },
+        select: {
+          id: true,
+          name: true,
+          mobile: true,
+          telephone: true,
+          email: true,
+          isPrimary: true,
+          receivesRfqs: true,
+        },
         orderBy: { isPrimary: "desc" },
       },
       documents: {
@@ -271,7 +320,7 @@ export const vendorDetail = asyncHandler(async (req: Request, res: Response) => 
 
   if (!vendor) throw AppError.notFound("Vendor not found");
 
-  const uploaded = new Set(vendor.documents.map((d) => d.docType));
+  const uploaded = new Set<string>(vendor.documents.map((d) => d.docType));
   const { bankAccountNoEnc, bankIfscEnc, ...rest } = vendor;
 
   res.json({
@@ -295,7 +344,7 @@ export const vendorDetail = asyncHandler(async (req: Request, res: Response) => 
           }
         : { bankVisible: false }),
     },
-    missingDocuments: REQUIRED_DOCUMENTS.filter((d) => !uploaded.has(d)),
+    missingDocuments: requiredDocumentsFor(vendor.gstRegistered === true).filter((d) => !uploaded.has(d)),
     canApprove: can(user.role, "vendor:approve"),
   });
 });
@@ -338,6 +387,35 @@ export const reject = asyncHandler(async (req: Request, res: Response) => {
 export const resendActivationEmail = asyncHandler(async (req: Request, res: Response) => {
   const result = await resendActivation(param(req, "vendorId"), actorOf(req));
   res.json(result);
+});
+
+/**
+ * The SAP vendor creation sheet (brief D3), admin only. It includes the
+ * decrypted bank block, so it is gated exactly like the detail screen's bank
+ * section rather than merely by "internal".
+ */
+export const sapSheet = asyncHandler(async (req: Request, res: Response) => {
+  const user = actorOf(req);
+  if (!can(user.role, "vendor:view_bank")) {
+    throw AppError.forbidden("The SAP creation sheet is restricted to administrators");
+  }
+  res.json({ sheet: await buildSapSheet(param(req, "vendorId")) });
+});
+
+export const exportSapSheet = asyncHandler(async (req: Request, res: Response) => {
+  const user = actorOf(req);
+  if (!can(user.role, "vendor:view_bank")) {
+    throw AppError.forbidden("The SAP creation sheet is restricted to administrators");
+  }
+  const file = await renderSapSheetXls(param(req, "vendorId"));
+  res.setHeader("Content-Type", "application/vnd.ms-excel");
+  res.setHeader("Content-Length", String(Buffer.byteLength(file.body)));
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${file.fileName.replace(/"/g, "")}"`,
+  );
+  // The brief is explicit: this export is not logged. No audit row, no email.
+  res.send(file.body);
 });
 
 /**

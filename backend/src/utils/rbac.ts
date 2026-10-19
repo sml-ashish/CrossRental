@@ -30,8 +30,17 @@ export type Capability =
   | "rfq:view_quotations"
   | "rfq:respond"
   | "quotation:award"
+  // P3: marking a quotation Under Review / Shortlisted / Rejected in the
+  // comparison screen. Held by both internal roles; the award is separate.
+  | "quotation:review"
   | "fleet:view_all"
-  | "fleet:edit_own";
+  | "fleet:edit_own"
+  | "fleet:edit_all"
+  // P1: the enquiry intake and sourcing workspace. The CR team is `sales_user`
+  // (overview decision), so both internal roles hold these.
+  | "enquiry:view"
+  | "enquiry:create"
+  | "enquiry:manage";
 
 const CAPABILITIES: Record<UserRole, Capability[]> = {
   // `rfq:respond` is deliberately absent from every internal role: a quotation is
@@ -52,10 +61,19 @@ const CAPABILITIES: Record<UserRole, Capability[]> = {
     "rfq:remind",
     "rfq:view_quotations",
     "quotation:award",
+    "quotation:review",
     "fleet:view_all",
+    // Brief D1: admin maintains any vendor's fleet on their behalf.
+    "fleet:edit_all",
+    // P1: admin can enter and work enquiries alongside the CR team.
+    "enquiry:view",
+    "enquiry:create",
+    "enquiry:manage",
   ],
-  // Sales creates, sends and tracks RFQs and reads approved fleets, but
-  // cannot see bank details and cannot award.
+  // Sales creates, sends and tracks RFQs, reads approved fleets, works
+  // enquiries, and — since P3 — runs quote comparison and the award (the CR path
+  // in BPD 6.15/6.16). Admin holds the same capabilities as an override; sales
+  // still cannot see bank details.
   sales_user: [
     "vendor:view_all",
     "vendor:invite",
@@ -66,7 +84,15 @@ const CAPABILITIES: Record<UserRole, Capability[]> = {
     "rfq:cancel",
     "rfq:remind",
     "rfq:view_quotations",
+    "quotation:award",
+    "quotation:review",
     "fleet:view_all",
+    // Brief D1/6.6: sales may add or edit a vendor's cranes on their behalf.
+    "fleet:edit_all",
+    // P1: sales *is* the CR team, so it enters and works every enquiry.
+    "enquiry:view",
+    "enquiry:create",
+    "enquiry:manage",
   ],
 };
 

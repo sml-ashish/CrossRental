@@ -6,6 +6,7 @@ import { recordAudit } from "./audit.service";
 import { nextRfqNumber } from "./rfqNumber.service";
 import { candidatesForRfq, type CandidateCrane } from "./candidate.service";
 import { invalidateDistancesFrom } from "./distance.service";
+import { onRfqSent } from "./enquiryTrail.service";
 import { tryGeocode, isInsideIndia, type GeoPoint } from "../lib/geo";
 import { sendTemplate, optionalBlock } from "./email.service";
 import { getSettings } from "../utils/settings";
@@ -96,8 +97,17 @@ const RFQ_SELECT = {
   rfqNumber: true,
   enquiryNo: true,
   lineNo: true,
+  enquiryLineId: true,
   craneType: true,
   capacityT: true,
+  capacityRule: true,
+  capacityNote: true,
+  applicationDescription: true,
+  loadDescription: true,
+  mainBoomM: true,
+  jibLengthM: true,
+  startDateTbc: true,
+  workingDaysPerMonth: true,
   quantity: true,
   siteLocation: true,
   siteStateCode: true,
@@ -116,6 +126,12 @@ const RFQ_SELECT = {
   craneAgeCriteriaYears: true,
   accommodationConveyance: true,
   paymentTerms: true,
+  mobilisationTerms: true,
+  supportCrane: true,
+  steelMatsGroundPrep: true,
+  ehsHrRequirements: true,
+  insuranceTerms: true,
+  extensionClause: true,
   notes: true,
   commercialTermsExtra: true,
   smlContactName: true,
@@ -138,6 +154,7 @@ const RFQ_SELECT = {
 type RfqRow = {
   id: string;
   rfqNumber: string;
+  enquiryLineId: string | null;
   capacityT: unknown;
   siteLatitude: unknown;
   siteLongitude: unknown;
@@ -162,6 +179,8 @@ export function toRfqView(row: Record<string, unknown>) {
   return {
     ...row,
     capacityT: num(row.capacityT) ?? 0,
+    mainBoomM: num(row.mainBoomM),
+    jibLengthM: num(row.jibLengthM),
     durationValue: num(row.durationValue) ?? 0,
     siteLatitude: num(row.siteLatitude),
     siteLongitude: num(row.siteLongitude),
@@ -225,10 +244,10 @@ async function resolveSite(input: {
 /**
  * The commercial-terms and SML-contact columns (brief 5.4).
  *
- * Extracted because create and update were writing the same eleven fields twice,
- * and a list that appears twice is a list that will drift: the day a term is
- * added to the schema, one copy is missed and the field silently stops being
- * editable on drafts.
+ * Extracted because create and update were writing the same fields twice, and
+ * a list that appears twice is a list that will drift: the day a term is added
+ * to the schema, one copy is missed and the field silently stops being editable
+ * on drafts.
  */
 function termColumns(input: CreateRfqInput | UpdateRfqInput) {
   return {
@@ -239,7 +258,15 @@ function termColumns(input: CreateRfqInput | UpdateRfqInput) {
     craneAgeCriteriaYears: input.craneAgeCriteriaYears,
     accommodationConveyance: input.accommodationConveyance,
     paymentTerms: input.paymentTerms,
+    mobilisationTerms: input.mobilisationTerms,
+    supportCrane: input.supportCrane,
+    steelMatsGroundPrep: input.steelMatsGroundPrep,
+    ehsHrRequirements: input.ehsHrRequirements,
+    insuranceTerms: input.insuranceTerms,
+    extensionClause: input.extensionClause,
     notes: input.notes,
+    commercialTermsExtra: (input.commercialTermsExtra ??
+      undefined) as Prisma.InputJsonValue | undefined,
     smlContactName: input.smlContactName,
     smlContactMobile: input.smlContactMobile,
     smlContactEmail: input.smlContactEmail,
@@ -292,8 +319,17 @@ export async function createRfq(raw: unknown, actor: Actor) {
     rfqNumber,
     enquiryNo: input.enquiryNo,
     lineNo: input.lineNo,
+    enquiryLineId: input.enquiryLineId ?? null,
     craneType: input.craneType,
     capacityT: input.capacityT,
+    capacityRule: input.capacityRule,
+    capacityNote: input.capacityNote,
+    applicationDescription: input.applicationDescription,
+    loadDescription: input.loadDescription,
+    mainBoomM: input.mainBoomM ?? null,
+    jibLengthM: input.jibLengthM ?? null,
+    startDateTbc: input.startDateTbc,
+    workingDaysPerMonth: input.workingDaysPerMonth ?? null,
     quantity: input.quantity,
     siteLocation: input.siteLocation,
     siteStateCode: input.siteStateCode,
@@ -395,6 +431,14 @@ export async function updateRfq(rfqId: string, raw: unknown, actor: Actor) {
     lineNo: input.lineNo,
     craneType: input.craneType,
     capacityT: input.capacityT,
+    capacityRule: input.capacityRule,
+    capacityNote: input.capacityNote,
+    applicationDescription: input.applicationDescription,
+    loadDescription: input.loadDescription,
+    mainBoomM: input.mainBoomM ?? null,
+    jibLengthM: input.jibLengthM ?? null,
+    startDateTbc: input.startDateTbc,
+    workingDaysPerMonth: input.workingDaysPerMonth ?? null,
     quantity: input.quantity,
     siteLocation: input.siteLocation,
     siteStateCode: input.siteStateCode,
@@ -549,6 +593,7 @@ async function loadRfq(rfqId: string): Promise<RfqRow> {
     select: {
       id: true,
       rfqNumber: true,
+      enquiryLineId: true,
       capacityT: true,
       siteLatitude: true,
       siteLongitude: true,
@@ -584,6 +629,7 @@ export async function getRfqDetail(rfqId: string, actor: Actor) {
           responseStatus: true,
           respondedAt: true,
           declineReason: true,
+          declineNote: true,
           reminderCount: true,
           lastReminderAt: true,
           candidateSnapshot: true,
@@ -617,6 +663,8 @@ export async function getRfqDetail(rfqId: string, actor: Actor) {
       responseStatus: r.responseStatus,
       respondedAt: r.respondedAt,
       declineReason: r.declineReason,
+      /** Brief C4: what else the vendor offered when declining. */
+      declineNote: r.declineNote,
       reminderCount: r.reminderCount,
       lastReminderAt: r.lastReminderAt,
       candidateSnapshot: r.candidateSnapshot,
@@ -646,6 +694,8 @@ async function listQuotationsForRfq(rfqId: string) {
       rentalRate: true,
       rateBasis: true,
       mobilisationCharges: true,
+      demobilisationCharges: true,
+      taxBasis: true,
       totalQuotedValue: true,
       validityDate: true,
       distanceToSiteKm: true,
@@ -677,6 +727,8 @@ async function listQuotationsForRfq(rfqId: string) {
     rentalRate: num(r.rentalRate) ?? 0,
     rateBasis: r.rateBasis,
     mobilisationCharges: num(r.mobilisationCharges) ?? 0,
+    demobilisationCharges: num(r.demobilisationCharges) ?? 0,
+    taxBasis: r.taxBasis,
     totalQuotedValue: num(r.totalQuotedValue) ?? 0,
     validityDate: r.validityDate,
     distanceToSiteKm: num(r.distanceToSiteKm),
@@ -698,6 +750,8 @@ export async function listApprovedVendors(rawQuery: unknown, actor: Actor) {
   return prisma.vendor.findMany({
     where: {
       onboardingStatus: OnboardingStatus.APPROVED,
+      // P0 B2: a suspended vendor is not a candidate for a new enquiry.
+      suspendedAt: null,
       ...(query.search
         ? {
             OR: [
@@ -747,9 +801,13 @@ async function resolveRecipients(
       id: true,
       name: true,
       onboardingStatus: true,
+      suspendedAt: true,
       users: {
         where: { role: "vendor_user", isActive: true },
         select: { email: true },
+      },
+      contacts: {
+        select: { email: true, isPrimary: true, receivesRfqs: true },
       },
     },
   });
@@ -767,7 +825,23 @@ async function resolveRecipients(
       refused.push(`${vendor.name ?? "A vendor"} is no longer approved`);
       return [];
     }
-    const emails = vendor.users.map((u) => u.email);
+    // P0 B2: a suspended vendor must not receive new enquiries.
+    if (vendor.suspendedAt) {
+      refused.push(`${vendor.name ?? "A vendor"} is suspended`);
+      return [];
+    }
+
+    // Brief 5.3 (open item 3 aside): RFQ emails go to the contacts the vendor
+    // ticked "receives RFQ emails" for. Only when nobody on file is ticked
+    // does the old rule apply — the active portal users, whose email is the
+    // primary contact's in practice.
+    const rfqContacts = vendor.contacts.filter(
+      (c) => c.receivesRfqs && c.email && c.email.length > 0,
+    );
+    const emails = rfqContacts.map((c) => c.email as string);
+    if (emails.length === 0) {
+      emails.push(...vendor.users.map((u) => u.email));
+    }
     if (emails.length === 0) {
       refused.push(`${vendor.name ?? "A vendor"} has no active user to email`);
       return [];
@@ -862,9 +936,29 @@ function invitationVars(
     siteState: String((rfq.siteState as { name: string }).name),
     craneType: String((rfq.craneTypeRef as { name: string }).name),
     capacityT: num(rfq.capacityT) ?? 0,
+    // Brief A3: the matching rule is quoted so a vendor reading "exactly"
+    // knows offering a bigger machine is not what was asked for.
+    capacityRule:
+      rfq.capacityRule === "EXACT"
+        ? `exactly ${num(rfq.capacityT) ?? 0} t`
+        : `at least ${num(rfq.capacityT) ?? 0} t`,
+    capacityNote: orDash(rfq.capacityNote),
+    applicationDescription: orDash(rfq.applicationDescription),
+    loadDescription: orDash(rfq.loadDescription),
+    mainBoomText:
+      rfq.mainBoomM === null || rfq.mainBoomM === undefined
+        ? "—"
+        : `${num(rfq.mainBoomM)} m`,
+    jibText:
+      rfq.jibLengthM === null || rfq.jibLengthM === undefined
+        ? "—"
+        : `${num(rfq.jibLengthM)} m`,
     quantity: rfq.quantity as number,
     configuration: orDash(rfq.configuration),
-    requiredStartDate: formatDate(rfq.requiredStartDate as Date),
+    requiredStartDate:
+      rfq.startDateTbc === true
+        ? "To be confirmed"
+        : formatDate(rfq.requiredStartDate as Date),
     durationText: durationText(
       num(rfq.durationValue) ?? 0,
       String(rfq.durationUnit),
@@ -880,6 +974,12 @@ function invitationVars(
         : `Up to ${rfq.craneAgeCriteriaYears} years old`,
     accommodationConveyance: orDash(rfq.accommodationConveyance),
     paymentTerms: orDash(rfq.paymentTerms),
+    mobilisationTerms: orDash(rfq.mobilisationTerms),
+    supportCrane: orDash(rfq.supportCrane),
+    steelMatsGroundPrep: orDash(rfq.steelMatsGroundPrep),
+    ehsHrRequirements: orDash(rfq.ehsHrRequirements),
+    insuranceTerms: orDash(rfq.insuranceTerms),
+    extensionClause: orDash(rfq.extensionClause),
     submissionDeadline: formatDateTime(rfq.submissionDeadline as Date),
     smlContactName: orDash(rfq.smlContactName),
     smlContactMobile: orDash(rfq.smlContactMobile),
@@ -917,7 +1017,12 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
     id: rfq.id,
     craneType: full.craneType,
     capacityT: full.capacityT,
+    capacityRule: full.capacityRule,
     requiredStartDate: full.requiredStartDate,
+    durationValue: full.durationValue,
+    durationUnit: full.durationUnit,
+    startDateTbc: full.startDateTbc,
+    workingDaysPerMonth: full.workingDaysPerMonth,
     siteLocation: full.siteLocation,
     siteStateCode: full.siteStateCode,
     siteLatitude: full.siteLatitude,
@@ -1021,6 +1126,12 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
     actor: auditActor(actor),
   });
 
+  // P1: dispatching an RFQ raised from an enquiry line moves that line's trail
+  // to RFQ Sent. A hand-typed or SAP-fed RFQ has no line and skips this.
+  if (rfq.enquiryLineId) {
+    await onRfqSent(rfq.enquiryLineId, actor);
+  }
+
   return {
     sent: results.filter((r) => r.status === EmailDeliveryStatus.SENT).length,
     failed: results.filter((r) => r.status === EmailDeliveryStatus.FAILED)
@@ -1038,7 +1149,12 @@ export async function getCandidates(rfqId: string, actor: Actor) {
       id: true,
       craneType: true,
       capacityT: true,
+      capacityRule: true,
       requiredStartDate: true,
+      durationValue: true,
+      durationUnit: true,
+      startDateTbc: true,
+      workingDaysPerMonth: true,
       siteLocation: true,
       siteStateCode: true,
       siteLatitude: true,
@@ -1085,7 +1201,24 @@ export async function extendDeadline(
     select: { id: true, emails: true },
   });
 
-  for (const recipient of pending) {
+  // C1: extending revives recipients who ran out of time without ever
+  // responding. Expired means the sweep moved them there from Pending, so it
+  // only ever holds vendors who never quoted — a vendor who did respond is
+  // Quoted (or held a Quoted state) and is untouched. The window is open again,
+  // so `lastReminderAt` is cleared to let the reminder job fire against the new
+  // deadline rather than staying dampened by a stamp from the old one.
+  const revived = await prisma.rfqVendorRecipient.findMany({
+    where: { rfqId, responseStatus: ResponseStatus.EXPIRED },
+    select: { id: true, emails: true },
+  });
+  if (revived.length > 0) {
+    await prisma.rfqVendorRecipient.updateMany({
+      where: { id: { in: revived.map((r) => r.id) } },
+      data: { responseStatus: ResponseStatus.PENDING, lastReminderAt: null },
+    });
+  }
+
+  for (const recipient of [...pending, ...revived]) {
     for (const address of recipient.emails) {
       await sendTemplate({
         to: address,
@@ -1122,7 +1255,8 @@ export async function extendDeadline(
 
   return {
     submissionDeadline: input.submissionDeadline.toISOString(),
-    notified: pending.length,
+    notified: pending.length + revived.length,
+    revived: revived.length,
   };
 }
 
@@ -1261,12 +1395,11 @@ export async function remindRfq(rfqId: string, raw: unknown, actor: Actor) {
  * Exposed as a callable function rather than wired to a timer: the scheduled
  * sweep is M7, and M4's acceptance is that the rule exists and can be run.
  *
- * Extending the deadline does *not* revive an already Expired recipient.
- * Extending exists so a vendor who quoted can keep revising and so a
- * still-Pending recipient gets a longer window; Expired is a response state the
- * vendor can see (brief 6.8 lists it in their RFQ list), so rewriting it would
- * contradict what they were already shown. The brief requires no revival, and
- * the sweep only ever moves Pending forward.
+ * The sweep only ever moves Pending forward. Revival is the other direction and
+ * lives in `extendDeadline` (C1): a recipient the sweep expired — necessarily
+ * one who never responded — is returned to Pending when SML gives the RFQ a
+ * later deadline, so the vendor gets another working window instead of being
+ * dead lettered over a deadline sales has since moved.
  */
 export async function expireOverdueRecipients(
   now: Date = new Date(),
@@ -1303,6 +1436,107 @@ export async function runExpirySweep(actor: Actor) {
     actor: auditActor(actor),
   });
   return { expired };
+}
+
+/**
+ * Automatic pre-deadline reminders (brief 6.7 as revised by C2).
+ *
+ * Pending recipients are reminded once the deadline is inside a per-RFQ lead
+ * window: the smaller of the configured `RFQ_REMINDER_LEAD_HOURS` (default 24)
+ * and half the RFQ's response window (send → deadline). Half the window is the
+ * ceiling because an RFQ sent a couple of hours before its deadline must not be
+ * chased the moment it goes out — the reminder belongs in the last half of the
+ * time the vendor actually has. A window shorter than
+ * `RFQ_REMINDER_MIN_WINDOW_HOURS` (default 4) is never chased at all: there is
+ * no room to act on a nudge, only a deadline to meet.
+ *
+ * A manual reminder sent to the same recipient counts as the chase: re-sending
+ * within a day of any reminder would be duplication, so the sweep skips anyone
+ * whose `lastReminderAt` is inside the last 24 hours.
+ *
+ * Only live RFQs are chased: a draft was never dispatched, a cancelled one says
+ * so already, and a closed one has an outcome. Losses on send are swallowed and
+ * logged — the deadline is what it is, and the sweep's job is to try.
+ */
+export async function runAutomaticRfqReminders(
+  now: Date = new Date(),
+): Promise<{ reminded: number; sent: number }> {
+  const settings = await getSettings();
+  const leadMs = settings.rfqReminderLeadHours * 3_600_000;
+  const minWindowMs = settings.rfqReminderMinWindowHours * 3_600_000;
+  // The per-RFQ window is at most the lead, so this is a safe upper bound; the
+  // half-window cases are trimmed below.
+  const horizon = new Date(now.getTime() + leadMs);
+  const freshReminderMs = 24 * 3_600_000;
+
+  const candidates = await prisma.rfqVendorRecipient.findMany({
+    where: {
+      responseStatus: ResponseStatus.PENDING,
+      rfq: {
+        status: RfqStatus.SENT,
+        submissionDeadline: { gt: now, lte: horizon },
+      },
+      OR: [
+        { lastReminderAt: null },
+        { lastReminderAt: { lt: new Date(now.getTime() - freshReminderMs) } },
+      ],
+    },
+    select: {
+      id: true,
+      emails: true,
+      rfq: {
+        select: {
+          id: true,
+          rfqNumber: true,
+          submissionDeadline: true,
+          sentAt: true,
+          createdAt: true,
+          siteLocation: true,
+          siteState: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  const due = candidates.filter((candidate) => {
+    const sentAt = candidate.rfq.sentAt ?? candidate.rfq.createdAt;
+    const windowMs = candidate.rfq.submissionDeadline.getTime() - sentAt.getTime();
+    if (windowMs < minWindowMs) return false;
+    const reminderLeadMs = Math.min(leadMs, windowMs / 2);
+    return now.getTime() >= candidate.rfq.submissionDeadline.getTime() - reminderLeadMs;
+  });
+
+  const portalBase = process.env.PORTAL_BASE_URL ?? "http://localhost:5173";
+  let sent = 0;
+
+  for (const candidate of due) {
+    for (const address of candidate.emails) {
+      const result = await sendTemplate({
+        to: address,
+        template: "rfq_reminder",
+        entity: "rfq",
+        entityId: candidate.rfq.id,
+        vars: {
+          rfqNumber: candidate.rfq.rfqNumber,
+          submissionDeadline: candidate.rfq.submissionDeadline.toISOString(),
+          siteLocation: candidate.rfq.siteLocation,
+          siteState: candidate.rfq.siteState?.name ?? "",
+          rfqUrl: `${portalBase}/app/rfqs/${candidate.rfq.id}`,
+        },
+      }).catch((err) => {
+        console.error("[rfq] automatic reminder failed", err);
+        return null;
+      });
+      if (result?.sent) sent += 1;
+    }
+
+    await prisma.rfqVendorRecipient.update({
+      where: { id: candidate.id },
+      data: { reminderCount: { increment: 1 }, lastReminderAt: now },
+    });
+  }
+
+  return { reminded: due.length, sent };
 }
 
 export type { CandidateCrane };

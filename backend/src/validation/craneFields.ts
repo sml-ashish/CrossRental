@@ -196,6 +196,11 @@ export const createCraneSchema = z
     currentStatus: z
       .enum(VENDOR_SELECTABLE_STATUSES)
       .default(CraneStatus.AVAILABLE),
+    /**
+     * Brief D1: only read for an internal actor adding a crane for a vendor.
+     * A vendor's own payload is scoped to their token and this is ignored.
+     */
+    vendorId: z.string().uuid().optional(),
     availableFrom: z
       .union([z.string(), z.date()])
       .optional()
@@ -207,12 +212,31 @@ export const createCraneSchema = z
         // date" instead of quietly storing a day the vendor never asked for.
         return parseDateInput(v) ?? new Date(NaN);
       }),
+    /** Brief D4: optional, meaningful while the crane is Under Maintenance. */
+    expectedReadyDate: z
+      .union([z.string(), z.date()])
+      .optional()
+      .nullable()
+      .transform((v) => {
+        if (v === undefined || v === null || v === "") return null;
+        return parseDateInput(v) ?? new Date(NaN);
+      }),
     /** Set by the vendor confirming or dragging a pin instead of geocoding. */
     latitude: z.coerce.number().optional().nullable(),
     longitude: z.coerce.number().optional().nullable(),
   })
   .superRefine((value, ctx) => {
     findUnpairedPin(value, ctx);
+    if (
+      value.expectedReadyDate &&
+      Number.isNaN(value.expectedReadyDate.getTime())
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["expectedReadyDate"],
+        message: "Enter a valid date",
+      });
+    }
     if (value.currentStatus === CraneStatus.ENGAGED) {
       if (!value.availableFrom) {
         ctx.addIssue({
@@ -262,11 +286,31 @@ export const updateCraneSchema = z
         // date" instead of quietly storing a day the vendor never asked for.
         return parseDateInput(v) ?? new Date(NaN);
       }),
+    /** Brief D4: optional, meaningful while the crane is Under Maintenance. */
+    expectedReadyDate: z
+      .union([z.string(), z.date()])
+      .optional()
+      .nullable()
+      .transform((v) => {
+        if (v === undefined) return undefined;
+        if (v === null || v === "") return null;
+        return parseDateInput(v) ?? new Date(NaN);
+      }),
     latitude: z.coerce.number().optional().nullable(),
     longitude: z.coerce.number().optional().nullable(),
   })
   .superRefine((value, ctx) => {
     findUnpairedPin(value, ctx);
+    if (
+      value.expectedReadyDate &&
+      Number.isNaN(value.expectedReadyDate.getTime())
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["expectedReadyDate"],
+        message: "Enter a valid date",
+      });
+    }
     if (
       value.currentStatus === CraneStatus.ENGAGED &&
       value.availableFrom !== undefined
@@ -324,9 +368,30 @@ export const quickUpdateSchema = z
         // date" instead of quietly storing a day the vendor never asked for.
         return parseDateInput(v) ?? new Date(NaN);
       }),
+    /** Brief D4: optional, meaningful while the crane is Under Maintenance. */
+    expectedReadyDate: z
+      .union([z.string(), z.date()])
+      .optional()
+      .nullable()
+      .transform((v) => {
+        if (v === undefined) return undefined;
+        if (v === null || v === "") return null;
+        return parseDateInput(v) ?? new Date(NaN);
+      }),
   })
   .superRefine((value, ctx) => {
     findUnpairedPin(value, ctx);
+
+    if (
+      value.expectedReadyDate &&
+      Number.isNaN(value.expectedReadyDate.getTime())
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["expectedReadyDate"],
+        message: "Enter a valid date",
+      });
+    }
 
     if (value.currentStatus !== CraneStatus.ENGAGED) return;
     if (value.availableFrom === undefined || value.availableFrom === null) {

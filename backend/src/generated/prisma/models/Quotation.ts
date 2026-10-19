@@ -30,6 +30,7 @@ export type QuotationAvgAggregateOutputType = {
   version: number | null
   rentalRate: runtime.Decimal | null
   mobilisationCharges: runtime.Decimal | null
+  demobilisationCharges: runtime.Decimal | null
   totalQuotedValue: runtime.Decimal | null
   distanceToSiteKm: runtime.Decimal | null
 }
@@ -38,6 +39,7 @@ export type QuotationSumAggregateOutputType = {
   version: number | null
   rentalRate: runtime.Decimal | null
   mobilisationCharges: runtime.Decimal | null
+  demobilisationCharges: runtime.Decimal | null
   totalQuotedValue: runtime.Decimal | null
   distanceToSiteKm: runtime.Decimal | null
 }
@@ -52,6 +54,8 @@ export type QuotationMinAggregateOutputType = {
   rentalRate: runtime.Decimal | null
   rateBasis: $Enums.RateBasis | null
   mobilisationCharges: runtime.Decimal | null
+  demobilisationCharges: runtime.Decimal | null
+  taxBasis: $Enums.TaxBasisOfQuotation | null
   totalQuotedValue: runtime.Decimal | null
   calculationNote: string | null
   availabilityConfirmed: boolean | null
@@ -65,6 +69,10 @@ export type QuotationMinAggregateOutputType = {
   distanceToSiteKm: runtime.Decimal | null
   distanceMethod: $Enums.DistanceMethod | null
   status: $Enums.QuotationStatus | null
+  statusReasonCode: string | null
+  statusReasonText: string | null
+  statusChangedAt: Date | null
+  statusChangedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -79,6 +87,8 @@ export type QuotationMaxAggregateOutputType = {
   rentalRate: runtime.Decimal | null
   rateBasis: $Enums.RateBasis | null
   mobilisationCharges: runtime.Decimal | null
+  demobilisationCharges: runtime.Decimal | null
+  taxBasis: $Enums.TaxBasisOfQuotation | null
   totalQuotedValue: runtime.Decimal | null
   calculationNote: string | null
   availabilityConfirmed: boolean | null
@@ -92,6 +102,10 @@ export type QuotationMaxAggregateOutputType = {
   distanceToSiteKm: runtime.Decimal | null
   distanceMethod: $Enums.DistanceMethod | null
   status: $Enums.QuotationStatus | null
+  statusReasonCode: string | null
+  statusReasonText: string | null
+  statusChangedAt: Date | null
+  statusChangedById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -106,6 +120,8 @@ export type QuotationCountAggregateOutputType = {
   rentalRate: number
   rateBasis: number
   mobilisationCharges: number
+  demobilisationCharges: number
+  taxBasis: number
   totalQuotedValue: number
   calculationNote: number
   availabilityConfirmed: number
@@ -121,6 +137,10 @@ export type QuotationCountAggregateOutputType = {
   distanceToSiteKm: number
   distanceMethod: number
   status: number
+  statusReasonCode: number
+  statusReasonText: number
+  statusChangedAt: number
+  statusChangedById: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -131,6 +151,7 @@ export type QuotationAvgAggregateInputType = {
   version?: true
   rentalRate?: true
   mobilisationCharges?: true
+  demobilisationCharges?: true
   totalQuotedValue?: true
   distanceToSiteKm?: true
 }
@@ -139,6 +160,7 @@ export type QuotationSumAggregateInputType = {
   version?: true
   rentalRate?: true
   mobilisationCharges?: true
+  demobilisationCharges?: true
   totalQuotedValue?: true
   distanceToSiteKm?: true
 }
@@ -153,6 +175,8 @@ export type QuotationMinAggregateInputType = {
   rentalRate?: true
   rateBasis?: true
   mobilisationCharges?: true
+  demobilisationCharges?: true
+  taxBasis?: true
   totalQuotedValue?: true
   calculationNote?: true
   availabilityConfirmed?: true
@@ -166,6 +190,10 @@ export type QuotationMinAggregateInputType = {
   distanceToSiteKm?: true
   distanceMethod?: true
   status?: true
+  statusReasonCode?: true
+  statusReasonText?: true
+  statusChangedAt?: true
+  statusChangedById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -180,6 +208,8 @@ export type QuotationMaxAggregateInputType = {
   rentalRate?: true
   rateBasis?: true
   mobilisationCharges?: true
+  demobilisationCharges?: true
+  taxBasis?: true
   totalQuotedValue?: true
   calculationNote?: true
   availabilityConfirmed?: true
@@ -193,6 +223,10 @@ export type QuotationMaxAggregateInputType = {
   distanceToSiteKm?: true
   distanceMethod?: true
   status?: true
+  statusReasonCode?: true
+  statusReasonText?: true
+  statusChangedAt?: true
+  statusChangedById?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -207,6 +241,8 @@ export type QuotationCountAggregateInputType = {
   rentalRate?: true
   rateBasis?: true
   mobilisationCharges?: true
+  demobilisationCharges?: true
+  taxBasis?: true
   totalQuotedValue?: true
   calculationNote?: true
   availabilityConfirmed?: true
@@ -222,6 +258,10 @@ export type QuotationCountAggregateInputType = {
   distanceToSiteKm?: true
   distanceMethod?: true
   status?: true
+  statusReasonCode?: true
+  statusReasonText?: true
+  statusChangedAt?: true
+  statusChangedById?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -323,6 +363,8 @@ export type QuotationGroupByOutputType = {
   rentalRate: runtime.Decimal
   rateBasis: $Enums.RateBasis
   mobilisationCharges: runtime.Decimal
+  demobilisationCharges: runtime.Decimal
+  taxBasis: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal
   calculationNote: string | null
   availabilityConfirmed: boolean
@@ -338,6 +380,10 @@ export type QuotationGroupByOutputType = {
   distanceToSiteKm: runtime.Decimal | null
   distanceMethod: $Enums.DistanceMethod | null
   status: $Enums.QuotationStatus
+  statusReasonCode: string | null
+  statusReasonText: string | null
+  statusChangedAt: Date | null
+  statusChangedById: string | null
   createdAt: Date
   updatedAt: Date
   _count: QuotationCountAggregateOutputType | null
@@ -375,6 +421,8 @@ export type QuotationWhereInput = {
   rentalRate?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFilter<"Quotation"> | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFilter<"Quotation"> | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.StringNullableFilter<"Quotation"> | string | null
   availabilityConfirmed?: Prisma.BoolFilter<"Quotation"> | boolean
@@ -390,12 +438,17 @@ export type QuotationWhereInput = {
   distanceToSiteKm?: Prisma.DecimalNullableFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.EnumDistanceMethodNullableFilter<"Quotation"> | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFilter<"Quotation"> | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  statusReasonText?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  statusChangedAt?: Prisma.DateTimeNullableFilter<"Quotation"> | Date | string | null
+  statusChangedById?: Prisma.StringNullableFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   rfq?: Prisma.XOR<Prisma.RfqScalarRelationFilter, Prisma.RfqWhereInput>
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
   crane?: Prisma.XOR<Prisma.CraneScalarRelationFilter, Prisma.CraneWhereInput>
   attachments?: Prisma.QuotationAttachmentListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }
 
 export type QuotationOrderByWithRelationInput = {
@@ -408,6 +461,8 @@ export type QuotationOrderByWithRelationInput = {
   rentalRate?: Prisma.SortOrder
   rateBasis?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
+  taxBasis?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   calculationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   availabilityConfirmed?: Prisma.SortOrder
@@ -423,12 +478,17 @@ export type QuotationOrderByWithRelationInput = {
   distanceToSiteKm?: Prisma.SortOrderInput | Prisma.SortOrder
   distanceMethod?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  statusReasonCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusReasonText?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusChangedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   rfq?: Prisma.RfqOrderByWithRelationInput
   vendor?: Prisma.VendorOrderByWithRelationInput
   crane?: Prisma.CraneOrderByWithRelationInput
   attachments?: Prisma.QuotationAttachmentOrderByRelationAggregateInput
+  reservations?: Prisma.ReservationOrderByRelationAggregateInput
 }
 
 export type QuotationWhereUniqueInput = Prisma.AtLeast<{
@@ -445,6 +505,8 @@ export type QuotationWhereUniqueInput = Prisma.AtLeast<{
   rentalRate?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFilter<"Quotation"> | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFilter<"Quotation"> | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.StringNullableFilter<"Quotation"> | string | null
   availabilityConfirmed?: Prisma.BoolFilter<"Quotation"> | boolean
@@ -460,12 +522,17 @@ export type QuotationWhereUniqueInput = Prisma.AtLeast<{
   distanceToSiteKm?: Prisma.DecimalNullableFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.EnumDistanceMethodNullableFilter<"Quotation"> | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFilter<"Quotation"> | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  statusReasonText?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  statusChangedAt?: Prisma.DateTimeNullableFilter<"Quotation"> | Date | string | null
+  statusChangedById?: Prisma.StringNullableFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   rfq?: Prisma.XOR<Prisma.RfqScalarRelationFilter, Prisma.RfqWhereInput>
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
   crane?: Prisma.XOR<Prisma.CraneScalarRelationFilter, Prisma.CraneWhereInput>
   attachments?: Prisma.QuotationAttachmentListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }, "id" | "rfqId_vendorId_craneId_version">
 
 export type QuotationOrderByWithAggregationInput = {
@@ -478,6 +545,8 @@ export type QuotationOrderByWithAggregationInput = {
   rentalRate?: Prisma.SortOrder
   rateBasis?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
+  taxBasis?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   calculationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   availabilityConfirmed?: Prisma.SortOrder
@@ -493,6 +562,10 @@ export type QuotationOrderByWithAggregationInput = {
   distanceToSiteKm?: Prisma.SortOrderInput | Prisma.SortOrder
   distanceMethod?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  statusReasonCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusReasonText?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusChangedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.QuotationCountOrderByAggregateInput
@@ -515,6 +588,8 @@ export type QuotationScalarWhereWithAggregatesInput = {
   rentalRate?: Prisma.DecimalWithAggregatesFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisWithAggregatesFilter<"Quotation"> | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalWithAggregatesFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalWithAggregatesFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationWithAggregatesFilter<"Quotation"> | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalWithAggregatesFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
   availabilityConfirmed?: Prisma.BoolWithAggregatesFilter<"Quotation"> | boolean
@@ -530,6 +605,10 @@ export type QuotationScalarWhereWithAggregatesInput = {
   distanceToSiteKm?: Prisma.DecimalNullableWithAggregatesFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.EnumDistanceMethodNullableWithAggregatesFilter<"Quotation"> | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusWithAggregatesFilter<"Quotation"> | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
+  statusReasonText?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
+  statusChangedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Quotation"> | Date | string | null
+  statusChangedById?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Quotation"> | Date | string
 }
@@ -541,6 +620,8 @@ export type QuotationCreateInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -556,12 +637,17 @@ export type QuotationCreateInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
   vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationUncheckedCreateInput = {
@@ -574,6 +660,8 @@ export type QuotationUncheckedCreateInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -589,9 +677,14 @@ export type QuotationUncheckedCreateInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationUpdateInput = {
@@ -601,6 +694,8 @@ export type QuotationUpdateInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -616,12 +711,17 @@ export type QuotationUpdateInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
   vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateInput = {
@@ -634,6 +734,8 @@ export type QuotationUncheckedUpdateInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -649,9 +751,14 @@ export type QuotationUncheckedUpdateInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationCreateManyInput = {
@@ -664,6 +771,8 @@ export type QuotationCreateManyInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -679,6 +788,10 @@ export type QuotationCreateManyInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -690,6 +803,8 @@ export type QuotationUpdateManyMutationInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -705,6 +820,10 @@ export type QuotationUpdateManyMutationInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -719,6 +838,8 @@ export type QuotationUncheckedUpdateManyInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -734,6 +855,10 @@ export type QuotationUncheckedUpdateManyInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -746,6 +871,11 @@ export type QuotationListRelationFilter = {
 
 export type QuotationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type QuotationNullableScalarRelationFilter = {
+  is?: Prisma.QuotationWhereInput | null
+  isNot?: Prisma.QuotationWhereInput | null
 }
 
 export type QuotationRfqIdVendorIdCraneIdVersionCompoundUniqueInput = {
@@ -765,6 +895,8 @@ export type QuotationCountOrderByAggregateInput = {
   rentalRate?: Prisma.SortOrder
   rateBasis?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
+  taxBasis?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   calculationNote?: Prisma.SortOrder
   availabilityConfirmed?: Prisma.SortOrder
@@ -780,6 +912,10 @@ export type QuotationCountOrderByAggregateInput = {
   distanceToSiteKm?: Prisma.SortOrder
   distanceMethod?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  statusReasonCode?: Prisma.SortOrder
+  statusReasonText?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrder
+  statusChangedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -788,6 +924,7 @@ export type QuotationAvgOrderByAggregateInput = {
   version?: Prisma.SortOrder
   rentalRate?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   distanceToSiteKm?: Prisma.SortOrder
 }
@@ -802,6 +939,8 @@ export type QuotationMaxOrderByAggregateInput = {
   rentalRate?: Prisma.SortOrder
   rateBasis?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
+  taxBasis?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   calculationNote?: Prisma.SortOrder
   availabilityConfirmed?: Prisma.SortOrder
@@ -815,6 +954,10 @@ export type QuotationMaxOrderByAggregateInput = {
   distanceToSiteKm?: Prisma.SortOrder
   distanceMethod?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  statusReasonCode?: Prisma.SortOrder
+  statusReasonText?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrder
+  statusChangedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -829,6 +972,8 @@ export type QuotationMinOrderByAggregateInput = {
   rentalRate?: Prisma.SortOrder
   rateBasis?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
+  taxBasis?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   calculationNote?: Prisma.SortOrder
   availabilityConfirmed?: Prisma.SortOrder
@@ -842,6 +987,10 @@ export type QuotationMinOrderByAggregateInput = {
   distanceToSiteKm?: Prisma.SortOrder
   distanceMethod?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  statusReasonCode?: Prisma.SortOrder
+  statusReasonText?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrder
+  statusChangedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -850,6 +999,7 @@ export type QuotationSumOrderByAggregateInput = {
   version?: Prisma.SortOrder
   rentalRate?: Prisma.SortOrder
   mobilisationCharges?: Prisma.SortOrder
+  demobilisationCharges?: Prisma.SortOrder
   totalQuotedValue?: Prisma.SortOrder
   distanceToSiteKm?: Prisma.SortOrder
 }
@@ -985,8 +1135,28 @@ export type QuotationUncheckedUpdateManyWithoutRfqNestedInput = {
   deleteMany?: Prisma.QuotationScalarWhereInput | Prisma.QuotationScalarWhereInput[]
 }
 
+export type QuotationCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutReservationsInput, Prisma.QuotationUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.QuotationWhereUniqueInput
+}
+
+export type QuotationUpdateOneWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutReservationsInput, Prisma.QuotationUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.QuotationUpsertWithoutReservationsInput
+  disconnect?: Prisma.QuotationWhereInput | boolean
+  delete?: Prisma.QuotationWhereInput | boolean
+  connect?: Prisma.QuotationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.QuotationUpdateToOneWithWhereWithoutReservationsInput, Prisma.QuotationUpdateWithoutReservationsInput>, Prisma.QuotationUncheckedUpdateWithoutReservationsInput>
+}
+
 export type EnumRateBasisFieldUpdateOperationsInput = {
   set?: $Enums.RateBasis
+}
+
+export type EnumTaxBasisOfQuotationFieldUpdateOperationsInput = {
+  set?: $Enums.TaxBasisOfQuotation
 }
 
 export type EnumQuoteSourceFieldUpdateOperationsInput = {
@@ -1022,6 +1192,8 @@ export type QuotationCreateWithoutVendorInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1037,11 +1209,16 @@ export type QuotationCreateWithoutVendorInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutVendorInput = {
@@ -1053,6 +1230,8 @@ export type QuotationUncheckedCreateWithoutVendorInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1068,9 +1247,14 @@ export type QuotationUncheckedCreateWithoutVendorInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutVendorInput = {
@@ -1112,6 +1296,8 @@ export type QuotationScalarWhereInput = {
   rentalRate?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFilter<"Quotation"> | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFilter<"Quotation"> | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.StringNullableFilter<"Quotation"> | string | null
   availabilityConfirmed?: Prisma.BoolFilter<"Quotation"> | boolean
@@ -1127,6 +1313,10 @@ export type QuotationScalarWhereInput = {
   distanceToSiteKm?: Prisma.DecimalNullableFilter<"Quotation"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.EnumDistanceMethodNullableFilter<"Quotation"> | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFilter<"Quotation"> | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  statusReasonText?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  statusChangedAt?: Prisma.DateTimeNullableFilter<"Quotation"> | Date | string | null
+  statusChangedById?: Prisma.StringNullableFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
 }
@@ -1138,6 +1328,8 @@ export type QuotationCreateWithoutCraneInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1153,11 +1345,16 @@ export type QuotationCreateWithoutCraneInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
   vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutCraneInput = {
@@ -1169,6 +1366,8 @@ export type QuotationUncheckedCreateWithoutCraneInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1184,9 +1383,14 @@ export type QuotationUncheckedCreateWithoutCraneInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutCraneInput = {
@@ -1222,6 +1426,8 @@ export type QuotationCreateWithoutRfqInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1237,11 +1443,16 @@ export type QuotationCreateWithoutRfqInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutRfqInput = {
@@ -1253,6 +1464,8 @@ export type QuotationUncheckedCreateWithoutRfqInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1268,9 +1481,14 @@ export type QuotationUncheckedCreateWithoutRfqInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutRfqInput = {
@@ -1299,13 +1517,15 @@ export type QuotationUpdateManyWithWhereWithoutRfqInput = {
   data: Prisma.XOR<Prisma.QuotationUpdateManyMutationInput, Prisma.QuotationUncheckedUpdateManyWithoutRfqInput>
 }
 
-export type QuotationCreateWithoutAttachmentsInput = {
+export type QuotationCreateWithoutReservationsInput = {
   id?: string
   version?: number
   isLatest?: boolean
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1321,11 +1541,176 @@ export type QuotationCreateWithoutAttachmentsInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
   vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
+  attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+}
+
+export type QuotationUncheckedCreateWithoutReservationsInput = {
+  id?: string
+  rfqId: string
+  vendorId: string
+  craneId: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+}
+
+export type QuotationCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.QuotationWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutReservationsInput, Prisma.QuotationUncheckedCreateWithoutReservationsInput>
+}
+
+export type QuotationUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.QuotationUpdateWithoutReservationsInput, Prisma.QuotationUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutReservationsInput, Prisma.QuotationUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.QuotationWhereInput
+}
+
+export type QuotationUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.QuotationWhereInput
+  data: Prisma.XOR<Prisma.QuotationUpdateWithoutReservationsInput, Prisma.QuotationUncheckedUpdateWithoutReservationsInput>
+}
+
+export type QuotationUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
+  crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
+  attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+}
+
+export type QuotationUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqId?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  craneId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+}
+
+export type QuotationCreateWithoutAttachmentsInput = {
+  id?: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
+  vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
+  crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutAttachmentsInput = {
@@ -1338,6 +1723,8 @@ export type QuotationUncheckedCreateWithoutAttachmentsInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1353,8 +1740,13 @@ export type QuotationUncheckedCreateWithoutAttachmentsInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutAttachmentsInput = {
@@ -1380,6 +1772,8 @@ export type QuotationUpdateWithoutAttachmentsInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1395,11 +1789,16 @@ export type QuotationUpdateWithoutAttachmentsInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
   vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutAttachmentsInput = {
@@ -1412,6 +1811,8 @@ export type QuotationUncheckedUpdateWithoutAttachmentsInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1427,8 +1828,13 @@ export type QuotationUncheckedUpdateWithoutAttachmentsInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationCreateManyVendorInput = {
@@ -1440,6 +1846,8 @@ export type QuotationCreateManyVendorInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1455,6 +1863,10 @@ export type QuotationCreateManyVendorInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1466,6 +1878,8 @@ export type QuotationUpdateWithoutVendorInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1481,11 +1895,16 @@ export type QuotationUpdateWithoutVendorInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutVendorInput = {
@@ -1497,6 +1916,8 @@ export type QuotationUncheckedUpdateWithoutVendorInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1512,9 +1933,14 @@ export type QuotationUncheckedUpdateWithoutVendorInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateManyWithoutVendorInput = {
@@ -1526,6 +1952,8 @@ export type QuotationUncheckedUpdateManyWithoutVendorInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1541,6 +1969,10 @@ export type QuotationUncheckedUpdateManyWithoutVendorInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1554,6 +1986,8 @@ export type QuotationCreateManyCraneInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1569,6 +2003,10 @@ export type QuotationCreateManyCraneInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1580,6 +2018,8 @@ export type QuotationUpdateWithoutCraneInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1595,11 +2035,16 @@ export type QuotationUpdateWithoutCraneInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
   vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutCraneInput = {
@@ -1611,6 +2056,8 @@ export type QuotationUncheckedUpdateWithoutCraneInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1626,9 +2073,14 @@ export type QuotationUncheckedUpdateWithoutCraneInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateManyWithoutCraneInput = {
@@ -1640,6 +2092,8 @@ export type QuotationUncheckedUpdateManyWithoutCraneInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1655,6 +2109,10 @@ export type QuotationUncheckedUpdateManyWithoutCraneInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1668,6 +2126,8 @@ export type QuotationCreateManyRfqInput = {
   rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis: $Enums.RateBasis
   mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
   totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: string | null
   availabilityConfirmed: boolean
@@ -1683,6 +2143,10 @@ export type QuotationCreateManyRfqInput = {
   distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: $Enums.DistanceMethod | null
   status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1694,6 +2158,8 @@ export type QuotationUpdateWithoutRfqInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1709,11 +2175,16 @@ export type QuotationUpdateWithoutRfqInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutRfqInput = {
@@ -1725,6 +2196,8 @@ export type QuotationUncheckedUpdateWithoutRfqInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1740,9 +2213,14 @@ export type QuotationUncheckedUpdateWithoutRfqInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateManyWithoutRfqInput = {
@@ -1754,6 +2232,8 @@ export type QuotationUncheckedUpdateManyWithoutRfqInput = {
   rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
   mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
   totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1769,6 +2249,10 @@ export type QuotationUncheckedUpdateManyWithoutRfqInput = {
   distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
   status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1780,10 +2264,12 @@ export type QuotationUncheckedUpdateManyWithoutRfqInput = {
 
 export type QuotationCountOutputType = {
   attachments: number
+  reservations: number
 }
 
 export type QuotationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   attachments?: boolean | QuotationCountOutputTypeCountAttachmentsArgs
+  reservations?: boolean | QuotationCountOutputTypeCountReservationsArgs
 }
 
 /**
@@ -1803,6 +2289,13 @@ export type QuotationCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime
   where?: Prisma.QuotationAttachmentWhereInput
 }
 
+/**
+ * QuotationCountOutputType without action
+ */
+export type QuotationCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationWhereInput
+}
+
 
 export type QuotationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1814,6 +2307,8 @@ export type QuotationSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   rentalRate?: boolean
   rateBasis?: boolean
   mobilisationCharges?: boolean
+  demobilisationCharges?: boolean
+  taxBasis?: boolean
   totalQuotedValue?: boolean
   calculationNote?: boolean
   availabilityConfirmed?: boolean
@@ -1829,12 +2324,17 @@ export type QuotationSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   distanceToSiteKm?: boolean
   distanceMethod?: boolean
   status?: boolean
+  statusReasonCode?: boolean
+  statusReasonText?: boolean
+  statusChangedAt?: boolean
+  statusChangedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   crane?: boolean | Prisma.CraneDefaultArgs<ExtArgs>
   attachments?: boolean | Prisma.Quotation$attachmentsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Quotation$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.QuotationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["quotation"]>
 
@@ -1848,6 +2348,8 @@ export type QuotationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   rentalRate?: boolean
   rateBasis?: boolean
   mobilisationCharges?: boolean
+  demobilisationCharges?: boolean
+  taxBasis?: boolean
   totalQuotedValue?: boolean
   calculationNote?: boolean
   availabilityConfirmed?: boolean
@@ -1863,6 +2365,10 @@ export type QuotationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   distanceToSiteKm?: boolean
   distanceMethod?: boolean
   status?: boolean
+  statusReasonCode?: boolean
+  statusReasonText?: boolean
+  statusChangedAt?: boolean
+  statusChangedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
@@ -1880,6 +2386,8 @@ export type QuotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   rentalRate?: boolean
   rateBasis?: boolean
   mobilisationCharges?: boolean
+  demobilisationCharges?: boolean
+  taxBasis?: boolean
   totalQuotedValue?: boolean
   calculationNote?: boolean
   availabilityConfirmed?: boolean
@@ -1895,6 +2403,10 @@ export type QuotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   distanceToSiteKm?: boolean
   distanceMethod?: boolean
   status?: boolean
+  statusReasonCode?: boolean
+  statusReasonText?: boolean
+  statusChangedAt?: boolean
+  statusChangedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
@@ -1912,6 +2424,8 @@ export type QuotationSelectScalar = {
   rentalRate?: boolean
   rateBasis?: boolean
   mobilisationCharges?: boolean
+  demobilisationCharges?: boolean
+  taxBasis?: boolean
   totalQuotedValue?: boolean
   calculationNote?: boolean
   availabilityConfirmed?: boolean
@@ -1927,16 +2441,21 @@ export type QuotationSelectScalar = {
   distanceToSiteKm?: boolean
   distanceMethod?: boolean
   status?: boolean
+  statusReasonCode?: boolean
+  statusReasonText?: boolean
+  statusChangedAt?: boolean
+  statusChangedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type QuotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqId" | "vendorId" | "craneId" | "version" | "isLatest" | "rentalRate" | "rateBasis" | "mobilisationCharges" | "totalQuotedValue" | "calculationNote" | "availabilityConfirmed" | "availableFrom" | "validityDate" | "acceptsCommercialTerms" | "deviationText" | "remarks" | "warnings" | "submittedAt" | "source" | "craneLocationSnapshot" | "distanceToSiteKm" | "distanceMethod" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["quotation"]>
+export type QuotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqId" | "vendorId" | "craneId" | "version" | "isLatest" | "rentalRate" | "rateBasis" | "mobilisationCharges" | "demobilisationCharges" | "taxBasis" | "totalQuotedValue" | "calculationNote" | "availabilityConfirmed" | "availableFrom" | "validityDate" | "acceptsCommercialTerms" | "deviationText" | "remarks" | "warnings" | "submittedAt" | "source" | "craneLocationSnapshot" | "distanceToSiteKm" | "distanceMethod" | "status" | "statusReasonCode" | "statusReasonText" | "statusChangedAt" | "statusChangedById" | "createdAt" | "updatedAt", ExtArgs["result"]["quotation"]>
 export type QuotationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   crane?: boolean | Prisma.CraneDefaultArgs<ExtArgs>
   attachments?: boolean | Prisma.Quotation$attachmentsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Quotation$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.QuotationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type QuotationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1957,6 +2476,7 @@ export type $QuotationPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     vendor: Prisma.$VendorPayload<ExtArgs>
     crane: Prisma.$CranePayload<ExtArgs>
     attachments: Prisma.$QuotationAttachmentPayload<ExtArgs>[]
+    reservations: Prisma.$ReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1968,6 +2488,8 @@ export type $QuotationPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     rentalRate: runtime.Decimal
     rateBasis: $Enums.RateBasis
     mobilisationCharges: runtime.Decimal
+    demobilisationCharges: runtime.Decimal
+    taxBasis: $Enums.TaxBasisOfQuotation
     totalQuotedValue: runtime.Decimal
     calculationNote: string | null
     availabilityConfirmed: boolean
@@ -1983,6 +2505,10 @@ export type $QuotationPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     distanceToSiteKm: runtime.Decimal | null
     distanceMethod: $Enums.DistanceMethod | null
     status: $Enums.QuotationStatus
+    statusReasonCode: string | null
+    statusReasonText: string | null
+    statusChangedAt: Date | null
+    statusChangedById: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["quotation"]>
@@ -2383,6 +2909,7 @@ export interface Prisma__QuotationClient<T, Null = never, ExtArgs extends runtim
   vendor<T extends Prisma.VendorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VendorDefaultArgs<ExtArgs>>): Prisma.Prisma__VendorClient<runtime.Types.Result.GetResult<Prisma.$VendorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   crane<T extends Prisma.CraneDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CraneDefaultArgs<ExtArgs>>): Prisma.Prisma__CraneClient<runtime.Types.Result.GetResult<Prisma.$CranePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   attachments<T extends Prisma.Quotation$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reservations<T extends Prisma.Quotation$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2421,6 +2948,8 @@ export interface QuotationFieldRefs {
   readonly rentalRate: Prisma.FieldRef<"Quotation", 'Decimal'>
   readonly rateBasis: Prisma.FieldRef<"Quotation", 'RateBasis'>
   readonly mobilisationCharges: Prisma.FieldRef<"Quotation", 'Decimal'>
+  readonly demobilisationCharges: Prisma.FieldRef<"Quotation", 'Decimal'>
+  readonly taxBasis: Prisma.FieldRef<"Quotation", 'TaxBasisOfQuotation'>
   readonly totalQuotedValue: Prisma.FieldRef<"Quotation", 'Decimal'>
   readonly calculationNote: Prisma.FieldRef<"Quotation", 'String'>
   readonly availabilityConfirmed: Prisma.FieldRef<"Quotation", 'Boolean'>
@@ -2436,6 +2965,10 @@ export interface QuotationFieldRefs {
   readonly distanceToSiteKm: Prisma.FieldRef<"Quotation", 'Decimal'>
   readonly distanceMethod: Prisma.FieldRef<"Quotation", 'DistanceMethod'>
   readonly status: Prisma.FieldRef<"Quotation", 'QuotationStatus'>
+  readonly statusReasonCode: Prisma.FieldRef<"Quotation", 'String'>
+  readonly statusReasonText: Prisma.FieldRef<"Quotation", 'String'>
+  readonly statusChangedAt: Prisma.FieldRef<"Quotation", 'DateTime'>
+  readonly statusChangedById: Prisma.FieldRef<"Quotation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Quotation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Quotation", 'DateTime'>
 }
@@ -2860,6 +3393,30 @@ export type Quotation$attachmentsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.QuotationAttachmentScalarFieldEnum | Prisma.QuotationAttachmentScalarFieldEnum[]
+}
+
+/**
+ * Quotation.reservations
+ */
+export type Quotation$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reservation
+   */
+  select?: Prisma.ReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reservation
+   */
+  omit?: Prisma.ReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationInclude<ExtArgs> | null
+  where?: Prisma.ReservationWhereInput
+  orderBy?: Prisma.ReservationOrderByWithRelationInput | Prisma.ReservationOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
 }
 
 /**

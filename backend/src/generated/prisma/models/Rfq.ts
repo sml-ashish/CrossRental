@@ -29,6 +29,9 @@ export type AggregateRfq = {
 export type RfqAvgAggregateOutputType = {
   capacityT: runtime.Decimal | null
   quantity: number | null
+  mainBoomM: runtime.Decimal | null
+  jibLengthM: runtime.Decimal | null
+  workingDaysPerMonth: number | null
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
   durationValue: runtime.Decimal | null
@@ -38,6 +41,9 @@ export type RfqAvgAggregateOutputType = {
 export type RfqSumAggregateOutputType = {
   capacityT: runtime.Decimal | null
   quantity: number | null
+  mainBoomM: runtime.Decimal | null
+  jibLengthM: runtime.Decimal | null
+  workingDaysPerMonth: number | null
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
   durationValue: runtime.Decimal | null
@@ -52,6 +58,14 @@ export type RfqMinAggregateOutputType = {
   craneType: string | null
   capacityT: runtime.Decimal | null
   quantity: number | null
+  capacityRule: $Enums.CapacityRule | null
+  capacityNote: string | null
+  applicationDescription: string | null
+  loadDescription: string | null
+  mainBoomM: runtime.Decimal | null
+  jibLengthM: runtime.Decimal | null
+  startDateTbc: boolean | null
+  workingDaysPerMonth: number | null
   siteLocation: string | null
   siteStateCode: string | null
   sitePincode: string | null
@@ -70,6 +84,12 @@ export type RfqMinAggregateOutputType = {
   accommodationConveyance: string | null
   paymentTerms: string | null
   notes: string | null
+  mobilisationTerms: string | null
+  supportCrane: string | null
+  steelMatsGroundPrep: string | null
+  ehsHrRequirements: string | null
+  insuranceTerms: string | null
+  extensionClause: string | null
   smlContactName: string | null
   smlContactMobile: string | null
   smlContactEmail: string | null
@@ -78,6 +98,7 @@ export type RfqMinAggregateOutputType = {
   rollupStatus: $Enums.RfqRollupStatus | null
   cancelledAt: Date | null
   cancelReason: string | null
+  enquiryLineId: string | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -92,6 +113,14 @@ export type RfqMaxAggregateOutputType = {
   craneType: string | null
   capacityT: runtime.Decimal | null
   quantity: number | null
+  capacityRule: $Enums.CapacityRule | null
+  capacityNote: string | null
+  applicationDescription: string | null
+  loadDescription: string | null
+  mainBoomM: runtime.Decimal | null
+  jibLengthM: runtime.Decimal | null
+  startDateTbc: boolean | null
+  workingDaysPerMonth: number | null
   siteLocation: string | null
   siteStateCode: string | null
   sitePincode: string | null
@@ -110,6 +139,12 @@ export type RfqMaxAggregateOutputType = {
   accommodationConveyance: string | null
   paymentTerms: string | null
   notes: string | null
+  mobilisationTerms: string | null
+  supportCrane: string | null
+  steelMatsGroundPrep: string | null
+  ehsHrRequirements: string | null
+  insuranceTerms: string | null
+  extensionClause: string | null
   smlContactName: string | null
   smlContactMobile: string | null
   smlContactEmail: string | null
@@ -118,6 +153,7 @@ export type RfqMaxAggregateOutputType = {
   rollupStatus: $Enums.RfqRollupStatus | null
   cancelledAt: Date | null
   cancelReason: string | null
+  enquiryLineId: string | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -132,6 +168,14 @@ export type RfqCountAggregateOutputType = {
   craneType: number
   capacityT: number
   quantity: number
+  capacityRule: number
+  capacityNote: number
+  applicationDescription: number
+  loadDescription: number
+  mainBoomM: number
+  jibLengthM: number
+  startDateTbc: number
+  workingDaysPerMonth: number
   siteLocation: number
   siteStateCode: number
   sitePincode: number
@@ -150,6 +194,12 @@ export type RfqCountAggregateOutputType = {
   accommodationConveyance: number
   paymentTerms: number
   notes: number
+  mobilisationTerms: number
+  supportCrane: number
+  steelMatsGroundPrep: number
+  ehsHrRequirements: number
+  insuranceTerms: number
+  extensionClause: number
   commercialTermsExtra: number
   smlContactName: number
   smlContactMobile: number
@@ -159,6 +209,7 @@ export type RfqCountAggregateOutputType = {
   rollupStatus: number
   cancelledAt: number
   cancelReason: number
+  enquiryLineId: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -170,6 +221,9 @@ export type RfqCountAggregateOutputType = {
 export type RfqAvgAggregateInputType = {
   capacityT?: true
   quantity?: true
+  mainBoomM?: true
+  jibLengthM?: true
+  workingDaysPerMonth?: true
   siteLatitude?: true
   siteLongitude?: true
   durationValue?: true
@@ -179,6 +233,9 @@ export type RfqAvgAggregateInputType = {
 export type RfqSumAggregateInputType = {
   capacityT?: true
   quantity?: true
+  mainBoomM?: true
+  jibLengthM?: true
+  workingDaysPerMonth?: true
   siteLatitude?: true
   siteLongitude?: true
   durationValue?: true
@@ -193,6 +250,14 @@ export type RfqMinAggregateInputType = {
   craneType?: true
   capacityT?: true
   quantity?: true
+  capacityRule?: true
+  capacityNote?: true
+  applicationDescription?: true
+  loadDescription?: true
+  mainBoomM?: true
+  jibLengthM?: true
+  startDateTbc?: true
+  workingDaysPerMonth?: true
   siteLocation?: true
   siteStateCode?: true
   sitePincode?: true
@@ -211,6 +276,12 @@ export type RfqMinAggregateInputType = {
   accommodationConveyance?: true
   paymentTerms?: true
   notes?: true
+  mobilisationTerms?: true
+  supportCrane?: true
+  steelMatsGroundPrep?: true
+  ehsHrRequirements?: true
+  insuranceTerms?: true
+  extensionClause?: true
   smlContactName?: true
   smlContactMobile?: true
   smlContactEmail?: true
@@ -219,6 +290,7 @@ export type RfqMinAggregateInputType = {
   rollupStatus?: true
   cancelledAt?: true
   cancelReason?: true
+  enquiryLineId?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -233,6 +305,14 @@ export type RfqMaxAggregateInputType = {
   craneType?: true
   capacityT?: true
   quantity?: true
+  capacityRule?: true
+  capacityNote?: true
+  applicationDescription?: true
+  loadDescription?: true
+  mainBoomM?: true
+  jibLengthM?: true
+  startDateTbc?: true
+  workingDaysPerMonth?: true
   siteLocation?: true
   siteStateCode?: true
   sitePincode?: true
@@ -251,6 +331,12 @@ export type RfqMaxAggregateInputType = {
   accommodationConveyance?: true
   paymentTerms?: true
   notes?: true
+  mobilisationTerms?: true
+  supportCrane?: true
+  steelMatsGroundPrep?: true
+  ehsHrRequirements?: true
+  insuranceTerms?: true
+  extensionClause?: true
   smlContactName?: true
   smlContactMobile?: true
   smlContactEmail?: true
@@ -259,6 +345,7 @@ export type RfqMaxAggregateInputType = {
   rollupStatus?: true
   cancelledAt?: true
   cancelReason?: true
+  enquiryLineId?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -273,6 +360,14 @@ export type RfqCountAggregateInputType = {
   craneType?: true
   capacityT?: true
   quantity?: true
+  capacityRule?: true
+  capacityNote?: true
+  applicationDescription?: true
+  loadDescription?: true
+  mainBoomM?: true
+  jibLengthM?: true
+  startDateTbc?: true
+  workingDaysPerMonth?: true
   siteLocation?: true
   siteStateCode?: true
   sitePincode?: true
@@ -291,6 +386,12 @@ export type RfqCountAggregateInputType = {
   accommodationConveyance?: true
   paymentTerms?: true
   notes?: true
+  mobilisationTerms?: true
+  supportCrane?: true
+  steelMatsGroundPrep?: true
+  ehsHrRequirements?: true
+  insuranceTerms?: true
+  extensionClause?: true
   commercialTermsExtra?: true
   smlContactName?: true
   smlContactMobile?: true
@@ -300,6 +401,7 @@ export type RfqCountAggregateInputType = {
   rollupStatus?: true
   cancelledAt?: true
   cancelReason?: true
+  enquiryLineId?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -401,6 +503,14 @@ export type RfqGroupByOutputType = {
   craneType: string
   capacityT: runtime.Decimal
   quantity: number
+  capacityRule: $Enums.CapacityRule
+  capacityNote: string | null
+  applicationDescription: string | null
+  loadDescription: string | null
+  mainBoomM: runtime.Decimal | null
+  jibLengthM: runtime.Decimal | null
+  startDateTbc: boolean
+  workingDaysPerMonth: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode: string | null
@@ -419,6 +529,12 @@ export type RfqGroupByOutputType = {
   accommodationConveyance: string | null
   paymentTerms: string | null
   notes: string | null
+  mobilisationTerms: string | null
+  supportCrane: string | null
+  steelMatsGroundPrep: string | null
+  ehsHrRequirements: string | null
+  insuranceTerms: string | null
+  extensionClause: string | null
   commercialTermsExtra: runtime.JsonValue | null
   smlContactName: string | null
   smlContactMobile: string | null
@@ -428,6 +544,7 @@ export type RfqGroupByOutputType = {
   rollupStatus: $Enums.RfqRollupStatus | null
   cancelledAt: Date | null
   cancelReason: string | null
+  enquiryLineId: string | null
   createdById: string
   createdAt: Date
   updatedAt: Date
@@ -465,6 +582,14 @@ export type RfqWhereInput = {
   craneType?: Prisma.StringFilter<"Rfq"> | string
   capacityT?: Prisma.DecimalFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFilter<"Rfq"> | number
+  capacityRule?: Prisma.EnumCapacityRuleFilter<"Rfq"> | $Enums.CapacityRule
+  capacityNote?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  applicationDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  loadDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFilter<"Rfq"> | boolean
+  workingDaysPerMonth?: Prisma.IntNullableFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringFilter<"Rfq"> | string
   siteStateCode?: Prisma.StringFilter<"Rfq"> | string
   sitePincode?: Prisma.StringNullableFilter<"Rfq"> | string | null
@@ -483,6 +608,12 @@ export type RfqWhereInput = {
   accommodationConveyance?: Prisma.StringNullableFilter<"Rfq"> | string | null
   paymentTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
   notes?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  mobilisationTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  supportCrane?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  steelMatsGroundPrep?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  ehsHrRequirements?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  insuranceTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  extensionClause?: Prisma.StringNullableFilter<"Rfq"> | string | null
   commercialTermsExtra?: Prisma.JsonNullableFilter<"Rfq">
   smlContactName?: Prisma.StringNullableFilter<"Rfq"> | string | null
   smlContactMobile?: Prisma.StringNullableFilter<"Rfq"> | string | null
@@ -492,16 +623,19 @@ export type RfqWhereInput = {
   rollupStatus?: Prisma.EnumRfqRollupStatusNullableFilter<"Rfq"> | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
   cancelReason?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  enquiryLineId?: Prisma.StringNullableFilter<"Rfq"> | string | null
   createdById?: Prisma.StringFilter<"Rfq"> | string
   createdAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   sentAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
   craneTypeRef?: Prisma.XOR<Prisma.CraneTypeScalarRelationFilter, Prisma.CraneTypeWhereInput>
   siteState?: Prisma.XOR<Prisma.StateScalarRelationFilter, Prisma.StateWhereInput>
+  enquiryLine?: Prisma.XOR<Prisma.EnquiryLineItemNullableScalarRelationFilter, Prisma.EnquiryLineItemWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   recipients?: Prisma.RfqVendorRecipientListRelationFilter
   quotations?: Prisma.QuotationListRelationFilter
   attachments?: Prisma.RfqAttachmentListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }
 
 export type RfqOrderByWithRelationInput = {
@@ -512,6 +646,14 @@ export type RfqOrderByWithRelationInput = {
   craneType?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  capacityRule?: Prisma.SortOrder
+  capacityNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  loadDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrderInput | Prisma.SortOrder
+  startDateTbc?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
   sitePincode?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -530,6 +672,12 @@ export type RfqOrderByWithRelationInput = {
   accommodationConveyance?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  mobilisationTerms?: Prisma.SortOrderInput | Prisma.SortOrder
+  supportCrane?: Prisma.SortOrderInput | Prisma.SortOrder
+  steelMatsGroundPrep?: Prisma.SortOrderInput | Prisma.SortOrder
+  ehsHrRequirements?: Prisma.SortOrderInput | Prisma.SortOrder
+  insuranceTerms?: Prisma.SortOrderInput | Prisma.SortOrder
+  extensionClause?: Prisma.SortOrderInput | Prisma.SortOrder
   commercialTermsExtra?: Prisma.SortOrderInput | Prisma.SortOrder
   smlContactName?: Prisma.SortOrderInput | Prisma.SortOrder
   smlContactMobile?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -539,16 +687,19 @@ export type RfqOrderByWithRelationInput = {
   rollupStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  enquiryLineId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   craneTypeRef?: Prisma.CraneTypeOrderByWithRelationInput
   siteState?: Prisma.StateOrderByWithRelationInput
+  enquiryLine?: Prisma.EnquiryLineItemOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   recipients?: Prisma.RfqVendorRecipientOrderByRelationAggregateInput
   quotations?: Prisma.QuotationOrderByRelationAggregateInput
   attachments?: Prisma.RfqAttachmentOrderByRelationAggregateInput
+  reservations?: Prisma.ReservationOrderByRelationAggregateInput
 }
 
 export type RfqWhereUniqueInput = Prisma.AtLeast<{
@@ -562,6 +713,14 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   craneType?: Prisma.StringFilter<"Rfq"> | string
   capacityT?: Prisma.DecimalFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFilter<"Rfq"> | number
+  capacityRule?: Prisma.EnumCapacityRuleFilter<"Rfq"> | $Enums.CapacityRule
+  capacityNote?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  applicationDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  loadDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFilter<"Rfq"> | boolean
+  workingDaysPerMonth?: Prisma.IntNullableFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringFilter<"Rfq"> | string
   siteStateCode?: Prisma.StringFilter<"Rfq"> | string
   sitePincode?: Prisma.StringNullableFilter<"Rfq"> | string | null
@@ -580,6 +739,12 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   accommodationConveyance?: Prisma.StringNullableFilter<"Rfq"> | string | null
   paymentTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
   notes?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  mobilisationTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  supportCrane?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  steelMatsGroundPrep?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  ehsHrRequirements?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  insuranceTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  extensionClause?: Prisma.StringNullableFilter<"Rfq"> | string | null
   commercialTermsExtra?: Prisma.JsonNullableFilter<"Rfq">
   smlContactName?: Prisma.StringNullableFilter<"Rfq"> | string | null
   smlContactMobile?: Prisma.StringNullableFilter<"Rfq"> | string | null
@@ -589,16 +754,19 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   rollupStatus?: Prisma.EnumRfqRollupStatusNullableFilter<"Rfq"> | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
   cancelReason?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  enquiryLineId?: Prisma.StringNullableFilter<"Rfq"> | string | null
   createdById?: Prisma.StringFilter<"Rfq"> | string
   createdAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   sentAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
   craneTypeRef?: Prisma.XOR<Prisma.CraneTypeScalarRelationFilter, Prisma.CraneTypeWhereInput>
   siteState?: Prisma.XOR<Prisma.StateScalarRelationFilter, Prisma.StateWhereInput>
+  enquiryLine?: Prisma.XOR<Prisma.EnquiryLineItemNullableScalarRelationFilter, Prisma.EnquiryLineItemWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   recipients?: Prisma.RfqVendorRecipientListRelationFilter
   quotations?: Prisma.QuotationListRelationFilter
   attachments?: Prisma.RfqAttachmentListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }, "id" | "rfqNumber">
 
 export type RfqOrderByWithAggregationInput = {
@@ -609,6 +777,14 @@ export type RfqOrderByWithAggregationInput = {
   craneType?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  capacityRule?: Prisma.SortOrder
+  capacityNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  applicationDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  loadDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrderInput | Prisma.SortOrder
+  startDateTbc?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
   sitePincode?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -627,6 +803,12 @@ export type RfqOrderByWithAggregationInput = {
   accommodationConveyance?: Prisma.SortOrderInput | Prisma.SortOrder
   paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  mobilisationTerms?: Prisma.SortOrderInput | Prisma.SortOrder
+  supportCrane?: Prisma.SortOrderInput | Prisma.SortOrder
+  steelMatsGroundPrep?: Prisma.SortOrderInput | Prisma.SortOrder
+  ehsHrRequirements?: Prisma.SortOrderInput | Prisma.SortOrder
+  insuranceTerms?: Prisma.SortOrderInput | Prisma.SortOrder
+  extensionClause?: Prisma.SortOrderInput | Prisma.SortOrder
   commercialTermsExtra?: Prisma.SortOrderInput | Prisma.SortOrder
   smlContactName?: Prisma.SortOrderInput | Prisma.SortOrder
   smlContactMobile?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -636,6 +818,7 @@ export type RfqOrderByWithAggregationInput = {
   rollupStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  enquiryLineId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -658,6 +841,14 @@ export type RfqScalarWhereWithAggregatesInput = {
   craneType?: Prisma.StringWithAggregatesFilter<"Rfq"> | string
   capacityT?: Prisma.DecimalWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntWithAggregatesFilter<"Rfq"> | number
+  capacityRule?: Prisma.EnumCapacityRuleWithAggregatesFilter<"Rfq"> | $Enums.CapacityRule
+  capacityNote?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  applicationDescription?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  loadDescription?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  mainBoomM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolWithAggregatesFilter<"Rfq"> | boolean
+  workingDaysPerMonth?: Prisma.IntNullableWithAggregatesFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringWithAggregatesFilter<"Rfq"> | string
   siteStateCode?: Prisma.StringWithAggregatesFilter<"Rfq"> | string
   sitePincode?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
@@ -676,6 +867,12 @@ export type RfqScalarWhereWithAggregatesInput = {
   accommodationConveyance?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
   paymentTerms?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  mobilisationTerms?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  supportCrane?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  steelMatsGroundPrep?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  ehsHrRequirements?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  insuranceTerms?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  extensionClause?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
   commercialTermsExtra?: Prisma.JsonNullableWithAggregatesFilter<"Rfq">
   smlContactName?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
   smlContactMobile?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
@@ -685,6 +882,7 @@ export type RfqScalarWhereWithAggregatesInput = {
   rollupStatus?: Prisma.EnumRfqRollupStatusNullableWithAggregatesFilter<"Rfq"> | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Rfq"> | Date | string | null
   cancelReason?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
+  enquiryLineId?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Rfq"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Rfq"> | Date | string
@@ -698,6 +896,14 @@ export type RfqCreateInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -715,6 +921,12 @@ export type RfqCreateInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -729,10 +941,12 @@ export type RfqCreateInput = {
   sentAt?: Date | string | null
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateInput = {
@@ -743,6 +957,14 @@ export type RfqUncheckedCreateInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -761,6 +983,12 @@ export type RfqUncheckedCreateInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -770,6 +998,7 @@ export type RfqUncheckedCreateInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -777,6 +1006,7 @@ export type RfqUncheckedCreateInput = {
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUpdateInput = {
@@ -786,6 +1016,14 @@ export type RfqUpdateInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -803,6 +1041,12 @@ export type RfqUpdateInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -817,10 +1061,12 @@ export type RfqUpdateInput = {
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateInput = {
@@ -831,6 +1077,14 @@ export type RfqUncheckedUpdateInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -849,6 +1103,12 @@ export type RfqUncheckedUpdateInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -858,6 +1118,7 @@ export type RfqUncheckedUpdateInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -865,6 +1126,7 @@ export type RfqUncheckedUpdateInput = {
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateManyInput = {
@@ -875,6 +1137,14 @@ export type RfqCreateManyInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -893,6 +1163,12 @@ export type RfqCreateManyInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -902,6 +1178,7 @@ export type RfqCreateManyInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -915,6 +1192,14 @@ export type RfqUpdateManyMutationInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -932,6 +1217,12 @@ export type RfqUpdateManyMutationInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -954,6 +1245,14 @@ export type RfqUncheckedUpdateManyInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -972,6 +1271,12 @@ export type RfqUncheckedUpdateManyInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -981,6 +1286,7 @@ export type RfqUncheckedUpdateManyInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1005,6 +1311,14 @@ export type RfqCountOrderByAggregateInput = {
   craneType?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  capacityRule?: Prisma.SortOrder
+  capacityNote?: Prisma.SortOrder
+  applicationDescription?: Prisma.SortOrder
+  loadDescription?: Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrder
+  startDateTbc?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
   sitePincode?: Prisma.SortOrder
@@ -1023,6 +1337,12 @@ export type RfqCountOrderByAggregateInput = {
   accommodationConveyance?: Prisma.SortOrder
   paymentTerms?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  mobilisationTerms?: Prisma.SortOrder
+  supportCrane?: Prisma.SortOrder
+  steelMatsGroundPrep?: Prisma.SortOrder
+  ehsHrRequirements?: Prisma.SortOrder
+  insuranceTerms?: Prisma.SortOrder
+  extensionClause?: Prisma.SortOrder
   commercialTermsExtra?: Prisma.SortOrder
   smlContactName?: Prisma.SortOrder
   smlContactMobile?: Prisma.SortOrder
@@ -1032,6 +1352,7 @@ export type RfqCountOrderByAggregateInput = {
   rollupStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelReason?: Prisma.SortOrder
+  enquiryLineId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -1041,6 +1362,9 @@ export type RfqCountOrderByAggregateInput = {
 export type RfqAvgOrderByAggregateInput = {
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrder
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
@@ -1055,6 +1379,14 @@ export type RfqMaxOrderByAggregateInput = {
   craneType?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  capacityRule?: Prisma.SortOrder
+  capacityNote?: Prisma.SortOrder
+  applicationDescription?: Prisma.SortOrder
+  loadDescription?: Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrder
+  startDateTbc?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
   sitePincode?: Prisma.SortOrder
@@ -1073,6 +1405,12 @@ export type RfqMaxOrderByAggregateInput = {
   accommodationConveyance?: Prisma.SortOrder
   paymentTerms?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  mobilisationTerms?: Prisma.SortOrder
+  supportCrane?: Prisma.SortOrder
+  steelMatsGroundPrep?: Prisma.SortOrder
+  ehsHrRequirements?: Prisma.SortOrder
+  insuranceTerms?: Prisma.SortOrder
+  extensionClause?: Prisma.SortOrder
   smlContactName?: Prisma.SortOrder
   smlContactMobile?: Prisma.SortOrder
   smlContactEmail?: Prisma.SortOrder
@@ -1081,6 +1419,7 @@ export type RfqMaxOrderByAggregateInput = {
   rollupStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelReason?: Prisma.SortOrder
+  enquiryLineId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -1095,6 +1434,14 @@ export type RfqMinOrderByAggregateInput = {
   craneType?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  capacityRule?: Prisma.SortOrder
+  capacityNote?: Prisma.SortOrder
+  applicationDescription?: Prisma.SortOrder
+  loadDescription?: Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrder
+  startDateTbc?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
   sitePincode?: Prisma.SortOrder
@@ -1113,6 +1460,12 @@ export type RfqMinOrderByAggregateInput = {
   accommodationConveyance?: Prisma.SortOrder
   paymentTerms?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  mobilisationTerms?: Prisma.SortOrder
+  supportCrane?: Prisma.SortOrder
+  steelMatsGroundPrep?: Prisma.SortOrder
+  ehsHrRequirements?: Prisma.SortOrder
+  insuranceTerms?: Prisma.SortOrder
+  extensionClause?: Prisma.SortOrder
   smlContactName?: Prisma.SortOrder
   smlContactMobile?: Prisma.SortOrder
   smlContactEmail?: Prisma.SortOrder
@@ -1121,6 +1474,7 @@ export type RfqMinOrderByAggregateInput = {
   rollupStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelReason?: Prisma.SortOrder
+  enquiryLineId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -1130,6 +1484,9 @@ export type RfqMinOrderByAggregateInput = {
 export type RfqSumOrderByAggregateInput = {
   capacityT?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  mainBoomM?: Prisma.SortOrder
+  jibLengthM?: Prisma.SortOrder
+  workingDaysPerMonth?: Prisma.SortOrder
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
@@ -1139,6 +1496,11 @@ export type RfqSumOrderByAggregateInput = {
 export type RfqScalarRelationFilter = {
   is?: Prisma.RfqWhereInput
   isNot?: Prisma.RfqWhereInput
+}
+
+export type RfqNullableScalarRelationFilter = {
+  is?: Prisma.RfqWhereInput | null
+  isNot?: Prisma.RfqWhereInput | null
 }
 
 export type RfqCreateNestedManyWithoutSiteStateInput = {
@@ -1267,6 +1629,10 @@ export type RfqUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.RfqScalarWhereInput | Prisma.RfqScalarWhereInput[]
 }
 
+export type EnumCapacityRuleFieldUpdateOperationsInput = {
+  set?: $Enums.CapacityRule
+}
+
 export type EnumDurationUnitFieldUpdateOperationsInput = {
   set?: $Enums.DurationUnit
 }
@@ -1291,6 +1657,22 @@ export type RfqUpdateOneRequiredWithoutAttachmentsNestedInput = {
   upsert?: Prisma.RfqUpsertWithoutAttachmentsInput
   connect?: Prisma.RfqWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.RfqUpdateToOneWithWhereWithoutAttachmentsInput, Prisma.RfqUpdateWithoutAttachmentsInput>, Prisma.RfqUncheckedUpdateWithoutAttachmentsInput>
+}
+
+export type RfqCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutReservationsInput, Prisma.RfqUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.RfqWhereUniqueInput
+}
+
+export type RfqUpdateOneWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutReservationsInput, Prisma.RfqUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.RfqUpsertWithoutReservationsInput
+  disconnect?: Prisma.RfqWhereInput | boolean
+  delete?: Prisma.RfqWhereInput | boolean
+  connect?: Prisma.RfqWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RfqUpdateToOneWithWhereWithoutReservationsInput, Prisma.RfqUpdateWithoutReservationsInput>, Prisma.RfqUncheckedUpdateWithoutReservationsInput>
 }
 
 export type RfqCreateNestedOneWithoutRecipientsInput = {
@@ -1321,6 +1703,48 @@ export type RfqUpdateOneRequiredWithoutQuotationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.RfqUpdateToOneWithWhereWithoutQuotationsInput, Prisma.RfqUpdateWithoutQuotationsInput>, Prisma.RfqUncheckedUpdateWithoutQuotationsInput>
 }
 
+export type RfqCreateNestedManyWithoutEnquiryLineInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput> | Prisma.RfqCreateWithoutEnquiryLineInput[] | Prisma.RfqUncheckedCreateWithoutEnquiryLineInput[]
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutEnquiryLineInput | Prisma.RfqCreateOrConnectWithoutEnquiryLineInput[]
+  createMany?: Prisma.RfqCreateManyEnquiryLineInputEnvelope
+  connect?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+}
+
+export type RfqUncheckedCreateNestedManyWithoutEnquiryLineInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput> | Prisma.RfqCreateWithoutEnquiryLineInput[] | Prisma.RfqUncheckedCreateWithoutEnquiryLineInput[]
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutEnquiryLineInput | Prisma.RfqCreateOrConnectWithoutEnquiryLineInput[]
+  createMany?: Prisma.RfqCreateManyEnquiryLineInputEnvelope
+  connect?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+}
+
+export type RfqUpdateManyWithoutEnquiryLineNestedInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput> | Prisma.RfqCreateWithoutEnquiryLineInput[] | Prisma.RfqUncheckedCreateWithoutEnquiryLineInput[]
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutEnquiryLineInput | Prisma.RfqCreateOrConnectWithoutEnquiryLineInput[]
+  upsert?: Prisma.RfqUpsertWithWhereUniqueWithoutEnquiryLineInput | Prisma.RfqUpsertWithWhereUniqueWithoutEnquiryLineInput[]
+  createMany?: Prisma.RfqCreateManyEnquiryLineInputEnvelope
+  set?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  disconnect?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  delete?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  connect?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  update?: Prisma.RfqUpdateWithWhereUniqueWithoutEnquiryLineInput | Prisma.RfqUpdateWithWhereUniqueWithoutEnquiryLineInput[]
+  updateMany?: Prisma.RfqUpdateManyWithWhereWithoutEnquiryLineInput | Prisma.RfqUpdateManyWithWhereWithoutEnquiryLineInput[]
+  deleteMany?: Prisma.RfqScalarWhereInput | Prisma.RfqScalarWhereInput[]
+}
+
+export type RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput> | Prisma.RfqCreateWithoutEnquiryLineInput[] | Prisma.RfqUncheckedCreateWithoutEnquiryLineInput[]
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutEnquiryLineInput | Prisma.RfqCreateOrConnectWithoutEnquiryLineInput[]
+  upsert?: Prisma.RfqUpsertWithWhereUniqueWithoutEnquiryLineInput | Prisma.RfqUpsertWithWhereUniqueWithoutEnquiryLineInput[]
+  createMany?: Prisma.RfqCreateManyEnquiryLineInputEnvelope
+  set?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  disconnect?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  delete?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  connect?: Prisma.RfqWhereUniqueInput | Prisma.RfqWhereUniqueInput[]
+  update?: Prisma.RfqUpdateWithWhereUniqueWithoutEnquiryLineInput | Prisma.RfqUpdateWithWhereUniqueWithoutEnquiryLineInput[]
+  updateMany?: Prisma.RfqUpdateManyWithWhereWithoutEnquiryLineInput | Prisma.RfqUpdateManyWithWhereWithoutEnquiryLineInput[]
+  deleteMany?: Prisma.RfqScalarWhereInput | Prisma.RfqScalarWhereInput[]
+}
+
 export type RfqCreateWithoutSiteStateInput = {
   id?: string
   rfqNumber: string
@@ -1328,6 +1752,14 @@ export type RfqCreateWithoutSiteStateInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1345,6 +1777,12 @@ export type RfqCreateWithoutSiteStateInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1358,10 +1796,12 @@ export type RfqCreateWithoutSiteStateInput = {
   updatedAt?: Date | string
   sentAt?: Date | string | null
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutSiteStateInput = {
@@ -1372,6 +1812,14 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1389,6 +1837,12 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1398,6 +1852,7 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1405,6 +1860,7 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutSiteStateInput = {
@@ -1444,6 +1900,14 @@ export type RfqScalarWhereInput = {
   craneType?: Prisma.StringFilter<"Rfq"> | string
   capacityT?: Prisma.DecimalFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFilter<"Rfq"> | number
+  capacityRule?: Prisma.EnumCapacityRuleFilter<"Rfq"> | $Enums.CapacityRule
+  capacityNote?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  applicationDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  loadDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFilter<"Rfq"> | boolean
+  workingDaysPerMonth?: Prisma.IntNullableFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringFilter<"Rfq"> | string
   siteStateCode?: Prisma.StringFilter<"Rfq"> | string
   sitePincode?: Prisma.StringNullableFilter<"Rfq"> | string | null
@@ -1462,6 +1926,12 @@ export type RfqScalarWhereInput = {
   accommodationConveyance?: Prisma.StringNullableFilter<"Rfq"> | string | null
   paymentTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
   notes?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  mobilisationTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  supportCrane?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  steelMatsGroundPrep?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  ehsHrRequirements?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  insuranceTerms?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  extensionClause?: Prisma.StringNullableFilter<"Rfq"> | string | null
   commercialTermsExtra?: Prisma.JsonNullableFilter<"Rfq">
   smlContactName?: Prisma.StringNullableFilter<"Rfq"> | string | null
   smlContactMobile?: Prisma.StringNullableFilter<"Rfq"> | string | null
@@ -1471,6 +1941,7 @@ export type RfqScalarWhereInput = {
   rollupStatus?: Prisma.EnumRfqRollupStatusNullableFilter<"Rfq"> | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
   cancelReason?: Prisma.StringNullableFilter<"Rfq"> | string | null
+  enquiryLineId?: Prisma.StringNullableFilter<"Rfq"> | string | null
   createdById?: Prisma.StringFilter<"Rfq"> | string
   createdAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
@@ -1484,6 +1955,14 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1501,6 +1980,12 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1514,10 +1999,12 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   updatedAt?: Date | string
   sentAt?: Date | string | null
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
@@ -1527,6 +2014,14 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -1545,6 +2040,12 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1554,6 +2055,7 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1561,6 +2063,7 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutCraneTypeRefInput = {
@@ -1596,6 +2099,14 @@ export type RfqCreateWithoutCreatedByInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1613,6 +2124,12 @@ export type RfqCreateWithoutCreatedByInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1627,9 +2144,11 @@ export type RfqCreateWithoutCreatedByInput = {
   sentAt?: Date | string | null
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutCreatedByInput = {
@@ -1640,6 +2159,14 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -1658,6 +2185,12 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1667,12 +2200,14 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutCreatedByInput = {
@@ -1708,6 +2243,14 @@ export type RfqCreateWithoutAttachmentsInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1725,6 +2268,12 @@ export type RfqCreateWithoutAttachmentsInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1739,9 +2288,11 @@ export type RfqCreateWithoutAttachmentsInput = {
   sentAt?: Date | string | null
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutAttachmentsInput = {
@@ -1752,6 +2303,14 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -1770,6 +2329,12 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1779,12 +2344,14 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutAttachmentsInput = {
@@ -1810,6 +2377,14 @@ export type RfqUpdateWithoutAttachmentsInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1827,6 +2402,12 @@ export type RfqUpdateWithoutAttachmentsInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1841,9 +2422,11 @@ export type RfqUpdateWithoutAttachmentsInput = {
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutAttachmentsInput = {
@@ -1854,6 +2437,14 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1872,6 +2463,12 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1881,21 +2478,31 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
-export type RfqCreateWithoutRecipientsInput = {
+export type RfqCreateWithoutReservationsInput = {
   id?: string
   rfqNumber: string
   enquiryNo: string
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1913,6 +2520,12 @@ export type RfqCreateWithoutRecipientsInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1927,12 +2540,14 @@ export type RfqCreateWithoutRecipientsInput = {
   sentAt?: Date | string | null
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
+  recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
 }
 
-export type RfqUncheckedCreateWithoutRecipientsInput = {
+export type RfqUncheckedCreateWithoutReservationsInput = {
   id?: string
   rfqNumber: string
   enquiryNo: string
@@ -1940,6 +2555,14 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -1958,6 +2581,12 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -1967,12 +2596,266 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+  recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+}
+
+export type RfqCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.RfqWhereUniqueInput
+  create: Prisma.XOR<Prisma.RfqCreateWithoutReservationsInput, Prisma.RfqUncheckedCreateWithoutReservationsInput>
+}
+
+export type RfqUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.RfqUpdateWithoutReservationsInput, Prisma.RfqUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.RfqCreateWithoutReservationsInput, Prisma.RfqUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.RfqWhereInput
+}
+
+export type RfqUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.RfqWhereInput
+  data: Prisma.XOR<Prisma.RfqUpdateWithoutReservationsInput, Prisma.RfqUncheckedUpdateWithoutReservationsInput>
+}
+
+export type RfqUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
+  siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
+  recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqCreateWithoutRecipientsInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+  craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
+  siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+}
+
+export type RfqUncheckedCreateWithoutRecipientsInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  craneType: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  siteStateCode: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutRecipientsInput = {
@@ -1998,6 +2881,14 @@ export type RfqUpdateWithoutRecipientsInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2015,6 +2906,12 @@ export type RfqUpdateWithoutRecipientsInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2029,9 +2926,11 @@ export type RfqUpdateWithoutRecipientsInput = {
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutRecipientsInput = {
@@ -2042,6 +2941,14 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2060,6 +2967,12 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2069,12 +2982,14 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutQuotationsInput = {
@@ -2084,6 +2999,14 @@ export type RfqCreateWithoutQuotationsInput = {
   lineNo: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2101,6 +3024,12 @@ export type RfqCreateWithoutQuotationsInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -2115,9 +3044,11 @@ export type RfqCreateWithoutQuotationsInput = {
   sentAt?: Date | string | null
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutQuotationsInput = {
@@ -2128,6 +3059,14 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -2146,6 +3085,12 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -2155,12 +3100,14 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutQuotationsInput = {
@@ -2186,6 +3133,14 @@ export type RfqUpdateWithoutQuotationsInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2203,6 +3158,12 @@ export type RfqUpdateWithoutQuotationsInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2217,9 +3178,11 @@ export type RfqUpdateWithoutQuotationsInput = {
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutQuotationsInput = {
@@ -2230,6 +3193,14 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2248,6 +3219,12 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2257,22 +3234,31 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
-export type RfqCreateManySiteStateInput = {
+export type RfqCreateWithoutEnquiryLineInput = {
   id?: string
   rfqNumber: string
   enquiryNo: string
   lineNo: string
-  craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   sitePincode?: string | null
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2290,6 +3276,12 @@ export type RfqCreateManySiteStateInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -2299,145 +3291,34 @@ export type RfqCreateManySiteStateInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
-  createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
+  siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
+  recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
 }
 
-export type RfqUpdateWithoutSiteStateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
-  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
-  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
-  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
-  recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
-  quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
-  attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
-}
-
-export type RfqUncheckedUpdateWithoutSiteStateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
-  craneType?: Prisma.StringFieldUpdateOperationsInput | string
-  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
-  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
-  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
-  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
-  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
-}
-
-export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
-  craneType?: Prisma.StringFieldUpdateOperationsInput | string
-  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
-  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
-  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-}
-
-export type RfqCreateManyCraneTypeRefInput = {
+export type RfqUncheckedCreateWithoutEnquiryLineInput = {
   id?: string
   rfqNumber: string
   enquiryNo: string
   lineNo: string
+  craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -2456,6 +3337,12 @@ export type RfqCreateManyCraneTypeRefInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -2469,15 +3356,108 @@ export type RfqCreateManyCraneTypeRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
 }
 
-export type RfqUpdateWithoutCraneTypeRefInput = {
+export type RfqCreateOrConnectWithoutEnquiryLineInput = {
+  where: Prisma.RfqWhereUniqueInput
+  create: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput>
+}
+
+export type RfqCreateManyEnquiryLineInputEnvelope = {
+  data: Prisma.RfqCreateManyEnquiryLineInput | Prisma.RfqCreateManyEnquiryLineInput[]
+  skipDuplicates?: boolean
+}
+
+export type RfqUpsertWithWhereUniqueWithoutEnquiryLineInput = {
+  where: Prisma.RfqWhereUniqueInput
+  update: Prisma.XOR<Prisma.RfqUpdateWithoutEnquiryLineInput, Prisma.RfqUncheckedUpdateWithoutEnquiryLineInput>
+  create: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput>
+}
+
+export type RfqUpdateWithWhereUniqueWithoutEnquiryLineInput = {
+  where: Prisma.RfqWhereUniqueInput
+  data: Prisma.XOR<Prisma.RfqUpdateWithoutEnquiryLineInput, Prisma.RfqUncheckedUpdateWithoutEnquiryLineInput>
+}
+
+export type RfqUpdateManyWithWhereWithoutEnquiryLineInput = {
+  where: Prisma.RfqScalarWhereInput
+  data: Prisma.XOR<Prisma.RfqUpdateManyMutationInput, Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineInput>
+}
+
+export type RfqCreateManySiteStateInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  craneType: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  enquiryLineId?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+}
+
+export type RfqUpdateWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2495,6 +3475,240 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
+  recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateWithoutSiteStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type RfqCreateManyCraneTypeRefInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  siteStateCode: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  enquiryLineId?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+}
+
+export type RfqUpdateWithoutCraneTypeRefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2508,10 +3722,12 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
@@ -2521,6 +3737,14 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2539,6 +3763,12 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2548,6 +3778,7 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2555,6 +3786,7 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
@@ -2564,6 +3796,14 @@ export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2582,6 +3822,12 @@ export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2591,6 +3837,7 @@ export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2605,6 +3852,14 @@ export type RfqCreateManyCreatedByInput = {
   craneType: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
   siteLocation: string
   siteStateCode: string
   sitePincode?: string | null
@@ -2623,6 +3878,12 @@ export type RfqCreateManyCreatedByInput = {
   accommodationConveyance?: string | null
   paymentTerms?: string | null
   notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: string | null
   smlContactMobile?: string | null
@@ -2632,6 +3893,7 @@ export type RfqCreateManyCreatedByInput = {
   rollupStatus?: $Enums.RfqRollupStatus | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
+  enquiryLineId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
@@ -2644,6 +3906,14 @@ export type RfqUpdateWithoutCreatedByInput = {
   lineNo?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2661,6 +3931,12 @@ export type RfqUpdateWithoutCreatedByInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2675,9 +3951,11 @@ export type RfqUpdateWithoutCreatedByInput = {
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutCreatedByInput = {
@@ -2688,6 +3966,14 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2706,6 +3992,179 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type RfqCreateManyEnquiryLineInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  craneType: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  siteStateCode: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+}
+
+export type RfqUpdateWithoutEnquiryLineInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2718,12 +4177,16 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
-  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
-  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
+  siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
+  recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
 }
 
-export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
+export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2731,6 +4194,14 @@ export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
   craneType?: Prisma.StringFieldUpdateOperationsInput | string
   capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
   sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2749,6 +4220,12 @@ export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
   accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2758,6 +4235,66 @@ export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
   rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateManyWithoutEnquiryLineInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2772,12 +4309,14 @@ export type RfqCountOutputType = {
   recipients: number
   quotations: number
   attachments: number
+  reservations: number
 }
 
 export type RfqCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   recipients?: boolean | RfqCountOutputTypeCountRecipientsArgs
   quotations?: boolean | RfqCountOutputTypeCountQuotationsArgs
   attachments?: boolean | RfqCountOutputTypeCountAttachmentsArgs
+  reservations?: boolean | RfqCountOutputTypeCountReservationsArgs
 }
 
 /**
@@ -2811,6 +4350,13 @@ export type RfqCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime.Types
   where?: Prisma.RfqAttachmentWhereInput
 }
 
+/**
+ * RfqCountOutputType without action
+ */
+export type RfqCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationWhereInput
+}
+
 
 export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2820,6 +4366,14 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   craneType?: boolean
   capacityT?: boolean
   quantity?: boolean
+  capacityRule?: boolean
+  capacityNote?: boolean
+  applicationDescription?: boolean
+  loadDescription?: boolean
+  mainBoomM?: boolean
+  jibLengthM?: boolean
+  startDateTbc?: boolean
+  workingDaysPerMonth?: boolean
   siteLocation?: boolean
   siteStateCode?: boolean
   sitePincode?: boolean
@@ -2838,6 +4392,12 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   accommodationConveyance?: boolean
   paymentTerms?: boolean
   notes?: boolean
+  mobilisationTerms?: boolean
+  supportCrane?: boolean
+  steelMatsGroundPrep?: boolean
+  ehsHrRequirements?: boolean
+  insuranceTerms?: boolean
+  extensionClause?: boolean
   commercialTermsExtra?: boolean
   smlContactName?: boolean
   smlContactMobile?: boolean
@@ -2847,16 +4407,19 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   rollupStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
+  enquiryLineId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
+  enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recipients?: boolean | Prisma.Rfq$recipientsArgs<ExtArgs>
   quotations?: boolean | Prisma.Rfq$quotationsArgs<ExtArgs>
   attachments?: boolean | Prisma.Rfq$attachmentsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Rfq$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.RfqCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rfq"]>
 
@@ -2868,6 +4431,14 @@ export type RfqSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   craneType?: boolean
   capacityT?: boolean
   quantity?: boolean
+  capacityRule?: boolean
+  capacityNote?: boolean
+  applicationDescription?: boolean
+  loadDescription?: boolean
+  mainBoomM?: boolean
+  jibLengthM?: boolean
+  startDateTbc?: boolean
+  workingDaysPerMonth?: boolean
   siteLocation?: boolean
   siteStateCode?: boolean
   sitePincode?: boolean
@@ -2886,6 +4457,12 @@ export type RfqSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   accommodationConveyance?: boolean
   paymentTerms?: boolean
   notes?: boolean
+  mobilisationTerms?: boolean
+  supportCrane?: boolean
+  steelMatsGroundPrep?: boolean
+  ehsHrRequirements?: boolean
+  insuranceTerms?: boolean
+  extensionClause?: boolean
   commercialTermsExtra?: boolean
   smlContactName?: boolean
   smlContactMobile?: boolean
@@ -2895,12 +4472,14 @@ export type RfqSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   rollupStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
+  enquiryLineId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
+  enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rfq"]>
 
@@ -2912,6 +4491,14 @@ export type RfqSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   craneType?: boolean
   capacityT?: boolean
   quantity?: boolean
+  capacityRule?: boolean
+  capacityNote?: boolean
+  applicationDescription?: boolean
+  loadDescription?: boolean
+  mainBoomM?: boolean
+  jibLengthM?: boolean
+  startDateTbc?: boolean
+  workingDaysPerMonth?: boolean
   siteLocation?: boolean
   siteStateCode?: boolean
   sitePincode?: boolean
@@ -2930,6 +4517,12 @@ export type RfqSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   accommodationConveyance?: boolean
   paymentTerms?: boolean
   notes?: boolean
+  mobilisationTerms?: boolean
+  supportCrane?: boolean
+  steelMatsGroundPrep?: boolean
+  ehsHrRequirements?: boolean
+  insuranceTerms?: boolean
+  extensionClause?: boolean
   commercialTermsExtra?: boolean
   smlContactName?: boolean
   smlContactMobile?: boolean
@@ -2939,12 +4532,14 @@ export type RfqSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   rollupStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
+  enquiryLineId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
+  enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rfq"]>
 
@@ -2956,6 +4551,14 @@ export type RfqSelectScalar = {
   craneType?: boolean
   capacityT?: boolean
   quantity?: boolean
+  capacityRule?: boolean
+  capacityNote?: boolean
+  applicationDescription?: boolean
+  loadDescription?: boolean
+  mainBoomM?: boolean
+  jibLengthM?: boolean
+  startDateTbc?: boolean
+  workingDaysPerMonth?: boolean
   siteLocation?: boolean
   siteStateCode?: boolean
   sitePincode?: boolean
@@ -2974,6 +4577,12 @@ export type RfqSelectScalar = {
   accommodationConveyance?: boolean
   paymentTerms?: boolean
   notes?: boolean
+  mobilisationTerms?: boolean
+  supportCrane?: boolean
+  steelMatsGroundPrep?: boolean
+  ehsHrRequirements?: boolean
+  insuranceTerms?: boolean
+  extensionClause?: boolean
   commercialTermsExtra?: boolean
   smlContactName?: boolean
   smlContactMobile?: boolean
@@ -2983,30 +4592,35 @@ export type RfqSelectScalar = {
   rollupStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
+  enquiryLineId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
 }
 
-export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "createdById" | "createdAt" | "updatedAt" | "sentAt", ExtArgs["result"]["rfq"]>
+export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt", ExtArgs["result"]["rfq"]>
 export type RfqInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
+  enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   recipients?: boolean | Prisma.Rfq$recipientsArgs<ExtArgs>
   quotations?: boolean | Prisma.Rfq$quotationsArgs<ExtArgs>
   attachments?: boolean | Prisma.Rfq$attachmentsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Rfq$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.RfqCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RfqIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
+  enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type RfqIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
+  enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -3015,10 +4629,12 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   objects: {
     craneTypeRef: Prisma.$CraneTypePayload<ExtArgs>
     siteState: Prisma.$StatePayload<ExtArgs>
+    enquiryLine: Prisma.$EnquiryLineItemPayload<ExtArgs> | null
     createdBy: Prisma.$UserPayload<ExtArgs>
     recipients: Prisma.$RfqVendorRecipientPayload<ExtArgs>[]
     quotations: Prisma.$QuotationPayload<ExtArgs>[]
     attachments: Prisma.$RfqAttachmentPayload<ExtArgs>[]
+    reservations: Prisma.$ReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3028,6 +4644,17 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     craneType: string
     capacityT: runtime.Decimal
     quantity: number
+    capacityRule: $Enums.CapacityRule
+    capacityNote: string | null
+    applicationDescription: string | null
+    loadDescription: string | null
+    mainBoomM: runtime.Decimal | null
+    jibLengthM: runtime.Decimal | null
+    startDateTbc: boolean
+    /**
+     * * Used to convert months into days when RATE_DAY_BASIS is working days.
+     */
+    workingDaysPerMonth: number | null
     siteLocation: string
     siteStateCode: string
     sitePincode: string | null
@@ -3046,6 +4673,12 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     accommodationConveyance: string | null
     paymentTerms: string | null
     notes: string | null
+    mobilisationTerms: string | null
+    supportCrane: string | null
+    steelMatsGroundPrep: string | null
+    ehsHrRequirements: string | null
+    insuranceTerms: string | null
+    extensionClause: string | null
     commercialTermsExtra: runtime.JsonValue | null
     smlContactName: string | null
     smlContactMobile: string | null
@@ -3055,6 +4688,7 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     rollupStatus: $Enums.RfqRollupStatus | null
     cancelledAt: Date | null
     cancelReason: string | null
+    enquiryLineId: string | null
     createdById: string
     createdAt: Date
     updatedAt: Date
@@ -3455,10 +5089,12 @@ export interface Prisma__RfqClient<T, Null = never, ExtArgs extends runtime.Type
   readonly [Symbol.toStringTag]: "PrismaPromise"
   craneTypeRef<T extends Prisma.CraneTypeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CraneTypeDefaultArgs<ExtArgs>>): Prisma.Prisma__CraneTypeClient<runtime.Types.Result.GetResult<Prisma.$CraneTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   siteState<T extends Prisma.StateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StateDefaultArgs<ExtArgs>>): Prisma.Prisma__StateClient<runtime.Types.Result.GetResult<Prisma.$StatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  enquiryLine<T extends Prisma.Rfq$enquiryLineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$enquiryLineArgs<ExtArgs>>): Prisma.Prisma__EnquiryLineItemClient<runtime.Types.Result.GetResult<Prisma.$EnquiryLineItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   recipients<T extends Prisma.Rfq$recipientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$recipientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqVendorRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   quotations<T extends Prisma.Rfq$quotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$quotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attachments<T extends Prisma.Rfq$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reservations<T extends Prisma.Rfq$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3495,6 +5131,14 @@ export interface RfqFieldRefs {
   readonly craneType: Prisma.FieldRef<"Rfq", 'String'>
   readonly capacityT: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly quantity: Prisma.FieldRef<"Rfq", 'Int'>
+  readonly capacityRule: Prisma.FieldRef<"Rfq", 'CapacityRule'>
+  readonly capacityNote: Prisma.FieldRef<"Rfq", 'String'>
+  readonly applicationDescription: Prisma.FieldRef<"Rfq", 'String'>
+  readonly loadDescription: Prisma.FieldRef<"Rfq", 'String'>
+  readonly mainBoomM: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly jibLengthM: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly startDateTbc: Prisma.FieldRef<"Rfq", 'Boolean'>
+  readonly workingDaysPerMonth: Prisma.FieldRef<"Rfq", 'Int'>
   readonly siteLocation: Prisma.FieldRef<"Rfq", 'String'>
   readonly siteStateCode: Prisma.FieldRef<"Rfq", 'String'>
   readonly sitePincode: Prisma.FieldRef<"Rfq", 'String'>
@@ -3513,6 +5157,12 @@ export interface RfqFieldRefs {
   readonly accommodationConveyance: Prisma.FieldRef<"Rfq", 'String'>
   readonly paymentTerms: Prisma.FieldRef<"Rfq", 'String'>
   readonly notes: Prisma.FieldRef<"Rfq", 'String'>
+  readonly mobilisationTerms: Prisma.FieldRef<"Rfq", 'String'>
+  readonly supportCrane: Prisma.FieldRef<"Rfq", 'String'>
+  readonly steelMatsGroundPrep: Prisma.FieldRef<"Rfq", 'String'>
+  readonly ehsHrRequirements: Prisma.FieldRef<"Rfq", 'String'>
+  readonly insuranceTerms: Prisma.FieldRef<"Rfq", 'String'>
+  readonly extensionClause: Prisma.FieldRef<"Rfq", 'String'>
   readonly commercialTermsExtra: Prisma.FieldRef<"Rfq", 'Json'>
   readonly smlContactName: Prisma.FieldRef<"Rfq", 'String'>
   readonly smlContactMobile: Prisma.FieldRef<"Rfq", 'String'>
@@ -3522,6 +5172,7 @@ export interface RfqFieldRefs {
   readonly rollupStatus: Prisma.FieldRef<"Rfq", 'RfqRollupStatus'>
   readonly cancelledAt: Prisma.FieldRef<"Rfq", 'DateTime'>
   readonly cancelReason: Prisma.FieldRef<"Rfq", 'String'>
+  readonly enquiryLineId: Prisma.FieldRef<"Rfq", 'String'>
   readonly createdById: Prisma.FieldRef<"Rfq", 'String'>
   readonly createdAt: Prisma.FieldRef<"Rfq", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Rfq", 'DateTime'>
@@ -3927,6 +5578,25 @@ export type RfqDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
+ * Rfq.enquiryLine
+ */
+export type Rfq$enquiryLineArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EnquiryLineItem
+   */
+  select?: Prisma.EnquiryLineItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EnquiryLineItem
+   */
+  omit?: Prisma.EnquiryLineItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnquiryLineItemInclude<ExtArgs> | null
+  where?: Prisma.EnquiryLineItemWhereInput
+}
+
+/**
  * Rfq.recipients
  */
 export type Rfq$recipientsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3996,6 +5666,30 @@ export type Rfq$attachmentsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.RfqAttachmentScalarFieldEnum | Prisma.RfqAttachmentScalarFieldEnum[]
+}
+
+/**
+ * Rfq.reservations
+ */
+export type Rfq$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reservation
+   */
+  select?: Prisma.ReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reservation
+   */
+  omit?: Prisma.ReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationInclude<ExtArgs> | null
+  where?: Prisma.ReservationWhereInput
+  orderBy?: Prisma.ReservationOrderByWithRelationInput | Prisma.ReservationOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
 }
 
 /**

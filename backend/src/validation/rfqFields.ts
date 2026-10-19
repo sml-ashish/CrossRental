@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { INDIA_BOUNDS } from "../lib/geo";
-import { DurationUnit, RfqStatus } from "../generated/prisma/client";
+import {
+  CapacityRule,
+  DurationUnit,
+  RfqStatus,
+} from "../generated/prisma/client";
 
 /**
  * RFQ field rules from brief 5.4, with the constraints of brief 6.7.
@@ -116,7 +120,25 @@ const commercialTermFields = {
     .nullable(),
   accommodationConveyance: optionalText(200),
   paymentTerms: optionalText(200),
+  // P0 A4: the remaining terms on the CR enquiry line item.
+  mobilisationTerms: optionalText(2000),
+  supportCrane: optionalText(500),
+  steelMatsGroundPrep: optionalText(1000),
+  ehsHrRequirements: optionalText(1000),
+  insuranceTerms: optionalText(1000),
+  extensionClause: optionalText(1000),
   notes: optionalText(2000),
+  /**
+   * Vendor-safe terms that have no column of their own (P1): the demobilisation
+   * term and the five scope terms the template carries. A free-form bag rather
+   * than five more columns, because these are shown to the vendor as text and
+   * never matched on. Anything internal must not be added here — the RFQ is the
+   * vendor-facing artefact.
+   */
+  commercialTermsExtra: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
+    .optional()
+    .nullable(),
 };
 
 /** The SML contact shown to vendors (brief 5.4). */
@@ -140,15 +162,62 @@ const baseRfqFields = {
   /** The SAP line-item snapshot (brief 5.4): text for now, a feed later. */
   enquiryNo: trimmed(60).min(1, "Enter the enquiry number"),
   lineNo: trimmed(60).min(1, "Enter the line number"),
+  /**
+   * The native enquiry line this RFQ was raised from (P1). Null for RFQs typed
+   * by hand or fed from SAP; set by `createRfqFromLine`. It is the anchor the
+   * line-item trail hangs off, so it is copied verbatim, never inferred.
+   */
+  enquiryLineId: z
+    .string()
+    .uuid("That is not a valid enquiry line reference")
+    .optional()
+    .nullable(),
 
   craneType: trimmed(50).min(1, "Choose the crane type"),
   capacityT: z.coerce
     .number({ message: "Enter the required capacity in tonnes" })
     .positive("Required capacity must be greater than 0"),
+  // Brief A3: how candidates are matched on capacity. Defaults to "at least"
+  // so the M6 behaviour is preserved for RFQs that do not state a rule.
+  capacityRule: z.enum([CapacityRule.AT_LEAST, CapacityRule.EXACT]).default(
+    CapacityRule.AT_LEAST,
+  ),
+  // Context for the capacity choice, not a filter: matching keys on tonnes.
+  capacityNote: optionalText(2000),
   quantity: z.coerce
     .number({ message: "Enter the quantity required" })
     .int("Quantity must be a whole number")
     .min(1, "Quantity must be at least 1"),
+
+  // Brief A3: what the crane is there to do and what it will lift. Both are
+  // shown to the vendor verbatim, so they are long free text, not a picklist.
+  applicationDescription: optionalText(5000),
+  loadDescription: optionalText(5000),
+
+  // Structured boom/jib requirements (brief A3). Optional per row because not
+  // every enquiry states them; the quotation service warns when the offered
+  // crane's boom falls short of what was asked.
+  mainBoomM: z.coerce
+    .number({ message: "Enter the required main boom length in metres" })
+    .positive("Main boom length must be greater than 0")
+    .max(200, "Main boom length cannot exceed 200 m")
+    .optional(),
+  jibLengthM: z.coerce
+    .number({ message: "Enter the required jib length in metres" })
+    .positive("Jib length must be greater than 0")
+    .max(200, "Jib length cannot exceed 200 m")
+    .optional(),
+
+  // Brief A3: no fixed start date means the availability confirmation is not
+  // demanded and the vendor is told why.
+  startDateTbc: z.boolean().default(false),
+  /** Used to convert months into days when RATE_DAY_BASIS is working days. */
+  workingDaysPerMonth: z.coerce
+    .number({ message: "Enter the working days per month" })
+    .int("Working days per month must be a whole number")
+    .min(1, "Working days per month must be at least 1")
+    .max(31, "Working days per month cannot exceed 31")
+    .optional(),
 
   siteLocation: trimmed(300).min(3, "Enter the job site location"),
   siteStateCode: trimmed(10).min(1, "Choose the state"),

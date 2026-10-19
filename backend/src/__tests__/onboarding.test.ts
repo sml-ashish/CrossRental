@@ -61,7 +61,12 @@ function fullForm() {
   return {
     name: APPLICANT_COMPANY,
     natureOfCompany: "PRIVATE_LTD",
-    registeredAddress: "14 Harbour Road, Ahmedabad, Gujarat 380001",
+    addressLine1: "14 Harbour Road",
+    addressLine2: "Near docks",
+    city: "Ahmedabad",
+    district: "Ahmedabad",
+    stateCode: "GJ",
+    pincode: "380001",
     telephone: "+91 79 4000 1200",
     fax: "",
     email: APPLICANT_CONTACT_EMAIL,
@@ -69,10 +74,13 @@ function fullForm() {
     companySize: "11-50",
     pan: "AABCO1234K",
     tan: "BLR1234567",
+    gstRegistered: true,
     gstn: "24AABCO1234K1Z5",
-    gstCompositionOpted: false,
+    gstRegistrationType: "REGULAR",
     gstr1FilingFrequency: "MONTHLY",
     cin: "U12345MH2024PTC123456",
+    msmeRegistered: false,
+    tdsLowerDeduction: false,
     operatingRegions: ["GJ", "MH"],
     contacts: [
       {
@@ -81,6 +89,7 @@ function fullForm() {
         telephone: "",
         email: APPLICANT_CONTACT_EMAIL,
         isPrimary: true,
+        receivesRfqs: true,
       },
       {
         name: "Sam Dispatch",
@@ -88,6 +97,7 @@ function fullForm() {
         telephone: "",
         email: "",
         isPrimary: false,
+        receivesRfqs: false,
       },
     ],
     bankAccountHolderName: "Onboarding Test Cranes Pvt Ltd",
@@ -96,15 +106,17 @@ function fullForm() {
     bankAccountType: "CURRENT",
     bankAccountNo: "50100234567890",
     bankIfsc: "TEST0000123",
+    bankMicr: "380012345",
     fleetSummary: "Rough-terrain and crawler cranes, 20 to 100 tonne, fleet of about 12.",
     codeOfConductAccepted: true,
     declarationName: "Rita Owner",
     declarationDesignation: "Managing Director",
     declarationDate: "2026-01-15",
+    communicationNotes: "Prefer email before 6 pm.",
   };
 }
 
-const REQUIRED_DOCS = ["CANCELLED_CHEQUE", "GST_CERTIFICATE", "PAN_COPY"] as const;
+const REQUIRED_DOCS = ["CANCELLED_CHEQUE", "PAN_COPY", "DECLARATION_SCAN", "GST_CERTIFICATE"] as const;
 
 interface Ctx {
   adminToken: string;
@@ -184,9 +196,10 @@ describe("M2 invitations", () => {
     expect(res.body.status).toBe("DRAFT");
     expect(res.body.canEdit).toBe(true);
     expect(res.body.prefill.companyName).toBe("Onboarding Test Cranes");
-    // The vendor has not started, so there is no draft row yet.
+    // The vendor has not started, so there is no draft row yet — and no
+    // gstRegistered answer, so the GST certificate is not required yet.
     expect(res.body.vendorId).toBeNull();
-    expect(res.body.missingDocuments).toEqual([...REQUIRED_DOCS]);
+    expect(res.body.missingDocuments).toEqual(["CANCELLED_CHEQUE", "PAN_COPY", "DECLARATION_SCAN"]);
   });
 
   it("lets sales invite, because vendor:invite is not admin-only", async () => {
@@ -266,6 +279,19 @@ describe("M2 invitations", () => {
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/expired/i);
   });
+
+  it("expires an invitation seven days after it is issued (P0 A9)", async () => {
+    const ctx = await seedAndSignIn();
+    const { invitationId } = await invite(ctx.adminToken);
+
+    const row = await testPrisma.vendorInvitation.findUniqueOrThrow({
+      where: { id: invitationId },
+      select: { createdAt: true, expiresAt: true },
+    });
+    const days = (row.expiresAt.getTime() - row.createdAt.getTime()) / 86_400_000;
+    expect(days).toBeGreaterThan(6.9);
+    expect(days).toBeLessThan(7.1);
+  });
 });
 
 describe("M2 the public form's reference data", () => {
@@ -329,14 +355,14 @@ describe("M2 saving a draft", () => {
       body: { name: APPLICANT_COMPANY },
     });
     const second = await call(app, "PUT", `/api/onboarding/invitation/${token}`, {
-      body: { registeredAddress: "14 Harbour Road, Ahmedabad" },
+      body: { addressLine1: "14 Harbour Road, Ahmedabad" },
     });
 
     expect(second.status, JSON.stringify(second.body)).toBe(200);
 
     const view = await call(app, "GET", `/api/onboarding/invitation/${token}`);
     expect(view.body.draft.name).toBe(APPLICANT_COMPANY);
-    expect(view.body.draft.registeredAddress).toContain("Harbour Road");
+    expect(view.body.draft.addressLine1).toContain("Harbour Road");
   });
 
   it("still rejects a structurally impossible value in a draft", async () => {
@@ -479,7 +505,7 @@ describe("M2 submitting", () => {
     expect(res.body.details.some((d: { path: string }) => d.path === "bankAccountType")).toBe(true);
   });
 
-  it("warns without blocking when the GSTIN does not embed the PAN", async () => {
+  it("blocks submit when the GSTIN does not embed the PAN", async () => {
     const ctx = await seedAndSignIn();
     const { token } = await invite(ctx.adminToken);
 
@@ -490,9 +516,128 @@ describe("M2 submitting", () => {
       body: mismatched,
     });
 
-    // A suspicious mismatch is the admin's call, not a hard stop.
-    expect(res.status).toBe(200);
-    expect((res.body.warnings as string[]).join(" ")).toMatch(/GSTIN/i);
+    // Open item 2 (decision): the mismatch usually means the numbers were
+    // copied from two different entities, so it is a hard stop now, not a
+    // warning the admin has to catch.
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe("VALIDATION_ERROR");
+    expect(JSON.stringify(res.body.details ?? res.body.error)).toMatch(/GSTIN/i);
+  });
+
+  it("blocks submit when the GST block contradicts gstRegistered", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+
+    // Registered but no GSTIN on file — the key is omitted entirely, which is
+    // also how a browser form with an empty optional input submits.
+    const missingGstn = { ...fullForm(), gstn: undefined };
+    await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: missingGstn });
+    await uploadAll(token);
+    const res = await call(app, "POST", `/api/onboarding/invitation/${token}/submit`, {
+      body: missingGstn,
+    });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.details ?? res.body.error)).toMatch(/GSTIN is required/i);
+
+    // Unregistered but still sending a typed GSTN (the vendor flipped the
+    // radio without clearing the box they had already filled).
+    const unregistered = { ...fullForm(), gstRegistered: false, gstRegistrationType: "" };
+    await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: unregistered });
+    await uploadAll(token);
+    const res2 = await call(app, "POST", `/api/onboarding/invitation/${token}/submit`, {
+      body: unregistered,
+    });
+    expect(res2.status).toBe(400);
+    expect(JSON.stringify(res2.body.details ?? res2.body.error)).toMatch(/only apply/i);
+  });
+
+  it("blocks submit when the PAN's 4th letter contradicts the company type", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+
+    // Private ltd wants "C" at position 4; this PAN belongs to a proprietor.
+    const wrongType = { ...fullForm(), pan: "AABPO1234K", gstn: "24AABPO1234K1Z5" };
+    await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: wrongType });
+    await uploadAll(token);
+    const res = await call(app, "POST", `/api/onboarding/invitation/${token}/submit`, {
+      body: wrongType,
+    });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.details ?? res.body.error)).toMatch(/4th letter/i);
+  });
+
+  it("normalises a contact mobile to ten digits and rejects a leading zero (P0 A8)", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+
+    // "+91" and a leading "0" are the two shapes a vendor actually types, and
+    // both mean the same ten-digit number.
+    const form = fullForm();
+    form.contacts[0].mobile = "+91 98200 11223";
+    form.contacts[1].mobile = "09820044556";
+    const save = await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: form });
+    expect(save.status, JSON.stringify(save.body)).toBe(200);
+
+    const stored = await testPrisma.vendor.findUniqueOrThrow({
+      where: { id: save.body.vendorId },
+      select: { contacts: { select: { mobile: true } } },
+    });
+    expect(stored.contacts.map((c) => c.mobile).sort()).toEqual(["9820011223", "9820044556"]);
+
+    // A number that still begins with zero after normalising is not a mobile.
+    const bad = fullForm();
+    bad.contacts[0].mobile = "0982001123";
+    const res = await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: bad });
+    expect(res.status).toBe(400);
+    expect(
+      res.body.details.some((d: { path: string }) => d.path.includes("mobile")),
+    ).toBe(true);
+  });
+
+  it("refuses a second vendor with the same PAN or GSTIN (P0 A8)", async () => {
+    const ctx = await seedAndSignIn();
+    const first = await invite(ctx.adminToken);
+    await submitApplication(ctx, first.token);
+
+    const second = await invite(ctx.adminToken, "second@onboarding.test");
+    // Save first under a different, valid identity so the collision is raised
+    // by the friendly submit check rather than by the unique index on save.
+    const distinct = { ...fullForm(), pan: "AABCC5678L", gstn: "24AABCC5678L1Z5" };
+    await call(app, "PUT", `/api/onboarding/invitation/${second.token}`, { body: distinct });
+    await uploadAll(second.token);
+
+    const res = await call(app, "POST", `/api/onboarding/invitation/${second.token}/submit`, {
+      body: fullForm(),
+    });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.details ?? res.body.error)).toMatch(
+      /already registered with this PAN/i,
+    );
+  });
+
+  it("accepts a submit from an unregistered vendor without the GST certificate", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+
+    // An unregistered vendor leaves the whole GST block empty; omit the key
+    // the way an untouched form would.
+    const base = fullForm() as Record<string, unknown>;
+    delete base["gstn"];
+    const unregistered = {
+      ...base,
+      gstRegistered: false,
+      gstRegistrationType: "",
+      gstr1FilingFrequency: "",
+    };
+    await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: unregistered });
+    // Skip the GST certificate upload: an unregistered vendor has no option
+    // to upload it, so the page never lists it and submit must not want it.
+    await uploadAll(token, ["CANCELLED_CHEQUE", "PAN_COPY", "DECLARATION_SCAN"]);
+    const res = await call(app, "POST", `/api/onboarding/invitation/${token}/submit`, {
+      body: unregistered,
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect((res.body.warnings as string[]).join(" ")).not.toMatch(/GSTIN/i);
   });
 
   it("freezes the form once submitted", async () => {
@@ -724,6 +869,129 @@ describe("M2 the approval queue", () => {
     expect(res.body.missingDocuments).toEqual(
       expect.arrayContaining(["CANCELLED_CHEQUE", "GST_CERTIFICATE"]),
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase D3: the SAP vendor creation sheet
+// ---------------------------------------------------------------------------
+
+describe("SAP vendor creation sheet (D3)", () => {
+  it("lays the vendor out for an admin, with the bank details decrypted", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+    const vendorId = await submitApplication(ctx, token);
+
+    const mailBefore = await testPrisma.emailLog.count();
+    const auditBefore = await testPrisma.auditLog.count();
+    const res = await call(app, "GET", `/api/vendors/${vendorId}/sap-sheet`, {
+      token: ctx.adminToken,
+    });
+    expect(res.status).toBe(200);
+
+    const sheet = res.body.sheet;
+    expect(sheet.sections.map((s: any) => s.title)).toEqual(
+      expect.arrayContaining([
+        "Vendor identification",
+        "Address",
+        "Tax and registration",
+        "Bank details",
+      ]),
+    );
+
+    const bank = sheet.sections.find((s: any) => s.title === "Bank details");
+    const account = bank.rows.find((r: any) => r.label === "Account number");
+    expect(account.value).toBe("50100234567890");
+
+    // The export is not logged (brief D3): reading it writes nothing new.
+    expect(await testPrisma.emailLog.count()).toBe(mailBefore);
+    expect(await testPrisma.auditLog.count()).toBe(auditBefore);
+  });
+
+  it("is admin only", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+    const vendorId = await submitApplication(ctx, token);
+
+    const sales = await call(app, "GET", `/api/vendors/${vendorId}/sap-sheet`, {
+      token: ctx.salesToken,
+    });
+    expect(sales.status).toBe(403);
+  });
+
+  it("exports a SpreadsheetML workbook", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+    const vendorId = await submitApplication(ctx, token);
+
+    const res = await callRaw(app, `/api/vendors/${vendorId}/sap-sheet.xls`, {
+      token: ctx.adminToken,
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("application/vnd.ms-excel");
+    const body = res.buffer.toString("utf8");
+    expect(body).toContain("SAP vendor sheet");
+    expect(body).toContain("Bank details");
+  });
+
+  it("carries admin-edited master-list picks through approval onto the sheet", async () => {
+    const ctx = await seedAndSignIn();
+    const { token } = await invite(ctx.adminToken);
+    const vendorId = await submitApplication(ctx, token);
+
+    const saved = await call(app, "PUT", "/api/settings/master-lists/VENDOR_ORIGIN", {
+      token: ctx.adminToken,
+      body: { values: ["Domestic", "domestic", " Imported "] },
+    });
+    // Trimmed, blanks dropped, case-insensitively de-duplicated.
+    expect(saved.status).toBe(200);
+    expect(saved.body.values).toEqual(["Domestic", "Imported"]);
+
+    const approve = await call(app, "POST", `/api/vendors/${vendorId}/approve`, {
+      token: ctx.adminToken,
+      body: { officeUse: { vendorOrigin: "Domestic", legalForm: "Private Limited" } },
+    });
+    expect(approve.status).toBe(200);
+
+    const sheet = await call(app, "GET", `/api/vendors/${vendorId}/sap-sheet`, {
+      token: ctx.adminToken,
+    });
+    const office = sheet.body.sheet.sections.find((s: any) => s.title === "Office use (SML)");
+    const origin = office.rows.find((r: any) => r.label === "Vendor origin");
+    const legal = office.rows.find((r: any) => r.label === "Legal form");
+    expect(origin.value).toBe("Domestic");
+    expect(legal.value).toBe("Private Limited");
+  });
+});
+
+describe("SAP office-use master lists (D3)", () => {
+  it("lets an admin edit and read the lists, and refuses sales", async () => {
+    const ctx = await seedAndSignIn();
+
+    expect(
+      (await call(app, "GET", "/api/settings/master-lists", { token: ctx.salesToken })).status,
+    ).toBe(403);
+
+    const before = await call(app, "GET", "/api/settings/master-lists", { token: ctx.adminToken });
+    expect(before.status).toBe(200);
+    expect(before.body.masterLists.VENDOR_ORIGIN).toEqual([]);
+
+    await call(app, "PUT", "/api/settings/master-lists/LEGAL_FORM", {
+      token: ctx.adminToken,
+      body: { values: ["Partnership", "Private Limited"] },
+    });
+
+    const after = await call(app, "GET", "/api/settings/master-lists", { token: ctx.adminToken });
+    expect(after.body.masterLists.LEGAL_FORM).toEqual(["Partnership", "Private Limited"]);
+  });
+
+  it("rejects an unknown list name", async () => {
+    const ctx = await seedAndSignIn();
+    const res = await call(app, "PUT", "/api/settings/master-lists/NOT_A_LIST", {
+      token: ctx.adminToken,
+      body: { values: ["x"] },
+    });
+    expect(res.status).toBe(400);
   });
 });
 
@@ -1116,7 +1384,7 @@ describe("M2 isolation", () => {
     expect(res.status).toBe(409);
 
     const applicantDocs = await testPrisma.vendorDocument.count({ where: { vendorId: applicantId } });
-    expect(applicantDocs).toBe(3);
+    expect(applicantDocs).toBe(4);
   });
 
   it("keeps the invitation token out of the audit log", async () => {

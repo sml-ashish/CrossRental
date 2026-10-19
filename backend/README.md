@@ -30,6 +30,7 @@ src/
   utils/jwt.ts           access tokens
   utils/rbac.ts          role → capability map
   utils/settings.ts      cached app settings
+  utils/masterLists.ts   admin-editable SAP office-use master lists (D3)
   lib/geo.ts             geocoding provider interface, stub, India bounds
   middleware/            auth, validate, errorHandler, upload, rate limits
   services/
@@ -40,15 +41,28 @@ src/
     crane.service.ts        fleet CRUD, status rules, geocoding, load charts
     candidate.service.ts    RFQ candidate matching, grouping, distance order
     distance.service.ts    road distance, straight-line fallback, caching
+    enquiry.service.ts     native enquiry intake, line CRUD, manual internal
+                           check, RFQ-from-line (P1)
+    enquiryTrail.service.ts  line status trail and enquiry roll-up (P1)
+    enquiryNumber.service.ts per-year sequential enquiry numbering (P1)
     rfq.service.ts         create, dispatch, track, deadline, cancel, remind,
-                           expiry
+                           expiry, automatic reminders
     rfqNumber.service.ts   per-year sequential RFQ numbering
-    email.ts, audit.ts   business logic
+    award.service.ts       award (brief 6.7): select, not-award, book, email
+    quotation.service.ts   vendor inbox, quotation submit/revise/withdraw, decline
+    reservations.service.ts  dated commitments, derived Booked/Hired, release
+    sapSheet.service.ts    SAP vendor creation sheet + SpreadsheetML export (D3)
+    admin.service.ts       admin dashboard counters, staff management,
+                           vendor suspend/reinstate (P0 B)
+    vendorDashboard.service.ts  vendor dashboard counters and lists (7.5)
+    staleFleet.service.ts  stale-fleet reminder sweep (6.5)
+    audit.service.ts, email.service.ts   business logic
     emailTemplates.ts   subject/body per template, with the vars each requires
+  validation/            Zod schemas per surface, including enquiryFields.ts (P1)
   controllers/           HTTP shaping only
   routes/                route tables
-  job/scheduler.ts       cron registry; the RFQ reminder and expiry sweeps are
-                         callable functions until M7 wires them to a timer
+  job/scheduler.ts       cron registry; three jobs are wired in
+                         job/registerJobs.ts (see "Background jobs")
   generated/prisma/      generated client — do not edit
   __tests__/             Vitest suites
 ```
@@ -195,7 +209,14 @@ two audiences under one set of rules.
 | `POST`   | `/rfqs/:rfqId/cancel`     | `rfq:cancel`           | Requires a reason. |
 | `POST`   | `/rfqs/:rfqId/remind`     | `rfq:remind`           | Optional `recipientId` for one recipient. |
 | `GET`    | `/rfqs/approved-vendors`  | `rfq:track`            | The picker's "everyone else" list. |
-| `POST`   | `/rfqs/expire-pending`    | `rfq:track`            | Runs the expiry sweep by hand; the timer is M7. |
+| `POST`   | `/rfqs/expire-pending`    | `rfq:track`            | Runs the expiry sweep by hand; a cron job also runs hourly. |
+| `POST`   | `/rfqs/:rfqId/quotations/:quotationId/award` | `quotation:award` | Admin only. See "Award endpoints". |
+| `GET`    | `/settings`               | `vendor:approve`       | Admin only. The day basis. |
+| `PATCH`  | `/settings`               | `vendor:approve`       | Admin only. Body `{ rateDayBasis: CALENDAR_DAYS \| WORKING_DAYS_PER_MONTH }`. |
+| `GET`    | `/settings/master-lists`  | `vendor:approve`       | Admin only. The six SAP office-use lists (each starts empty). |
+| `PUT`    | `/settings/master-lists/:name` | `vendor:approve`  | Admin only. Body `{ values: string[] }`; trimmed and case-insensitively de-duplicated. `name` ∈ VENDOR_ORIGIN, VENDOR_TYPE, PURCHASE_ORG, PAYMENT_TERM, WITHHOLDING_TAX_TYPE, LEGAL_FORM. |
+| `GET`    | `/vendors/:vendorId/sap-sheet` | `vendor:view_bank` | Admin only. The SAP creation sheet (bank columns decrypted). Not logged. |
+| `GET`    | `/vendors/:vendorId/sap-sheet.xls` | `vendor:view_bank` | Admin only. SpreadsheetML 2003 export of the same sheet. Not logged. |
 
 Guards are per verb, not one blanket "any RFQ capability": the table separates
 creating from dispatching from reminding, and a blanket guard would hand every one
@@ -210,6 +231,18 @@ The rules worth knowing before changing any of this:
   addresses.** Any address list in the request body is ignored outright, so a
   crafted request cannot mail a third party. Approval and the presence of an
   active user are re-checked at send time rather than trusted from the picker.
+- **Capacity matches "at least" by default; the RFQ can demand exact (brief A3).**
+  `capacityRule` on the RFQ switches the picker's tonnage filter for that enquiry
+  alone; `capacityNote`, `applicationDescription`, `loadDescription` and the
+  structured `mainBoomM` / `jibLengthM` travel with the requirement and appear on
+  the vendor's screen and in the invitation mail. A crane whose boom is shorter
+  than required raises a stored warning, and a quotation against an RFQ whose
+  start date is TBC neither asks for nor stores an availability confirmation —
+  the vendor is told why instead.
+- **The day basis is an admin setting (brief 6).** `RATE_DAY_BASIS` in
+  `app_settings` picks between 30 calendar days per month and the RFQ's own
+  `workingDaysPerMonth`; it changes only the month-to-days conversion shown in
+  every quotation note.
 - **A failed delivery is per recipient.** One bouncing mailbox is recorded as
   `FAILED` on that row and written to `EmailLog`, and the RFQ still goes out
   `SENT` to everyone else.
@@ -223,18 +256,33 @@ The rules worth knowing before changing any of this:
   database write; admitting it would offer a crane whose availability nobody
   knows. It is dropped from both buckets rather than moved into `unverified`,
   which means "location unverified".
+- **A TBC start date skips the date checks with a notice (brief C3).** When the
+  RFQ has no fixed start there is nothing to compare, so an `ENGAGED` crane is
+  admitted however its release date reads, no reservation overlap is computed,
+  and the list carries `startDateTbc: true` plus a `notice` telling sales the
+  dates were not checked. The quotation side does the same: the availability
+  confirmation is not required and the stored warning `start_date_tbc` records
+  why (brief A3).
 - **Only road distances are cached.** `distance.service.ts` caches on
   `method === "road"`; a straight-line fallback is returned with
   `approximate: true` and never written to `distance_cache`, because a cached
   approximation would shadow the real figure for the whole cache lifetime once
   routing recovers.
-- **Extending a deadline does not revive an `Expired` recipient.** `PENDING`
-  recipients get a longer window and a notification; `Expired` is a status the
-  vendor has already seen, so rewriting it would contradict their own view. The
-  brief requires no revival and the sweep only ever moves `PENDING` forward.
+- **Extending a deadline revives an `Expired` recipient (brief C1).** `PENDING`
+  recipients get a longer window and a notification; recipients the sweep moved
+  to `EXPIRED` — necessarily ones who never responded — return to `PENDING` with
+  their `lastReminderAt` cleared, so the reminder job fires against the new
+  deadline. A `DECLINED` or `QUOTED` recipient is untouched. The response
+  carries `revived` beside `notified`. (This replaces the earlier rule that an
+  `Expired` recipient was never revived.)
 - **A cancellation reason is required** and is injected into the email as a
   pre-escaped block, so a vendor's or an internal user's free text cannot inject
   markup into the mail.
+- **A decline carries what else the vendor can offer (brief C4).** The enquiry
+  mail invites the vendor to decline and list their available fleet or contacts
+  of other agencies, and the decline form asks for the same. Both `declineReason`
+  and `declineNote` are stored on the recipient and returned to the RFQ's creator
+  on the tracking detail, so a "no" is not a dead end.
 
 ## Vendor quotation endpoints
 
@@ -249,7 +297,7 @@ exists. Ownership is resolved before the request body is parsed.
 | `GET`  | `/vendor/rfqs`                          | Inbox, deadline ascending. Filters: `responseStatus`, `search`. |
 | `GET`  | `/vendor/rfqs/:rfqId`                   | Vendor's view of one RFQ. Sets `firstViewedAt` once. |
 | `GET`  | `/vendor/rfqs/:rfqId/quotations`        | Every version, grouped into per-crane series, newest first. |
-| `POST` | `/vendor/rfqs/:rfqId/decline`           | Optional `reason` and `note`. |
+| `POST` | `/vendor/rfqs/:rfqId/decline`           | Optional `reason` and `note`; `note` is what else they can offer (brief C4). |
 | `POST` | `/vendor/rfqs/:rfqId/quotations/preview` | Total, warnings, distance. Stores nothing. |
 | `POST` | `/vendor/rfqs/:rfqId/quotations`         | Optional `loadChart` file (multipart). |
 | `POST` | `/vendor/rfqs/quotations/:id/revisions`  | Optional `loadChart`. Becomes the next version. |
@@ -258,11 +306,12 @@ exists. Ownership is resolved before the request body is parsed.
 
 Rules, all in `quotation.service.ts`:
 
-- **Blocks:** closed deadline, cancelled RFQ, a crane that is not the vendor's or
+- **Blocks:** closed/cancelled RFQ with the same "SML has finalised this RFQ"
+  message, a closed deadline, a crane that is not the vendor's or
   is deactivated / `UNDER_MAINTENANCE` / `BOOKED` / `HIRED`, a rate of zero or less,
-  negative mobilisation, a validity date before today, no availability
-  confirmation, and no load chart on the crane, on the submission, or already on
-  this crane's series.
+  negative mobilisation or demobilisation, a validity date before today, no
+  availability confirmation, and no load chart on the crane, on the submission,
+  or already on this crane's series.
 - **Warnings, stored not thrown:** crane type differs, capacity differs in either
   direction, YOM breaks the age criterion, `ENGAGED` until after the required start.
 - **Versions are per crane.** `quantity > 1` gives each crane its own independent
@@ -287,6 +336,175 @@ Rules, all in `quotation.service.ts`:
   lists metadata only, and the internal surface has no attachment route at all
   yet. The `OTHER` attachment kind is defined but never written — see the open
   question in the root README.
+- **Vendor-visible statuses are mapped, not raw.** `SELECTED` arrives as
+  `AWARDED` (the word the brief uses for the vendor-facing outcome);
+  `NOT_AWARDED` passes through unchanged. Every vendor quotation and history
+  response goes through `vendorVisibleStatus()` — see `award.service.ts` for the
+  other half of the mapping.
+
+## Award endpoints (brief 6.7 as revised, phase B2)
+
+`POST /api/rfqs/:rfqId/quotations/:quotationId/award`, admin only. The whole
+decision is one transaction in `award.service.ts`:
+
+- Only the **latest + `SUBMITTED`** quotation on an unclosed, uncancelled RFQ is
+  awardable, and only if the crane is active, not Under Maintenance and has **no
+  overlapping ACTIVE reservation** ("crane now reserved").
+- The award creates a **`BOOKED` reservation** for the crane (brief 5.3/6.1). It
+  no longer writes a `BOOKED`/`HIRED` status: the commitment is the dated
+  reservation, and the badge is derived from it everywhere.
+- The **reservation window** is derived from the RFQ's `requiredStartDate` and
+  `durationValue`/`durationUnit` (converted with the `RATE_DAY_BASIS` setting).
+  When the RFQ's start date is `startDateTbc`, the caller must supply both
+  `startDate` and `endDate`, because there is nothing to derive them from.
+- **Awards are partial until the RFQ's `quantity` is reached.** One award on a
+  quantity-2 RFQ leaves the other quotations open (RFQ stays `SENT`); only the
+  award that reaches the quantity sets the remaining latest live quotations to
+  `NOT_AWARDED` and closes the RFQ (`CLOSED`).
+- On a closing award an audit entry is written and two emails go out:
+  `quotation_awarded` to the winner (with the reserved period), and
+  `quotation_not_awarded` to every vendor passed over. A partial award only mails
+  the winner.
+- An optional free-text `reason` is echoed into both emails through
+  `optionalBlock`, escaping every other free text the mail renders.
+
+Comparison and finalisation screens belong to sales-side work later; they call
+the same service.
+
+## Reservation endpoints (brief 5.3 / 6.1, phase B)
+
+Under `/api/reservations`. **SML-side only** — there is no vendor route, because
+a reservation is SML's record of who has the crane when. Reading is `rfq:track`
+(sales and admin); blocking and releasing are `vendor:approve` (admin only).
+
+| Method | Path                          | Capability       | Notes |
+| ------ | ----------------------------- | ---------------- | ----- |
+| `GET`  | `/reservations`               | `rfq:track`      | Filters: `status`, `type`, `craneId`, `vendorId`. |
+| `POST` | `/reservations`               | `vendor:approve` | Blocks a crane for a period. Body `{ craneId, startDate, endDate, reason? }`. |
+| `POST` | `/reservations/:id/release`   | `vendor:approve` | Reason required. Audit entry, `reservation_released` mail to the vendor. |
+| `POST` | `/reservations/complete-overdue` | `vendor:approve` | Marks past-end ACTIVE rows `COMPLETED`; the daily job runs the same sweep. |
+
+A reservation is a dated commitment, not a flag:
+
+- **Booked and Hired are derived, never stored (brief 6.1).** An ACTIVE
+  reservation covering today reads `HIRED`, one starting later reads `BOOKED`,
+  and the crane's own status stays whatever the vendor last set.
+  `deriveBookingBadge` is the single reading shared by the admin list and the
+  vendor dashboard.
+- **Availability is the absence of an overlapping reservation (brief 6.1/B3).**
+  Candidate matching and the quotation guard no longer read a stored
+  Booked/Hired status: `reservationWindowForRfq` derives the RFQ's window from
+  its start date and duration (or returns nothing when the start is TBC), and a
+  crane with an ACTIVE reservation intersecting it is dropped from the picker
+  and refused at submit ("That crane is reserved on an SML contract for X to Y
+  and cannot be quoted"). A vetting reminder: an Engaged crane whose
+  `available_from` has passed is flagged "availability date lapsed, confirm" on
+  the vendor dashboard and counted as due for update.
+- **The database refuses overlaps.** `btree_gist` plus an `EXCLUDE` constraint
+  (`reservations_active_no_overlap`) refuses two ACTIVE reservations on one crane
+  whose ranges intersect, transaction or not. The service checks first so the
+  caller gets a sentence naming the clash, and the constraint is the backstop for
+  two writers racing.
+- **Releasing frees the crane and tells the vendor.** The status becomes
+  `RELEASED`, the reason, actor and timestamp are kept, an audit entry is written
+  and the vendor's addresses (the RFQ's recipients when there is one, else the
+  vendor's recorded address) receive `reservation_released`.
+- **Dates are UTC calendar slices.** Writers normalise to UTC midnight so the
+  stored end date is the crane's last committed day and the range compares whole
+  days.
+- **Migration synthesis.** The phase B migration turned cranes still carrying the
+  legacy stored `BOOKED`/`HIRED` into one ACTIVE reservation each and reset the
+  crane status to `AVAILABLE`, so no commitment was lost. From B2 the award
+  writes reservations only, so the legacy statuses are no longer produced.
+
+## Admin endpoints (P0 B)
+
+Under `/api/admin`. Every route requires `vendor:approve` — held by `admin_user`
+and not by `sales_user` — applied once with `router.use`.
+
+| Method | Path | Notes |
+|---|---|---|
+| `GET`  | `/admin/dashboard` | The five B1 counters: registrations awaiting approval, RFQs with a failed email delivery, cranes stale past `STALE_FLAG_DAYS` (60), cranes with no map location, Engaged cranes past `availableFrom`. Each phone links to the same filtered list where one exists (approvals, RFQs `?delivery=FAILED`). |
+| `GET`  | `/admin/users` | Internal users only (`admin_user`, `sales_user`), oldest first. |
+| `POST` | `/admin/users` | Body `{ email, fullName?, role }` where `role` ∈ `admin_user \| sales_user`. Creates an OTP-only account (no password hash) and emails `internal_user_created`. 409 on a duplicate email. |
+| `PATCH`| `/admin/users/:id` | Body `{ role?, isActive? }`. Changing the role re-issues the user's capabilities. An admin cannot deactivate their own account (400). |
+| `POST` | `/admin/users/:id/reset-credentials` | Forces a fresh credential: internal users get a new login code, vendor users an emailed reset link. |
+| `POST` | `/admin/vendors/:id/suspend` | Body `{ reason? }`. Sets `suspendedAt`/`suspendedById`/`suspendReason`, deactivates the vendor's users and audits. 409 if already suspended. |
+| `POST` | `/admin/vendors/:id/reinstate` | Clears the suspension and reactivates the users (only when the vendor is APPROVED). 400 if not suspended. |
+
+**Suspension is enforced server-side in four places**: `loginWithPassword`
+(403 `VENDOR_SUSPENDED`, and the users are deactivated so live tokens die at
+`requireAuth`), `resolveRecipients` and `listApprovedVendors` in
+`rfq.service.ts`, and the candidate picker in `candidate.service.ts`. A suspended
+vendor cannot sign in, receive an RFQ, or appear as a candidate.
+
+## Enquiry endpoints (P1)
+
+Under `/api/enquiries`. Internal only — `enquiry:*` is held by `admin_user` and
+the CR team (`sales_user`), and every service entry point re-checks the role.
+
+| Method | Path | Capability | Notes |
+|---|---|---|---|
+| `GET`  | `/enquiries` | `enquiry:view` | List with the derived roll-up per row. Filters: `status`, `search`, `businessVertical`, `stateCode`, `from`, `to`. |
+| `POST` | `/enquiries` | `enquiry:create` | Body is the header plus `lines[]`. The adapter point: all creation (manual today, a SAP feed later) goes through `createEnquiry(payload, source)`. |
+| `GET`  | `/enquiries/:enquiryId` | `enquiry:view` | Header, lines and a stage-count summary. |
+| `PUT`  | `/enquiries/:enquiryId` | `enquiry:manage` | Full header edit. |
+| `POST` | `/enquiries/:enquiryId/lines` | `enquiry:manage` | Add a line; `lineNo` is assigned. |
+| `GET`  | `/enquiries/lines/:lineId/workspace` | `enquiry:view` | Vendor recommendations, RFQ history and quotations for the line. No SML section — SML has no fleet here. |
+| `PUT`  | `/enquiries/lines/:lineId` | `enquiry:manage` | Full line edit. |
+| `POST` | `/enquiries/lines/:lineId/cancel` | `enquiry:manage` | Body `{ reason }`. The line becomes final; nothing revives it. |
+| `POST` | `/enquiries/lines/:lineId/internal-check` | `enquiry:manage` | Body `{ outcome: CHECKED_NOT_AVAILABLE \| FULFILLED_INTERNALLY, notes? }` — the manual CR availability check. |
+| `POST` | `/enquiries/lines/:lineId/rfq` | `rfq:create` | Body `{ submissionDeadline }`. Prefills an RFQ from the line's **vendor-safe** subset only. |
+
+**Status is event driven, never set by a request.** `enquiryTrail.service.ts`
+holds the forward-only trail and the roll-up. Triggers: `sendRfq` → RFQ Sent,
+the first quotation → Quotes Received, an award → Booked, the internal check →
+Fulfilled Internally / Availability Check, and cancel → Cancelled (final). The
+header status is derived from the lines: nothing finalised → Received Pending
+Sourcing, any quotes → Partially Quoted, some done → Partially Finalised, all
+done → Fully Finalised, all closed/cancelled → Closed.
+
+**The internal block never leaves the server.** `createRfqFromLine` reads only
+the vendor-safe fields, so `customerName`, `customerAddress`, `rentalBudget`,
+`internalNotes`, `poSapReference` and `salesPartnerName` cannot reach an RFQ.
+The five scope terms (additional manpower, intra-site movement, pre-release,
+PPE, ROW) and the demobilisation term go into the RFQ's `commercialTermsExtra`
+JSON, which the vendor reads. An enquiry test asserts the absence by string.
+
+## Vendor dashboard (brief 7.5)
+
+`GET /api/vendor/dashboard` — one read returning counters **and the rows the
+counters lead to**: cranes due for an update (the 30-day window from
+`app_settings`), active/upcoming bookings (derived from the crane's reservations
+— Booked or Hired, which only SML can set), the RFQs awaiting response (nearest
+deadline first, overdue on top) and
+quotation counts. Scoped by the token's vendor id like every other vendor
+surface; an account without a vendor gets a 403 rather than a dashboard of
+nothing.
+
+## Background jobs
+
+`job/registerJobs.ts` registers four schedules via `scheduler.ts`, started by
+`createApp()`:
+
+- **stale-fleet-reminders** (daily ~05:11) — `staleFleet.service.ts`. Cranes past
+  the staleness window get one email to the vendor's addresses; the repeat
+  window (default 7 days) is deduped by reading `EmailLog`, so no schema change
+  was needed.
+- **rfq-reminders** (hourly) — RFQs inside their reminder window email `PENDING`
+  recipients; `lastReminderAt` within 24h is the dampener between runs. The
+  window is the smaller of `RFQ_REMINDER_LEAD_HOURS` (default 24) and half the
+  RFQ's send-to-deadline window, and a window shorter than
+  `RFQ_REMINDER_MIN_WINDOW_HOURS` (default 4) is never chased (brief C2).
+- **rfq-expiry** (hourly) — `EXPIRED` past-deadline recipients, the same sweep
+  `POST /rfqs/expire-pending` runs by hand.
+- **reservation-expiry** (daily ~01:23) — `reservations.service.ts` marks ACTIVE
+  reservations whose end date has passed `COMPLETED`, so the crane stops reading
+  as Booked/Hired (brief 6.1). The same sweep runs by hand at
+  `POST /reservations/complete-overdue`.
+
+`app_settings` keys: `STALE_DUE_DAYS`, `STALE_FLAG_DAYS`, `STALE_REMINDER_REPEAT_DAYS`,
+`RFQ_REMINDER_LEAD_HOURS`, `RFQ_REMINDER_MIN_WINDOW_HOURS`, `RATE_DAY_BASIS`.
 
 ## Tests
 
@@ -301,9 +519,12 @@ Suites:
   validation errors. Runs against a real Postgres over real HTTP, because the
   rule is only as strong as the actual query.
 - `onboarding.test.ts` — brief 7.2/7.3. The whole paper-free path: invite,
-  save a draft, upload the three required documents, submit, work the queue,
-  approve, reject and resubmit. Plus cross-vendor isolation via a guessed or
-  reused token, and that a vendor cannot sign in before approval.
+  save a draft, upload the required documents (cheque, PAN copy, signed
+  declaration page, GST certificate when registered), submit, work the queue,
+  approve, reject and resubmit. Plus the cross-field rules at submit (PAN
+  company-type letter, PAN inside the GSTIN, conditional GST/MSME/TDS blocks),
+  cross-vendor isolation via a guessed or reused token, and that a vendor
+  cannot sign in before approval.
 - `rateLimit.test.ts` — credential limiter trips at the configured budget,
   per-email isolation, case-insensitive keys.
 - `fleet.test.ts` — brief 6.3/6.4. Crane CRUD, the duplicate-serial rule, the
@@ -324,10 +545,25 @@ Suites:
   withdrawn, and that the inbox reports the most recently sent total.
 - `dates.test.ts` — the UTC calendar-date helpers, including that an impossible
   date is rejected rather than rolled into the next month.
+- `award.test.ts` — brief 6.7/7.5. The M7 journey: award one quotation and see
+  the others Not Awarded, the crane Booked, the RFQ CLOSED, the audit row written
+  and the two emails sent; the refusals (sales, non-latest, already-booked
+  crane, cancelled RFQ); the vendor dashboard counters and lists scoped to one
+  vendor; the stale-fleet reminder sweep and its dedup window; the RFQ
+  automatic reminder sprint and the expiry sweep.
+- `enquiry.test.ts` — P1. Native intake with every template field, the derived
+  roll-up (internal fulfilment, partial, all-cancelled closes the enquiry, a
+  cancelled line never revives), the RFQ-from-line vendor-safe copy (customer,
+  budget, notes, PO and Sales Partner are absent by string), vendor
+  recommendations in the workspace, the full trail journey (RFQ Sent → Quotes
+  Received → Booked) and that a vendor is refused the whole surface.
+- `admin.test.ts`, `settings.test.ts`, `reservations.test.ts` — the P0 admin
+  surface, the master-list settings and the dated reservations.
 
-275/275 tests across the seven files (69 RFQ, 66 quotations, 58 fleet, 52 onboarding, 14 access isolation, 11 calendar dates, 5 rate limit). The suite opens a
-real HTTP server per request against a real Postgres, because the rules being
-tested are properties of the actual queries and status codes.
+388/388 tests across thirteen files. The exact per-file split shifts as phases
+land, so `npx vitest list` is the authoritative count rather than this line. The
+suite opens a real HTTP server per request against a real Postgres, because the
+rules being tested are properties of the actual queries and status codes.
 
 `npx vitest list` prints every collected test without running any of them, which
 is the cheap way to check a count or confirm a test name. The suite takes about
@@ -356,7 +592,7 @@ npx ts-node scripts/e2e-onboarding-check.ts
 ```
 
 Drives the whole M2 path over real HTTP the way the browser does — invite, save
-a draft, upload the three documents, submit, work the queue, approve — and
+a draft, upload the required documents, submit, work the queue, approve — and
 asserts the security rules that matter: that a vendor cannot sign in before
 approval, that the queue never carries bank values, that a sales user's response
 omits the bank block entirely, and that only the last four digits are stored in

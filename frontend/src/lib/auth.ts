@@ -26,7 +26,7 @@ export interface AuthResponse {
 
 /** Where each role lands after signing in. Mirrors the backend's RBAC map. */
 export const ROLE_HOME: Record<UserRole, string> = {
-  vendor_user: "/app/fleet",
+  vendor_user: "/app/dashboard",
   sales_user: "/app/rfqs",
   admin_user: "/app/approvals",
 };

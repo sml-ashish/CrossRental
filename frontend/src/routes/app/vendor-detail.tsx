@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Download, Send, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, Pencil, Plus, Send, ShieldCheck } from "lucide-react";
 import {
   approveVendor,
   DOCUMENT_LABELS,
@@ -10,6 +10,15 @@ import {
   rejectVendor,
   resendActivation,
 } from "@/lib/onboarding";
+import { listCranes } from "@/lib/fleet";
+import { getVendorInsights } from "@/lib/vendorInsights";
+import { reinstateVendor, suspendVendor } from "@/lib/admin";
+import {
+  MASTER_LIST_LABELS,
+  SAP_MASTER_LIST_KEYS,
+  loadMasterLists,
+  type SapMasterListKey,
+} from "@/lib/settings";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge, StatusBadge } from "@/components/ui/badge";
@@ -48,19 +57,67 @@ export function VendorDetailPage() {
   const [manpowerStatus, setManpowerStatus] = useState("");
   const [improvementRequirement, setImprovementRequirement] = useState("");
   const [improvementPeriod, setImprovementPeriod] = useState("");
+  // SAP office-use master-list picks (phase D3). Business vertical is excluded:
+  // it is chosen on an enquiry, not on a vendor's SAP sheet.
+  const [masterPicks, setMasterPicks] = useState<
+    Record<SapMasterListKey, string>
+  >({
+    VENDOR_ORIGIN: "",
+    VENDOR_TYPE: "",
+    PURCHASE_ORG: "",
+    PAYMENT_TERM: "",
+    WITHHOLDING_TAX_TYPE: "",
+    LEGAL_FORM: "",
+  });
+  const [suspendReason, setSuspendReason] = useState("");
+  const [confirmSuspend, setConfirmSuspend] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // The options come from admin-editable lists and may be empty; the selects
+  // then only offer "Not set", which is the honest state until the owner's SAP
+  // values are entered on the settings screen.
+  const masterLists = useQuery({
+    queryKey: ["settings", "master-lists"],
+    queryFn: loadMasterLists,
+  });
+
+  const pickFor = (key: SapMasterListKey) => ({
+    value: masterPicks[key],
+    onChange: (value: string) => setMasterPicks((prev) => ({ ...prev, [key]: value })),
+    options: (masterLists.data?.[key] ?? []).map((v) => ({ value: v, label: v })),
+  });
 
   const officeUse = {
     facilityStatus,
     manpowerStatus,
     improvementRequirement,
     improvementPeriod,
+    vendorOrigin: masterPicks.VENDOR_ORIGIN,
+    vendorType: masterPicks.VENDOR_TYPE,
+    purchaseOrg: masterPicks.PURCHASE_ORG,
+    paymentTerm: masterPicks.PAYMENT_TERM,
+    withholdingTaxType: masterPicks.WITHHOLDING_TAX_TYPE,
+    legalForm: masterPicks.LEGAL_FORM,
   };
 
   const detail = useQuery({
     queryKey: ["vendors", "detail", vendorId],
     queryFn: () => loadVendorDetail(vendorId),
+  });
+
+  // Brief D1: an SML user opens any approved vendor's fleet and maintains it
+  // with the same forms, on the vendor's behalf.
+  const fleet = useQuery({
+    queryKey: ["fleet", "list", "vendor", vendorId],
+    queryFn: () => listCranes({ vendorId, includeInactive: true }),
+  });
+
+  // P4 BPD 6.10: the discovery view — categories and RFQ participation. Bank
+  // details are not in this payload at all, so sales cannot reach them here.
+  const insights = useQuery({
+    queryKey: ["vendors", "insights", vendorId],
+    queryFn: () => getVendorInsights(vendorId),
   });
 
   const approve = useMutation({
@@ -96,6 +153,23 @@ export function VendorDetailPage() {
     mutationFn: () => resendActivation(vendorId),
     onSuccess: (result) =>
       window.alert(result.sent ? "A fresh activation link has been emailed." : "The email did not send."),
+  });
+
+  // P0 B2: suspend or reinstate the whole vendor from its detail screen.
+  const suspend = useMutation({
+    mutationFn: () => suspendVendor(vendorId, suspendReason.trim()),
+    onSuccess: async () => {
+      setSuspendReason("");
+      setConfirmSuspend(false);
+      await queryClient.invalidateQueries({ queryKey: ["vendors"] });
+    },
+  });
+
+  const reinstate = useMutation({
+    mutationFn: () => reinstateVendor(vendorId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["vendors"] });
+    },
   });
 
   if (detail.isLoading) {
@@ -150,17 +224,29 @@ export function VendorDetailPage() {
           </p>
         </div>
 
-        {canApprove && vendor.onboardingStatus === "APPROVED" ? (
-          <button
-            type="button"
-            className="btn-secondary px-3 py-2 text-sm"
-            onClick={() => resend.mutate()}
-            disabled={resend.isPending}
-          >
-            {resend.isPending ? <Spinner /> : <Send className="size-4" aria-hidden />}
-            Resend activation link
-          </button>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {canApprove ? (
+            <Link
+              to="/app/vendors/$vendorId/sap-sheet"
+              params={{ vendorId }}
+              className="btn-secondary px-3 py-2 text-sm"
+            >
+              <FileSpreadsheet className="size-4" aria-hidden />
+              SAP creation sheet
+            </Link>
+          ) : null}
+          {canApprove && vendor.onboardingStatus === "APPROVED" ? (
+            <button
+              type="button"
+              className="btn-secondary px-3 py-2 text-sm"
+              onClick={() => resend.mutate()}
+              disabled={resend.isPending}
+            >
+              {resend.isPending ? <Spinner /> : <Send className="size-4" aria-hidden />}
+              Resend activation link
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {missingDocuments.length > 0 ? (
@@ -185,6 +271,90 @@ export function VendorDetailPage() {
         </Alert>
       ) : null}
 
+      {canApprove && vendor.onboardingStatus === "APPROVED" ? (
+        <Section title="Vendor access">
+          {vendor.suspendedAt ? (
+            <>
+              <Alert tone="error" title="Suspended">
+                <p>
+                  This vendor cannot sign in or receive RFQs.
+                  {vendor.suspendedAt
+                    ? ` Suspended on ${new Date(vendor.suspendedAt).toLocaleDateString()}.`
+                    : ""}
+                </p>
+                {vendor.suspendReason ? (
+                  <p className="mt-1 whitespace-pre-wrap">{vendor.suspendReason}</p>
+                ) : null}
+              </Alert>
+              <button
+                type="button"
+                className="btn-primary mt-3"
+                onClick={() => reinstate.mutate()}
+                disabled={reinstate.isPending}
+              >
+                {reinstate.isPending ? <Spinner /> : null}
+                Reinstate vendor
+              </button>
+            </>
+          ) : confirmSuspend ? (
+            <>
+              <Field
+                label="Reason (optional)"
+                htmlFor="suspend-reason"
+                hint="Recorded in the audit trail and shown above while suspended."
+              >
+                <TextArea
+                  id="suspend-reason"
+                  value={suspendReason}
+                  onChange={setSuspendReason}
+                  rows={3}
+                />
+              </Field>
+              <div className="mt-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => suspend.mutate()}
+                  disabled={suspend.isPending}
+                >
+                  {suspend.isPending ? <Spinner /> : null}
+                  Confirm suspension
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setConfirmSuspend(false)}
+                  disabled={suspend.isPending}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-slate-500">
+                Suspending blocks sign-in and removes the vendor from RFQ lists until
+                reinstated.
+              </p>
+              <button
+                type="button"
+                className="btn-secondary mt-3"
+                onClick={() => setConfirmSuspend(true)}
+              >
+                Suspend vendor
+              </button>
+            </>
+          )}
+
+          {suspend.isError ? (
+            <Alert tone="error">{(suspend.error as Error).message}</Alert>
+          ) : null}
+          {reinstate.isError ? (
+            <Alert tone="error">{(reinstate.error as Error).message}</Alert>
+          ) : null}
+        </Section>
+      ) : null}
+
       <Section title="Company">
         <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
           <ReadOnlyValue label="Legal name" value={vendor.name ?? ""} />
@@ -195,7 +365,18 @@ export function VendorDetailPage() {
           <ReadOnlyValue label="Weekly off" value={vendor.weeklyOffDays ?? ""} />
           <ReadOnlyValue label="Company size" value={vendor.companySize ?? ""} />
           <div className="sm:col-span-2">
-            <ReadOnlyValue label="Registered address" value={vendor.registeredAddress ?? ""} />
+            <ReadOnlyValue
+              label="Address"
+              value={[
+                vendor.addressLine1,
+                vendor.addressLine2,
+                [vendor.city, vendor.district, vendor.addressState?.name, vendor.pincode]
+                  .filter(Boolean)
+                  .join(" "),
+              ]
+                .filter(Boolean)
+                .join(", ")}
+            />
           </div>
           <ReadOnlyValue
             label="Operating regions"
@@ -207,15 +388,46 @@ export function VendorDetailPage() {
       <Section title="Registration">
         <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
           <ReadOnlyValue label="PAN" value={vendor.pan ?? ""} mono />
-          <ReadOnlyValue label="GSTIN" value={vendor.gstn ?? ""} mono />
           <ReadOnlyValue label="TAN" value={vendor.tan ?? ""} mono />
           <ReadOnlyValue label="CIN" value={vendor.cin ?? ""} mono />
-          <ReadOnlyValue label="MSME category" value={vendor.msmeCategory ?? ""} />
+          <ReadOnlyValue
+            label="GST-registered"
+            value={vendor.gstRegistered === true ? "Yes" : vendor.gstRegistered === false ? "No" : "—"}
+          />
+          <ReadOnlyValue label="GSTIN" value={vendor.gstn ?? ""} mono />
+          <ReadOnlyValue
+            label="GST registration type"
+            value={(vendor.gstRegistrationType ?? "").replace(/_/g, " ").toLowerCase()}
+          />
           <ReadOnlyValue label="GSTR-1 frequency" value={vendor.gstr1FilingFrequency ?? ""} />
           <ReadOnlyValue
-            label="GST composition"
-            value={vendor.gstCompositionOpted ? "Opted in" : "No"}
+            label="MSME-registered"
+            value={vendor.msmeRegistered === true ? "Yes" : vendor.msmeRegistered === false ? "No" : "—"}
           />
+          <ReadOnlyValue
+            label="MSME category / reg. no."
+            value={[vendor.msmeCategory, vendor.msmeRegNo].filter(Boolean).join(" · ")}
+          />
+          <ReadOnlyValue
+            label="MSME exemption date"
+            value={vendor.msmeExemptionDate ? new Date(vendor.msmeExemptionDate).toLocaleDateString() : ""}
+          />
+          <ReadOnlyValue
+            label="Lower TDS deduction"
+            value={vendor.tdsLowerDeduction === true ? "Yes" : vendor.tdsLowerDeduction === false ? "No" : "—"}
+          />
+          {vendor.tdsLowerDeduction ? (
+            <>
+              <ReadOnlyValue
+                label="TDS certificate"
+                value={[vendor.tdsCertificateNo, vendor.tdsValidFrom, vendor.tdsValidTo].filter(Boolean).join(" · ")}
+              />
+              <ReadOnlyValue
+                label="TDS section / rate"
+                value={[vendor.tdsSection, vendor.tdsRatePercent === 0 ? "0%" : vendor.tdsRatePercent ? `${vendor.tdsRatePercent}%` : ""].filter(Boolean).join(" · ")}
+              />
+            </>
+          ) : null}
           <ReadOnlyValue
             label="Government registration"
             value={
@@ -243,6 +455,11 @@ export function VendorDetailPage() {
                       <Badge tone="blue">Primary</Badge>
                     </span>
                   ) : null}
+                  {contact.receivesRfqs ? (
+                    <span className="ml-2">
+                      <Badge tone="emerald">Receives RFQs</Badge>
+                    </span>
+                  ) : null}
                 </p>
                 <p className="truncate text-xs text-slate-500">{contact.email || "—"}</p>
               </div>
@@ -250,6 +467,132 @@ export function VendorDetailPage() {
             </li>
           ))}
         </ul>
+      </Section>
+
+      <Section
+        title="Participation"
+        description="From RFQ invitations only — invitations, quotes and awards. Not a performance score."
+      >
+        {insights.isPending ? (
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Spinner /> Loading participation
+          </div>
+        ) : insights.isError ? (
+          <Alert title="Could not load participation">{(insights.error as Error).message}</Alert>
+        ) : (
+          <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-4">
+            <ReadOnlyValue label="RFQs received" value={String(insights.data.profile.rfqsReceived)} />
+            <ReadOnlyValue
+              label="Quotations submitted"
+              value={String(insights.data.profile.quotationsSubmitted)}
+            />
+            <ReadOnlyValue
+              label="Invitations"
+              value={String(insights.data.profile.participation.invitations)}
+            />
+            <ReadOnlyValue label="Quoted" value={String(insights.data.profile.participation.quoted)} />
+            <ReadOnlyValue label="Awarded" value={String(insights.data.profile.participation.awarded)} />
+            <ReadOnlyValue
+              label="Responsiveness"
+              value={
+                insights.data.profile.participation.responsivenessPct === null
+                  ? "—"
+                  : `${insights.data.profile.participation.responsivenessPct}%`
+              }
+            />
+            <ReadOnlyValue
+              label="Win ratio"
+              value={
+                insights.data.profile.participation.winPct === null
+                  ? "—"
+                  : `${insights.data.profile.participation.winPct}%`
+              }
+            />
+            <ReadOnlyValue
+              label="Categories"
+              value={insights.data.profile.categories.map((c) => c.name).join(", ")}
+            />
+          </dl>
+        )}
+      </Section>
+
+      <Section
+        title="Fleet"
+        description="Maintain this vendor's cranes here. Any change you make is recorded as on the vendor's behalf and they are notified."
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm text-slate-500">
+            {fleet.isLoading
+              ? "Loading cranes…"
+              : `${fleet.data?.cranes.length ?? 0} crane${
+                  (fleet.data?.cranes.length ?? 0) === 1 ? "" : "s"
+                }`}
+          </p>
+          {vendor.onboardingStatus === "APPROVED" ? (
+            <Link
+              to="/app/fleet/new"
+              search={{ vendorId, duplicate: undefined }}
+              className="btn-secondary px-3 py-2 text-sm"
+            >
+              <Plus className="size-4" aria-hidden />
+              Add crane
+            </Link>
+          ) : null}
+        </div>
+
+        {fleet.isError ? (
+          <Alert title="Could not load this vendor's fleet">
+            {(fleet.error as Error).message}
+          </Alert>
+        ) : !fleet.isLoading && (fleet.data?.cranes.length ?? 0) === 0 ? (
+          <p className="text-sm text-slate-500">No cranes on record for this vendor.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {fleet.data?.cranes.map((crane) => (
+              <li
+                key={crane.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-2.5"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-sm font-semibold text-slate-900">
+                      {crane.serialRegistrationNo}
+                    </span>
+                    <StatusBadge status={crane.currentStatus} />
+                    {!crane.isActive ? <Badge tone="neutral">Deactivated</Badge> : null}
+                    {crane.updatedOnBehalf ? (
+                      <Badge tone="blue">SML on behalf</Badge>
+                    ) : null}
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {crane.make} {crane.model} · {crane.capacityT}T · {crane.currentLocation}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Data last confirmed {new Date(crane.statusUpdatedAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/app/cranes/$craneId"
+                    params={{ craneId: crane.id }}
+                    className="btn-secondary px-3 py-2 text-sm"
+                  >
+                    Detail
+                  </Link>
+                  <Link
+                    to="/app/fleet/$craneId/edit"
+                    params={{ craneId: crane.id }}
+                    search={{ vendorId }}
+                    className="btn-secondary px-3 py-2 text-sm"
+                  >
+                    <Pencil className="size-3.5" aria-hidden />
+                    Edit
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </Section>
 
       {vendor.bankVisible ? (
@@ -264,7 +607,16 @@ export function VendorDetailPage() {
             <ReadOnlyValue label="Account type" value={vendor.bankAccountType ?? ""} />
             <ReadOnlyValue label="Account number" value={vendor.bankAccountNo ?? ""} mono />
             <ReadOnlyValue label="IFSC" value={vendor.bankIfsc ?? ""} mono />
+            <ReadOnlyValue label="MICR" value={vendor.bankMicr ?? ""} mono />
+            <ReadOnlyValue label="IBAN" value={vendor.bankIban ?? ""} mono />
+            <ReadOnlyValue label="SWIFT" value={vendor.bankSwift ?? ""} mono />
           </dl>
+        </Section>
+      ) : null}
+
+      {vendor.communicationNotes ? (
+        <Section title="Communication preferences">
+          <ReadOnlyValue label="Notes" value={vendor.communicationNotes} />
         </Section>
       ) : null}
 
@@ -385,6 +737,25 @@ export function VendorDetailPage() {
                 placeholder="e.g. 30 days"
               />
             </Field>
+            {SAP_MASTER_LIST_KEYS.map((key) => {
+              const pick = pickFor(key);
+              return (
+                <Field
+                  key={key}
+                  label={MASTER_LIST_LABELS[key]}
+                  htmlFor={`master-${key}`}
+                  hint={pick.options.length === 0 ? "No options yet — add them in Settings." : undefined}
+                >
+                  <Select
+                    id={`master-${key}`}
+                    value={pick.value}
+                    onChange={pick.onChange}
+                    options={pick.options}
+                    placeholder="Not set"
+                  />
+                </Field>
+              );
+            })}
             <Field label="SAP vendor code" htmlFor="sapVendorCode" hint="Optional. Must be unique.">
               <TextInput
                 id="sapVendorCode"

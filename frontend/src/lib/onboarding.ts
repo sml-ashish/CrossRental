@@ -1,4 +1,4 @@
-import { api, apiUpload } from "@/lib/api";
+import { api, apiUpload, getStoredToken } from "@/lib/api";
 
 /**
  * Client for the M2 onboarding endpoints (brief 7.2, 7.3).
@@ -10,7 +10,14 @@ import { api, apiUpload } from "@/lib/api";
  * segment, never logged or stored.
  */
 
-export type DocType = "CANCELLED_CHEQUE" | "GST_CERTIFICATE" | "PAN_COPY" | "OTHER";
+export type DocType =
+  | "CANCELLED_CHEQUE"
+  | "GST_CERTIFICATE"
+  | "PAN_COPY"
+  | "DECLARATION_SCAN"
+  | "TDS_CERTIFICATE"
+  | "MSME_CERTIFICATE"
+  | "OTHER";
 
 export interface OnboardingContact {
   name: string;
@@ -18,13 +25,19 @@ export interface OnboardingContact {
   telephone: string;
   email: string;
   isPrimary: boolean;
+  receivesRfqs: boolean;
 }
 
 /** The editable form. Every field is optional until submit. */
 export interface OnboardingForm {
   name: string;
   natureOfCompany: string;
-  registeredAddress: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  district: string;
+  stateCode: string;
+  pincode: string;
   telephone: string;
   fax: string;
   email: string;
@@ -32,13 +45,23 @@ export interface OnboardingForm {
   companySize: string;
   pan: string;
   tan: string;
+  gstRegistered: boolean;
   gstn: string;
-  gstCompositionOpted: boolean;
+  gstRegistrationType: string;
   gstr1FilingFrequency: string;
   cin: string;
   govtRegistrationType: string;
   govtRegistrationNo: string;
+  msmeRegistered: boolean;
   msmeCategory: string;
+  msmeRegNo: string;
+  msmeExemptionDate: string;
+  tdsLowerDeduction: boolean;
+  tdsCertificateNo: string;
+  tdsSection: string;
+  tdsRatePercent: string;
+  tdsValidFrom: string;
+  tdsValidTo: string;
   operatingRegions: string[];
   contacts: OnboardingContact[];
   bankAccountHolderName: string;
@@ -48,11 +71,15 @@ export interface OnboardingForm {
   /** Left blank when the vendor is not changing the stored value. */
   bankAccountNo: string;
   bankIfsc: string;
+  bankMicr: string;
+  bankIban: string;
+  bankSwift: string;
   fleetSummary: string;
   codeOfConductAccepted: boolean;
   declarationName: string;
   declarationDesignation: string;
   declarationDate: string;
+  communicationNotes: string;
 }
 
 export interface OnboardingDocument {
@@ -93,7 +120,12 @@ export interface SaveResult {
 const EMPTY_FORM: OnboardingForm = {
   name: "",
   natureOfCompany: "",
-  registeredAddress: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  district: "",
+  stateCode: "",
+  pincode: "",
   telephone: "",
   fax: "",
   email: "",
@@ -101,13 +133,23 @@ const EMPTY_FORM: OnboardingForm = {
   companySize: "",
   pan: "",
   tan: "",
+  gstRegistered: false,
   gstn: "",
-  gstCompositionOpted: false,
+  gstRegistrationType: "",
   gstr1FilingFrequency: "",
   cin: "",
   govtRegistrationType: "",
   govtRegistrationNo: "",
+  msmeRegistered: false,
   msmeCategory: "",
+  msmeRegNo: "",
+  msmeExemptionDate: "",
+  tdsLowerDeduction: false,
+  tdsCertificateNo: "",
+  tdsSection: "",
+  tdsRatePercent: "",
+  tdsValidFrom: "",
+  tdsValidTo: "",
   operatingRegions: [],
   contacts: [],
   bankAccountHolderName: "",
@@ -116,11 +158,15 @@ const EMPTY_FORM: OnboardingForm = {
   bankAccountType: "",
   bankAccountNo: "",
   bankIfsc: "",
+  bankMicr: "",
+  bankIban: "",
+  bankSwift: "",
   fleetSummary: "",
   codeOfConductAccepted: false,
   declarationName: "",
   declarationDesignation: "",
   declarationDate: "",
+  communicationNotes: "",
 };
 
 /**
@@ -136,12 +182,26 @@ export function initialForm(
 ): OnboardingForm {
   const merged: OnboardingForm = { ...EMPTY_FORM, ...(draft ?? {}) };
 
+  // A stored draft carries every field, with undefined for "not answered yet" —
+  // those must not wipe the defaults above.
+  merged.gstRegistered = merged.gstRegistered === true;
+  merged.msmeRegistered = merged.msmeRegistered === true;
+  merged.tdsLowerDeduction = merged.tdsLowerDeduction === true;
+  merged.contacts = (merged.contacts ?? []).map((c) => ({ ...c, receivesRfqs: c.receivesRfqs === true }));
+
   if (prefill) {
     if (!merged.name && prefill.companyName) merged.name = prefill.companyName;
     if (!merged.email && prefill.email) merged.email = prefill.email;
     if (merged.contacts.length === 0 && prefill.contactName) {
       merged.contacts = [
-        { name: prefill.contactName, mobile: "", telephone: "", email: prefill.email ?? "", isPrimary: true },
+        {
+          name: prefill.contactName,
+          mobile: "",
+          telephone: "",
+          email: prefill.email ?? "",
+          isPrimary: true,
+          receivesRfqs: false,
+        },
       ];
     }
   }
@@ -184,6 +244,17 @@ export function saveForm(
   // first save, and sending "" would be read as clearing the stored value.
   if (!touched.has("bankAccountNo")) delete body["bankAccountNo"];
   if (!touched.has("bankIfsc")) delete body["bankIfsc"];
+
+  // Booleans always travel, even untouched, so a draft save records an
+  // explicit answer rather than leaving the master flags null.
+  for (const key of ["gstRegistered", "msmeRegistered", "tdsLowerDeduction"] as const) {
+    body[key] ??= form[key];
+  }
+  // Numeric input arrives as a string from the form; the API expects a number.
+  if (typeof body["tdsRatePercent"] === "string") {
+    const n = Number(body["tdsRatePercent"]);
+    body["tdsRatePercent"] = body["tdsRatePercent"] === "" ? undefined : Number.isFinite(n) ? n : undefined;
+  }
 
   return token
     ? api<SaveResult>(`/onboarding/invitation/${encodeURIComponent(token)}`, {
@@ -235,6 +306,53 @@ export async function downloadDocument(
 }
 
 // ---------------------------------------------------------------------------
+// SAP vendor creation sheet (brief D3, admin only)
+// ---------------------------------------------------------------------------
+
+export interface SapSheetRow {
+  label: string;
+  value: string;
+}
+
+export interface SapSheetSection {
+  title: string;
+  rows: SapSheetRow[];
+}
+
+export interface SapSheet {
+  vendorId: string;
+  vendorName: string;
+  sapVendorCode: string | null;
+  generatedAt: string;
+  sections: SapSheetSection[];
+}
+
+export function loadSapSheet(vendorId: string) {
+  return api<{ sheet: SapSheet }>(`/vendors/${encodeURIComponent(vendorId)}/sap-sheet`);
+}
+
+/** Streams the SpreadsheetML export back. Fetched rather than linked so it is authenticated. */
+export async function downloadSapSheet(
+  vendorId: string,
+): Promise<{ blob: Blob; fileName: string }> {
+  const token = getStoredToken();
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL ?? "/api"}/vendors/${encodeURIComponent(vendorId)}/sap-sheet.xls`,
+    { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+  );
+  if (!response.ok) {
+    throw new Error(
+      response.status === 403
+        ? "The SAP creation sheet is restricted to administrators."
+        : "That sheet could not be downloaded.",
+    );
+  }
+  const disposition = response.headers.get("content-disposition") ?? "";
+  const match = /filename="([^"]+)"/.exec(disposition);
+  return { blob: await response.blob(), fileName: match?.[1] ?? "SAP-vendor-sheet.xls" };
+}
+
+// ---------------------------------------------------------------------------
 // Admin / sales side
 // ---------------------------------------------------------------------------
 
@@ -249,7 +367,12 @@ export interface QueueVendor {
   adminRemarks: string | null;
   approvedAt: string | null;
   totalFleetSize: number;
-  registeredAddress: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  district: string | null;
+  stateCode: string | null;
+  pincode: string | null;
   operatingRegions: string[];
   updatedAt: string;
   contacts: { name: string; email: string | null; mobile: string | null }[];
@@ -275,7 +398,14 @@ export interface VendorDetail {
   sapVendorCode: string | null;
   name: string | null;
   natureOfCompany: string | null;
-  registeredAddress: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  district: string | null;
+  stateCode: string | null;
+  /** The related State row, as sent by the detail endpoint. */
+  addressState: { name: string } | null;
+  pincode: string | null;
   telephone: string | null;
   fax: string | null;
   email: string | null;
@@ -283,21 +413,37 @@ export interface VendorDetail {
   companySize: string | null;
   pan: string | null;
   tan: string | null;
+  gstRegistered: boolean | null;
   gstn: string | null;
-  gstCompositionOpted: boolean | null;
+  gstRegistrationType: string | null;
   gstr1FilingFrequency: string | null;
   cin: string | null;
   govtRegistrationType: string | null;
   govtRegistrationNo: string | null;
+  msmeRegistered: boolean | null;
   msmeCategory: string | null;
+  msmeRegNo: string | null;
+  msmeExemptionDate: string | null;
+  tdsLowerDeduction: boolean | null;
+  tdsCertificateNo: string | null;
+  tdsSection: string | null;
+  tdsRatePercent: number | null;
+  tdsValidFrom: string | null;
+  tdsValidTo: string | null;
   fleetSummary: string | null;
   codeOfConductAccepted: boolean | null;
   declarationName: string | null;
   declarationDesignation: string | null;
   declarationDate: string | null;
+  bankMicr: string | null;
+  bankIban: string | null;
+  bankSwift: string | null;
+  communicationNotes: string | null;
   onboardingStatus: string;
   adminRemarks: string | null;
   approvedAt: string | null;
+  suspendedAt: string | null;
+  suspendReason: string | null;
   facilityStatus: string | null;
   manpowerStatus: string | null;
   improvementRequirement: string | null;
@@ -380,7 +526,11 @@ export const DOCUMENT_LABELS: Record<string, string> = {
   CANCELLED_CHEQUE: "Cancelled cheque",
   GST_CERTIFICATE: "GST certificate",
   PAN_COPY: "PAN card copy",
+  DECLARATION_SCAN: "Signed declaration page",
+  TDS_CERTIFICATE: "TDS exemption certificate",
+  MSME_CERTIFICATE: "MSME registration certificate",
   OTHER: "Other supporting document",
 };
 
-export const REQUIRED_DOC_TYPES: DocType[] = ["CANCELLED_CHEQUE", "GST_CERTIFICATE", "PAN_COPY"];
+/** Documents every vendor uploads; the GST certificate joins only when registered. */
+export const REQUIRED_DOC_TYPES: DocType[] = ["CANCELLED_CHEQUE", "PAN_COPY", "DECLARATION_SCAN"];

@@ -89,6 +89,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const requestOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email } = otpRequestSchema.parse(req.body);
+   
   await requestLoginOtp(email, req.ip);
   res.json({
     message:

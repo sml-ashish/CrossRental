@@ -12,8 +12,16 @@ import vendorRoutes from "./routes/vendor.routes";
 import onboardingRoutes from "./routes/onboarding.routes";
 import craneRoutes from "./routes/crane.routes";
 import rfqRoutes from "./routes/rfq.routes";
+import enquiryRoutes from "./routes/enquiry.routes";
+import settingsRoutes from "./routes/settings.routes";
+import reservationsRoutes from "./routes/reservations.routes";
+import discoveryRoutes from "./routes/discovery.routes";
+import communicationRoutes from "./routes/communication.routes";
 import vendorQuotationRoutes from "./routes/vendorQuotation.routes";
+import vendorDashboardRoutes from "./routes/vendorDashboard.routes";
+import adminRoutes from "./routes/admin.routes";
 import { startScheduler, stopScheduler } from "./job/scheduler";
+import { registerDefaultJobs } from "./job/registerJobs";
 
 export function createApp() {
   const app = express();
@@ -59,7 +67,14 @@ export function createApp() {
   app.use("/api/onboarding", onboardingRoutes);
   app.use("/api/cranes", craneRoutes);
   app.use("/api/rfqs", rfqRoutes);
+  app.use("/api/enquiries", enquiryRoutes);
+  app.use("/api/settings", settingsRoutes);
+  app.use("/api/reservations", reservationsRoutes);
+  app.use("/api/discovery", discoveryRoutes);
+  app.use("/api/communications", communicationRoutes);
   app.use("/api/vendor/rfqs", vendorQuotationRoutes);
+  app.use("/api/vendor/dashboard", vendorDashboardRoutes);
+  app.use("/api/admin", adminRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
@@ -82,6 +97,7 @@ async function main() {
     );
   });
 
+  registerDefaultJobs();
   startScheduler();
 
   const shutdown = async (signal: string) => {

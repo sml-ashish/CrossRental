@@ -901,23 +901,39 @@ describe("fleet: isolation", () => {
     expect((await call(app, "POST", "/api/cranes", { body: cranePayload() })).status).toBe(401);
   });
 
-  it("lets sales read an approved fleet but not write to it", async () => {
+  it("lets sales read an approved fleet and write on the vendor's behalf (D1)", async () => {
     const read = await call(app, "GET", "/api/cranes", { token: ctx.salesToken });
     expect(read.status).toBe(200);
     expect(read.body.cranes.some((c: any) => c.vendorId === ctx.a.vendorId)).toBe(true);
     expect(read.body.cranes[0].vendorName).toBeTruthy();
 
-    const write = await call(app, "POST", "/api/cranes", {
+    // A create must name the vendor whose fleet is being updated.
+    const noVendor = await call(app, "POST", "/api/cranes", {
       token: ctx.salesToken,
       body: cranePayload({ serialRegistrationNo: "SALES-WRITE" }),
     });
-    expect(write.status).toBe(403);
+    expect(noVendor.status).toBe(400);
 
-    const edit = await call(app, "PUT", `/api/cranes/${ctx.a.craneId}`, {
+    const write = await call(app, "POST", "/api/cranes", {
       token: ctx.salesToken,
-      body: cranePayload(),
+      body: { ...cranePayload({ serialRegistrationNo: "SALES-WRITE" }), vendorId: ctx.a.vendorId },
     });
-    expect(edit.status).toBe(403);
+    expect(write.status).toBe(201);
+    expect(write.body.crane.updatedOnBehalf).toBe(true);
+
+    await call(app, "PUT", `/api/cranes/${ctx.a.craneId}`, {
+      token: ctx.salesToken,
+      body: { ...cranePayload(), vendorId: ctx.a.vendorId },
+    });
+    const edited = await testPrisma.crane.findUniqueOrThrow({ where: { id: ctx.a.craneId } });
+    expect(edited.updatedOnBehalf).toBe(true);
+
+    // The change carries the on-behalf audit mark.
+    const audit = await testPrisma.auditLog.findFirst({
+      where: { entity: "crane", entityId: ctx.a.craneId, action: "crane_updated" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(audit?.onBehalfOfVendor).toBe(true);
   });
 
   it("keeps a non-approved vendor's fleet out of internal reads", async () => {
@@ -952,5 +968,117 @@ describe("fleet: isolation", () => {
       currentStatus: "UNDER_MAINTENANCE",
       currentLocation: "Vadodara Yard",
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase D: expected_ready_date (D4) and on-behalf updates (D1)
+// ---------------------------------------------------------------------------
+
+describe("fleet: expected ready date (D4)", () => {
+  it("stores expected_ready_date on create, edit and the quick update", async () => {
+    const created = await call(app, "POST", "/api/cranes", {
+      token: tokenA,
+      body: cranePayload({
+        serialRegistrationNo: "D4-READY-1",
+        currentStatus: "UNDER_MAINTENANCE",
+        expectedReadyDate: "2026-11-01",
+      }),
+    });
+    expect(created.status).toBe(201);
+    expect(created.body.crane.expectedReadyDate).toContain("2026-11-01");
+
+    // An edit can move it, and moving it winds the status clock.
+    const before = await testPrisma.crane.findUniqueOrThrow({ where: { id: created.body.crane.id } });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const edited = await call(app, "PUT", `/api/cranes/${created.body.crane.id}`, {
+      token: tokenA,
+      body: cranePayload({
+        serialRegistrationNo: "D4-READY-1",
+        currentStatus: "UNDER_MAINTENANCE",
+        expectedReadyDate: "2026-12-15",
+      }),
+    });
+    expect(edited.status).toBe(200);
+    expect(edited.body.crane.expectedReadyDate).toContain("2026-12-15");
+    const after = await testPrisma.crane.findUniqueOrThrow({ where: { id: created.body.crane.id } });
+    expect(after.statusUpdatedAt.getTime()).toBeGreaterThan(before.statusUpdatedAt.getTime());
+
+    // The quick status-and-location action carries it too.
+    const quick = await call(app, "PATCH", `/api/cranes/${created.body.crane.id}/status-location`, {
+      token: tokenA,
+      body: {
+        currentStatus: "UNDER_MAINTENANCE",
+        currentLocation: "Surat Yard",
+        stateCode: "GJ",
+        expectedReadyDate: "2027-01-05",
+      },
+    });
+    expect(quick.status).toBe(200);
+    expect(quick.body.crane.expectedReadyDate).toContain("2027-01-05");
+
+    // The audit trail records the change to the ready date.
+    const audit = await testPrisma.auditLog.findFirst({
+      where: { entity: "crane", entityId: created.body.crane.id, action: "crane_updated" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(audit).not.toBeNull();
+  });
+
+  it("rejects an impossible expected_ready_date", async () => {
+    const res = await call(app, "POST", "/api/cranes", {
+      token: tokenA,
+      body: cranePayload({
+        serialRegistrationNo: "D4-BAD-DATE",
+        currentStatus: "UNDER_MAINTENANCE",
+        expectedReadyDate: "2026-02-31",
+      }),
+    });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("fleet: updates on behalf of a vendor (D1)", () => {
+  it("emails the vendor and marks the audit when a sales user edits", async () => {
+    await call(app, "PUT", `/api/cranes/${ctx.a.craneId}`, {
+      token: ctx.salesToken,
+      body: cranePayload({
+        currentLocation: "SML Updated Yard",
+        vendorId: ctx.a.vendorId,
+      }),
+    });
+
+    const crane = await testPrisma.crane.findUniqueOrThrow({ where: { id: ctx.a.craneId } });
+    expect(crane.updatedOnBehalf).toBe(true);
+
+    const mail = await testPrisma.emailLog.findFirst({
+      where: { template: "fleet_updated_on_behalf" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(mail).not.toBeNull();
+
+    const audit = await testPrisma.auditLog.findFirst({
+      where: { entity: "crane", entityId: ctx.a.craneId, action: "crane_updated" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(audit?.onBehalfOfVendor).toBe(true);
+  });
+
+  it("clears the on-behalf mark when the vendor next edits their crane", async () => {
+    await call(app, "PUT", `/api/cranes/${ctx.a.craneId}`, {
+      token: ctx.salesToken,
+      body: { ...cranePayload({ currentLocation: "SML Updated Yard" }), vendorId: ctx.a.vendorId },
+    });
+    expect(
+      (await testPrisma.crane.findUniqueOrThrow({ where: { id: ctx.a.craneId } })).updatedOnBehalf,
+    ).toBe(true);
+
+    await call(app, "PUT", `/api/cranes/${ctx.a.craneId}`, {
+      token: tokenA,
+      body: cranePayload({ currentLocation: "Vendor Yard Again" }),
+    });
+    expect(
+      (await testPrisma.crane.findUniqueOrThrow({ where: { id: ctx.a.craneId } })).updatedOnBehalf,
+    ).toBe(false);
   });
 });

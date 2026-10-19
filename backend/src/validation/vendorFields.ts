@@ -19,6 +19,25 @@ import { z } from "zod";
 export const PAN_PATTERN = /^[A-Z]{5}\d{4}[A-Z]$/;
 
 /**
+ * Brief 5.1: the PAN's 4th letter is the company-type letter — C for a
+ * (Public or Private) company, F for a partnership, P for a proprietorship.
+ * A mismatch usually means the PAN belongs to a different entity than the
+ * one the form is about, which is exactly the transcription error this rule
+ * exists to catch.
+ */
+const COMPANY_TYPE_LETTER: Record<string, string> = {
+  PUBLIC_LTD: "C",
+  PRIVATE_LTD: "C",
+  PARTNERSHIP: "F",
+  PROPRIETORSHIP: "P",
+};
+
+export function panCompanyTypeMismatch(pan: string, natureOfCompany: string): boolean {
+  const letter = COMPANY_TYPE_LETTER[natureOfCompany];
+  return letter !== undefined ? pan[3] !== letter : false;
+}
+
+/**
  * GSTIN: 15 characters — 2-digit state code, 10-character PAN, 1 entity code,
  * 'Z', 1 checksum character (brief 5.1 says "15 characters"; the structure is
  * what makes a typo detectable).
@@ -37,6 +56,22 @@ export const CIN_PATTERN = /^[LUu]\d{5}[A-Z\d]{2}\d{4}[A-Z\d]{3}[A-Z\d]{6}$/;
  * with an STD code pushes them to invent something that passes.
  */
 export const PHONE_PATTERN = /^[+]?[\d\s()-]{7,20}$/;
+
+/**
+ * A contact's mobile (P0 A8): 10 digits with no leading zero. A "+91"/"0"
+ * prefix is stripped first, because vendors type their number in every one of
+ * those shapes, and refusing a correct number over its punctuation helps no
+ * one. This is stricter than {@link PHONE_PATTERN}, which still governs a
+ * landline's telephone field.
+ */
+export const MOBILE_PATTERN = /^[1-9]\d{9}$/;
+
+export function normaliseMobile(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  return digits;
+}
 
 export function normalise(value: string): string {
   return value.trim().toUpperCase().replace(/\s+/g, "");
@@ -84,6 +119,12 @@ export const phoneField = z
   .trim()
   .refine((v) => PHONE_PATTERN.test(v), "Enter a valid phone number");
 
+export const mobileField = z
+  .string()
+  .trim()
+  .transform(normaliseMobile)
+  .refine((v) => MOBILE_PATTERN.test(v), "Enter a 10-digit mobile number without a leading zero");
+
 export const emailField = z
   .string()
   .trim()
@@ -96,6 +137,19 @@ export const accountNoField = z
   .trim()
   .transform((v) => v.replace(/\s+/g, ""))
   .refine((v) => /^\d{9,18}$/.test(v), "Enter the account number as 9 to 18 digits");
+
+/** MICR: exactly 9 digits (brief 5.1), optional. */
+export const micrField = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/\s+/g, ""))
+  .refine((v) => /^\d{9}$/.test(v), "MICR must be exactly 9 digits");
+
+/** Indian pincodes: 6 digits, and the first is never 0. */
+export const pincodeField = z
+  .string()
+  .trim()
+  .refine((v) => /^[1-9]\d{5}$/.test(v), "Enter a 6-digit pincode");
 
 export const shortText = trimmed(200);
 export const longText = trimmed(2000);

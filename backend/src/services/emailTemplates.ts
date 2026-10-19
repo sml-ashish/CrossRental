@@ -167,6 +167,27 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
     ),
   },
   {
+    key: "fleet_updated_on_behalf",
+    subject: "Your crane details were updated on your behalf",
+    bodyHtml: layout(
+      "Fleet updated on your behalf",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         An SML user updated your crane details for you. The change is recorded against
+         your crane and is shown in the portal.
+       </p>
+       <div style="margin:0 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#334155">
+         {{craneLabel}}<br/>
+         <span style="color:#64748b">Updated by {{actorName}}</span>
+       </div>
+       <p style="margin:0;font-size:13px;color:#64748b">
+         If anything looks wrong, open the crane in the portal and edit it — that clears
+         the "updated on your behalf" mark.
+       </p>`,
+      { label: "View crane", url: "{{craneUrl}}" },
+    ),
+  },
+  {
     key: "rfq_invitation",
     subject: "[{{rfqNumber}}] Crane enquiry — please quote",
     bodyHtml: layout(
@@ -180,7 +201,12 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
        <table style="width:100%;border-collapse:collapse;font-size:13px;color:#334155;margin:0 0 16px">
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b;width:45%">RFQ number</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:600">{{rfqNumber}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Site location</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{siteLocation}}, {{siteState}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane requirement</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneType}}, {{capacityT}} T, quantity {{quantity}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane requirement</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneType}}, {{capacityRule}}, quantity {{quantity}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Capacity note</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{capacityNote}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Application</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{applicationDescription}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Load details</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{loadDescription}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Main boom required</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{mainBoomText}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Jib length required</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{jibText}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Configuration</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{configuration}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Tentative deployment</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{requiredStartDate}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Hiring duration</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{durationText}}</td></tr>
@@ -191,6 +217,12 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane age criteria</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneAgeCriteria}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Accommodation &amp; conveyance</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{accommodationConveyance}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Payment terms</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{paymentTerms}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Mobilisation &amp; demobilisation</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{mobilisationTerms}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Support crane</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{supportCrane}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Steel mats &amp; ground prep</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{steelMatsGroundPrep}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">EHS / HR</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{ehsHrRequirements}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Insurance</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{insuranceTerms}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Extension clause</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{extensionClause}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Quote due by</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:600;color:#b8130f">{{submissionDeadline}}</td></tr>
        </table>
        <p style="margin:0 0 12px;font-size:13px;color:#334155">
@@ -242,6 +274,8 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Version</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{version}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Rate</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">INR {{rentalRate}} per {{rateBasis}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Mobilisation</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">INR {{mobilisationCharges}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Demobilisation</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">INR {{demobilisationCharges}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Tax basis</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{taxBasis}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Total quoted value</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:700">INR {{totalQuotedValue}}</td></tr>
          <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Validity</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{validityDate}}</td></tr>
        </table>
@@ -280,6 +314,7 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
        </p>
        <div style="margin:0 0 16px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534">
          {{craneLabel}}<br/>
+         <span style="color:#475569">Reserved for: {{periodText}}</span><br/>
          <span style="color:#475569">Total quoted value: INR {{totalQuotedValue}}</span>
        </div>
        {{reasonBlock}}
@@ -321,6 +356,43 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
        </p>
        {{reasonBlock}}`,
       { label: "View enquiry", url: "{{rfqUrl}}" },
+    ),
+  },
+  {
+    key: "reservation_released",
+    subject: "Your crane {{craneLabel}} has been released",
+    bodyHtml: layout(
+      "Reservation released",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         The reservation on the crane below has been released, so it is available again.
+       </p>
+       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px">
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:600">{{craneLabel}}</td></tr>
+         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Period</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{periodText}}</td></tr>
+         <tr><td style="padding:7px 0;color:#64748b">Released by</td><td style="padding:7px 0">{{releasedBy}}</td></tr>
+       </table>
+       {{reasonBlock}}
+        <p style="margin:0;font-size:13px;color:#64748b">
+          You can update this crane's status in the portal from your fleet list.
+        </p>`,
+    ),
+  },
+  {
+    key: "internal_user_created",
+    subject: "Your SML Crane Portal account",
+    bodyHtml: layout(
+      "Your portal account is ready",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello{{fullName}},</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         An SML Crane Portal account has been created for you with the role
+         <strong>{{roleLabel}}</strong>.
+       </p>
+       <p style="margin:0;font-size:14px;color:#334155">
+         Sign in with this email address and the one-time code we send you — there is no
+         password to remember.
+       </p>`,
+      { label: "Sign in", url: "{{loginUrl}}" },
     ),
   },
 ];

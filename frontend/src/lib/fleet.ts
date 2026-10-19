@@ -66,6 +66,10 @@ export interface Crane {
   locationUnverified: boolean;
   freshness: CraneFreshness;
   availableFrom: string | null;
+  /** Brief D4: when an under-maintenance crane is expected back. */
+  expectedReadyDate: string | null;
+  /** Brief D1: last change was made by SML on this vendor's behalf. */
+  updatedOnBehalf: boolean;
   loadChart: LoadChart | null;
   ownershipType: string;
   isActive: boolean;
@@ -103,6 +107,8 @@ export interface CraneForm {
   latitude: string;
   longitude: string;
   remarks: string;
+  /** Only meaningful while UNDER_MAINTENANCE (brief D4). */
+  expectedReadyDate: string;
 }
 
 export const EMPTY_CRANE_FORM: CraneForm = {
@@ -123,6 +129,7 @@ export const EMPTY_CRANE_FORM: CraneForm = {
   latitude: "",
   longitude: "",
   remarks: "",
+  expectedReadyDate: "",
 };
 
 export interface ReferenceOption {
@@ -156,6 +163,9 @@ export function craneToForm(crane: Crane): CraneForm {
     latitude: crane.latitude === null ? "" : String(crane.latitude),
     longitude: crane.longitude === null ? "" : String(crane.longitude),
     remarks: crane.remarks ?? "",
+    expectedReadyDate: crane.expectedReadyDate
+      ? crane.expectedReadyDate.slice(0, 10)
+      : "",
   };
 }
 
@@ -189,6 +199,12 @@ function toPayload(form: CraneForm) {
     latitude: coordinate(form.latitude),
     longitude: coordinate(form.longitude),
     remarks: form.remarks.trim() || null,
+    // Only meaningful while under maintenance; cleared otherwise so a stale
+    // date does not linger next to an Available crane.
+    expectedReadyDate:
+      form.currentStatus === "UNDER_MAINTENANCE" && form.expectedReadyDate.trim()
+        ? form.expectedReadyDate.trim()
+        : null,
   };
 }
 
@@ -198,6 +214,8 @@ export interface ListCranesFilters {
   stateCode?: string;
   search?: string;
   includeInactive?: boolean;
+  /** Internal readers only: narrow the list to one vendor (brief D1). */
+  vendorId?: string;
 }
 
 export function listCranes(filters: ListCranesFilters = {}): Promise<{ cranes: Crane[] }> {
@@ -215,12 +233,39 @@ export function getCrane(craneId: string): Promise<{ crane: Crane }> {
   return api(`/cranes/${craneId}`);
 }
 
-export function createCrane(form: CraneForm): Promise<{ crane: Crane }> {
-  return api("/cranes", { method: "POST", body: toPayload(form) });
+/**
+ * Creates a crane.
+ *
+ * - An SML user passes `vendorId` to write on a vendor's behalf (brief D1); a
+ *   vendor omits it and the backend takes it from the token.
+ * - `availableFrom` is carried separately because it is required only when the
+ *   status is Engaged, and is not part of the crane form itself.
+ */
+export function createCrane(
+  form: CraneForm,
+  extra: { vendorId?: string; availableFrom?: string | null } = {},
+): Promise<{ crane: Crane }> {
+  const body: Record<string, unknown> = { ...toPayload(form) };
+  if (extra.vendorId) body.vendorId = extra.vendorId;
+  if (extra.availableFrom !== undefined) body.availableFrom = extra.availableFrom;
+  return api("/cranes", { method: "POST", body });
 }
 
-export function updateCrane(craneId: string, form: CraneForm): Promise<{ crane: Crane }> {
-  return api(`/cranes/${craneId}`, { method: "PUT", body: toPayload(form) });
+/**
+ * Edits a crane.
+ *
+ * `availableFrom` is carried separately for the same reason as `createCrane`:
+ * it is required only while the status is Engaged and is not part of the crane
+ * form, so `toPayload` would otherwise drop a date the vendor just set.
+ */
+export function updateCrane(
+  craneId: string,
+  form: CraneForm,
+  extra: { availableFrom?: string | null } = {},
+): Promise<{ crane: Crane }> {
+  const body: Record<string, unknown> = { ...toPayload(form) };
+  if (extra.availableFrom !== undefined) body.availableFrom = extra.availableFrom;
+  return api(`/cranes/${craneId}`, { method: "PUT", body });
 }
 
 export interface QuickUpdate {

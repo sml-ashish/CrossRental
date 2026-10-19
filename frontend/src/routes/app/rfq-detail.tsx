@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, MapPin, Send } from "lucide-react";
 import {
   ROLLUPE_STATUS_LABELS,
+  awardQuotation,
   cancelRfq,
   confirmSitePin,
   extendDeadline,
@@ -65,6 +66,7 @@ export function RfqDetailPage() {
 function InternalRfqDetailPage() {
   const { rfqId } = useParams({ from: "/app/rfqs/$rfqId" }) as { rfqId: string };
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const detail = useQuery({ queryKey: ["rfq", rfqId], queryFn: () => getRfq(rfqId) });
   const rfq = detail.data?.rfq;
@@ -135,14 +137,35 @@ function InternalRfqDetailPage() {
           <Section title="Requirement">
             <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <ReadOnlyValue label="Crane type" value={rfq.craneTypeRef?.name ?? rfq.craneType} />
-              <ReadOnlyValue label="Capacity required" value={`${rfq.capacityT} t`} />
+              <ReadOnlyValue
+                label="Capacity required"
+                value={`${rfq.capacityT} t (${rfq.capacityRule === "EXACT" ? "exact" : "at least"})`}
+              />
               <ReadOnlyValue label="Quantity" value={String(rfq.quantity)} />
+              {rfq.capacityNote ? (
+                <ReadOnlyValue label="Capacity note" value={rfq.capacityNote} />
+              ) : null}
+              {rfq.applicationDescription ? (
+                <ReadOnlyValue label="Application" value={rfq.applicationDescription} />
+              ) : null}
+              {rfq.loadDescription ? (
+                <ReadOnlyValue label="Load details" value={rfq.loadDescription} />
+              ) : null}
+              {rfq.mainBoomM !== null ? (
+                <ReadOnlyValue label="Main boom required" value={`${rfq.mainBoomM} m`} />
+              ) : null}
+              {rfq.jibLengthM !== null ? (
+                <ReadOnlyValue label="Jib length required" value={`${rfq.jibLengthM} m`} />
+              ) : null}
               <ReadOnlyValue
                 label="Job site"
                 value={`${rfq.siteLocation}, ${rfq.siteState?.name ?? rfq.siteStateCode}`}
               />
               <ReadOnlyValue label="Pincode" value={rfq.sitePincode ?? "—"} mono />
-              <ReadOnlyValue label="Required start" value={formatCalendarDate(rfq.requiredStartDate)} />
+              <ReadOnlyValue
+                label="Required start"
+                value={rfq.startDateTbc ? "To be confirmed" : formatCalendarDate(rfq.requiredStartDate)}
+              />
               <ReadOnlyValue
                 label="Duration"
                 value={`${rfq.durationValue} ${rfq.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}`}
@@ -167,6 +190,18 @@ function InternalRfqDetailPage() {
                 value={rfq.accommodationConveyance ?? "—"}
               />
               <ReadOnlyValue label="Payment terms" value={rfq.paymentTerms ?? "—"} />
+              <ReadOnlyValue
+                label="Mobilisation & demobilisation"
+                value={rfq.mobilisationTerms ?? "—"}
+              />
+              <ReadOnlyValue label="Support crane" value={rfq.supportCrane ?? "—"} />
+              <ReadOnlyValue
+                label="Steel mats & ground prep"
+                value={rfq.steelMatsGroundPrep ?? "—"}
+              />
+              <ReadOnlyValue label="EHS / HR requirements" value={rfq.ehsHrRequirements ?? "—"} />
+              <ReadOnlyValue label="Insurance" value={rfq.insuranceTerms ?? "—"} />
+              <ReadOnlyValue label="Extension clause" value={rfq.extensionClause ?? "—"} />
               <ReadOnlyValue label="Notes" value={rfq.notes ?? "—"} />
             </dl>
             <div className="border-t border-slate-100 pt-3">
@@ -206,7 +241,15 @@ function InternalRfqDetailPage() {
           ) : null}
 
           <RecipientsSection rfqId={rfqId} recipients={rfq.recipients} onDone={invalidate} />
-          <QuotationsSection quotations={rfq.quotations} />
+          <QuotationsSection
+            rfqId={rfqId}
+            quotations={rfq.quotations}
+            canAward={user?.role === "admin_user"}
+            closed={isCancelled || rfq.status === "CLOSED"}
+            startDateTbc={rfq.startDateTbc}
+            defaultStartDate={rfq.requiredStartDate?.slice(0, 10) ?? ""}
+            onDone={invalidate}
+          />
         </>
       )}
     </div>
@@ -255,6 +298,10 @@ function ActionBar({
             Edit draft
           </Link>
         ) : null}
+
+        <Link to="/app/communications" search={{ rfqId }} className="btn-secondary px-4 py-2 text-sm">
+          Communication history
+        </Link>
 
         <button
           type="button"
@@ -491,7 +538,7 @@ function CandidatePickerSection({
     );
   }
 
-  const alreadySelected = selected.filter((id) => alreadySent.includes(id));
+
 
   return (
     <Section
@@ -518,6 +565,12 @@ function CandidatePickerSection({
                 void queryClient.invalidateQueries({ queryKey: ["rfq", rfqId] });
               }}
             />
+          ) : null}
+
+          {candidates.data.candidates.notice ? (
+            <Alert title="Start date to be confirmed">
+              {candidates.data.candidates.notice}
+            </Alert>
           ) : null}
 
           {candidates.data.candidates.distancesAvailable && pickerVendors.length === 0 && unverified.length === 0 ? (
@@ -641,15 +694,15 @@ function CandidatePickerSection({
           type="button"
           className="btn-primary px-5 py-2.5 text-sm"
           onClick={() => send.mutate()}
-          disabled={send.isPending || alreadySelected.length === 0}
+          disabled={send.isPending || selected.length === 0}
         >
           {send.isPending ? <Spinner /> : <Send className="size-4" aria-hidden />}
           {send.isPending
             ? "Sending"
-            : `Send to ${alreadySelected.length} vendor${alreadySelected.length === 1 ? "" : "s"}`}
+            : `Send to ${selected.length} vendor${selected.length === 1 ? "" : "s"}`}
         </button>
         <p className="text-xs text-slate-500">
-          {alreadySelected.length === 0
+          {selected.length === 0
             ? "Select at least one vendor above."
             : "Emails go to each vendor's own active portal users."}
         </p>
@@ -774,6 +827,7 @@ function RecipientsSection({
     responseStatus: string;
     respondedAt: string | null;
     declineReason: string | null;
+    declineNote: string | null;
     reminderCount: number;
     lastReminderAt: string | null;
   }>;
@@ -862,8 +916,13 @@ function RecipientsSection({
                 </td>
                 <td className="px-3 py-2.5">
                   <StatusBadge status={recipient.responseStatus} />
-                  {recipient.responseStatus === "DECLINED" && recipient.declineReason ? (
-                    <p className="mt-1 text-xs text-slate-500">{recipient.declineReason}</p>
+                  {recipient.responseStatus === "DECLINED" ? (
+                    <div className="mt-1 text-xs text-slate-500">
+                      {recipient.declineReason ? <p>{recipient.declineReason}</p> : null}
+                      {recipient.declineNote ? (
+                        <p className="mt-0.5 whitespace-pre-line">{recipient.declineNote}</p>
+                      ) : null}
+                    </div>
                   ) : null}
                   {recipient.respondedAt ? (
                     <p className="mt-1 text-xs text-slate-500">
@@ -906,15 +965,24 @@ function RecipientsSection({
 }
 
 /**
- * Received quotations (brief 7.9), read-only.
+ * Received quotations (brief 7.9).
  *
- * No comparison and no selection here — brief 2 puts the comparison screens out
- * of scope, and selection goes through the admin award action in 6.7. Empty
- * until M5 lets vendors submit.
+ * Read-only for sales; the award action is admin-only (brief 6.7) and the
+ * screen reflects that rather than guessing — the backend refuses the request
+ * from a sales token regardless of what this UI shows. An award is final: it
+ * books the winning crane, closes the RFQ and emails every vendor on the
+ * invitation, so the confirm step names its consequences before it runs.
  */
 function QuotationsSection({
+  rfqId,
   quotations,
+  canAward,
+  closed,
+  startDateTbc,
+  defaultStartDate,
+  onDone,
 }: {
+  rfqId: string;
   /**
    * `ReceivedQuotation` rather than a hand-written copy: an inline shape drifts
    * from the payload, and when it did, `warnings` was typed `string[]` while the
@@ -922,11 +990,22 @@ function QuotationsSection({
    * out at runtime.
    */
   quotations: ReceivedQuotation[];
+  canAward: boolean;
+  closed: boolean;
+  startDateTbc: boolean;
+  defaultStartDate: string;
+  onDone: () => void;
 }) {
+  const [awarding, setAwarding] = useState<string | null>(null);
+
   return (
     <Section
       title="Received quotations"
-      description="Read-only. Comparison and selection arrive with the sales workflow."
+      description={
+        closed
+          ? "This RFQ is finalised. The vendors have been told the outcome."
+          : "Comparison stays out of scope (brief 2); selection is the admin award action below."
+      }
     >
       {quotations.length === 0 ? (
         <p className="text-sm text-slate-500">
@@ -934,16 +1013,19 @@ function QuotationsSection({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[56rem] text-left text-sm">
+          <table className="w-full min-w-[62rem] text-left text-sm">
             <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th className="px-3 py-2 font-medium">Vendor</th>
                 <th className="px-3 py-2 font-medium">Crane</th>
                 <th className="px-3 py-2 font-medium">Rate</th>
                 <th className="px-3 py-2 font-medium">Mobilisation</th>
+                <th className="px-3 py-2 font-medium">Demob.</th>
+                <th className="px-3 py-2 font-medium">Tax</th>
                 <th className="px-3 py-2 font-medium">Total</th>
                 <th className="px-3 py-2 font-medium">Distance</th>
                 <th className="px-3 py-2 font-medium">Advisories</th>
+                <th className="px-3 py-2 font-medium">Outcome</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -969,6 +1051,12 @@ function QuotationsSection({
                   <td className="px-3 py-2.5 text-xs text-slate-700">
                     {quotation.mobilisationCharges.toLocaleString("en-IN")}
                   </td>
+                  <td className="px-3 py-2.5 text-xs text-slate-700">
+                    {quotation.demobilisationCharges.toLocaleString("en-IN")}
+                  </td>
+                  <td className="px-3 py-2.5 text-xs text-slate-700">
+                    {quotation.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"}
+                  </td>
                   <td className="px-3 py-2.5 text-sm font-semibold text-slate-900">
                     {quotation.totalQuotedValue.toLocaleString("en-IN")}
                   </td>
@@ -986,6 +1074,28 @@ function QuotationsSection({
                       </ul>
                     )}
                   </td>
+                  <td className="px-3 py-2.5">
+                    <StatusBadge status={quotation.status} />
+                    {canAward && !closed ? (
+                      <AwardControl
+                        rfqId={rfqId}
+                        quotationId={quotation.quotationId}
+                        awardable={quotation.isLatest && quotation.status === "SUBMITTED"}
+                        startDateTbc={startDateTbc}
+                        defaultStartDate={defaultStartDate}
+                        open={awarding === quotation.quotationId}
+                        onToggle={() =>
+                          setAwarding(
+                            awarding === quotation.quotationId ? null : quotation.quotationId,
+                          )
+                        }
+                        onDone={() => {
+                          setAwarding(null);
+                          onDone();
+                        }}
+                      />
+                    ) : null}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -993,5 +1103,128 @@ function QuotationsSection({
         </div>
       )}
     </Section>
+  );
+}
+
+/**
+ * The award affordance for one row. Superseded or non-Submitted versions cannot
+ * be awarded (the backend refuses them), so the button appears on an awardable
+ * row at all and disappears from the ones that are not.
+ */
+function AwardControl({
+  rfqId,
+  quotationId,
+  awardable,
+  startDateTbc,
+  defaultStartDate,
+  open,
+  onToggle,
+  onDone,
+}: {
+  rfqId: string;
+  quotationId: string;
+  awardable: boolean;
+  startDateTbc: boolean;
+  defaultStartDate: string;
+  open: boolean;
+  onToggle: () => void;
+  onDone: () => void;
+}) {
+  const [reason, setReason] = useState("");
+  const [startDate, setStartDate] = useState(startDateTbc ? defaultStartDate : "");
+  const [endDate, setEndDate] = useState("");
+
+  const award = useMutation({
+    mutationFn: () =>
+      awardQuotation(
+        rfqId,
+        quotationId,
+        { reason, dates: startDateTbc ? { startDate, endDate } : undefined },
+      ),
+    onSuccess: (result) => {
+      onDone();
+      const detail = result.result.partial
+        ? `Partial award (${result.result.awardedCount} of ${result.result.quantity}); the other quotations stay open.`
+        : `${result.result.notAwardedCount} other quotation(s) marked Not Awarded and the RFQ finalised.`;
+      window.alert(
+        `Awarded. ${detail} ` +
+          `${result.result.notifiedAwarded} award email(s) and ${result.result.notifiedNotAwarded} ` +
+          `not-awarded email(s) sent.`,
+      );
+    },
+  });
+
+  if (open) {
+    return (
+      <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <p className="text-xs text-slate-600">
+          Selects this quotation, reserves the crane for the requirement window and emails
+          the vendor. Other quotations stay open until the RFQ's quantity is awarded, when
+          the RFQ is finalised.
+        </p>
+        {startDateTbc ? (
+          <>
+            <Field label="Reservation start" htmlFor={`award-start-${quotationId}`} required>
+              <TextInput
+                id={`award-start-${quotationId}`}
+                type="date"
+                value={startDate}
+                onChange={setStartDate}
+              />
+            </Field>
+            <Field label="Reservation end" htmlFor={`award-end-${quotationId}`} required>
+              <TextInput
+                id={`award-end-${quotationId}`}
+                type="date"
+                value={endDate}
+                onChange={setEndDate}
+              />
+            </Field>
+          </>
+        ) : null}
+        <Field label="Remarks" htmlFor={`award-reason-${quotationId}`} hint="Optional echo into the emails.">
+          <TextInput
+            id={`award-reason-${quotationId}`}
+            value={reason}
+            onChange={setReason}
+          />
+        </Field>
+        {award.isError ? (
+          <Alert title="Not awarded">{(award.error as Error).message}</Alert>
+        ) : null}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="btn-primary px-3 py-1.5 text-xs"
+            onClick={() => award.mutate()}
+            disabled={award.isPending}
+          >
+            {award.isPending ? <Spinner /> : null}
+            Confirm award
+          </button>
+          <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={onToggle}>
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        className="btn-secondary px-2.5 py-1.5 text-xs"
+        onClick={onToggle}
+        disabled={!awardable}
+        title={
+          !awardable
+            ? "Only the latest Submitted version can be awarded"
+            : undefined
+        }
+      >
+        Award
+      </button>
+    </div>
   );
 }

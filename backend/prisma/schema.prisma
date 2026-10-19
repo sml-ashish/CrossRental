@@ -48,6 +48,15 @@ enum GstFilingFrequency {
   COMPOSITE
 }
 
+// Brief 5.1's GST registration type (only meaningful when gstRegistered).
+// Replaces the old gst_composition_opted boolean, which could only say yes/no.
+enum GstRegistrationType {
+  REGULAR
+  COMPOSITE
+  SEZ
+  EOU
+}
+
 enum MsmeCategory {
   MICRO
   SMALL
@@ -77,6 +86,11 @@ enum DocumentType {
   CANCELLED_CHEQUE
   GST_CERTIFICATE
   PAN_COPY
+  // Conditional documents (brief 7.2): the declaration scan is always
+  // required; the other two only when the corresponding option applies.
+  DECLARATION_SCAN
+  TDS_CERTIFICATE
+  MSME_CERTIFICATE
   OTHER
 }
 
@@ -84,10 +98,61 @@ enum CraneStatus {
   AVAILABLE
   ENGAGED
   UNDER_MAINTENANCE
-  // The last two are system-only (brief 6.1): the vendor dropdown never
-  // offers them, and a vendor cannot change a crane that is in one of them.
+  // Brief 6.1 as revised (phase B): the vendor dropdown never offers the last
+  // two, and nothing new should write them once reservations land. They stay in
+  // the enum only for rows written before the reservation rework.
   BOOKED
   HIRED
+}
+
+// How a reservation commits the crane (brief 5.3/6.1). Booked comes from an
+// award; Blocked is SML marking the crane unavailable by hand — a maintenance
+// window is one of these, with the crane's own status left as the vendor set it.
+enum ReservationType {
+  BOOKED
+  BLOCKED
+}
+
+// ---------------------------------------------------------------------------
+// Enquiries (P1)
+// ---------------------------------------------------------------------------
+
+// How an enquiry arrived. Only `manual` exists today; the adapter point
+// (`createEnquiry`) is what a future SAP feed would call with its own source.
+enum EnquirySource {
+  manual
+}
+
+// The enquiry header's rolled-up status (P1 section 4).
+enum EnquiryOverallStatus {
+  RECEIVED_PENDING_SOURCING
+  PARTIALLY_QUOTED
+  PARTIALLY_FINALISED
+  FULLY_FINALISED
+  CLOSED
+}
+
+// The event-driven line-item status trail (BPD 6.5). Never typed in: every
+// value is reached through a trigger (P1 section 3), and every change is audited.
+enum EnquiryLineTrailStatus {
+  NEW
+  AVAILABILITY_CHECK
+  VENDOR_SHORTLISTED
+  RFQ_SENT
+  AWAITING_QUOTES
+  QUOTES_RECEIVED
+  UNDER_EVALUATION
+  VENDOR_FINALISED
+  BOOKED
+  CLOSED
+  FULFILLED_INTERNALLY
+  CANCELLED
+}
+
+enum ReservationStatus {
+  ACTIVE
+  RELEASED
+  COMPLETED
 }
 
 enum OwnershipType {
@@ -139,6 +204,20 @@ enum RateBasis {
   PER_DAY
   PER_MONTH
   LUMP_SUM
+}
+
+// Whether the quotation's total already includes GST (brief A2). Does not
+// change any arithmetic: it tells sales how to compare two quotes.
+enum TaxBasisOfQuotation {
+  EXCLUSIVE_OF_GST
+  INCLUSIVE_OF_GST
+}
+
+// How sales want candidates matched on capacity (brief A3): AT_LEAST admits a
+// bigger crane, EXACT only one of the stated tonnage.
+enum CapacityRule {
+  AT_LEAST
+  EXACT
 }
 
 enum DurationUnit {
@@ -193,6 +272,8 @@ model State {
   vendorsOperating StateVendorRegion[]
   rfqs             Rfq[]
   cranes           Crane[]
+  vendorsWithAddress Vendor[]  @relation("VendorAddress")
+  enquiries        Enquiry[]   @relation("EnquirySiteState")
 
   @@map("states")
 }
@@ -217,6 +298,8 @@ model CraneType {
 
   cranes        Crane[]
   rfqCandidates Rfq[]   @relation("RfqCandidateType")
+  enquiryLines  EnquiryLineItem[] @relation("EnquiryLineCraneType")
+  mobilisationRates MobilisationRate[]
 
   @@map("crane_types")
 }
@@ -239,27 +322,63 @@ model Vendor {
   // is guaranteed to have every field below populated.
   // ---------------------------------------------------------------------------
 
-  name                 String?
-  natureOfCompany      NatureOfCompany?
-  registeredAddress    String?
-  telephone            String?
-  fax                  String?
-  email                String?
-  weeklyOffDays        String?
-  companySize          String?
-  pan                  String?
-  tan                  String?
-  gstn                 String?
-  gstCompositionOpted  Boolean?
+  name            String?
+  natureOfCompany NatureOfCompany?
+
+  // Structured address (brief 5.1 replaces the single registered-address text).
+  // The state relation is named so it does not collide with the operating
+  // regions join or the RFQ/crane state relations.
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  district     String?
+  stateCode    String?
+  addressState State?  @relation("VendorAddress", fields: [stateCode], references: [code])
+  pincode      String?
+
+  telephone String?
+  fax       String?
+  email     String?
+  weeklyOffDays String?
+  companySize    String?
+  // PAN is unique across vendors when present (brief 5.1). The 4th letter is
+  // the company-type letter — validated against natureOfCompany at submit.
+  pan String? @unique
+  tan String?
+
+  // GST block. Whether the vendor is GST-registered drives everything else:
+  // an unregistered vendor has no GSTN at all (stored as null), so the GSTN
+  // unique index below only ever sees registered vendors' numbers.
+  gstRegistered       Boolean?
+  gstRegistrationType GstRegistrationType?
+  // Unique across vendors (brief 5.1). Nullable: Postgres permits many NULLs
+  // under a unique index, which is what unregistered vendors need.
+  gstn                 String? @unique
   gstr1FilingFrequency GstFilingFrequency?
   cin                  String?
   govtRegistrationType String?
   govtRegistrationNo   String?
-  msmeCategory         MsmeCategory?
+
+  // MSME block — category and registration number required when registered,
+  // exemption certificate optional.
+  msmeRegistered    Boolean?
+  msmeCategory      MsmeCategory?
+  msmeRegNo         String?
+  msmeExemptionDate DateTime?
+
+  // TDS lower-deduction block — certificate details required when claimed.
+  tdsLowerDeduction Boolean?
+  tdsCertificateNo  String?
+  tdsSection        String?
+  tdsRatePercent    Int?
+  tdsValidFrom      DateTime?
+  tdsValidTo        DateTime?
 
   // Bank block. Account number and IFSC are AES-256-GCM encrypted at rest
   // (see utils/crypto.ts); last4 is kept in clear so the UI can mask
   // without decrypting. Sales users never receive these fields at all.
+  // MICR, IBAN and SWIFT are ordinary optional fields (the last two apply to
+  // foreign banks only); nothing here needs masking.
   bankAccountHolderName String?
   bankName              String?
   bankBranch            String?
@@ -267,14 +386,24 @@ model Vendor {
   bankAccountNoEnc      String?
   bankAccountNoLast4    String?
   bankIfscEnc           String?
+  bankMicr              String?
+  bankIban              String?
+  bankSwift             String?
 
   codeOfConductAccepted  Boolean?
   declarationName        String?
   declarationDesignation String?
   declarationDate        DateTime?
+  // The signed-and-stamped declaration page (open item 4, decided): the
+  // checkbox stands and the scan is uploaded beside it as a
+  // DECLARATION_SCAN document, required at submit.
 
   // Replaces the paper form's "Product range / HSN" block.
   fleetSummary String?
+
+  // Communication preferences: email is the only channel for now (brief 3),
+  // so this carries the vendor's notes on how they want to be reached.
+  communicationNotes String?
 
   onboardingStatus OnboardingStatus @default(DRAFT)
   approvedById     String?
@@ -282,11 +411,29 @@ model Vendor {
   approvedAt       DateTime?
   adminRemarks     String?
 
+  // P0 B2: an admin can suspend a vendor (it cannot sign in or receive RFQs)
+  // and reinstate it. The reason is kept for the audit trail and the screen.
+  suspendedAt     DateTime?
+  suspendedById   String?
+  suspendedBy     User?     @relation("VendorSuspendedBy", fields: [suspendedById], references: [id], onDelete: SetNull)
+  suspendReason   String?
+
   // Office-use review, admin only.
   facilityStatus         FacilityStatus?
   manpowerStatus         ManpowerStatus?
   improvementRequirement String?
   improvementPeriod      String?
+
+  // Office-use master-list values for the SAP creation sheet (phase D3). The
+  // admissible values live in admin-editable master lists (seeded empty, open
+  // item 3) so the owner's SAP "Legal Form Logic" values load without a code
+  // change; these columns hold the picked code for each field.
+  vendorOrigin         String?
+  vendorType           String?
+  purchaseOrg          String?
+  paymentTerm          String?
+  withholdingTaxType   String?
+  legalForm            String?
 
   // Count of active cranes, maintained by the crane service.
   totalFleetSize Int @default(0)
@@ -321,6 +468,9 @@ model VendorContact {
   // is what we want for contacts with no email.
   email     String? @unique
   isPrimary Boolean @default(false)
+  // Brief 5.3: RFQ emails go to contacts with this flag, falling back to the
+  // primary contact when nobody on file has it set.
+  receivesRfqs Boolean @default(false)
 
   vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
@@ -457,12 +607,18 @@ model User {
 
   lastLoginAt DateTime?
 
-  approvedVendors Vendor[]           @relation("VendorApprovedBy")
+  approvedVendors  Vendor[]           @relation("VendorApprovedBy")
+  suspendedVendors Vendor[]           @relation("VendorSuspendedBy")
   sentInvitations VendorInvitation[] @relation("InvitationCreatedBy")
   vendorDecisions VendorDecision[]   @relation("DecisionBy")
   otps            LoginOtp[]
   createdRfqs     Rfq[]              @relation("RfqCreatedBy")
   auditLogs       AuditLog[]
+  reservationsCreated  Reservation[] @relation("ReservationCreatedBy")
+  reservationsReleased Reservation[] @relation("ReservationReleasedBy")
+  ownedEnquiries      Enquiry[]      @relation("EnquiryCrOwner")
+  createdEnquiries    Enquiry[]      @relation("EnquiryCreatedBy")
+  recommendationSnapshots RecommendationSnapshot[] @relation("RecommendationSnapshotBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -530,6 +686,14 @@ model Crane {
   // Required when status is ENGAGED, cleared when it goes back to AVAILABLE.
   availableFrom DateTime?
 
+  // Brief D4: optional, meaningful when status is UNDER_MAINTENANCE.
+  expectedReadyDate DateTime?
+
+  // Brief D1: true when the last change was made by an SML user for the vendor,
+  // as opposed to the vendor themselves. Cleared whenever the vendor next edits
+  // the crane.
+  updatedOnBehalf Boolean @default(false)
+
   loadChartFileRef   String?
   loadChartFileName  String?
   loadChartMimeType  String?
@@ -550,6 +714,7 @@ model Crane {
   vendor     Vendor      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   quotations Quotation[]
   auditLogs  AuditLog[]
+  reservations Reservation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -583,6 +748,26 @@ model Rfq {
   capacityT    Decimal   @db.Decimal(10, 2)
   quantity     Int       @default(1)
 
+  // Brief A3: how candidates are matched on capacity, plus the free-text
+  // elaboration the checkbox cannot carry. Matching still keys on tonnes;
+  // the note is context, not a filter.
+  capacityRule CapacityRule @default(AT_LEAST)
+  capacityNote String?
+
+  applicationDescription String?
+  loadDescription        String?
+
+  // Structured boom/jib requirements (brief A3). The quotation service warns
+  // when the offered crane's boom is shorter than required.
+  mainBoomM Decimal? @db.Decimal(6, 2)
+  jibLengthM Decimal? @db.Decimal(6, 2)
+
+  // Brief A3: the customer has not fixed a start date, so the availability
+  // confirmation is not demanded and the vendor is told why.
+  startDateTbc Boolean @default(false)
+  /** Used to convert months into days when RATE_DAY_BASIS is working days. */
+  workingDaysPerMonth Int?
+
   siteLocation         String
   siteStateCode        String
   siteState            State             @relation(fields: [siteStateCode], references: [code])
@@ -606,6 +791,16 @@ model Rfq {
   paymentTerms            String?
   notes                   String?
 
+  // P0 A4: the remaining terms named on the CR enquiry line item, kept as
+  // their own columns (not buried in the JSON below) so they show on the
+  // vendor's screen and in the invitation mail like every other term.
+  mobilisationTerms  String?
+  supportCrane       String?
+  steelMatsGroundPrep String?
+  ehsHrRequirements  String?
+  insuranceTerms     String?
+  extensionClause    String?
+
   // The remaining rows of the 31-row "Cross Rental Enquiry Template" in
   // docs/CR Enquiry from SP.xlsx, so nothing on the paper form is lost.
   commercialTermsExtra Json?
@@ -620,6 +815,11 @@ model Rfq {
   cancelledAt        DateTime?
   cancelReason       String?
 
+  // P1: an RFQ raised from an enquiry line links back to it. `enquiryNo`/
+  // `lineNo` above stay as the printed snapshot; this is the live link.
+  enquiryLineId String?
+  enquiryLine   EnquiryLineItem? @relation(fields: [enquiryLineId], references: [id], onDelete: SetNull)
+
   createdById String
   createdBy   User      @relation("RfqCreatedBy", fields: [createdById], references: [id])
   createdAt   DateTime  @default(now())
@@ -629,6 +829,7 @@ model Rfq {
   recipients  RfqVendorRecipient[]
   quotations  Quotation[]
   attachments RfqAttachment[]
+  reservations Reservation[]
 
   @@index([status])
   @@index([submissionDeadline])
@@ -650,6 +851,54 @@ model RfqAttachment {
   uploadedBy String?
 
   @@map("rfq_attachments")
+}
+
+/**
+ * The dated commitment record (brief 5.3 / 6.1 as revised).
+ *
+ * A crane is committed through reservations, not through a stored status: the
+ * "Booked" and "Hired" badges are derived from active reservations, and a
+ * release is an operation on this row rather than a status flip. An award
+ * writes the Booked row in the award transaction (phase B2); Blocked is SML
+ * marking a crane unavailable by hand. The database refuses overlapping
+ * ACTIVE reservations on one crane via the exclusion constraint in the
+ * migration.
+ */
+model Reservation {
+  id        String           @id @default(uuid())
+  craneId   String
+  startDate DateTime
+  endDate   DateTime
+  type      ReservationType
+  status    ReservationStatus @default(ACTIVE)
+
+  // Who this reservation is for. Null on a hand-made Blocked row.
+  rfqId       String?
+  quotationId String?
+  /// P1: the enquiry line this commitment serves, when it came from one.
+  enquiryLineId String?
+
+  // The admin who made it — award rows carry the awarding admin; Blocked rows
+  // the admin who blocked. Release keeps the original creator and adds theirs.
+  // Nullable only for the legacy rows the phase B migration synthesized.
+  createdById   String?
+  releasedById  String?
+  releasedAt    DateTime?
+  releaseReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  crane       Crane            @relation(fields: [craneId], references: [id], onDelete: Cascade)
+  rfq         Rfq?             @relation(fields: [rfqId], references: [id])
+  quotation   Quotation?       @relation(fields: [quotationId], references: [id])
+  enquiryLine EnquiryLineItem? @relation(fields: [enquiryLineId], references: [id], onDelete: SetNull)
+  createdBy   User?            @relation("ReservationCreatedBy", fields: [createdById], references: [id])
+  releasedBy  User?            @relation("ReservationReleasedBy", fields: [releasedById], references: [id])
+
+  @@index([craneId, status])
+  @@index([status, startDate])
+  @@map("reservations")
 }
 
 model RfqVendorRecipient {
@@ -701,6 +950,12 @@ model Quotation {
   rentalRate          Decimal   @db.Decimal(14, 2)
   rateBasis           RateBasis
   mobilisationCharges Decimal   @default(0) @db.Decimal(14, 2)
+  // Brief A2: demobilisation is its own line, not a note inside mobilisation.
+  demobilisationCharges Decimal @default(0) @db.Decimal(14, 2)
+  // Whether the quoted total includes GST. Purely a declaration — it does not
+  // change the arithmetic — but sales compare quotes on like terms, and the
+  // paper form asked for it. Default brief 6.7: Exclusive of GST.
+  taxBasis                  TaxBasisOfQuotation @default(EXCLUSIVE_OF_GST)
   totalQuotedValue    Decimal   @db.Decimal(14, 2)
   // Human-readable working shown to the vendor before they submit, kept so
   // the receipt and history can reproduce it exactly.
@@ -729,11 +984,20 @@ model Quotation {
 
   status QuotationStatus @default(SUBMITTED)
 
+  // P3: the comparison mark (Under Review / Shortlisted / Rejected) and the
+  // reason code behind it. Kept on the quotation so the comparison screen reads
+  // the current mark directly; the full trail stays in AuditLog.
+  statusReasonCode  String?
+  statusReasonText  String?
+  statusChangedAt   DateTime?
+  statusChangedById String?
+
   rfq    Rfq    @relation(fields: [rfqId], references: [id], onDelete: Cascade)
   vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   crane  Crane  @relation(fields: [craneId], references: [id])
 
   attachments QuotationAttachment[]
+  reservations Reservation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -764,6 +1028,171 @@ model QuotationAttachment {
 }
 
 // ---------------------------------------------------------------------------
+// Enquiries (P1)
+// ---------------------------------------------------------------------------
+
+/**
+ * The enquiry header (BPD 6.3/6.4, P1 section 2).
+ *
+ * The CR team types these in today; a future SAP feed would call the same
+ * `createEnquiry(payload, source)` service, which is why `source` is a column
+ * even though `manual` is the only value that exists. The customer's name and
+ * address are internal-only and are never copied into an RFQ.
+ */
+model Enquiry {
+  id                String @id @default(uuid())
+  enquiryNo         String @unique
+  externalReference String?
+  enquiryDate       DateTime
+  source            EnquirySource @default(manual)
+
+  /// The Sales Partner's name, free text. Sales Partners have no account.
+  salesPartnerName String?
+
+  crOwnerId String
+  crOwner   User   @relation("EnquiryCrOwner", fields: [crOwnerId], references: [id])
+
+  // Internal only, never copied into an RFQ.
+  customerName    String
+  customerAddress String
+
+  siteLocation  String
+  siteStateCode String
+  siteState     State   @relation("EnquirySiteState", fields: [siteStateCode], references: [code])
+  sitePincode   String?
+  region        String?
+
+  // The job site's pin (P2). Geocoded once through the provider interface and
+  // stored, so a recommendation run reuses it rather than looking up again. The
+  // value is whatever the provider gave — with the stub that is a synthetic
+  // point, hence `siteCoordinateSource`.
+  siteLatitude         Decimal?          @db.Decimal(10, 7)
+  siteLongitude        Decimal?          @db.Decimal(10, 7)
+  siteCoordinateSource CoordinateSource?
+
+  businessVertical String?
+  crossRentalFlag  Boolean @default(true)
+  overallStatus    EnquiryOverallStatus @default(RECEIVED_PENDING_SOURCING)
+  notes            String?
+
+  createdById String?
+  createdBy   User?  @relation("EnquiryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  lines EnquiryLineItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([overallStatus])
+  @@index([enquiryDate])
+  @@map("enquiries")
+}
+
+/**
+ * One requirement line on an enquiry, derived from the Cross Rental Enquiry
+ * Template (P1 section 2). All 31 template rows are represented, including the
+ * five scope terms the first draft of the field list missed.
+ *
+ * `rentalBudget`, `internalNotes` and `poSapReference` are internal only, as is
+ * the customer block on the header: none of them is ever copied into an RFQ.
+ */
+model EnquiryLineItem {
+  id        String  @id @default(uuid())
+  enquiryId String
+  enquiry   Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  /// Line number within the enquiry; unique per enquiry.
+  lineNo Int
+
+  // --- Requirement ---
+  craneTypeCode String?
+  craneType     CraneType? @relation("EnquiryLineCraneType", fields: [craneTypeCode], references: [code])
+  capacityT     Decimal?   @db.Decimal(10, 2)
+  capacityRule  CapacityRule @default(AT_LEAST)
+  capacityNote  String?
+  quantity      Int        @default(1)
+
+  // --- Application and load ---
+  applicationDescription String?
+  loadDescription        String?
+  liftLoadT              Decimal? @db.Decimal(10, 2)
+  workingRadiusM         Decimal? @db.Decimal(6, 2)
+
+  // --- Configuration ---
+  requiredMainBoomM   Decimal? @db.Decimal(6, 2)
+  requiredFixedJibM   Decimal? @db.Decimal(6, 2)
+  requiredLuffingJibM Decimal? @db.Decimal(6, 2)
+  requiredWindJibM    Decimal? @db.Decimal(6, 2)
+  configurationNotes  String?
+
+  // --- Dates ---
+  requiredStartDate   DateTime?
+  startDateTbc        Boolean       @default(false)
+  durationValue       Decimal?      @db.Decimal(10, 2)
+  durationUnit        DurationUnit?
+  workingDaysPerMonth Int?
+
+  // --- Mobilisation ---
+  mobilisationTerms   String?
+  demobilisationTerms String?
+
+  // --- Terms and scopes (rows 12-25 of the template) ---
+  otCharges               String?
+  breakdownTerms          String?
+  dieselScope             String?
+  workingHoursShift       String?
+  accommodationConveyance String?
+  paymentTerms            String?
+  supportCraneScope       String?
+  steelMatsGroundPrepScope String?
+  ehsHrCompliance         String?
+  insuranceTerms          String?
+  extensionClause         String?
+  craneAgeCriteriaYears   Int?
+  otherTerms              String?
+
+  // --- Template rows the first P1 draft missed (rows 26-30) ---
+  additionalManpowerScope String?
+  intraSiteMovementScope  String?
+  prereleaseTerms         String?
+  ppeScope                String?
+  rowScope                String?
+
+  // --- Internal only ---
+  rentalBudget      String?
+  rentalBudgetValue Decimal? @db.Decimal(14, 2)
+  internalNotes     String?
+  poSapReference    String?
+
+  // --- Status (event driven; see services/enquiryTrail.service.ts) ---
+  trailStatus    EnquiryLineTrailStatus @default(NEW)
+  /// SML or vendor, when a source is finalised (P3).
+  selectedSource OwnershipType?
+  closureStatus  String?
+  cancelledAt    DateTime?
+  cancelReason   String?
+
+  rfqs            Rfq[]
+  reservations    Reservation[]
+  recommendations RecommendationSnapshot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([enquiryId, lineNo])
+  @@index([trailStatus])
+  @@map("enquiry_line_items")
+}
+
+/// Per-calendar-year enquiry counter behind CR-2026-0001 (P1 section 1).
+model EnquirySequence {
+  year Int @id
+  last Int @default(0)
+
+  @@map("enquiry_sequences")
+}
+
+// ---------------------------------------------------------------------------
 // Support tables
 // ---------------------------------------------------------------------------
 
@@ -783,6 +1212,11 @@ model AuditLog {
   actorRole String?
   actorName String?
   ipAddress String?
+
+  // Brief D1: true when an SML user made this change for the vendor. Mirrors
+  // Crane.updatedOnBehalf so the audit trail reads correctly even after the
+  // vendor's next change clears the crane flag.
+  onBehalfOfVendor Boolean @default(false)
 
   craneId String?
   crane   Crane?  @relation(fields: [craneId], references: [id], onDelete: SetNull)
@@ -860,4 +1294,78 @@ model EmailTemplate {
   bodyHtml  String
   updatedAt DateTime @updatedAt
   updatedBy String?
+}
+
+// ---------------------------------------------------------------------------
+// Recommendation and mobilisation cost (P2)
+// ---------------------------------------------------------------------------
+
+/**
+ * A frozen recommendation result for one enquiry line (BPD 7.1, P2 section 1).
+ *
+ * The brief is explicit that a recommendation is a snapshot, not a live view:
+ * crane locations move, so a result sales acted on yesterday must still read the
+ * same way tomorrow. Every evaluation writes a new row and none is ever edited;
+ * a refresh adds a row rather than replacing one.
+ *
+ * The SML and vendor sets live in separate columns on purpose. The hard rule is
+ * that the two are never merged, and two columns make a merge a deliberate
+ * schema change rather than an accident in a mapper.
+ */
+model RecommendationSnapshot {
+  id            String @id @default(uuid())
+  enquiryLineId String
+  enquiryLine   EnquiryLineItem @relation(fields: [enquiryLineId], references: [id], onDelete: Cascade)
+
+  /// "initial" on the first evaluation, "refresh" when a user re-ran it.
+  trigger String @default("initial")
+
+  /// The provider that produced the distances in this run ("stub", "haversine",
+  /// "none", or a future vendor). Kept so a synthetic figure is traceable.
+  provider String?
+
+  /// The job site as it was pinned when this ran; later edits do not rewrite it.
+  site Json
+  /// The SML set (empty: there is no SML crane fleet) and the manual internal
+  /// check outcome. Kept apart from the vendor set.
+  smlSet    Json
+  /// The vendor set: grouped cranes, distances, costs, warnings and metrics.
+  vendorSet Json
+
+  createdById String?
+  createdBy   User?   @relation("RecommendationSnapshotBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([enquiryLineId, createdAt])
+  @@map("recommendation_snapshots")
+}
+
+/**
+ * Per-km mobilisation rate by crane category and capacity band (BPD 5.5, P2
+ * section 2). The owner supplies the values; until Admin Configuration (P5)
+ * they are seeded from src/lib/mobilisationRates.ts.
+ *
+ * `capacityMaxT` null means "no upper bound". `ownershipType` null means the
+ * rate applies regardless of who owns the crane; a row that names an ownership
+ * type wins over a null row for that crane.
+ */
+model MobilisationRate {
+  id       String @id @default(uuid())
+
+  craneTypeCode String
+  craneType     CraneType @relation(fields: [craneTypeCode], references: [code])
+
+  capacityMinT Decimal  @db.Decimal(10, 2)
+  capacityMaxT Decimal? @db.Decimal(10, 2)
+  ownershipType OwnershipType?
+
+  ratePerKm Decimal @db.Decimal(12, 2)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([craneTypeCode])
+  @@map("mobilisation_rates")
 }

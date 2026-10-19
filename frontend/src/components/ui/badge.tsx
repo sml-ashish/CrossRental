@@ -50,11 +50,13 @@ export function statusTone(status: string): BadgeTone {
     case "AWARDED":
     case "COMPLETED":
     case "AVAILABLE":
+    case "SELECTED":
     case "HIRED":
       return "emerald";
     case "REJECTED":
     case "CANCELLED":
     case "EXPIRED":
+    case "NOT_AWARDED":
     case "LOST":
       return "red";
     case "ON_HOLD":

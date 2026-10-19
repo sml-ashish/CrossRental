@@ -31,6 +31,28 @@ export interface OfficeUseReview {
   manpowerStatus?: "ADEQUATE" | "NOT_ADEQUATE" | null;
   improvementRequirement?: string | null;
   improvementPeriod?: string | null;
+  // Office-use master-list picks (phase D3), from admin-editable lists.
+  vendorOrigin?: string | null;
+  vendorType?: string | null;
+  purchaseOrg?: string | null;
+  paymentTerm?: string | null;
+  withholdingTaxType?: string | null;
+  legalForm?: string | null;
+}
+
+function officeUseFields(office: OfficeUseReview) {
+  return {
+    facilityStatus: office.facilityStatus ?? null,
+    manpowerStatus: office.manpowerStatus ?? null,
+    improvementRequirement: office.improvementRequirement?.trim() || null,
+    improvementPeriod: office.improvementPeriod?.trim() || null,
+    vendorOrigin: office.vendorOrigin?.trim() || null,
+    vendorType: office.vendorType?.trim() || null,
+    purchaseOrg: office.purchaseOrg?.trim() || null,
+    paymentTerm: office.paymentTerm?.trim() || null,
+    withholdingTaxType: office.withholdingTaxType?.trim() || null,
+    legalForm: office.legalForm?.trim() || null,
+  };
 }
 
 export interface ApproveInput {
@@ -159,10 +181,7 @@ export async function approveVendor(
         approvedAt: new Date(),
         adminRemarks: input.adminRemarks || null,
         sapVendorCode: input.sapVendorCode?.trim() || vendor.sapVendorCode || null,
-        facilityStatus: office.facilityStatus ?? null,
-        manpowerStatus: office.manpowerStatus ?? null,
-        improvementRequirement: office.improvementRequirement?.trim() || null,
-        improvementPeriod: office.improvementPeriod?.trim() || null,
+        ...officeUseFields(office),
       },
     });
 
@@ -282,10 +301,7 @@ export async function rejectVendor(
       data: {
         onboardingStatus: "REJECTED",
         adminRemarks: remarks,
-        facilityStatus: office.facilityStatus ?? null,
-        manpowerStatus: office.manpowerStatus ?? null,
-        improvementRequirement: office.improvementRequirement?.trim() || null,
-        improvementPeriod: office.improvementPeriod?.trim() || null,
+        ...officeUseFields(office),
       },
     });
     await tx.vendorDecision.create({

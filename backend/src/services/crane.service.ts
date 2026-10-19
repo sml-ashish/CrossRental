@@ -21,6 +21,7 @@ import {
   type ListCranesQuery,
 } from "../validation/craneFields";
 import { CraneApprovalStatus, CraneStatus } from "../generated/prisma/client";
+import { sendTemplate } from "./email.service";
 import type { ValidatedUpload } from "../middleware/upload";
 
 /**
@@ -85,6 +86,87 @@ function requireVendorId(actor: Actor): string {
   return actor.vendorId;
 }
 
+/**
+ * Brief D1: sales and admin maintain any approved vendor's fleet using the same
+ * forms, and every such change is marked "on behalf of". A vendor is pinned to
+ * their own record; an internal caller must name the vendor and hold
+ * `fleet:edit_all`.
+ */
+async function resolveWriteTarget(
+  actor: Actor,
+  requestedVendorId?: string,
+): Promise<{ vendorId: string; onBehalf: boolean }> {
+  if (actor.role === "vendor_user") {
+    return { vendorId: requireVendorId(actor), onBehalf: false };
+  }
+  if (!can(actor.role, "fleet:edit_all")) {
+    throw AppError.forbidden("You do not have permission to edit vendor fleets");
+  }
+  if (!requestedVendorId) {
+    throw AppError.badRequest("Choose the vendor whose fleet you are updating");
+  }
+  const vendor = await prisma.vendor.findFirst({
+    where: { id: requestedVendorId, onboardingStatus: "APPROVED" },
+    select: { id: true },
+  });
+  if (!vendor) throw AppError.notFound("That vendor was not found");
+  return { vendorId: vendor.id, onBehalf: true };
+}
+
+/** A short human label for a crane, used in the on-behalf notification. */
+function craneLabel(row: {
+  make: string;
+  model: string;
+  capacityT: unknown;
+  serialRegistrationNo: string;
+}): string {
+  return `${row.make} ${row.model} — ${Number(row.capacityT)} t (${row.serialRegistrationNo})`;
+}
+
+/**
+ * Brief D1: tell the vendor an SML user changed their crane. Losses are
+ * swallowed and logged like every other notification.
+ */
+async function notifyFleetUpdatedOnBehalf(
+  vendorId: string,
+  craneId: string,
+  label: string,
+  actorName: string | null | undefined,
+): Promise<void> {
+  const vendor = await prisma.vendor.findUnique({
+    where: { id: vendorId },
+    select: { name: true, email: true },
+  });
+  if (!vendor?.email) return;
+  const portalBase = process.env.PORTAL_BASE_URL ?? "http://localhost:5173";
+  await sendTemplate({
+    to: vendor.email,
+    template: "fleet_updated_on_behalf",
+    entity: "crane",
+    entityId: craneId,
+    vars: {
+      vendorName: vendor.name ?? "The vendor",
+      craneLabel: label,
+      actorName: actorName ?? "An SML user",
+      craneUrl: `${portalBase}/app/fleet/${craneId}/edit`,
+    },
+  }).catch((err) => console.error("[crane] on-behalf mail failed", err));
+}
+
+/** The write half of {@link resolveWriteTarget} for an existing crane. */
+function onBehalfOf(actor: Actor, existing: { vendorId: string }): boolean {
+  if (actor.role === "vendor_user") {
+    if (existing.vendorId !== requireVendorId(actor)) {
+      throw AppError.notFound("Crane not found");
+    }
+    return false;
+  }
+  if (!can(actor.role, "fleet:edit_all")) {
+    throw AppError.forbidden("You do not have permission to edit vendor fleets");
+  }
+  return true;
+}
+
 const CRANE_SELECT = {
   id: true,
   vendorId: true,
@@ -108,6 +190,8 @@ const CRANE_SELECT = {
   geocodedBy: true,
   geocodedAt: true,
   availableFrom: true,
+  expectedReadyDate: true,
+  updatedOnBehalf: true,
   loadChartFileRef: true,
   loadChartFileName: true,
   loadChartMimeType: true,
@@ -133,6 +217,7 @@ const AUDITED_MOVE_FIELDS: string[] = [
   "currentLocation",
   "stateCode",
   "availableFrom",
+  "expectedReadyDate",
 ];
 
 export interface CraneFreshness {
@@ -179,6 +264,10 @@ export interface CraneView {
    */
   freshness: CraneFreshness;
   availableFrom: string | null;
+  /** Brief D4: shown while the crane is Under Maintenance. */
+  expectedReadyDate: string | null;
+  /** Brief D1: the last change was made by an SML user for the vendor. */
+  updatedOnBehalf: boolean;
   loadChart: {
     fileName: string;
     mimeType: string;
@@ -271,6 +360,10 @@ async function toView(row: any): Promise<CraneView> {
     locationUnverified: row.latitude === null || row.longitude === null,
     freshness: freshnessOf(row, settings),
     availableFrom: row.availableFrom ? row.availableFrom.toISOString() : null,
+    expectedReadyDate: row.expectedReadyDate
+      ? row.expectedReadyDate.toISOString()
+      : null,
+    updatedOnBehalf: Boolean(row.updatedOnBehalf),
     loadChart: row.loadChartFileName
       ? {
           fileName: row.loadChartFileName,
@@ -620,7 +713,7 @@ export async function createCrane(rawInput: unknown, actor: Actor) {
   if (!parsed.success) throw parsed.error;
   const input = parsed.data as CreateCraneInput;
 
-  const vendorId = requireVendorId(actor);
+  const { vendorId, onBehalf } = await resolveWriteTarget(actor, input.vendorId);
   assertVendorStatus(input.currentStatus);
   await assertReferences(input);
   await assertNoDuplicate(vendorId, input.serialRegistrationNo);
@@ -658,6 +751,8 @@ export async function createCrane(rawInput: unknown, actor: Actor) {
       pincode: input.pincode,
       ...coordinates,
       availableFrom,
+      expectedReadyDate: input.expectedReadyDate ?? null,
+      updatedOnBehalf: onBehalf,
       ownershipType: "VENDOR",
       isActive: true,
       approvalStatus: await approvalStatusForNewWork(),
@@ -682,7 +777,17 @@ export async function createCrane(rawInput: unknown, actor: Actor) {
     },
     craneId: row.id,
     actor: auditActor(actor),
+    onBehalfOfVendor: onBehalf,
   });
+
+  if (onBehalf) {
+    await notifyFleetUpdatedOnBehalf(
+      vendorId,
+      row.id,
+      craneLabel(row),
+      actor.email,
+    );
+  }
 
   return await toView(row);
 }
@@ -792,6 +897,7 @@ export async function updateCrane(
 
   const existing = await loadScoped(actor, craneId);
   assertNotSystemLocked(existing);
+  const onBehalf = onBehalfOf(actor, existing);
 
   if (input.currentStatus) assertVendorStatus(input.currentStatus);
 
@@ -834,7 +940,10 @@ export async function updateCrane(
     (input.pincode ?? null) !== (before.pincode ?? null) ||
     (input.availableFrom !== undefined &&
       (input.availableFrom?.getTime() ?? null) !==
-        (existing.availableFrom?.getTime() ?? null));
+        (existing.availableFrom?.getTime() ?? null)) ||
+    (input.expectedReadyDate !== undefined &&
+      (input.expectedReadyDate?.getTime() ?? null) !==
+        (existing.expectedReadyDate?.getTime() ?? null));
 
   const now = new Date();
 
@@ -859,6 +968,13 @@ export async function updateCrane(
       pincode: input.pincode,
       ...coordinates,
       availableFrom,
+      expectedReadyDate:
+        input.expectedReadyDate === undefined
+          ? existing.expectedReadyDate
+          : input.expectedReadyDate,
+      // Brief D1: an SML edit marks the crane "updated on behalf"; the vendor's
+      // own next edit clears the mark.
+      updatedOnBehalf: onBehalf,
       remarks: input.remarks ?? null,
       // Brief 6.4: with the flag on, an edit parks the crane in PENDING; with
       // it off, changes are live immediately — including clearing a PENDING left
@@ -885,12 +1001,14 @@ export async function updateCrane(
       currentLocation: existing.currentLocation,
       stateCode: existing.stateCode,
       availableFrom: existing.availableFrom,
+      expectedReadyDate: existing.expectedReadyDate,
     },
     {
       currentStatus: row.currentStatus,
       currentLocation: row.currentLocation,
       stateCode: row.stateCode,
       availableFrom: row.availableFrom,
+      expectedReadyDate: row.expectedReadyDate,
     },
     AUDITED_MOVE_FIELDS,
   );
@@ -904,7 +1022,17 @@ export async function updateCrane(
       newValue: change.newValue,
       craneId,
       actor: auditActor(actor),
+      onBehalfOfVendor: onBehalf,
     });
+
+    if (onBehalf) {
+      await notifyFleetUpdatedOnBehalf(
+        existing.vendorId,
+        craneId,
+        craneLabel(row),
+        actor.email,
+      );
+    }
   }
 
   return await toView(row);
@@ -959,6 +1087,7 @@ export async function quickUpdateCrane(
       remarks: existing.remarks ?? undefined,
       currentStatus: quick.currentStatus,
       availableFrom: quick.availableFrom,
+      expectedReadyDate: quick.expectedReadyDate,
     },
     actor,
   );
@@ -1001,12 +1130,13 @@ export async function duplicateCranePrefill(actor: Actor, craneId: string) {
  * the confirmation itself is worth recording.
  */
 export async function confirmCraneAccurate(craneId: string, actor: Actor) {
-  await loadScoped(actor, craneId);
+  const existing = await loadScoped(actor, craneId);
+  const onBehalf = onBehalfOf(actor, existing);
   const now = new Date();
 
   const row = await prisma.crane.update({
     where: { id: craneId },
-    data: { statusUpdatedAt: now, updatedBy: actor.id },
+    data: { statusUpdatedAt: now, updatedOnBehalf: onBehalf, updatedBy: actor.id },
     select: { ...CRANE_SELECT, vendor: { select: { name: true } } },
   });
 
@@ -1017,6 +1147,7 @@ export async function confirmCraneAccurate(craneId: string, actor: Actor) {
     newValue: { statusUpdatedAt: now.toISOString() },
     craneId,
     actor: auditActor(actor),
+    onBehalfOfVendor: onBehalf,
   });
 
   return await toView(row);
@@ -1032,11 +1163,12 @@ export async function confirmCraneAccurate(craneId: string, actor: Actor) {
  */
 export async function deactivateCrane(craneId: string, actor: Actor) {
   const existing = await loadScoped(actor, craneId);
+  const onBehalf = onBehalfOf(actor, existing);
   if (!existing.isActive) return await toView(existing);
 
   const row = await prisma.crane.update({
     where: { id: craneId },
-    data: { isActive: false, updatedBy: actor.id },
+    data: { isActive: false, updatedOnBehalf: onBehalf, updatedBy: actor.id },
     select: { ...CRANE_SELECT, vendor: { select: { name: true } } },
   });
 
@@ -1048,6 +1180,7 @@ export async function deactivateCrane(craneId: string, actor: Actor) {
     newValue: { isActive: false },
     craneId,
     actor: auditActor(actor),
+    onBehalfOfVendor: onBehalf,
   });
 
   return await toView(row);
@@ -1056,6 +1189,7 @@ export async function deactivateCrane(craneId: string, actor: Actor) {
 /** The way back from a mistaken deactivation. */
 export async function reactivateCrane(craneId: string, actor: Actor) {
   const existing = await loadScoped(actor, craneId);
+  const onBehalf = onBehalfOf(actor, existing);
   if (existing.isActive) return await toView(existing);
 
   // Reactivating puts the crane back under the duplicate rule, which is the
@@ -1068,7 +1202,7 @@ export async function reactivateCrane(craneId: string, actor: Actor) {
 
   const row = await prisma.crane.update({
     where: { id: craneId },
-    data: { isActive: true, updatedBy: actor.id },
+    data: { isActive: true, updatedOnBehalf: onBehalf, updatedBy: actor.id },
     select: { ...CRANE_SELECT, vendor: { select: { name: true } } },
   });
 
@@ -1080,6 +1214,7 @@ export async function reactivateCrane(craneId: string, actor: Actor) {
     newValue: { isActive: true },
     craneId,
     actor: auditActor(actor),
+    onBehalfOfVendor: onBehalf,
   });
 
   return await toView(row);

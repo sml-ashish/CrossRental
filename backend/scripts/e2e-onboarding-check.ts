@@ -79,7 +79,12 @@ function form(overrides: Record<string, unknown> = {}) {
   return {
     name: COMPANY,
     natureOfCompany: "PRIVATE_LTD",
-    registeredAddress: "14 fabricated industrial lane, example district",
+    addressLine1: "14 fabricated industrial lane",
+    addressLine2: "",
+    city: "Example city",
+    district: "Example district",
+    stateCode: "GJ",
+    pincode: "380001",
     telephone: "+91 9000000001",
     fax: "",
     email: EMAIL,
@@ -87,14 +92,16 @@ function form(overrides: Record<string, unknown> = {}) {
     companySize: "11-50",
     pan: "AAACE1234F",
     tan: "BLRCE4321K",
+    gstRegistered: true,
     gstn: "24AAACE1234F1Z5",
-    gstCompositionOpted: false,
+    gstRegistrationType: "REGULAR",
     // Left blank on purpose: an unselected optional dropdown must not block submit.
     gstr1FilingFrequency: "",
     cin: "",
     govtRegistrationType: "",
     govtRegistrationNo: "",
-    msmeCategory: "",
+    msmeRegistered: false,
+    tdsLowerDeduction: false,
     operatingRegions: ["GJ", "MH"],
     contacts: [
       {
@@ -103,6 +110,7 @@ function form(overrides: Record<string, unknown> = {}) {
         telephone: "",
         email: "e2e-owner@check.test",
         isPrimary: true,
+        receivesRfqs: false,
       },
     ],
     bankAccountHolderName: COMPANY,
@@ -177,7 +185,7 @@ async function main() {
   check("the full form saves", saved.status === 200, `HTTP ${saved.status}`);
 
   // 6. Documents.
-  for (const docType of ["CANCELLED_CHEQUE", "GST_CERTIFICATE", "PAN_COPY"]) {
+  for (const docType of ["CANCELLED_CHEQUE", "PAN_COPY", "DECLARATION_SCAN", "GST_CERTIFICATE"]) {
     const up = await upload(token, docType);
     check(`${docType} uploads`, up.status === 201, `HTTP ${up.status}`);
   }

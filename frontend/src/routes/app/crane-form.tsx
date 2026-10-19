@@ -39,6 +39,11 @@ function needsAvailableFrom(form: CraneForm): boolean {
   return form.currentStatus === "ENGAGED";
 }
 
+/** Brief D4: the expected-ready date only applies while under maintenance. */
+function needsExpectedReadyDate(form: CraneForm): boolean {
+  return form.currentStatus === "UNDER_MAINTENANCE";
+}
+
 function defaultAvailableFrom(): string {
   const date = new Date();
   date.setDate(date.getDate() + 1);
@@ -47,7 +52,12 @@ function defaultAvailableFrom(): string {
 
 export function CraneFormPage() {
   const { craneId } = useParams({ strict: false }) as { craneId?: string };
-  const search = useSearch({ strict: false }) as { duplicate?: string };
+  const search = useSearch({ strict: false }) as {
+    duplicate?: string;
+    /** Brief D1: an SML user writes this vendor's fleet on their behalf. */
+    vendorId?: string;
+  };
+  const onBehalfVendorId = search.vendorId;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -111,10 +121,31 @@ export function CraneFormPage() {
   const save = useMutation({
     mutationFn: () => {
       const payload = withAvailableFrom(form, availableFrom);
-      return isEdit ? updateCrane(craneId as string, payload) : createCrane(payload);
+      // On edit, only Engaged asserts a date and only Available clears it; Under
+      // Maintenance must omit the field so the date already on the crane stays.
+      const editAvailableFrom =
+        form.currentStatus === "ENGAGED"
+          ? availableFrom
+          : form.currentStatus === "AVAILABLE"
+            ? null
+            : undefined;
+      return isEdit
+        ? updateCrane(craneId as string, form, { availableFrom: editAvailableFrom })
+        : createCrane(payload, {
+            vendorId: onBehalfVendorId,
+            availableFrom: payload.availableFrom,
+          });
     },
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ["fleet"] });
+      void queryClient.invalidateQueries({ queryKey: ["vendors"] });
+      if (onBehalfVendorId) {
+        void navigate({
+          to: "/app/vendors/$vendorId",
+          params: { vendorId: onBehalfVendorId },
+        });
+        return;
+      }
       void navigate({ to: "/app/fleet", search: { notice: `${result.crane.serialRegistrationNo} saved` } });
     },
     onError: (error: unknown) => {
@@ -181,6 +212,13 @@ export function CraneFormPage() {
       {duplicateOf ? (
         <Alert tone="info" title="Copied from an existing crane">
           This is a new record. Check every field and give it its own serial or registration number.
+        </Alert>
+      ) : null}
+
+      {onBehalfVendorId ? (
+        <Alert tone="info" title="Updating on the vendor's behalf">
+          This change is recorded as made by SML on the vendor&apos;s behalf, and the vendor is
+          notified on their dashboard and by email.
         </Alert>
       ) : null}
 
@@ -389,6 +427,23 @@ export function CraneFormPage() {
                 />
               </Field>
             ) : null}
+
+            {needsExpectedReadyDate(form) ? (
+              <Field
+                label="Expected ready date"
+                htmlFor="expectedReadyDate"
+                error={fieldErrors.expectedReadyDate}
+                hint="When this crane is expected back from maintenance. Optional."
+              >
+                <TextInput
+                  id="expectedReadyDate"
+                  type="date"
+                  value={form.expectedReadyDate}
+                  onChange={(v) => set("expectedReadyDate", v)}
+                  invalid={Boolean(fieldErrors.expectedReadyDate)}
+                />
+              </Field>
+            ) : null}
           </div>
 
           <Field label="Remarks" htmlFor="remarks" error={fieldErrors.remarks}>
@@ -408,7 +463,14 @@ export function CraneFormPage() {
           <button
             type="button"
             className="btn-secondary"
-            onClick={() => void navigate({ to: "/app/fleet" })}
+            onClick={() =>
+              onBehalfVendorId
+                ? void navigate({
+                    to: "/app/vendors/$vendorId",
+                    params: { vendorId: onBehalfVendorId },
+                  })
+                : void navigate({ to: "/app/fleet" })
+            }
             disabled={save.isPending}
           >
             Cancel

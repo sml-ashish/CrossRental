@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 import { CRANE_TYPES, STATES } from "./referenceData";
+import { MOBILISATION_RATES } from "./mobilisationRates";
+import { seedMobilisationRates } from "../services/mobilisationCost.service";
 import { DEFAULT_EMAIL_TEMPLATES } from "../services/emailTemplates";
 import { seedSettings } from "../utils/settings";
 import { encryptField, last4 } from "../utils/crypto";
@@ -37,6 +39,9 @@ async function seedReferenceData() {
     });
   }
   console.log(`  crane types: ${CRANE_TYPES.length}`);
+
+  await seedMobilisationRates(prisma, MOBILISATION_RATES);
+  console.log(`  mobilisation rates: ${MOBILISATION_RATES.length}`);
 }
 
 async function seedEmailTemplates() {
@@ -145,12 +150,14 @@ async function seedDemoVendors() {
         sapVendorCode: vendor.sapVendorCode,
         name: vendor.name,
         natureOfCompany: vendor.natureOfCompany,
-        registeredAddress: vendor.registeredAddress,
+        addressLine1: vendor.registeredAddress,
         telephone: vendor.telephone,
         email: vendor.email,
         weeklyOffDays: "Sunday",
         pan: vendor.pan,
         gstn: vendor.gstn,
+        gstRegistered: true,
+        gstRegistrationType: "REGULAR",
         gstr1FilingFrequency: "MONTHLY",
         codeOfConductAccepted: true,
         declarationName: vendor.declaration.name,

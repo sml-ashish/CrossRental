@@ -328,6 +328,12 @@ describe("creating an RFQ", () => {
         otCharges: "As per agreement",
         paymentTerms: "30 days from invoice",
         craneAgeCriteriaYears: 15,
+        mobilisationTerms: "Mobilisation and demobilisation to vendor",
+        supportCrane: "Not in scope",
+        steelMatsGroundPrep: "Steel mats to vendor",
+        ehsHrRequirements: "PPE and site induction mandatory",
+        insuranceTerms: "To vendor",
+        extensionClause: "Extension at agreed rates",
         smlContactName: "Site Engineer",
         smlContactEmail: "engineer@sml.test",
       }),
@@ -336,6 +342,12 @@ describe("creating an RFQ", () => {
     expect(res.body.rfq.otCharges).toBe("As per agreement");
     expect(res.body.rfq.paymentTerms).toBe("30 days from invoice");
     expect(res.body.rfq.craneAgeCriteriaYears).toBe(15);
+    expect(res.body.rfq.mobilisationTerms).toBe("Mobilisation and demobilisation to vendor");
+    expect(res.body.rfq.supportCrane).toBe("Not in scope");
+    expect(res.body.rfq.steelMatsGroundPrep).toBe("Steel mats to vendor");
+    expect(res.body.rfq.ehsHrRequirements).toBe("PPE and site induction mandatory");
+    expect(res.body.rfq.insuranceTerms).toBe("To vendor");
+    expect(res.body.rfq.extensionClause).toBe("Extension at agreed rates");
     expect(res.body.rfq.smlContactName).toBe("Site Engineer");
     // An unset term is a blank on the enquiry, not an invalid RFQ.
     expect(res.body.rfq.dieselScope).toBeNull();
@@ -519,6 +531,49 @@ describe("the candidate picker", () => {
     expect(res.body.candidates.capacityRule).toContain("at least 500");
   });
 
+  it("stores the richer requirement fields (brief A3)", async () => {
+    const rfq = await createRfq({
+      capacityRule: "EXACT",
+      capacityNote: "Lift only, no travel",
+      applicationDescription: "Erecting a 60 m lattice tower",
+      loadDescription: "Base section, 40 t at 20 m radius",
+      mainBoomM: 60,
+      jibLengthM: 12,
+      startDateTbc: true,
+      workingDaysPerMonth: 24,
+    });
+    const res = await call(app, "GET", `/api/rfqs/${rfq.id}`, {
+      token: ctx.salesToken,
+    });
+    const view = res.body.rfq;
+    expect(view.capacityRule).toBe("EXACT");
+    expect(view.capacityNote).toBe("Lift only, no travel");
+    expect(view.applicationDescription).toBe("Erecting a 60 m lattice tower");
+    expect(view.loadDescription).toBe("Base section, 40 t at 20 m radius");
+    expect(Number(view.mainBoomM)).toBe(60);
+    expect(Number(view.jibLengthM)).toBe(12);
+    expect(view.startDateTbc).toBe(true);
+    expect(view.workingDaysPerMonth).toBe(24);
+  });
+
+  it("matches none under an exact rule when cranes differ in tonnage (brief A3)", async () => {
+    // Default is "at least", so the fixture cranes answer a 100 t RFQ; exact
+    // only admits cranes of exactly that tonnage.
+    const wide = await createRfq({ capacityT: 100 });
+    const wideRes = await call(app, "GET", `/api/rfqs/${wide.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    expect(wideRes.body.candidates.capacityRule).toContain("at least 100");
+
+    const exact = await createRfq({ capacityT: 100, capacityRule: "EXACT" });
+    const exactRes = await call(app, "GET", `/api/rfqs/${exact.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    expect(exactRes.body.candidates.located).toHaveLength(0);
+    expect(exactRes.body.candidates.unverified).toHaveLength(0);
+    expect(exactRes.body.candidates.capacityRule).toContain("exactly 100");
+  });
+
   it("excludes a crane of another type", async () => {
     await appPrisma.craneType.upsert({
       where: { code: "TYRE" },
@@ -530,6 +585,85 @@ describe("the candidate picker", () => {
       token: ctx.salesToken,
     });
     expect(res.body.candidates.located).toHaveLength(0);
+  });
+
+  it("excludes a crane with an overlapping active reservation for the RFQ window (brief B3)", async () => {
+    const rfq = await createRfq();
+    // The default RFQ window is roughly [+30, +150] days; a reservation inside
+    // it disqualifies the crane even though its status is Available.
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.a.craneId,
+        startDate: inDays(45),
+        endDate: inDays(55),
+        type: "BOOKED",
+        status: "ACTIVE",
+      },
+    });
+
+    const res = await call(app, "GET", `/api/rfqs/${rfq.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    const craneIds = [
+      ...res.body.candidates.located.flatMap((g: { cranes: Array<{ craneId: string }> }) =>
+        g.cranes.map((c) => c.craneId),
+      ),
+      ...res.body.candidates.unverified.map((c: { craneId: string }) => c.craneId),
+    ];
+    expect(craneIds).not.toContain(ctx.a.craneId);
+    expect(craneIds).toContain(ctx.b.craneId);
+
+    // A reservation well clear of the window leaves the crane a candidate.
+    await appPrisma.reservation.deleteMany({ where: { craneId: ctx.a.craneId } });
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.a.craneId,
+        startDate: inDays(250),
+        endDate: inDays(260),
+        type: "BOOKED",
+        status: "ACTIVE",
+      },
+    });
+    const after = await call(app, "GET", `/api/rfqs/${rfq.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    const afterIds = [
+      ...after.body.candidates.located.flatMap(
+        (g: { cranes: Array<{ craneId: string }> }) => g.cranes.map((c) => c.craneId),
+      ),
+      ...after.body.candidates.unverified.map((c: { craneId: string }) => c.craneId),
+    ];
+    expect(afterIds).toContain(ctx.a.craneId);
+  });
+
+  it("skips the date checks with a notice when the start date is TBC (brief C3)", async () => {
+    // Engaged and not free until after the provisional start date.
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { currentStatus: "ENGAGED", availableFrom: inDays(60) },
+    });
+
+    const strict = await createRfq();
+    const strictRes = await call(app, "GET", `/api/rfqs/${strict.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    expect(strictRes.body.candidates.startDateTbc).toBe(false);
+    expect(strictRes.body.candidates.notice).toBeNull();
+    const strictIds = strictRes.body.candidates.located.flatMap(
+      (g: { cranes: Array<{ craneId: string }> }) => g.cranes.map((c) => c.craneId),
+    );
+    expect(strictIds).not.toContain(ctx.a.craneId);
+
+    const tbc = await createRfq({ startDateTbc: true });
+    const tbcRes = await call(app, "GET", `/api/rfqs/${tbc.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    expect(tbcRes.body.candidates.startDateTbc).toBe(true);
+    expect(tbcRes.body.candidates.notice).toMatch(/to be confirmed/i);
+    const tbcIds = tbcRes.body.candidates.located.flatMap(
+      (g: { cranes: Array<{ craneId: string }> }) => g.cranes.map((c) => c.craneId),
+    );
+    expect(tbcIds).toContain(ctx.a.craneId);
   });
 
   it("excludes cranes of a vendor that is not approved", async () => {
@@ -1192,7 +1326,7 @@ describe("expiry", () => {
     expect(res.body.result.expired).toBe(0);
   });
 
-  it("leaves an Expired recipient Expired when the deadline is extended", async () => {
+  it("revives an Expired recipient to Pending when the deadline is extended (brief C1)", async () => {
     const rfq = await createRfq({ submissionDeadline: inDays(7).toISOString() });
     await sendRfq(rfq.id, [ctx.a.vendorId]);
 
@@ -1202,21 +1336,44 @@ describe("expiry", () => {
       data: { submissionDeadline: new Date(Date.now() - 60_000) },
     });
     await call(app, "POST", "/api/rfqs/expire-pending", { token: ctx.salesToken });
+    expect(
+      (await appPrisma.rfqVendorRecipient.findFirst({ where: { rfqId: rfq.id } }))
+        ?.responseStatus,
+    ).toBe("EXPIRED");
 
-    await call(app, "PATCH", `/api/rfqs/${rfq.id}/deadline`, {
+    const res = await call(app, "PATCH", `/api/rfqs/${rfq.id}/deadline`, {
       token: ctx.salesToken,
       body: { submissionDeadline: inDays(10).toISOString(), reason: "Customer revived it" },
     });
-    await call(app, "POST", "/api/rfqs/expire-pending", { token: ctx.salesToken });
+    expect(res.status).toBe(200);
+    expect(res.body.result.revived).toBe(1);
 
     const recipient = await appPrisma.rfqVendorRecipient.findFirst({
       where: { rfqId: rfq.id },
     });
-    // Expired is a response status the vendor has already been shown, so
-    // extending the deadline does not quietly rewrite it. Extension exists for
-    // revising a quotation and for giving a still-Pending recipient longer.
-    expect(recipient?.responseStatus).toBe("EXPIRED");
-    expect(await appPrisma.rfqVendorRecipient.count({ where: { responseStatus: "PENDING" } })).toBe(0);
+    // Expired only ever holds a vendor who never responded, so a later deadline
+    // gives them their window back rather than leaving them dead lettered.
+    expect(recipient?.responseStatus).toBe("PENDING");
+  });
+
+  it("does not revive a Quoted recipient on extension (brief C1)", async () => {
+    const rfq = await createRfq({ submissionDeadline: inDays(7).toISOString() });
+    await sendRfq(rfq.id, [ctx.a.vendorId]);
+    await appPrisma.rfqVendorRecipient.updateMany({
+      where: { rfqId: rfq.id },
+      data: { responseStatus: "QUOTED" },
+    });
+
+    const res = await call(app, "PATCH", `/api/rfqs/${rfq.id}/deadline`, {
+      token: ctx.salesToken,
+      body: { submissionDeadline: inDays(10).toISOString(), reason: "More time" },
+    });
+    expect(res.body.result.revived).toBe(0);
+
+    const recipient = await appPrisma.rfqVendorRecipient.findFirst({
+      where: { rfqId: rfq.id },
+    });
+    expect(recipient?.responseStatus).toBe("QUOTED");
   });
 
   it("keeps a still-Pending recipient Pending across an extension", async () => {

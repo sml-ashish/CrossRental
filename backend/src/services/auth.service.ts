@@ -115,7 +115,7 @@ export async function loginWithPassword(
       passwordHash: true,
       isActive: true,
       activationToken: true,
-      vendor: { select: { name: true, onboardingStatus: true } },
+      vendor: { select: { name: true, onboardingStatus: true, suspendedAt: true } },
     },
   });
 
@@ -124,13 +124,28 @@ export async function loginWithPassword(
   const hash = user?.passwordHash ?? "$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv";
   const passwordOk = await verifyPassword(password, hash);
 
-  if (!user || !user.passwordHash || !passwordOk || !user.isActive) {
+  if (!user || !user.passwordHash || !passwordOk) {
     throw new AppError(GENERIC_LOGIN_FAILURE, 401, "INVALID_CREDENTIALS");
   }
 
   if (user.role !== "vendor_user") {
     // Internal users are OTP-only. Saying so here would confirm the address
     // exists, so the generic failure stands.
+    throw new AppError(GENERIC_LOGIN_FAILURE, 401, "INVALID_CREDENTIALS");
+  }
+
+  // P0 B2: a suspended vendor's users are deactivated, which would otherwise
+  // surface as the generic credentials failure. Checked before the isActive
+  // gate so a correct password gets the truthful reason instead of a puzzle.
+  if (user.vendor?.suspendedAt) {
+    throw new AppError(
+      "Your account has been suspended. Please contact SML.",
+      403,
+      "VENDOR_SUSPENDED",
+    );
+  }
+
+  if (!user.isActive) {
     throw new AppError(GENERIC_LOGIN_FAILURE, 401, "INVALID_CREDENTIALS");
   }
 
@@ -315,6 +330,10 @@ export async function requestLoginOtp(email: string, ipAddress?: string): Promis
       ipAddress: ipAddress ?? null,
     },
   });
+
+  // Local/dev only: surface the code in the server logs until email delivery is
+  // relied upon. Remove before production.
+  console.log(`[LOGIN OTP] ${user.email} → ${code}`);
 
   await sendTemplate({
     to: user.email,

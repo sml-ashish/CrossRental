@@ -64,15 +64,21 @@ export const ModelName = {
   Crane: 'Crane',
   Rfq: 'Rfq',
   RfqAttachment: 'RfqAttachment',
+  Reservation: 'Reservation',
   RfqVendorRecipient: 'RfqVendorRecipient',
   Quotation: 'Quotation',
   QuotationAttachment: 'QuotationAttachment',
+  Enquiry: 'Enquiry',
+  EnquiryLineItem: 'EnquiryLineItem',
+  EnquirySequence: 'EnquirySequence',
   AuditLog: 'AuditLog',
   EmailLog: 'EmailLog',
   DistanceCache: 'DistanceCache',
   AppSetting: 'AppSetting',
   RfqSequence: 'RfqSequence',
-  EmailTemplate: 'EmailTemplate'
+  EmailTemplate: 'EmailTemplate',
+  RecommendationSnapshot: 'RecommendationSnapshot',
+  MobilisationRate: 'MobilisationRate'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -122,7 +128,12 @@ export const VendorScalarFieldEnum = {
   sapVendorCode: 'sapVendorCode',
   name: 'name',
   natureOfCompany: 'natureOfCompany',
-  registeredAddress: 'registeredAddress',
+  addressLine1: 'addressLine1',
+  addressLine2: 'addressLine2',
+  city: 'city',
+  district: 'district',
+  stateCode: 'stateCode',
+  pincode: 'pincode',
   telephone: 'telephone',
   fax: 'fax',
   email: 'email',
@@ -130,13 +141,23 @@ export const VendorScalarFieldEnum = {
   companySize: 'companySize',
   pan: 'pan',
   tan: 'tan',
+  gstRegistered: 'gstRegistered',
+  gstRegistrationType: 'gstRegistrationType',
   gstn: 'gstn',
-  gstCompositionOpted: 'gstCompositionOpted',
   gstr1FilingFrequency: 'gstr1FilingFrequency',
   cin: 'cin',
   govtRegistrationType: 'govtRegistrationType',
   govtRegistrationNo: 'govtRegistrationNo',
+  msmeRegistered: 'msmeRegistered',
   msmeCategory: 'msmeCategory',
+  msmeRegNo: 'msmeRegNo',
+  msmeExemptionDate: 'msmeExemptionDate',
+  tdsLowerDeduction: 'tdsLowerDeduction',
+  tdsCertificateNo: 'tdsCertificateNo',
+  tdsSection: 'tdsSection',
+  tdsRatePercent: 'tdsRatePercent',
+  tdsValidFrom: 'tdsValidFrom',
+  tdsValidTo: 'tdsValidTo',
   bankAccountHolderName: 'bankAccountHolderName',
   bankName: 'bankName',
   bankBranch: 'bankBranch',
@@ -144,19 +165,32 @@ export const VendorScalarFieldEnum = {
   bankAccountNoEnc: 'bankAccountNoEnc',
   bankAccountNoLast4: 'bankAccountNoLast4',
   bankIfscEnc: 'bankIfscEnc',
+  bankMicr: 'bankMicr',
+  bankIban: 'bankIban',
+  bankSwift: 'bankSwift',
   codeOfConductAccepted: 'codeOfConductAccepted',
   declarationName: 'declarationName',
   declarationDesignation: 'declarationDesignation',
   declarationDate: 'declarationDate',
   fleetSummary: 'fleetSummary',
+  communicationNotes: 'communicationNotes',
   onboardingStatus: 'onboardingStatus',
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
   adminRemarks: 'adminRemarks',
+  suspendedAt: 'suspendedAt',
+  suspendedById: 'suspendedById',
+  suspendReason: 'suspendReason',
   facilityStatus: 'facilityStatus',
   manpowerStatus: 'manpowerStatus',
   improvementRequirement: 'improvementRequirement',
   improvementPeriod: 'improvementPeriod',
+  vendorOrigin: 'vendorOrigin',
+  vendorType: 'vendorType',
+  purchaseOrg: 'purchaseOrg',
+  paymentTerm: 'paymentTerm',
+  withholdingTaxType: 'withholdingTaxType',
+  legalForm: 'legalForm',
   totalFleetSize: 'totalFleetSize',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -174,6 +208,7 @@ export const VendorContactScalarFieldEnum = {
   telephone: 'telephone',
   email: 'email',
   isPrimary: 'isPrimary',
+  receivesRfqs: 'receivesRfqs',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -285,6 +320,8 @@ export const CraneScalarFieldEnum = {
   geocodedBy: 'geocodedBy',
   geocodedAt: 'geocodedAt',
   availableFrom: 'availableFrom',
+  expectedReadyDate: 'expectedReadyDate',
+  updatedOnBehalf: 'updatedOnBehalf',
   loadChartFileRef: 'loadChartFileRef',
   loadChartFileName: 'loadChartFileName',
   loadChartMimeType: 'loadChartMimeType',
@@ -310,6 +347,14 @@ export const RfqScalarFieldEnum = {
   craneType: 'craneType',
   capacityT: 'capacityT',
   quantity: 'quantity',
+  capacityRule: 'capacityRule',
+  capacityNote: 'capacityNote',
+  applicationDescription: 'applicationDescription',
+  loadDescription: 'loadDescription',
+  mainBoomM: 'mainBoomM',
+  jibLengthM: 'jibLengthM',
+  startDateTbc: 'startDateTbc',
+  workingDaysPerMonth: 'workingDaysPerMonth',
   siteLocation: 'siteLocation',
   siteStateCode: 'siteStateCode',
   sitePincode: 'sitePincode',
@@ -328,6 +373,12 @@ export const RfqScalarFieldEnum = {
   accommodationConveyance: 'accommodationConveyance',
   paymentTerms: 'paymentTerms',
   notes: 'notes',
+  mobilisationTerms: 'mobilisationTerms',
+  supportCrane: 'supportCrane',
+  steelMatsGroundPrep: 'steelMatsGroundPrep',
+  ehsHrRequirements: 'ehsHrRequirements',
+  insuranceTerms: 'insuranceTerms',
+  extensionClause: 'extensionClause',
   commercialTermsExtra: 'commercialTermsExtra',
   smlContactName: 'smlContactName',
   smlContactMobile: 'smlContactMobile',
@@ -337,6 +388,7 @@ export const RfqScalarFieldEnum = {
   rollupStatus: 'rollupStatus',
   cancelledAt: 'cancelledAt',
   cancelReason: 'cancelReason',
+  enquiryLineId: 'enquiryLineId',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -358,6 +410,27 @@ export const RfqAttachmentScalarFieldEnum = {
 } as const
 
 export type RfqAttachmentScalarFieldEnum = (typeof RfqAttachmentScalarFieldEnum)[keyof typeof RfqAttachmentScalarFieldEnum]
+
+
+export const ReservationScalarFieldEnum = {
+  id: 'id',
+  craneId: 'craneId',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  type: 'type',
+  status: 'status',
+  rfqId: 'rfqId',
+  quotationId: 'quotationId',
+  enquiryLineId: 'enquiryLineId',
+  createdById: 'createdById',
+  releasedById: 'releasedById',
+  releasedAt: 'releasedAt',
+  releaseReason: 'releaseReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
 
 
 export const RfqVendorRecipientScalarFieldEnum = {
@@ -392,6 +465,8 @@ export const QuotationScalarFieldEnum = {
   rentalRate: 'rentalRate',
   rateBasis: 'rateBasis',
   mobilisationCharges: 'mobilisationCharges',
+  demobilisationCharges: 'demobilisationCharges',
+  taxBasis: 'taxBasis',
   totalQuotedValue: 'totalQuotedValue',
   calculationNote: 'calculationNote',
   availabilityConfirmed: 'availabilityConfirmed',
@@ -407,6 +482,10 @@ export const QuotationScalarFieldEnum = {
   distanceToSiteKm: 'distanceToSiteKm',
   distanceMethod: 'distanceMethod',
   status: 'status',
+  statusReasonCode: 'statusReasonCode',
+  statusReasonText: 'statusReasonText',
+  statusChangedAt: 'statusChangedAt',
+  statusChangedById: 'statusChangedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -428,6 +507,102 @@ export const QuotationAttachmentScalarFieldEnum = {
 export type QuotationAttachmentScalarFieldEnum = (typeof QuotationAttachmentScalarFieldEnum)[keyof typeof QuotationAttachmentScalarFieldEnum]
 
 
+export const EnquiryScalarFieldEnum = {
+  id: 'id',
+  enquiryNo: 'enquiryNo',
+  externalReference: 'externalReference',
+  enquiryDate: 'enquiryDate',
+  source: 'source',
+  salesPartnerName: 'salesPartnerName',
+  crOwnerId: 'crOwnerId',
+  customerName: 'customerName',
+  customerAddress: 'customerAddress',
+  siteLocation: 'siteLocation',
+  siteStateCode: 'siteStateCode',
+  sitePincode: 'sitePincode',
+  region: 'region',
+  siteLatitude: 'siteLatitude',
+  siteLongitude: 'siteLongitude',
+  siteCoordinateSource: 'siteCoordinateSource',
+  businessVertical: 'businessVertical',
+  crossRentalFlag: 'crossRentalFlag',
+  overallStatus: 'overallStatus',
+  notes: 'notes',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnquiryScalarFieldEnum = (typeof EnquiryScalarFieldEnum)[keyof typeof EnquiryScalarFieldEnum]
+
+
+export const EnquiryLineItemScalarFieldEnum = {
+  id: 'id',
+  enquiryId: 'enquiryId',
+  lineNo: 'lineNo',
+  craneTypeCode: 'craneTypeCode',
+  capacityT: 'capacityT',
+  capacityRule: 'capacityRule',
+  capacityNote: 'capacityNote',
+  quantity: 'quantity',
+  applicationDescription: 'applicationDescription',
+  loadDescription: 'loadDescription',
+  liftLoadT: 'liftLoadT',
+  workingRadiusM: 'workingRadiusM',
+  requiredMainBoomM: 'requiredMainBoomM',
+  requiredFixedJibM: 'requiredFixedJibM',
+  requiredLuffingJibM: 'requiredLuffingJibM',
+  requiredWindJibM: 'requiredWindJibM',
+  configurationNotes: 'configurationNotes',
+  requiredStartDate: 'requiredStartDate',
+  startDateTbc: 'startDateTbc',
+  durationValue: 'durationValue',
+  durationUnit: 'durationUnit',
+  workingDaysPerMonth: 'workingDaysPerMonth',
+  mobilisationTerms: 'mobilisationTerms',
+  demobilisationTerms: 'demobilisationTerms',
+  otCharges: 'otCharges',
+  breakdownTerms: 'breakdownTerms',
+  dieselScope: 'dieselScope',
+  workingHoursShift: 'workingHoursShift',
+  accommodationConveyance: 'accommodationConveyance',
+  paymentTerms: 'paymentTerms',
+  supportCraneScope: 'supportCraneScope',
+  steelMatsGroundPrepScope: 'steelMatsGroundPrepScope',
+  ehsHrCompliance: 'ehsHrCompliance',
+  insuranceTerms: 'insuranceTerms',
+  extensionClause: 'extensionClause',
+  craneAgeCriteriaYears: 'craneAgeCriteriaYears',
+  otherTerms: 'otherTerms',
+  additionalManpowerScope: 'additionalManpowerScope',
+  intraSiteMovementScope: 'intraSiteMovementScope',
+  prereleaseTerms: 'prereleaseTerms',
+  ppeScope: 'ppeScope',
+  rowScope: 'rowScope',
+  rentalBudget: 'rentalBudget',
+  rentalBudgetValue: 'rentalBudgetValue',
+  internalNotes: 'internalNotes',
+  poSapReference: 'poSapReference',
+  trailStatus: 'trailStatus',
+  selectedSource: 'selectedSource',
+  closureStatus: 'closureStatus',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EnquiryLineItemScalarFieldEnum = (typeof EnquiryLineItemScalarFieldEnum)[keyof typeof EnquiryLineItemScalarFieldEnum]
+
+
+export const EnquirySequenceScalarFieldEnum = {
+  year: 'year',
+  last: 'last'
+} as const
+
+export type EnquirySequenceScalarFieldEnum = (typeof EnquirySequenceScalarFieldEnum)[keyof typeof EnquirySequenceScalarFieldEnum]
+
+
 export const AuditLogScalarFieldEnum = {
   id: 'id',
   entity: 'entity',
@@ -439,6 +614,7 @@ export const AuditLogScalarFieldEnum = {
   actorRole: 'actorRole',
   actorName: 'actorName',
   ipAddress: 'ipAddress',
+  onBehalfOfVendor: 'onBehalfOfVendor',
   craneId: 'craneId',
   createdAt: 'createdAt'
 } as const
@@ -506,6 +682,36 @@ export const EmailTemplateScalarFieldEnum = {
 export type EmailTemplateScalarFieldEnum = (typeof EmailTemplateScalarFieldEnum)[keyof typeof EmailTemplateScalarFieldEnum]
 
 
+export const RecommendationSnapshotScalarFieldEnum = {
+  id: 'id',
+  enquiryLineId: 'enquiryLineId',
+  trigger: 'trigger',
+  provider: 'provider',
+  site: 'site',
+  smlSet: 'smlSet',
+  vendorSet: 'vendorSet',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type RecommendationSnapshotScalarFieldEnum = (typeof RecommendationSnapshotScalarFieldEnum)[keyof typeof RecommendationSnapshotScalarFieldEnum]
+
+
+export const MobilisationRateScalarFieldEnum = {
+  id: 'id',
+  craneTypeCode: 'craneTypeCode',
+  capacityMinT: 'capacityMinT',
+  capacityMaxT: 'capacityMaxT',
+  ownershipType: 'ownershipType',
+  ratePerKm: 'ratePerKm',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MobilisationRateScalarFieldEnum = (typeof MobilisationRateScalarFieldEnum)[keyof typeof MobilisationRateScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -520,6 +726,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

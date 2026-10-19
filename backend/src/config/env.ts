@@ -102,7 +102,7 @@ export const env = Object.freeze({
   onboarding: Object.freeze({
     // How long an invitation link stays usable. The vendor gets a reminder
     // before it lapses rather than the link simply dying.
-    invitationTtlDays: num("ONBOARDING_INVITATION_TTL_DAYS", 30),
+    invitationTtlDays: num("ONBOARDING_INVITATION_TTL_DAYS", 7),
     // Rejection remarks are emailed; this is how long a rejected vendor keeps
     // access to the link in order to correct and resubmit.
     resubmitWindowDays: num("ONBOARDING_RESUBMIT_WINDOW_DAYS", 30),
@@ -131,6 +131,16 @@ export const env = Object.freeze({
     STALE_FLAG_DAYS: num("STALE_FLAG_DAYS", 60),
     STALE_REMINDER_REPEAT_DAYS: num("STALE_REMINDER_REPEAT_DAYS", 7),
     RFQ_REMINDER_LEAD_HOURS: num("RFQ_REMINDER_LEAD_HOURS", 24),
+    // Brief C2: a response window shorter than this is never auto-reminded —
+    // there is no room to chase, only a deadline to meet.
+    RFQ_REMINDER_MIN_WINDOW_HOURS: num("RFQ_REMINDER_MIN_WINDOW_HOURS", 4),
+    // Brief 6: how a quoted month converts into days for the total. The
+    // calendar default keeps M5's arithmetic; working days uses each RFQ's
+    // captured working_days_per_month.
+    RATE_DAY_BASIS: str("RATE_DAY_BASIS", "CALENDAR_DAYS"),
+    // P3: the comparison screen's default sort. Open item 5's working
+    // assumption — total estimated cost ascending.
+    QUOTE_RANK_RULE: str("QUOTE_RANK_RULE", "TOTAL_ESTIMATED_COST"),
   }),
 
   // India bounding box, brief 5.2. Used by the geocode/pin-drop validators and

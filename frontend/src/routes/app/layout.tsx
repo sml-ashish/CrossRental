@@ -15,16 +15,29 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { to: "/app/dashboard", label: "Dashboard", roles: ["vendor_user"] },
   { to: "/app/fleet", label: "My Fleet", roles: ["vendor_user"] },
-  { to: "/app/quotes", label: "Quotations", roles: ["vendor_user"] },
+  // A vendor's quotations live inside each RFQ in their inbox, so they get no
+  // separate nav item for them.
+  // Enquiries are the CR team's intake and sourcing queue; vendors never see
+  // this surface at all.
+  { to: "/app/enquiries", label: "Enquiries", roles: ["sales_user", "admin_user"] },
+  // Manual discovery is an internal browse across every vendor's fleet, so
+  // vendors never see this surface.
+  { to: "/app/discovery", label: "Discovery", roles: ["sales_user", "admin_user"] },
   // Admins track every RFQ as well as sales; only creating is pointed at sales.
   { to: "/app/rfqs", label: "RFQs", roles: ["vendor_user", "sales_user", "admin_user"] },
-  { to: "/app/bookings", label: "Bookings", roles: ["vendor_user", "sales_user"] },
+  // The booking calendar is internal planning (P2): it shows every crane's
+  // days, SML's and vendors' alike, so vendors never see this surface.
+  { to: "/app/bookings", label: "Bookings", roles: ["sales_user", "admin_user"] },
   { to: "/app/rfqs/new", label: "Create RFQ", roles: ["sales_user"] },
-  { to: "/app/quotes", label: "Compare Quotes", roles: ["sales_user", "admin_user"] },
+  // The comparison screens are out of scope (brief 2), so quotations keep no
+  // separate internal screen either, but the route explains what exists.
+  { to: "/app/quotes", label: "Quotations", roles: ["sales_user", "admin_user"] },
   // Sales reach the queue too: they send invitations and chase registrations,
   // and only the Approve/Reject controls are withheld from them.
   { to: "/app/approvals", label: "Vendor Onboarding", roles: ["admin_user", "sales_user"] },
+  { to: "/app/admin", label: "Admin", roles: ["admin_user"] },
   { to: "/app/settings", label: "Settings", roles: ["admin_user"] },
 ];
 
@@ -43,7 +56,7 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white print:hidden">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
           <div className="flex items-center gap-3">
             <div
@@ -73,8 +86,8 @@ export function AppLayout() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6">
-        <nav className="hidden w-56 shrink-0 lg:block" aria-label="Main">
+      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 print:block print:max-w-none print:p-0">
+        <nav className="hidden w-56 shrink-0 lg:block print:hidden" aria-label="Main">
           <ul className="space-y-0.5">
             {items.map((item) => (
               <li key={`${item.to}:${item.label}`}>

@@ -24,7 +24,8 @@ export type DistanceMethod = "road" | "straight_line" | null;
 export const RFQ_STATUS_LABELS: Record<RfqStatus, string> = {
   DRAFT: "Draft",
   SENT: "Sent",
-  CLOSED: "Closed",
+  // Brief decision 8: the BPD's spelling is "Finalised".
+  CLOSED: "Finalised",
   CANCELLED: "Cancelled",
 };
 
@@ -60,6 +61,14 @@ export interface Rfq {
   craneType: string;
   craneTypeRef: { name: string } | null;
   capacityT: number;
+  capacityRule: "AT_LEAST" | "EXACT";
+  capacityNote: string | null;
+  applicationDescription: string | null;
+  loadDescription: string | null;
+  mainBoomM: number | null;
+  jibLengthM: number | null;
+  startDateTbc: boolean;
+  workingDaysPerMonth: number | null;
   quantity: number;
   siteLocation: string;
   siteStateCode: string;
@@ -81,6 +90,12 @@ export interface Rfq {
   craneAgeCriteriaYears: number | null;
   accommodationConveyance: string | null;
   paymentTerms: string | null;
+  mobilisationTerms: string | null;
+  supportCrane: string | null;
+  steelMatsGroundPrep: string | null;
+  ehsHrRequirements: string | null;
+  insuranceTerms: string | null;
+  extensionClause: string | null;
   notes: string | null;
   smlContactName: string | null;
   smlContactMobile: string | null;
@@ -124,6 +139,7 @@ export interface RfqRecipient {
   responseStatus: ResponseStatus;
   respondedAt: string | null;
   declineReason: string | null;
+  declineNote: string | null;
   reminderCount: number;
   lastReminderAt: string | null;
   candidateSnapshot: unknown;
@@ -140,6 +156,8 @@ export interface ReceivedQuotation {
   rentalRate: number;
   rateBasis: string;
   mobilisationCharges: number;
+  demobilisationCharges: number;
+  taxBasis: string;
   totalQuotedValue: number;
   validityDate: string;
   distanceToSiteKm: number | null;
@@ -213,6 +231,8 @@ export interface CandidateList {
   located: CandidateGroup[];
   unverified: CandidateCrane[];
   capacityRule: string;
+  startDateTbc: boolean;
+  notice: string | null;
 }
 
 export interface ApprovedVendor {
@@ -231,6 +251,14 @@ export interface RfqForm {
   lineNo: string;
   craneType: string;
   capacityT: string;
+  capacityRule: "AT_LEAST" | "EXACT";
+  capacityNote: string;
+  applicationDescription: string;
+  loadDescription: string;
+  mainBoomM: string;
+  jibLengthM: string;
+  startDateTbc: boolean;
+  workingDaysPerMonth: string;
   quantity: string;
   siteLocation: string;
   siteStateCode: string;
@@ -249,6 +277,12 @@ export interface RfqForm {
   craneAgeCriteriaYears: string;
   accommodationConveyance: string;
   paymentTerms: string;
+  mobilisationTerms: string;
+  supportCrane: string;
+  steelMatsGroundPrep: string;
+  ehsHrRequirements: string;
+  insuranceTerms: string;
+  extensionClause: string;
   notes: string;
   smlContactName: string;
   smlContactMobile: string;
@@ -260,6 +294,14 @@ export const EMPTY_RFQ_FORM: RfqForm = {
   lineNo: "",
   craneType: "",
   capacityT: "",
+  capacityRule: "AT_LEAST",
+  capacityNote: "",
+  applicationDescription: "",
+  loadDescription: "",
+  mainBoomM: "",
+  jibLengthM: "",
+  startDateTbc: false,
+  workingDaysPerMonth: "",
   quantity: "1",
   siteLocation: "",
   siteStateCode: "",
@@ -278,6 +320,12 @@ export const EMPTY_RFQ_FORM: RfqForm = {
   craneAgeCriteriaYears: "",
   accommodationConveyance: "",
   paymentTerms: "",
+  mobilisationTerms: "",
+  supportCrane: "",
+  steelMatsGroundPrep: "",
+  ehsHrRequirements: "",
+  insuranceTerms: "",
+  extensionClause: "",
   notes: "",
   smlContactName: "",
   smlContactMobile: "",
@@ -312,6 +360,15 @@ export function rfqToForm(rfq: Rfq): RfqForm {
     lineNo: rfq.lineNo,
     craneType: rfq.craneType,
     capacityT: String(rfq.capacityT),
+    capacityRule: rfq.capacityRule,
+    capacityNote: rfq.capacityNote ?? "",
+    applicationDescription: rfq.applicationDescription ?? "",
+    loadDescription: rfq.loadDescription ?? "",
+    mainBoomM: rfq.mainBoomM === null ? "" : String(rfq.mainBoomM),
+    jibLengthM: rfq.jibLengthM === null ? "" : String(rfq.jibLengthM),
+    startDateTbc: rfq.startDateTbc,
+    workingDaysPerMonth:
+      rfq.workingDaysPerMonth === null ? "" : String(rfq.workingDaysPerMonth),
     quantity: String(rfq.quantity),
     siteLocation: rfq.siteLocation,
     siteStateCode: rfq.siteStateCode,
@@ -331,6 +388,12 @@ export function rfqToForm(rfq: Rfq): RfqForm {
       rfq.craneAgeCriteriaYears === null ? "" : String(rfq.craneAgeCriteriaYears),
     accommodationConveyance: rfq.accommodationConveyance ?? "",
     paymentTerms: rfq.paymentTerms ?? "",
+    mobilisationTerms: rfq.mobilisationTerms ?? "",
+    supportCrane: rfq.supportCrane ?? "",
+    steelMatsGroundPrep: rfq.steelMatsGroundPrep ?? "",
+    ehsHrRequirements: rfq.ehsHrRequirements ?? "",
+    insuranceTerms: rfq.insuranceTerms ?? "",
+    extensionClause: rfq.extensionClause ?? "",
     notes: rfq.notes ?? "",
     smlContactName: rfq.smlContactName ?? "",
     smlContactMobile: rfq.smlContactMobile ?? "",
@@ -378,6 +441,15 @@ function toRfqPayload(form: RfqForm) {
     lineNo: form.lineNo.trim(),
     craneType: form.craneType,
     capacityT: Number(form.capacityT),
+    capacityRule: form.capacityRule,
+    capacityNote: blankToNull(form.capacityNote),
+    applicationDescription: blankToNull(form.applicationDescription),
+    loadDescription: blankToNull(form.loadDescription),
+    mainBoomM: form.mainBoomM.trim() === "" ? null : Number(form.mainBoomM),
+    jibLengthM: form.jibLengthM.trim() === "" ? null : Number(form.jibLengthM),
+    startDateTbc: form.startDateTbc,
+    workingDaysPerMonth:
+      form.workingDaysPerMonth.trim() === "" ? null : Number(form.workingDaysPerMonth),
     quantity: Number(form.quantity),
     siteLocation: form.siteLocation.trim(),
     siteStateCode: form.siteStateCode,
@@ -397,6 +469,12 @@ function toRfqPayload(form: RfqForm) {
       form.craneAgeCriteriaYears.trim() === "" ? null : Number(form.craneAgeCriteriaYears),
     accommodationConveyance: blankToNull(form.accommodationConveyance),
     paymentTerms: blankToNull(form.paymentTerms),
+    mobilisationTerms: blankToNull(form.mobilisationTerms),
+    supportCrane: blankToNull(form.supportCrane),
+    steelMatsGroundPrep: blankToNull(form.steelMatsGroundPrep),
+    ehsHrRequirements: blankToNull(form.ehsHrRequirements),
+    insuranceTerms: blankToNull(form.insuranceTerms),
+    extensionClause: blankToNull(form.extensionClause),
     notes: blankToNull(form.notes),
     smlContactName: blankToNull(form.smlContactName),
     smlContactMobile: blankToNull(form.smlContactMobile),
@@ -476,6 +554,46 @@ export function extendDeadline(
 
 export function cancelRfq(rfqId: string, reason: string): Promise<{ result: { notified: number } }> {
   return api(`/rfqs/${rfqId}/cancel`, { method: "POST", body: { reason } });
+}
+
+/**
+ * Award (brief 6.7 as revised, M7 + phase B2). Admin only on the backend
+ * (`quotation:award`). The award creates the reservation for the crane; while
+ * the RFQ's quantity is not reached it is **partial** and the other quotations
+ * stay open. The optional reason is broad remarks for the email, not a channel
+ * to negotiate. Dates are only needed when the RFQ's start date is TBC.
+ */
+export function awardQuotation(
+  rfqId: string,
+  quotationId: string,
+  options: { reason?: string; reasonCode?: string; dates?: { startDate?: string; endDate?: string } } = {},
+): Promise<{
+  result: {
+    awarded: true;
+    quotationId: string;
+    craneId: string;
+    reservationId: string;
+    reservationStart: string;
+    reservationEnd: string;
+    rfqNumber: string;
+    partial: boolean;
+    quantity: number;
+    awardedCount: number;
+    rfqClosed: boolean;
+    notAwardedCount: number;
+    notifiedAwarded: number;
+    notifiedNotAwarded: number;
+  };
+}> {
+  const body: Record<string, unknown> = {};
+  if (options.reason?.trim()) body.reason = options.reason.trim();
+  if (options.reasonCode?.trim()) body.reasonCode = options.reasonCode.trim();
+  if (options.dates?.startDate) body.startDate = options.dates.startDate;
+  if (options.dates?.endDate) body.endDate = options.dates.endDate;
+  return api(`/rfqs/${rfqId}/quotations/${quotationId}/award`, {
+    method: "POST",
+    body,
+  });
 }
 
 export function remindRfq(

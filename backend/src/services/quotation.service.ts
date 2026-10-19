@@ -4,7 +4,18 @@ import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import { recordAudit } from "./audit.service";
 import { distanceBetween } from "./distance.service";
+import { onQuotesReceived, onUnderEvaluation } from "./enquiryTrail.service";
+import { getSettings } from "../utils/settings";
+import { getMasterLists } from "../utils/masterLists";
 import { sendTemplate } from "./email.service";
+import {
+  quotationMarkSchema,
+  type QuotationMarkInput,
+} from "../validation/quotationMarkFields";
+import {
+  findOverlappingReservation,
+  reservationWindowForRfq,
+} from "./reservations.service";
 import {
   submitQuotationSchema,
   reviseQuotationSchema,
@@ -114,8 +125,17 @@ const RECIPIENT_SELECT = {
       rfqNumber: true,
       enquiryNo: true,
       lineNo: true,
+      enquiryLineId: true,
       craneType: true,
       capacityT: true,
+      capacityRule: true,
+      capacityNote: true,
+      applicationDescription: true,
+      loadDescription: true,
+      mainBoomM: true,
+      jibLengthM: true,
+      startDateTbc: true,
+      workingDaysPerMonth: true,
       quantity: true,
       siteLocation: true,
       siteStateCode: true,
@@ -133,6 +153,12 @@ const RECIPIENT_SELECT = {
       craneAgeCriteriaYears: true,
       accommodationConveyance: true,
       paymentTerms: true,
+      mobilisationTerms: true,
+      supportCrane: true,
+      steelMatsGroundPrep: true,
+      ehsHrRequirements: true,
+      insuranceTerms: true,
+      extensionClause: true,
       notes: true,
       commercialTermsExtra: true,
       smlContactName: true,
@@ -150,6 +176,19 @@ const RECIPIENT_SELECT = {
 type RecipientRow = Prisma.RfqVendorRecipientGetPayload<{
   select: typeof RECIPIENT_SELECT;
 }>;
+
+/**
+ * Brief 6's day-basis context for the total: the admin setting decides which
+ * month conversion applies, and the RFQ supplies its own working-days figure.
+ * Cached by the settings module, so fetching it per call is fine.
+ */
+async function dayBasisFor(rfq: RecipientRow["rfq"]) {
+  const settings = await getSettings();
+  return {
+    rateDayBasis: settings.rateDayBasis,
+    workingDaysPerMonth: rfq.workingDaysPerMonth,
+  };
+}
 
 type LiveQuotationRow = {
   id: string;
@@ -231,13 +270,24 @@ async function loadRecipient(
 }
 
 /**
- * A cancelled RFQ is readable but dead: the vendor must see the reason, and no
- * action can be taken on it even if the deadline has not passed yet.
+ * A cancelled *or closed* RFQ is readable but dead: the vendor must see why it
+ * stopped, and no action can be taken on it even if the deadline has not passed
+ * yet.
+ *
+ * Closed comes from the M7 award (brief 6.7): once SML has selected one
+ * quotation, the RFQ's quotation period is over whatever the deadline said, so
+ * revising, withdrawing, declining or quoting after an award would contradict
+ * the outcome every vendor has already been told about by email.
  */
-function assertNotCancelled(recipient: RecipientRow): void {
+function assertOpen(recipient: RecipientRow): void {
   if (recipient.rfq.status === RfqStatus.CANCELLED) {
     throw AppError.conflict(
       "SML cancelled this RFQ, so it can no longer be quoted. Contact SML if that looks wrong.",
+    );
+  }
+  if (recipient.rfq.status === RfqStatus.CLOSED) {
+    throw AppError.conflict(
+      "SML has finalised this RFQ, so quotations can no longer be submitted or changed.",
     );
   }
 }
@@ -257,9 +307,26 @@ function assertBeforeDeadline(recipient: RecipientRow, now = new Date()): void {
   }
 }
 
+/**
+ * The availability confirmation (brief 6.7), unless the start date is TBC
+ * (brief A3): without a fixed start the question has no answer, so the vendor
+ * is warned in `computeWarnings` instead of being blocked here.
+ */
+function assertAvailability(
+  rfq: RecipientRow["rfq"],
+  input: { availabilityConfirmed?: boolean | null },
+): void {
+  if (rfq.startDateTbc === true) return;
+  if (input.availabilityConfirmed !== true) {
+    throw AppError.badRequest(
+      "Confirm the crane is available for this requirement",
+    );
+  }
+}
+
 /** A cancelled, declined or expired RFQ cannot be acted on. */
 function assertActionable(recipient: RecipientRow): void {
-  assertNotCancelled(recipient);
+  assertOpen(recipient);
   if (recipient.responseStatus === ResponseStatus.DECLINED) {
     throw AppError.conflict("You have declined this RFQ.");
   }
@@ -280,6 +347,10 @@ const CRANE_SELECT = {
   typeOfCraneCode: true,
   capacityT: true,
   yom: true,
+  mainBoomM: true,
+  fixedJibM: true,
+  luffingJibM: true,
+  windJibM: true,
   make: true,
   model: true,
   currentStatus: true,
@@ -318,13 +389,19 @@ async function loadQuotingCrane(
 }
 
 /**
- * The statuses that cannot be quoted (brief 6.7).
+ * The cranes that cannot be quoted (brief 6.7 as revised, phase B3).
  *
  * Under Maintenance is a vendor's own statement that the crane is not working.
- * Booked and Hired are SML's, so the crane is already committed elsewhere and
- * quoting it would put two jobs on one machine.
+ * The commitment check is now the *reservation*: a crane with an ACTIVE
+ * reservation overlapping the RFQ's window is already committed elsewhere, so
+ * quoting it would put two jobs on one machine. Stored Booked/Hired is kept as a
+ * legacy guard for pre-reservation rows that the phase B migration has not
+ * touched (normally none).
  */
-function assertCraneQuotable(crane: QuotingCrane): void {
+async function assertCraneQuotable(
+  crane: QuotingCrane,
+  rfq: RecipientRow["rfq"],
+): Promise<void> {
   if (!crane.isActive) {
     throw AppError.badRequest("That crane is deactivated");
   }
@@ -339,6 +416,17 @@ function assertCraneQuotable(crane: QuotingCrane): void {
   ) {
     throw AppError.badRequest(
       "That crane is committed to SML on another contract and cannot be quoted",
+    );
+  }
+
+  const window = reservationWindowForRfq(rfq, await dayBasisFor(rfq));
+  if (!window) return;
+  const clash = await findOverlappingReservation(crane.id, window.start, window.end);
+  if (clash) {
+    throw AppError.badRequest(
+      `That crane is reserved on an SML contract for ${clash.startDate
+        .toISOString()
+        .slice(0, 10)} to ${clash.endDate.toISOString().slice(0, 10)} and cannot be quoted`,
     );
   }
 }
@@ -389,6 +477,54 @@ export function computeWarnings(
         Number(crane.capacityT) < Number(rfq.capacityT)
           ? `Crane capacity is ${crane.capacityT} t, below the ${rfq.capacityT} t required.`
           : `Crane capacity is ${crane.capacityT} t, against the ${rfq.capacityT} t required.`,
+    });
+  }
+
+  // Brief A3: structurable boom requirement, so the shortfall is computed from
+  // two numbers rather than left to a human to spot in free text. Warning, not
+  // a block: the vendor may have a reason (a different jib combination, a
+  // newer crane with a longer reach) that sales can judge.
+  if (
+    rfq.mainBoomM !== null &&
+    rfq.mainBoomM !== undefined &&
+    crane.mainBoomM !== null &&
+    Number(crane.mainBoomM) < Number(rfq.mainBoomM)
+  ) {
+    warnings.push({
+      code: "boom_shorter_than_required",
+      message:
+        `This crane's main boom is ${Number(crane.mainBoomM)} m, below the ` +
+        `${Number(rfq.mainBoomM)} m the requirement asks for.`,
+    });
+  }
+
+  // P0 A6: jib shortfall. A crane can carry a fixed, luffing or wind jib, so
+  // the comparison uses the longest one on file; a crane with no jib recorded
+  // is not warned about, because "unknown" is not "too short".
+  const jibLengths = [crane.fixedJibM, crane.luffingJibM, crane.windJibM]
+    .filter((v): v is NonNullable<typeof v> => v !== null && v !== undefined)
+    .map((v) => Number(v));
+  if (
+    rfq.jibLengthM !== null &&
+    rfq.jibLengthM !== undefined &&
+    jibLengths.length > 0 &&
+    Math.max(...jibLengths) < Number(rfq.jibLengthM)
+  ) {
+    warnings.push({
+      code: "jib_shorter_than_required",
+      message:
+        `This crane's jib is ${Math.max(...jibLengths)} m, below the ` +
+        `${Number(rfq.jibLengthM)} m the requirement asks for.`,
+    });
+  }
+
+  // Brief A3: the vendor is told the start date is not fixed yet, so the
+  // availability question they are not asked does not read as an oversight.
+  if (rfq.startDateTbc === true) {
+    warnings.push({
+      code: "start_date_tbc",
+      message:
+        "The customer has not fixed a start date yet, so no availability confirmation is required.",
     });
   }
 
@@ -489,7 +625,7 @@ export async function previewQuotation(
   const recipient = await loadRecipient(rfqId, actor);
   const input: SubmitQuotationInput = submitQuotationSchema.parse(raw);
   const crane = await loadQuotingCrane(input.craneId, actor);
-  assertCraneQuotable(crane);
+  await assertCraneQuotable(crane, recipient.rfq);
 
   const { rentalCharge, total, note } = calculateTotal({
     rentalRate: input.rentalRate,
@@ -497,6 +633,8 @@ export async function previewQuotation(
     durationValue: Number(recipient.rfq.durationValue),
     durationUnit: recipient.rfq.durationUnit,
     mobilisationCharges: input.mobilisationCharges,
+    demobilisationCharges: input.demobilisationCharges,
+    dayBasis: await dayBasisFor(recipient.rfq),
   });
 
   const distance = await distanceToSite(recipient.rfq, crane);
@@ -508,7 +646,7 @@ export async function previewQuotation(
   try {
     assertActionable(recipient);
     assertBeforeDeadline(recipient);
-    assertCraneQuotable(crane);
+    await assertCraneQuotable(crane, recipient.rfq);
   } catch (error) {
     if (!(error instanceof AppError)) throw error;
     blockedReason = error.message;
@@ -518,6 +656,8 @@ export async function previewQuotation(
     preview: {
       rentalCharge,
       mobilisationCharges: input.mobilisationCharges,
+      demobilisationCharges: input.demobilisationCharges,
+      taxBasis: input.taxBasis,
       totalQuotedValue: total,
       calculationNote: note,
       warnings: computeWarnings(recipient.rfq, crane),
@@ -642,11 +782,8 @@ export async function listVendorRfqs(rawQuery: unknown, actor: Actor) {
   const now = Date.now();
   return {
     rfqs: recipients.map((recipient) => {
-      const live = (liveByRfq.get(recipient.rfq.id) ?? []).filter(
-        (q) =>
-          q.status === QuotationStatus.SUBMITTED ||
-          q.status === QuotationStatus.UNDER_REVIEW ||
-          q.status === QuotationStatus.SHORTLISTED,
+      const live = (liveByRfq.get(recipient.rfq.id) ?? []).filter((q) =>
+        isVendorLive(q.status),
       );
       return {
         recipientId: recipient.id,
@@ -704,6 +841,8 @@ const QUOTATION_SELECT = {
   rentalRate: true,
   rateBasis: true,
   mobilisationCharges: true,
+  demobilisationCharges: true,
+  taxBasis: true,
   totalQuotedValue: true,
   calculationNote: true,
   availabilityConfirmed: true,
@@ -733,6 +872,44 @@ type QuotationRow = Prisma.QuotationGetPayload<{
   select: typeof QUOTATION_SELECT;
 }>;
 
+/**
+ * Vendor-visible status mapping (brief 6.8): a vendor sees Submitted, Withdrawn,
+ * Awarded and Not Awarded. `SELECTED` is the internal word for Awarded, so it is
+ * translated here rather than leaking sales vocabulary into the vendor's screen.
+ *
+ * P3's UNDER_REVIEW / SHORTLISTED / REJECTED are SML's own comparison marks: the
+ * vendor's offer is still Submitted from where they stand, so those three map to
+ * SUBMITTED rather than exposing the internal review vocabulary.
+ */
+export function vendorVisibleStatus(
+  status: QuotationStatus,
+): "AWARDED" | "NOT_AWARDED" | QuotationStatus {
+  if (status === QuotationStatus.SELECTED) return "AWARDED";
+  if (status === QuotationStatus.NOT_AWARDED) return "NOT_AWARDED";
+  if (
+    status === QuotationStatus.UNDER_REVIEW ||
+    status === QuotationStatus.SHORTLISTED ||
+    status === QuotationStatus.REJECTED
+  ) {
+    return QuotationStatus.SUBMITTED;
+  }
+  return status;
+}
+
+/**
+ * The statuses that still count as a vendor's live offer. SML's internal review
+ * marks do not end the vendor's offer, so a marked quotation can still be
+ * revised, withdrawn and counted in the vendor's inbox.
+ */
+function isVendorLive(status: QuotationStatus): boolean {
+  return (
+    status === QuotationStatus.SUBMITTED ||
+    status === QuotationStatus.UNDER_REVIEW ||
+    status === QuotationStatus.SHORTLISTED ||
+    status === QuotationStatus.REJECTED
+  );
+}
+
 export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
   assertVendor(actor);
   const vendorId = requireVendorId(actor);
@@ -756,7 +933,12 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
   }
 
   const rfq = recipient.rfq;
-  const locked = rfq.submissionDeadline.getTime() <= Date.now();
+  // Locked once the deadline passes, and also once SML finalises: a closed RFQ
+  // has an outcome the vendor has already been told, so no action exists.
+  const locked =
+    rfq.submissionDeadline.getTime() <= Date.now() ||
+    rfq.status === RfqStatus.CLOSED ||
+    rfq.status === RfqStatus.CANCELLED;
 
   return {
     rfq: {
@@ -767,6 +949,13 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       craneType: rfq.craneType,
       craneTypeName: rfq.craneTypeRef.name,
       capacityT: Number(rfq.capacityT),
+      capacityRule: rfq.capacityRule,
+      capacityNote: rfq.capacityNote,
+      applicationDescription: rfq.applicationDescription,
+      loadDescription: rfq.loadDescription,
+      mainBoomM: rfq.mainBoomM === null ? null : Number(rfq.mainBoomM),
+      jibLengthM: rfq.jibLengthM === null ? null : Number(rfq.jibLengthM),
+      startDateTbc: rfq.startDateTbc,
       quantity: rfq.quantity,
       siteLocation: rfq.siteLocation,
       siteStateCode: rfq.siteStateCode,
@@ -783,6 +972,12 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
         workingHoursShift: rfq.workingHoursShift,
         accommodationConveyance: rfq.accommodationConveyance,
         paymentTerms: rfq.paymentTerms,
+        mobilisationTerms: rfq.mobilisationTerms,
+        supportCrane: rfq.supportCrane,
+        steelMatsGroundPrep: rfq.steelMatsGroundPrep,
+        ehsHrRequirements: rfq.ehsHrRequirements,
+        insuranceTerms: rfq.insuranceTerms,
+        extensionClause: rfq.extensionClause,
         extra: rfq.commercialTermsExtra,
       },
       smlContact: {
@@ -815,6 +1010,8 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       rentalRate: Number(q.rentalRate),
       rateBasis: q.rateBasis,
       mobilisationCharges: Number(q.mobilisationCharges),
+      demobilisationCharges: Number(q.demobilisationCharges),
+      taxBasis: q.taxBasis,
       totalQuotedValue: Number(q.totalQuotedValue),
       calculationNote: q.calculationNote,
       availabilityConfirmed: q.availabilityConfirmed,
@@ -825,7 +1022,7 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       remarks: q.remarks,
       warnings: (q.warnings ?? []) as Array<{ code: string; message: string }>,
       submittedAt: q.submittedAt.toISOString(),
-      status: q.status,
+      status: vendorVisibleStatus(q.status),
       distanceToSiteKm:
         q.distanceToSiteKm === null ? null : Number(q.distanceToSiteKm),
       distanceMethod: q.distanceMethod,
@@ -838,7 +1035,7 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       // back once `submit` refuses a second quote for the same crane.
       editable:
         index === quotations.findIndex((other) => other.craneId === q.craneId) &&
-        (q.status === QuotationStatus.SUBMITTED ||
+        (isVendorLive(q.status) ||
           q.status === QuotationStatus.WITHDRAWN) &&
         !locked,
     })),
@@ -873,7 +1070,8 @@ export async function submitQuotation(
 
   const input: SubmitQuotationInput = submitQuotationSchema.parse(raw);
   const crane = await loadQuotingCrane(input.craneId, actor);
-  assertCraneQuotable(crane);
+  await assertCraneQuotable(crane, recipient.rfq);
+  assertAvailability(recipient.rfq, input);
   assertLoadChart(
     crane,
     await seriesHasLoadChart(rfqId, vendorId, crane.id),
@@ -899,6 +1097,8 @@ export async function submitQuotation(
     durationValue: Number(rfq.durationValue),
     durationUnit: rfq.durationUnit,
     mobilisationCharges: input.mobilisationCharges,
+    demobilisationCharges: input.demobilisationCharges,
+    dayBasis: await dayBasisFor(rfq),
   });
 
   const warnings = computeWarnings(rfq, crane);
@@ -928,6 +1128,8 @@ export async function submitQuotation(
         rentalRate: input.rentalRate,
         rateBasis: input.rateBasis,
         mobilisationCharges: input.mobilisationCharges,
+        demobilisationCharges: input.demobilisationCharges,
+        taxBasis: input.taxBasis,
         totalQuotedValue: total,
         calculationNote: note,
         availabilityConfirmed: true,
@@ -975,6 +1177,12 @@ export async function submitQuotation(
 
   await markResponded(recipient.id, actor);
   await rollUpToQuotesReceived(rfq.id);
+  // P1: the first quotation on an RFQ raised from an enquiry line advances that
+  // line's trail to Quotes Received. The vendor actor is not an SML user, so the
+  // trail records it without an actor rather than attributing it to the vendor.
+  if (rfq.enquiryLineId) {
+    await onQuotesReceived(rfq.enquiryLineId, null);
+  }
   await notifyVendorOfReceipt(recipient, quotation.id, "submitted");
   await notifyCreatorOfQuotation(
     rfq,
@@ -1072,6 +1280,8 @@ async function notifyVendorOfReceipt(
       rentalRate: true,
       rateBasis: true,
       mobilisationCharges: true,
+      demobilisationCharges: true,
+      taxBasis: true,
       totalQuotedValue: true,
       validityDate: true,
       calculationNote: true,
@@ -1102,6 +1312,8 @@ async function notifyVendorOfReceipt(
       rentalRate: Number(quotation.rentalRate).toFixed(2),
       rateBasis: rateBasisLabel(quotation.rateBasis),
       mobilisationCharges: Number(quotation.mobilisationCharges).toFixed(2),
+      demobilisationCharges: Number(quotation.demobilisationCharges).toFixed(2),
+      taxBasis: taxBasisLabel(quotation.taxBasis),
       totalQuotedValue: Number(quotation.totalQuotedValue).toFixed(2),
       validityDate: toCalendarDateString(quotation.validityDate),
       calculationNote: quotation.calculationNote ?? "",
@@ -1112,6 +1324,10 @@ async function notifyVendorOfReceipt(
 
 function rateBasisLabel(basis: RateBasis): string {
   return basis === RateBasis.PER_MONTH ? "month" : "day";
+}
+
+function taxBasisLabel(basis: string): string {
+  return basis === "INCLUSIVE_OF_GST" ? "Inclusive of GST" : "Exclusive of GST";
 }
 
 /** The sales user who created the RFQ, if they are still an active user. */
@@ -1224,8 +1440,9 @@ export async function reviseQuotation(
   const input: ReviseQuotationInput = reviseQuotationSchema.parse(raw);
 
   const recipient = await loadRecipient(existing.rfqId, actor);
-  assertNotCancelled(recipient);
+  assertOpen(recipient);
   assertBeforeDeadline(recipient);
+  assertAvailability(recipient.rfq, input);
 
   // A withdrawn latest version may be revised, and that is the only way back.
   // `submitQuotation` refuses a second quote for a crane that already has one —
@@ -1233,10 +1450,7 @@ export async function reviseQuotation(
   // also refused a revision, retracting an offer would lock that crane out of the
   // RFQ for good. Reviving through a new version keeps the withdrawn one in
   // history, which is what "all versions stay in history" (brief 6.7) asks for.
-  if (
-    existing.status !== QuotationStatus.SUBMITTED &&
-    existing.status !== QuotationStatus.WITHDRAWN
-  ) {
+  if (!isVendorLive(existing.status) && existing.status !== QuotationStatus.WITHDRAWN) {
     throw AppError.conflict(
       `This quotation is ${existing.status.toLowerCase().replace(/_/g, " ")} and can no longer be revised.`,
     );
@@ -1261,7 +1475,7 @@ export async function reviseQuotation(
   // Re-checked, not assumed from the first submission: a crane booked or sent to
   // maintenance in the meantime must not collect a second version of a price.
   const crane = await loadQuotingCrane(existing.craneId, actor);
-  assertCraneQuotable(crane);
+  await assertCraneQuotable(crane, recipient.rfq);
   assertLoadChart(
     crane,
     await seriesHasLoadChart(
@@ -1279,6 +1493,8 @@ export async function reviseQuotation(
     durationValue: Number(rfq.durationValue),
     durationUnit: rfq.durationUnit,
     mobilisationCharges: input.mobilisationCharges,
+    demobilisationCharges: input.demobilisationCharges,
+    dayBasis: await dayBasisFor(rfq),
   });
 
   const warnings = computeWarnings(rfq, crane);
@@ -1415,10 +1631,10 @@ export async function withdrawQuotation(
   const input = withdrawQuotationSchema.parse(raw ?? {});
 
   const recipient = await loadRecipient(existing.rfqId, actor);
-  assertNotCancelled(recipient);
+  assertOpen(recipient);
   assertBeforeDeadline(recipient);
 
-  if (!existing.isLatest || existing.status !== QuotationStatus.SUBMITTED) {
+  if (!existing.isLatest || !isVendorLive(existing.status)) {
     throw AppError.conflict("Only your latest live quotation can be withdrawn");
   }
 
@@ -1450,6 +1666,147 @@ export async function withdrawQuotation(
 }
 
 // ---------------------------------------------------------------------------
+// Internal comparison marks (P3, BPD 6.15)
+// ---------------------------------------------------------------------------
+
+/** The comparison surface is internal: the CR team and admins, never a vendor. */
+function assertInternal(actor: Actor): void {
+  if (actor.role !== "admin_user" && actor.role !== "sales_user") {
+    throw AppError.forbidden("Only the CR team can review quotations");
+  }
+}
+
+/**
+ * Marks a comparable quotation Under Review, Shortlisted or Rejected (BPD 6.15).
+ *
+ * This is a **mark, not an award**: it records a CR user's opinion of a price so
+ * the comparison screen can show it. The award outcomes — `SELECTED` and
+ * `NOT_AWARDED` — are unreachable here and belong to `awardQuotation` alone, so
+ * there is exactly one path to finalising a vendor.
+ *
+ * Only the latest version of a live quotation can be marked: a superseded or
+ * withdrawn row has already been superseded in the vendor's own history, and a
+ * closed RFQ already has an outcome. Re-marking is allowed (a Shortlist can
+ * become a Rejection before the award), because the mark is a working note, not
+ * a commitment — only the award is a commitment.
+ *
+ * The reason code is checked against the admin's master list **when that list is
+ * non-empty**, so the codes are enforced once configured and the flow still works
+ * while an admin is still filling the list in.
+ */
+export async function markQuotation(
+  rfqId: string,
+  quotationId: string,
+  raw: unknown,
+  actor: Actor,
+) {
+  assertInternal(actor);
+  const input: QuotationMarkInput = quotationMarkSchema.parse(raw ?? {});
+
+  const quotation = await prisma.quotation.findFirst({
+    where: { id: quotationId, rfqId },
+    select: {
+      id: true,
+      rfqId: true,
+      vendorId: true,
+      craneId: true,
+      version: true,
+      isLatest: true,
+      status: true,
+      rfq: { select: { status: true, enquiryLineId: true } },
+    },
+  });
+  if (!quotation) throw AppError.notFound("That quotation was not found");
+
+  if (!quotation.isLatest) {
+    throw AppError.conflict(
+      `This quotation is version ${quotation.version}; only the latest version can be marked.`,
+    );
+  }
+  if (quotation.status === QuotationStatus.WITHDRAWN) {
+    throw AppError.conflict("This quotation was withdrawn and cannot be marked");
+  }
+  if (
+    quotation.status === QuotationStatus.SELECTED ||
+    quotation.status === QuotationStatus.NOT_AWARDED
+  ) {
+    throw AppError.conflict(
+      "This quotation has already been awarded or not awarded and cannot be re-marked",
+    );
+  }
+  if (quotation.rfq.status === RfqStatus.CLOSED) {
+    throw AppError.conflict("This RFQ has already been finalised");
+  }
+  if (quotation.rfq.status === RfqStatus.CANCELLED) {
+    throw AppError.conflict("This RFQ was cancelled and cannot be marked");
+  }
+
+  // The code list is the source of truth once an admin has filled it in. An
+  // empty list means "not configured yet", not "no code is allowed".
+  if (input.reasonCode !== null) {
+    const lists = await getMasterLists();
+    const codes = lists.QUOTATION_MARK_REASON_CODES;
+    const known = codes.some(
+      (code) => code.toLowerCase() === input.reasonCode?.toLowerCase(),
+    );
+    if (codes.length > 0 && !known) {
+      throw AppError.badRequest(
+        `"${input.reasonCode}" is not one of the configured reason codes`,
+      );
+    }
+  }
+
+  const updated = await prisma.quotation.update({
+    where: { id: quotationId },
+    data: {
+      status: input.status,
+      statusReasonCode: input.reasonCode,
+      statusReasonText: input.reasonText,
+      statusChangedAt: new Date(),
+      statusChangedById: actor.id,
+    },
+    select: {
+      id: true,
+      version: true,
+      status: true,
+      statusReasonCode: true,
+      statusReasonText: true,
+      statusChangedAt: true,
+    },
+  });
+
+  // The first mark on a line moves it to Under Evaluation (BPD 6.5). The trail's
+  // forward-only rule means a later mark cannot pull it back.
+  if (quotation.rfq.enquiryLineId) {
+    await onUnderEvaluation(quotation.rfq.enquiryLineId, actor);
+  }
+
+  await recordAudit({
+    entity: "quotation",
+    entityId: quotationId,
+    action: "mark",
+    oldValue: { status: quotation.status },
+    newValue: {
+      status: input.status,
+      reasonCode: input.reasonCode,
+      reasonText: input.reasonText,
+    },
+    actor: auditActor(actor),
+  });
+
+  return {
+    mark: {
+      quotationId: quotation.id,
+      version: quotation.version,
+      status: input.status,
+      reasonCode: input.reasonCode,
+      reasonText: input.reasonText,
+      markedAt: new Date().toISOString(),
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
 // History (brief 7.8)
 // ---------------------------------------------------------------------------
 
@@ -1473,6 +1830,8 @@ export async function listQuotationHistory(rfqId: string, actor: Actor) {
       rentalRate: true,
       rateBasis: true,
       mobilisationCharges: true,
+      demobilisationCharges: true,
+      taxBasis: true,
       totalQuotedValue: true,
       calculationNote: true,
       validityDate: true,
@@ -1510,10 +1869,12 @@ export async function listQuotationHistory(rfqId: string, actor: Actor) {
         rentalRate: Number(q.rentalRate),
         rateBasis: q.rateBasis,
         mobilisationCharges: Number(q.mobilisationCharges),
+        demobilisationCharges: Number(q.demobilisationCharges),
+        taxBasis: q.taxBasis,
         totalQuotedValue: Number(q.totalQuotedValue),
         calculationNote: q.calculationNote,
         validityDate: q.validityDate.toISOString(),
-        status: q.status,
+        status: vendorVisibleStatus(q.status),
         submittedAt: q.submittedAt.toISOString(),
         warnings: (q.warnings ?? []) as Array<{
           code: string;
@@ -1539,7 +1900,7 @@ export async function declineRfq(rfqId: string, raw: unknown, actor: Actor) {
   assertVendor(actor);
   const input = declineRfqSchema.parse(raw ?? {});
   const recipient = await loadRecipient(rfqId, actor);
-  assertNotCancelled(recipient);
+  assertOpen(recipient);
   assertBeforeDeadline(recipient);
 
   if (recipient.responseStatus === ResponseStatus.DECLINED) {
@@ -1566,7 +1927,11 @@ export async function declineRfq(rfqId: string, raw: unknown, actor: Actor) {
     entity: "rfq",
     entityId: rfqId,
     action: "decline",
-    newValue: { reason: input.reason, vendorId: requireVendorId(actor) },
+    newValue: {
+      reason: input.reason,
+      note: input.note,
+      vendorId: requireVendorId(actor),
+    },
     actor: auditActor(actor),
   });
 

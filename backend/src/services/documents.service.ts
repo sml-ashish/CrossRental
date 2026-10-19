@@ -20,7 +20,18 @@ import type { DocumentType } from "../generated/prisma/client";
  *    see three superseded PAN copies and no way to tell which is current.
  */
 
-const UPLOADABLE = new Set<string>(["CANCELLED_CHEQUE", "GST_CERTIFICATE", "PAN_COPY", "OTHER"]);
+const UPLOADABLE = new Set<string>([
+  "CANCELLED_CHEQUE",
+  "GST_CERTIFICATE",
+  "PAN_COPY",
+  // Conditional documents (brief 7.2, open item 4): the signed declaration
+  // page is always required; the TDS and MSME certificates arrive only when
+  // the corresponding option applies.
+  "DECLARATION_SCAN",
+  "TDS_CERTIFICATE",
+  "MSME_CERTIFICATE",
+  "OTHER",
+]);
 
 function assertDocType(value: string): DocumentType {
   if (!UPLOADABLE.has(value)) {

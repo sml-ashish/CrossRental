@@ -86,10 +86,20 @@ src/
 
 | Path                        | Who            | What |
 | --------------------------- | -------------- | ---- |
-| `/onboarding/start`         | anyone with a link | Registration form. No session — the token is the credential. |
+| `/onboarding/start`         | anyone with a link | Registration form (SAP-aligned fields, conditional GST/MSME/TDS blocks, document uploads). No session — the token is the credential. |
 | `/app/approvals`            | admin, sales   | Approval queue: status filters, search, send invitation |
-| `/app/vendors/$vendorId`    | admin, sales   | Registration detail. Admin sees decrypted bank details and the approve/reject controls |
+| `/app/vendors/$vendorId`    | admin, sales   | Registration detail. Admin sees decrypted bank details and the approve/reject controls; both roles get the vendor's fleet section (add/edit on the vendor's behalf) and, for admin, the SAP creation-sheet link |
 | `/app/vendors`              | internal       | Redirects to the queue |
+| `/app/vendors/$vendorId/sap-sheet` | admin   | Print-friendly SAP vendor creation sheet (phase D3) |
+| `/app/admin`                | admin          | Dashboard counters (B1), staff management and vendor suspend/reinstate entry point (P0 B) |
+| `/app/settings`             | admin          | Day basis and the SAP office-use master lists (phase D3) |
+| `/app/enquiries`            | admin, sales   | Enquiry intake list, filtered by the derived roll-up (P1) |
+| `/app/enquiries/new`        | admin, sales   | Capture an enquiry and its line items (P1) |
+| `/app/enquiries/$enquiryId` | admin, sales   | Header, lines, the status trail and the manual internal check (P1) |
+| `/app/enquiries/$enquiryId/edit` | admin, sales | Edit the enquiry header (P1) |
+| `/app/enquiries/$enquiryId/lines/new` | admin, sales | Add a line item (P1) |
+| `/app/enquiries/lines/$lineId` | admin, sales | The line's sourcing workspace: vendor recommendations, RFQ history, quotations (P1) |
+| `/app/enquiries/lines/$lineId/edit` | admin, sales | Edit a line item (P1) |
 
 Sales can send invitations and view registrations; the Approve and Reject
 controls are not rendered for them, and the backend refuses those calls anyway.
@@ -98,9 +108,14 @@ Fleet routes:
 
 | Path                        | Who    | What |
 | --------------------------- | ------ | ---- |
+| `/app/dashboard`            | vendor | The vendor dashboard (brief 7.5): counters plus the rows behind them |
 | `/app/fleet`                | vendor | The fleet list: filters, search, and the per-crane quick actions |
-| `/app/fleet/new`            | vendor | Add a crane. `?duplicate=<craneId>` prefills from an existing one |
-| `/app/fleet/$craneId/edit`  | vendor | Edit a crane. The same screen as add |
+| `/app/fleet/new`            | vendor, admin, sales | Add a crane. `?duplicate=<craneId>` prefills from an existing one; an internal user passes `?vendorId=` to add on a vendor's behalf |
+| `/app/fleet/$craneId/edit`  | vendor, admin, sales | Edit a crane. The same screen as add. An on-behalf edit is badged and emails the vendor |
+
+An internal user reaching `/app/fleet/new` or `.../edit` writes on the vendor's
+behalf (brief D1). The form shows it is on their behalf, and the backend stamps
+`updatedOnBehalf` and emails `fleet_updated_on_behalf`.
 
 ### The fleet screens
 
@@ -119,6 +134,46 @@ the status dropdown carries only the three vendor-settable values, and the row
 shows the status with a note that SML manages it. The backend refuses those
 changes regardless.
 
+### The vendor dashboard (brief 7.5)
+
+One read, `/api/vendor/dashboard`, drives the whole screen. The response carries
+the rows as well as the counters, because a counter that cannot be clicked is a
+dead end: an awaiting-response row opens the RFQ detail, a due-for-update crane
+opens its edit screen, a booking opens the crane. Overdue RFQs sort to the top
+and colour red — a deadline the vendor missed is still worth seeing until it is
+cleared. `ROLE_HOME` in `lib/auth.ts` sends a vendor here after sign-in.
+
+### The award action (brief 6.7)
+
+On the internal RFQ detail, the quotations table gains an **Award** button,
+rendered for admins only and enabled only on an awardable row (latest version,
+still `SUBMITTED`). It opens a confirm form that states what an award does —
+selects this quote, reserves the crane for the requirement window and emails the
+vendor; the other quotations stay open until the RFQ's quantity is awarded, when
+the RFQ is finalised. When the RFQ's start date is TBC the form asks for the
+reservation start and end dates, since there is nothing to derive them from. The
+backend refuses a sales or non-awardable call no matter what the UI renders.
+
+### Enquiry intake and workspace (P1)
+
+The CR team captures an enquiry in `enquiry-form.tsx` (header plus any number of
+line items) and sources each line separately. The line fields are the 31 the
+cross-rental template carries, including the five scope terms — additional
+manpower, intra-site movement, pre-release, PPE and ROW — and an internal-only
+block (rental budget, PO/SAP reference, internal notes) that is badged and never
+sent to vendors.
+
+`enquiry-detail.tsx` shows the line's status **trail** as a fixed sequence, not a
+dropdown: it is event driven (RFQ sent, quotation received, award booked), so the
+only manual outcomes are the internal check and cancelling a line. The header
+status is the derived roll-up and is displayed, never edited.
+
+`enquiry-line.tsx` is the line workspace: vendor recommendations first (no SML
+section — SML has no fleet here), then the RFQ history and quotations raised on
+the line. **Raise RFQ** sends only a deadline; the backend prefills the RFQ from
+the vendor-safe subset, so the customer, budget and internal notes cannot cross
+over. Comparison and final selection arrive in a later phase.
+
 ### The RFQ screens
 
 | Path                          | Who          | What |
@@ -132,6 +187,12 @@ changes regardless.
 they differ only in where the initial values come from. `/app/rfqs` and
 `rfq-detail.tsx` branch on role — a vendor gets the vendor screens rather than
 the internal list, which the backend would refuse to load for them anyway.
+
+The requirement block carries the phase A3 fields: capacity rule (at least /
+exact) with a free-text note, application and load descriptions, structured
+boom and jib lengths, a start-date-TBC switch (which drops the availability
+question from the vendor's quote form) and, for month durations, the RFQ's own
+working days per month used when the admin's day basis is set to working days.
 
 ### Vendor quotation screens (M5)
 
@@ -189,6 +250,41 @@ backend returns a straight-line figure with `distanceApproximate`, and the picke
 says so rather than presenting it as a road distance. Cranes with no coordinates
 are listed in a separate group — a crane with no pin can still do the job, so
 dropping it would be the wrong kind of tidy.
+
+### SAP creation sheet and settings (phase D3)
+
+`sap-sheet.tsx` renders `/api/vendors/:vendorId/sap-sheet` as a print-friendly
+page in the SAP-aligned field order, with a **Print** button and an **Export**
+button that downloads the SpreadsheetML `.xls` from `.../sap-sheet.xls` (the
+download is streamed with the stored token, since a plain link could not carry
+the Authorization header). Both endpoints are admin-only and neither is logged.
+
+`settings.tsx` (admin only) edits the quotation day basis and the six SAP
+office-use master lists. Each list is a textarea, one value per line; they start
+empty, and `vendor-detail.tsx` offers their values as selects in the office-use
+block, so the owner's SAP "Legal Form Logic" values can be entered without a
+code change. An empty list still lets the admin approve — the select just has
+nothing but "Not set" to offer, and the sheet prints a blank cell.
+
+### Admin screen (phase P0 B)
+
+`admin.tsx` (admin only) is the day's exceptions and the staff who run the
+portal. The counters (registrations awaiting approval, RFQs with a failed email
+delivery, cranes stale/no-map-pin/past-release) link to the list that filters the
+same way where one exists — approvals, and RFQs with `?delivery=FAILED`; the
+crane counters are counts only until the SML fleet screen arrives in P1. The same
+screen lists the internal users: create one (OTP-only, no password), change a
+role, enable/disable, or reset credentials. Vendor suspension lives on
+`vendor-detail.tsx` — an admin sees a **Vendor access** section with Suspend
+(optional reason) and Reinstate.
+
+### Inline crane add (phase D2)
+
+Inside the vendor quotation form, a "Crane not in your fleet? Add it here" toggle
+opens the mandatory crane fields (brief 5.2) without leaving the page. It posts
+through the same `createCrane` call as the fleet screen, then selects the new
+crane for the quote — so a vendor who only notices the crane is missing while
+reading the requirement is not sent away to add it and come back.
 
 ## Design tokens
 

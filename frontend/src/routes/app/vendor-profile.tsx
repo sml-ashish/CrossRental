@@ -13,16 +13,31 @@ export interface MyVendor {
   sapVendorCode: string | null;
   name: string;
   natureOfCompany: string;
-  registeredAddress: string;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  district: string | null;
+  stateCode: string | null;
+  pincode: string | null;
   telephone: string | null;
   email: string;
   pan: string | null;
+  gstRegistered: boolean | null;
   gstn: string | null;
+  gstRegistrationType: string | null;
   fleetSummary: string | null;
+  communicationNotes: string | null;
   onboardingStatus: string;
   totalFleetSize: number;
   operatingRegions: string[];
-  contacts: { id: string; name: string; mobile: string | null; email: string | null; isPrimary: boolean }[];
+  contacts: {
+    id: string;
+    name: string;
+    mobile: string | null;
+    email: string | null;
+    isPrimary: boolean;
+    receivesRfqs: boolean;
+  }[];
   bankName: string | null;
   bankBranch: string | null;
   bankAccountType: string | null;
@@ -81,11 +96,37 @@ export function VendorProfilePage() {
         <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           <Field label="Legal name" value={data.name} />
           <Field label="Nature of company" value={data.natureOfCompany} />
-          <Field label="Registered address" value={data.registeredAddress} />
+          <div className="sm:col-span-2">
+            <Field
+              label="Address"
+              value={
+                [
+                  data.addressLine1,
+                  data.addressLine2,
+                  [data.city, data.district, data.pincode].filter(Boolean).join(" "),
+                ]
+                  .filter(Boolean)
+                  .join(", ") || "—"
+              }
+            />
+          </div>
           <Field label="Telephone" value={data.telephone ?? "—"} />
           <Field label="Email" value={data.email} />
           <Field label="PAN" value={data.pan ?? "—"} mono />
-          <Field label="GSTIN" value={data.gstn ?? "—"} mono />
+          <Field
+            label="GST"
+            value={
+              data.gstRegistered === true
+                ? `${data.gstn ?? "—"}${
+                    data.gstRegistrationType
+                      ? ` (${data.gstRegistrationType.replace(/_/g, " ").toLowerCase()})`
+                      : ""
+                  }`
+                : data.gstRegistered === false
+                  ? "Not registered"
+                  : "—"
+            }
+          />
           <Field label="Operating regions" value={data.operatingRegions.join(", ") || "—"} />
           <Field label="Fleet size" value={String(data.totalFleetSize)} />
           <Field label="Status" value={data.onboardingStatus} />

@@ -4,6 +4,8 @@ import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import * as rfqs from "../services/rfq.service";
 import type { Actor } from "../services/rfq.service";
+import { awardQuotation } from "../services/award.service";
+import { markQuotation } from "../services/quotation.service";
 
 /**
  * HTTP shaping for internal RFQ work (brief 7.9).
@@ -120,3 +122,36 @@ export const expirePending = asyncHandler(
     res.json({ result: await rfqs.runExpirySweep(actorOf(req)) });
   },
 );
+
+/**
+ * Award (brief 6.7): select a quotation, mark the rest Not Awarded, book the
+ * crane, close the RFQ and email the vendors. The business rules live in
+ * `award.service.ts`, which the later sales-side comparison screens will call
+ * too; this handler only parses paths and shapes the response.
+ */
+export const award = asyncHandler(async (req: Request, res: Response) => {
+  res.json({
+    result: await awardQuotation(
+      param(req, "rfqId"),
+      param(req, "quotationId"),
+      req.body,
+      actorOf(req),
+    ),
+  });
+});
+
+/**
+ * Mark a quotation (P3, BPD 6.15): Under Review, Shortlisted or Rejected with a
+ * reason code. This is the comparison screen's working note, not the award — the
+ * award outcomes stay in `award.service.ts`. The service owns the rules.
+ */
+export const mark = asyncHandler(async (req: Request, res: Response) => {
+  res.json({
+    result: await markQuotation(
+      param(req, "rfqId"),
+      param(req, "quotationId"),
+      req.body,
+      actorOf(req),
+    ),
+  });
+});

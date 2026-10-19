@@ -4,6 +4,7 @@ import { AppError } from "../middleware/errorHandler";
 import { AuthedRequest, vendorScopeOf } from "../middleware/auth";
 import { validateUpload, ACCEPTED_UPLOAD_LABEL } from "../middleware/upload";
 import * as cranes from "../services/crane.service";
+import { craneProfile } from "../services/craneProfile.service";
 import type { Actor } from "../services/crane.service";
 
 /**
@@ -39,6 +40,11 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 
 export const detail = asyncHandler(async (req: Request, res: Response) => {
   res.json({ crane: await cranes.getCraneDetail(actorOf(req), param(req, "craneId")) });
+});
+
+/** BPD 6.11: the crane detail screen's calendar, flags and transport guess. */
+export const profile = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ profile: await craneProfile(actorOf(req), param(req, "craneId")) });
 });
 
 export const create = asyncHandler(async (req: Request, res: Response) => {

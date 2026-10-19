@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { CRANE_SERIALS, INTERNAL_USERS, VENDOR_USERS } from "./fixtures";
 import { encryptField, last4 } from "../utils/crypto";
 import { DEFAULT_EMAIL_TEMPLATES } from "../services/emailTemplates";
+import { MOBILISATION_RATES } from "../lib/mobilisationRates";
 
 /**
  * Test harness.
@@ -121,6 +122,27 @@ export async function seedIsolationFixtures(): Promise<{
     update: {},
   });
 
+  // P2: the mobilisation rate table the recommendation engine prices from.
+  // Only rates whose crane type exists in the fixtures — the rate table has a
+  // foreign key and the harness seeds a smaller crane-type list than production.
+  const craneTypeCodes = new Set(
+    (await appPrisma.craneType.findMany({ select: { code: true } })).map(
+      (type) => type.code,
+    ),
+  );
+  const rateRows = MOBILISATION_RATES.filter((rate) =>
+    craneTypeCodes.has(rate.craneTypeCode),
+  ).map((rate) => ({
+    craneTypeCode: rate.craneTypeCode,
+    capacityMinT: rate.capacityMinT,
+    capacityMaxT: rate.capacityMaxT,
+    ownershipType: rate.ownershipType ?? null,
+    ratePerKm: rate.ratePerKm,
+  }));
+  if (rateRows.length > 0) {
+    await appPrisma.mobilisationRate.createMany({ data: rateRows });
+  }
+
   async function makeVendor(key: "a" | "b"): Promise<SeededVendor> {
     const email = VENDOR_USERS[key];
     const suffix = key.toUpperCase();
@@ -132,11 +154,21 @@ export async function seedIsolationFixtures(): Promise<{
       data: {
         name: `Isolation Vendor ${suffix}`,
         natureOfCompany: "PROPRIETORSHIP",
-        registeredAddress: `${suffix} Test Address`,
+        addressLine1: `${suffix} Test Address`,
+        city: `${suffix} City`,
+        district: `${suffix} District`,
+        stateCode: "GJ",
+        pincode: "396000",
         telephone: "+91 90000 00000",
         email,
         pan: `AAAAA0000${suffix}`,
+        gstRegistered: true,
         gstn: `27AAAAA0000${suffix}1Z5`,
+        gstRegistrationType: "REGULAR",
+        msmeRegistered: true,
+        msmeCategory: "MICRO",
+        msmeRegNo: `MSME${suffix}0001`,
+        tdsLowerDeduction: false,
         codeOfConductAccepted: true,
         declarationName: `Owner ${suffix}`,
         declarationDesignation: "Proprietor",
@@ -233,6 +265,7 @@ export async function seedIsolationFixtures(): Promise<{
       { key: "STALE_FLAG_DAYS", value: "60" },
       { key: "STALE_REMINDER_REPEAT_DAYS", value: "7" },
       { key: "RFQ_REMINDER_LEAD_HOURS", value: "24" },
+      { key: "RFQ_REMINDER_MIN_WINDOW_HOURS", value: "4" },
     ],
   });
 

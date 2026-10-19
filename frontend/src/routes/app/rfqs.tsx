@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import {
@@ -32,7 +32,7 @@ import { VendorRfqIndexPage } from "@/routes/app/vendor-rfqs";
 const STATUS_TABS: Array<{ value: RfqStatus | "ALL"; label: string }> = [
   { value: "SENT", label: "Sent" },
   { value: "DRAFT", label: "Drafts" },
-  { value: "CLOSED", label: "Closed" },
+  { value: "CLOSED", label: "Finalised" },
   { value: "CANCELLED", label: "Cancelled" },
   { value: "ALL", label: "All" },
 ];
@@ -52,15 +52,25 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
   const [searchInput, setSearchInput] = useState("");
   const [awaitingOnly, setAwaitingOnly] = useState(false);
 
+  // The admin dashboard links here with ?delivery=FAILED, so the counter lands
+  // on the rows that need chasing.
+  const routeSearch = useSearch({ strict: false }) as { delivery?: string };
+  const deliveryFailed = routeSearch.delivery === "FAILED";
+
   const rfqs = useQuery({
-    queryKey: ["rfqs", status, search, awaitingOnly],
+    queryKey: ["rfqs", status, search, awaitingOnly, deliveryFailed],
     queryFn: () =>
       listRfqs({
-        ...(status === "ALL" ? {} : { status }),
+        // A failed delivery can sit on a sent, closed or cancelled RFQ, so the
+        // filter widens the status set rather than hiding behind the default tab.
+        ...(deliveryFailed || status === "ALL" ? {} : { status }),
         ...(search ? { search } : {}),
         ...(awaitingOnly ? { awaitingResponse: true } : {}),
       }),
   });
+
+  const allRows = rfqs.data?.rfqs ?? [];
+  const rows = deliveryFailed ? allRows.filter((r) => r.failedCount > 0) : allRows;
 
   return (
     <div className="space-y-5">
@@ -142,15 +152,26 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
         ) : null}
       </form>
 
+      {deliveryFailed ? (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+          <span>Showing only RFQs with a failed email delivery.</span>
+          <Link to="/app/rfqs" search={{ delivery: undefined }} className="font-medium underline">
+            Clear
+          </Link>
+        </div>
+      ) : null}
+
       {rfqs.isLoading ? (
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Spinner /> Loading RFQs
         </div>
       ) : rfqs.error ? (
         <Alert title="Could not load the RFQ list">{(rfqs.error as Error).message}</Alert>
-      ) : (rfqs.data?.rfqs.length ?? 0) === 0 ? (
+      ) : rows.length === 0 ? (
         <div className="card p-8 text-center text-sm text-slate-500">
-          No RFQs here. Create one to start sourcing a crane for an enquiry.
+          {deliveryFailed
+            ? "No RFQs have a failed delivery."
+            : "No RFQs here. Create one to start sourcing a crane for an enquiry."}
         </div>
       ) : (
         <div className="card overflow-x-auto">
@@ -167,7 +188,7 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {(rfqs.data?.rfqs ?? []).map((row) => (
+              {rows.map((row) => (
                 <RfqRow key={row.id} rfq={row} />
               ))}
             </tbody>
@@ -267,7 +288,7 @@ export function deadlineCountdown(
   status: RfqStatus,
 ): { label: string; tone: "neutral" | "soon" | "overdue" } {
   if (status === "CANCELLED") return { label: "cancelled", tone: "neutral" };
-  if (status === "CLOSED") return { label: "closed", tone: "neutral" };
+  if (status === "CLOSED") return { label: "finalised", tone: "neutral" };
   if (status === "DRAFT") return { label: "not sent yet", tone: "neutral" };
 
   const ms = new Date(deadline).getTime() - Date.now();

@@ -4,6 +4,22 @@ import { asyncHandler } from "../middleware/asyncHandler";
 import { AppError } from "../middleware/errorHandler";
 import { AuthedRequest, requireAuth } from "../middleware/auth";
 import { maskAccountNumber } from "../utils/crypto";
+import { vendorInsights } from "../services/vendorInsights.service";
+import type { Actor } from "../services/crane.service";
+
+function actorOf(req: Request): Actor {
+  const user = (req as AuthedRequest).user;
+  if (!user) throw AppError.unauthorized();
+  return { id: user.id, email: user.email, role: user.role, vendorId: user.vendorId };
+}
+
+function param(req: Request, key: string): string {
+  const value = req.params[key];
+  if (typeof value !== "string" || value.trim() === "") {
+    throw AppError.badRequest(`Missing ${key}`);
+  }
+  return value.trim();
+}
 
 /**
  * Vendor-facing read of the caller's own vendor record.
@@ -30,18 +46,35 @@ export const getMyVendor = asyncHandler(async (req: Request, res: Response) => {
       sapVendorCode: true,
       name: true,
       natureOfCompany: true,
-      registeredAddress: true,
+      addressLine1: true,
+      addressLine2: true,
+      city: true,
+      district: true,
+      stateCode: true,
+      pincode: true,
       telephone: true,
       fax: true,
       email: true,
       weeklyOffDays: true,
       pan: true,
       tan: true,
+      gstRegistered: true,
       gstn: true,
-      gstCompositionOpted: true,
+      gstRegistrationType: true,
       gstr1FilingFrequency: true,
       cin: true,
+      govtRegistrationType: true,
+      govtRegistrationNo: true,
+      msmeRegistered: true,
       msmeCategory: true,
+      msmeRegNo: true,
+      msmeExemptionDate: true,
+      tdsLowerDeduction: true,
+      tdsCertificateNo: true,
+      tdsSection: true,
+      tdsRatePercent: true,
+      tdsValidFrom: true,
+      tdsValidTo: true,
       fleetSummary: true,
       onboardingStatus: true,
       adminRemarks: true,
@@ -53,9 +86,21 @@ export const getMyVendor = asyncHandler(async (req: Request, res: Response) => {
       bankAccountType: true,
       bankAccountHolderName: true,
       bankAccountNoLast4: true,
+      bankMicr: true,
+      bankIban: true,
+      bankSwift: true,
+      communicationNotes: true,
       operatingRegions: { select: { stateCode: true } },
       contacts: {
-        select: { id: true, name: true, mobile: true, telephone: true, email: true, isPrimary: true },
+        select: {
+          id: true,
+          name: true,
+          mobile: true,
+          telephone: true,
+          email: true,
+          isPrimary: true,
+          receivesRfqs: true,
+        },
         orderBy: { isPrimary: "desc" },
       },
       createdAt: true,
@@ -78,6 +123,15 @@ export const getMyVendor = asyncHandler(async (req: Request, res: Response) => {
       bankMasked: true,
     },
   });
+});
+
+/**
+ * BPD 6.10 discovery view of a vendor: fleet, categories and participation.
+ * Additive to the approval detail, which keeps the registration form and the
+ * admin-only bank block; this endpoint never selects bank columns.
+ */
+export const insight = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ profile: await vendorInsights(actorOf(req), param(req, "vendorId")) });
 });
 
 /** Reference data the onboarding and fleet forms need. */

@@ -169,6 +169,8 @@ export type StateWhereInput = {
   vendorsOperating?: Prisma.StateVendorRegionListRelationFilter
   rfqs?: Prisma.RfqListRelationFilter
   cranes?: Prisma.CraneListRelationFilter
+  vendorsWithAddress?: Prisma.VendorListRelationFilter
+  enquiries?: Prisma.EnquiryListRelationFilter
 }
 
 export type StateOrderByWithRelationInput = {
@@ -178,6 +180,8 @@ export type StateOrderByWithRelationInput = {
   vendorsOperating?: Prisma.StateVendorRegionOrderByRelationAggregateInput
   rfqs?: Prisma.RfqOrderByRelationAggregateInput
   cranes?: Prisma.CraneOrderByRelationAggregateInput
+  vendorsWithAddress?: Prisma.VendorOrderByRelationAggregateInput
+  enquiries?: Prisma.EnquiryOrderByRelationAggregateInput
 }
 
 export type StateWhereUniqueInput = Prisma.AtLeast<{
@@ -190,6 +194,8 @@ export type StateWhereUniqueInput = Prisma.AtLeast<{
   vendorsOperating?: Prisma.StateVendorRegionListRelationFilter
   rfqs?: Prisma.RfqListRelationFilter
   cranes?: Prisma.CraneListRelationFilter
+  vendorsWithAddress?: Prisma.VendorListRelationFilter
+  enquiries?: Prisma.EnquiryListRelationFilter
 }, "code" | "name">
 
 export type StateOrderByWithAggregationInput = {
@@ -217,6 +223,8 @@ export type StateCreateInput = {
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateUncheckedCreateInput = {
@@ -226,6 +234,8 @@ export type StateUncheckedCreateInput = {
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateUpdateInput = {
@@ -235,6 +245,8 @@ export type StateUpdateInput = {
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateUncheckedUpdateInput = {
@@ -244,6 +256,8 @@ export type StateUncheckedUpdateInput = {
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateCreateManyInput = {
@@ -287,6 +301,11 @@ export type StateScalarRelationFilter = {
   isNot?: Prisma.StateWhereInput
 }
 
+export type StateNullableScalarRelationFilter = {
+  is?: Prisma.StateWhereInput | null
+  isNot?: Prisma.StateWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -307,6 +326,22 @@ export type StateUpdateOneRequiredWithoutVendorsOperatingNestedInput = {
   upsert?: Prisma.StateUpsertWithoutVendorsOperatingInput
   connect?: Prisma.StateWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.StateUpdateToOneWithWhereWithoutVendorsOperatingInput, Prisma.StateUpdateWithoutVendorsOperatingInput>, Prisma.StateUncheckedUpdateWithoutVendorsOperatingInput>
+}
+
+export type StateCreateNestedOneWithoutVendorsWithAddressInput = {
+  create?: Prisma.XOR<Prisma.StateCreateWithoutVendorsWithAddressInput, Prisma.StateUncheckedCreateWithoutVendorsWithAddressInput>
+  connectOrCreate?: Prisma.StateCreateOrConnectWithoutVendorsWithAddressInput
+  connect?: Prisma.StateWhereUniqueInput
+}
+
+export type StateUpdateOneWithoutVendorsWithAddressNestedInput = {
+  create?: Prisma.XOR<Prisma.StateCreateWithoutVendorsWithAddressInput, Prisma.StateUncheckedCreateWithoutVendorsWithAddressInput>
+  connectOrCreate?: Prisma.StateCreateOrConnectWithoutVendorsWithAddressInput
+  upsert?: Prisma.StateUpsertWithoutVendorsWithAddressInput
+  disconnect?: Prisma.StateWhereInput | boolean
+  delete?: Prisma.StateWhereInput | boolean
+  connect?: Prisma.StateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StateUpdateToOneWithWhereWithoutVendorsWithAddressInput, Prisma.StateUpdateWithoutVendorsWithAddressInput>, Prisma.StateUncheckedUpdateWithoutVendorsWithAddressInput>
 }
 
 export type StateCreateNestedOneWithoutCranesInput = {
@@ -337,12 +372,28 @@ export type StateUpdateOneRequiredWithoutRfqsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StateUpdateToOneWithWhereWithoutRfqsInput, Prisma.StateUpdateWithoutRfqsInput>, Prisma.StateUncheckedUpdateWithoutRfqsInput>
 }
 
+export type StateCreateNestedOneWithoutEnquiriesInput = {
+  create?: Prisma.XOR<Prisma.StateCreateWithoutEnquiriesInput, Prisma.StateUncheckedCreateWithoutEnquiriesInput>
+  connectOrCreate?: Prisma.StateCreateOrConnectWithoutEnquiriesInput
+  connect?: Prisma.StateWhereUniqueInput
+}
+
+export type StateUpdateOneRequiredWithoutEnquiriesNestedInput = {
+  create?: Prisma.XOR<Prisma.StateCreateWithoutEnquiriesInput, Prisma.StateUncheckedCreateWithoutEnquiriesInput>
+  connectOrCreate?: Prisma.StateCreateOrConnectWithoutEnquiriesInput
+  upsert?: Prisma.StateUpsertWithoutEnquiriesInput
+  connect?: Prisma.StateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StateUpdateToOneWithWhereWithoutEnquiriesInput, Prisma.StateUpdateWithoutEnquiriesInput>, Prisma.StateUncheckedUpdateWithoutEnquiriesInput>
+}
+
 export type StateCreateWithoutVendorsOperatingInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateUncheckedCreateWithoutVendorsOperatingInput = {
@@ -351,6 +402,8 @@ export type StateUncheckedCreateWithoutVendorsOperatingInput = {
   isUnionTerritory?: boolean
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateCreateOrConnectWithoutVendorsOperatingInput = {
@@ -375,6 +428,8 @@ export type StateUpdateWithoutVendorsOperatingInput = {
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateUncheckedUpdateWithoutVendorsOperatingInput = {
@@ -383,6 +438,64 @@ export type StateUncheckedUpdateWithoutVendorsOperatingInput = {
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutSiteStateNestedInput
+}
+
+export type StateCreateWithoutVendorsWithAddressInput = {
+  code: string
+  name: string
+  isUnionTerritory?: boolean
+  vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
+  rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
+  cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
+  enquiries?: Prisma.EnquiryCreateNestedManyWithoutSiteStateInput
+}
+
+export type StateUncheckedCreateWithoutVendorsWithAddressInput = {
+  code: string
+  name: string
+  isUnionTerritory?: boolean
+  vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
+  rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
+  enquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutSiteStateInput
+}
+
+export type StateCreateOrConnectWithoutVendorsWithAddressInput = {
+  where: Prisma.StateWhereUniqueInput
+  create: Prisma.XOR<Prisma.StateCreateWithoutVendorsWithAddressInput, Prisma.StateUncheckedCreateWithoutVendorsWithAddressInput>
+}
+
+export type StateUpsertWithoutVendorsWithAddressInput = {
+  update: Prisma.XOR<Prisma.StateUpdateWithoutVendorsWithAddressInput, Prisma.StateUncheckedUpdateWithoutVendorsWithAddressInput>
+  create: Prisma.XOR<Prisma.StateCreateWithoutVendorsWithAddressInput, Prisma.StateUncheckedCreateWithoutVendorsWithAddressInput>
+  where?: Prisma.StateWhereInput
+}
+
+export type StateUpdateToOneWithWhereWithoutVendorsWithAddressInput = {
+  where?: Prisma.StateWhereInput
+  data: Prisma.XOR<Prisma.StateUpdateWithoutVendorsWithAddressInput, Prisma.StateUncheckedUpdateWithoutVendorsWithAddressInput>
+}
+
+export type StateUpdateWithoutVendorsWithAddressInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
+  rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
+  cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
+  enquiries?: Prisma.EnquiryUpdateManyWithoutSiteStateNestedInput
+}
+
+export type StateUncheckedUpdateWithoutVendorsWithAddressInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
+  rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
+  enquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateCreateWithoutCranesInput = {
@@ -391,6 +504,8 @@ export type StateCreateWithoutCranesInput = {
   isUnionTerritory?: boolean
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
+  vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateUncheckedCreateWithoutCranesInput = {
@@ -399,6 +514,8 @@ export type StateUncheckedCreateWithoutCranesInput = {
   isUnionTerritory?: boolean
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
+  vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateCreateOrConnectWithoutCranesInput = {
@@ -423,6 +540,8 @@ export type StateUpdateWithoutCranesInput = {
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateUncheckedUpdateWithoutCranesInput = {
@@ -431,6 +550,8 @@ export type StateUncheckedUpdateWithoutCranesInput = {
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateCreateWithoutRfqsInput = {
@@ -439,6 +560,8 @@ export type StateCreateWithoutRfqsInput = {
   isUnionTerritory?: boolean
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateUncheckedCreateWithoutRfqsInput = {
@@ -447,6 +570,8 @@ export type StateUncheckedCreateWithoutRfqsInput = {
   isUnionTerritory?: boolean
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
+  enquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutSiteStateInput
 }
 
 export type StateCreateOrConnectWithoutRfqsInput = {
@@ -471,6 +596,8 @@ export type StateUpdateWithoutRfqsInput = {
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUpdateManyWithoutSiteStateNestedInput
 }
 
 export type StateUncheckedUpdateWithoutRfqsInput = {
@@ -479,6 +606,64 @@ export type StateUncheckedUpdateWithoutRfqsInput = {
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
+  enquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutSiteStateNestedInput
+}
+
+export type StateCreateWithoutEnquiriesInput = {
+  code: string
+  name: string
+  isUnionTerritory?: boolean
+  vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
+  rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
+  cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
+}
+
+export type StateUncheckedCreateWithoutEnquiriesInput = {
+  code: string
+  name: string
+  isUnionTerritory?: boolean
+  vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
+  rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
+  vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
+}
+
+export type StateCreateOrConnectWithoutEnquiriesInput = {
+  where: Prisma.StateWhereUniqueInput
+  create: Prisma.XOR<Prisma.StateCreateWithoutEnquiriesInput, Prisma.StateUncheckedCreateWithoutEnquiriesInput>
+}
+
+export type StateUpsertWithoutEnquiriesInput = {
+  update: Prisma.XOR<Prisma.StateUpdateWithoutEnquiriesInput, Prisma.StateUncheckedUpdateWithoutEnquiriesInput>
+  create: Prisma.XOR<Prisma.StateCreateWithoutEnquiriesInput, Prisma.StateUncheckedCreateWithoutEnquiriesInput>
+  where?: Prisma.StateWhereInput
+}
+
+export type StateUpdateToOneWithWhereWithoutEnquiriesInput = {
+  where?: Prisma.StateWhereInput
+  data: Prisma.XOR<Prisma.StateUpdateWithoutEnquiriesInput, Prisma.StateUncheckedUpdateWithoutEnquiriesInput>
+}
+
+export type StateUpdateWithoutEnquiriesInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
+  rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
+  cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
+}
+
+export type StateUncheckedUpdateWithoutEnquiriesInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
+  rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
+  vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
 }
 
 
@@ -490,12 +675,16 @@ export type StateCountOutputType = {
   vendorsOperating: number
   rfqs: number
   cranes: number
+  vendorsWithAddress: number
+  enquiries: number
 }
 
 export type StateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendorsOperating?: boolean | StateCountOutputTypeCountVendorsOperatingArgs
   rfqs?: boolean | StateCountOutputTypeCountRfqsArgs
   cranes?: boolean | StateCountOutputTypeCountCranesArgs
+  vendorsWithAddress?: boolean | StateCountOutputTypeCountVendorsWithAddressArgs
+  enquiries?: boolean | StateCountOutputTypeCountEnquiriesArgs
 }
 
 /**
@@ -529,6 +718,20 @@ export type StateCountOutputTypeCountCranesArgs<ExtArgs extends runtime.Types.Ex
   where?: Prisma.CraneWhereInput
 }
 
+/**
+ * StateCountOutputType without action
+ */
+export type StateCountOutputTypeCountVendorsWithAddressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VendorWhereInput
+}
+
+/**
+ * StateCountOutputType without action
+ */
+export type StateCountOutputTypeCountEnquiriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EnquiryWhereInput
+}
+
 
 export type StateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
@@ -537,6 +740,8 @@ export type StateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   vendorsOperating?: boolean | Prisma.State$vendorsOperatingArgs<ExtArgs>
   rfqs?: boolean | Prisma.State$rfqsArgs<ExtArgs>
   cranes?: boolean | Prisma.State$cranesArgs<ExtArgs>
+  vendorsWithAddress?: boolean | Prisma.State$vendorsWithAddressArgs<ExtArgs>
+  enquiries?: boolean | Prisma.State$enquiriesArgs<ExtArgs>
   _count?: boolean | Prisma.StateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["state"]>
 
@@ -563,6 +768,8 @@ export type StateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   vendorsOperating?: boolean | Prisma.State$vendorsOperatingArgs<ExtArgs>
   rfqs?: boolean | Prisma.State$rfqsArgs<ExtArgs>
   cranes?: boolean | Prisma.State$cranesArgs<ExtArgs>
+  vendorsWithAddress?: boolean | Prisma.State$vendorsWithAddressArgs<ExtArgs>
+  enquiries?: boolean | Prisma.State$enquiriesArgs<ExtArgs>
   _count?: boolean | Prisma.StateCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -574,6 +781,8 @@ export type $StatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     vendorsOperating: Prisma.$StateVendorRegionPayload<ExtArgs>[]
     rfqs: Prisma.$RfqPayload<ExtArgs>[]
     cranes: Prisma.$CranePayload<ExtArgs>[]
+    vendorsWithAddress: Prisma.$VendorPayload<ExtArgs>[]
+    enquiries: Prisma.$EnquiryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     code: string
@@ -976,6 +1185,8 @@ export interface Prisma__StateClient<T, Null = never, ExtArgs extends runtime.Ty
   vendorsOperating<T extends Prisma.State$vendorsOperatingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.State$vendorsOperatingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StateVendorRegionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rfqs<T extends Prisma.State$rfqsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.State$rfqsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cranes<T extends Prisma.State$cranesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.State$cranesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CranePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  vendorsWithAddress<T extends Prisma.State$vendorsWithAddressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.State$vendorsWithAddressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  enquiries<T extends Prisma.State$enquiriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.State$enquiriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnquiryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1470,6 +1681,54 @@ export type State$cranesArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.CraneScalarFieldEnum | Prisma.CraneScalarFieldEnum[]
+}
+
+/**
+ * State.vendorsWithAddress
+ */
+export type State$vendorsWithAddressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Vendor
+   */
+  select?: Prisma.VendorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Vendor
+   */
+  omit?: Prisma.VendorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VendorInclude<ExtArgs> | null
+  where?: Prisma.VendorWhereInput
+  orderBy?: Prisma.VendorOrderByWithRelationInput | Prisma.VendorOrderByWithRelationInput[]
+  cursor?: Prisma.VendorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VendorScalarFieldEnum | Prisma.VendorScalarFieldEnum[]
+}
+
+/**
+ * State.enquiries
+ */
+export type State$enquiriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Enquiry
+   */
+  select?: Prisma.EnquirySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Enquiry
+   */
+  omit?: Prisma.EnquiryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnquiryInclude<ExtArgs> | null
+  where?: Prisma.EnquiryWhereInput
+  orderBy?: Prisma.EnquiryOrderByWithRelationInput | Prisma.EnquiryOrderByWithRelationInput[]
+  cursor?: Prisma.EnquiryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EnquiryScalarFieldEnum | Prisma.EnquiryScalarFieldEnum[]
 }
 
 /**

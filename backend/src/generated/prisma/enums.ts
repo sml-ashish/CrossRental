@@ -47,6 +47,16 @@ export const GstFilingFrequency = {
 export type GstFilingFrequency = (typeof GstFilingFrequency)[keyof typeof GstFilingFrequency]
 
 
+export const GstRegistrationType = {
+  REGULAR: 'REGULAR',
+  COMPOSITE: 'COMPOSITE',
+  SEZ: 'SEZ',
+  EOU: 'EOU'
+} as const
+
+export type GstRegistrationType = (typeof GstRegistrationType)[keyof typeof GstRegistrationType]
+
+
 export const MsmeCategory = {
   MICRO: 'MICRO',
   SMALL: 'SMALL',
@@ -86,6 +96,9 @@ export const DocumentType = {
   CANCELLED_CHEQUE: 'CANCELLED_CHEQUE',
   GST_CERTIFICATE: 'GST_CERTIFICATE',
   PAN_COPY: 'PAN_COPY',
+  DECLARATION_SCAN: 'DECLARATION_SCAN',
+  TDS_CERTIFICATE: 'TDS_CERTIFICATE',
+  MSME_CERTIFICATE: 'MSME_CERTIFICATE',
   OTHER: 'OTHER'
 } as const
 
@@ -101,6 +114,59 @@ export const CraneStatus = {
 } as const
 
 export type CraneStatus = (typeof CraneStatus)[keyof typeof CraneStatus]
+
+
+export const ReservationType = {
+  BOOKED: 'BOOKED',
+  BLOCKED: 'BLOCKED'
+} as const
+
+export type ReservationType = (typeof ReservationType)[keyof typeof ReservationType]
+
+
+export const EnquirySource = {
+  manual: 'manual'
+} as const
+
+export type EnquirySource = (typeof EnquirySource)[keyof typeof EnquirySource]
+
+
+export const EnquiryOverallStatus = {
+  RECEIVED_PENDING_SOURCING: 'RECEIVED_PENDING_SOURCING',
+  PARTIALLY_QUOTED: 'PARTIALLY_QUOTED',
+  PARTIALLY_FINALISED: 'PARTIALLY_FINALISED',
+  FULLY_FINALISED: 'FULLY_FINALISED',
+  CLOSED: 'CLOSED'
+} as const
+
+export type EnquiryOverallStatus = (typeof EnquiryOverallStatus)[keyof typeof EnquiryOverallStatus]
+
+
+export const EnquiryLineTrailStatus = {
+  NEW: 'NEW',
+  AVAILABILITY_CHECK: 'AVAILABILITY_CHECK',
+  VENDOR_SHORTLISTED: 'VENDOR_SHORTLISTED',
+  RFQ_SENT: 'RFQ_SENT',
+  AWAITING_QUOTES: 'AWAITING_QUOTES',
+  QUOTES_RECEIVED: 'QUOTES_RECEIVED',
+  UNDER_EVALUATION: 'UNDER_EVALUATION',
+  VENDOR_FINALISED: 'VENDOR_FINALISED',
+  BOOKED: 'BOOKED',
+  CLOSED: 'CLOSED',
+  FULFILLED_INTERNALLY: 'FULFILLED_INTERNALLY',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type EnquiryLineTrailStatus = (typeof EnquiryLineTrailStatus)[keyof typeof EnquiryLineTrailStatus]
+
+
+export const ReservationStatus = {
+  ACTIVE: 'ACTIVE',
+  RELEASED: 'RELEASED',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type ReservationStatus = (typeof ReservationStatus)[keyof typeof ReservationStatus]
 
 
 export const OwnershipType = {
@@ -172,6 +238,22 @@ export const RateBasis = {
 } as const
 
 export type RateBasis = (typeof RateBasis)[keyof typeof RateBasis]
+
+
+export const TaxBasisOfQuotation = {
+  EXCLUSIVE_OF_GST: 'EXCLUSIVE_OF_GST',
+  INCLUSIVE_OF_GST: 'INCLUSIVE_OF_GST'
+} as const
+
+export type TaxBasisOfQuotation = (typeof TaxBasisOfQuotation)[keyof typeof TaxBasisOfQuotation]
+
+
+export const CapacityRule = {
+  AT_LEAST: 'AT_LEAST',
+  EXACT: 'EXACT'
+} as const
+
+export type CapacityRule = (typeof CapacityRule)[keyof typeof CapacityRule]
 
 
 export const DurationUnit = {

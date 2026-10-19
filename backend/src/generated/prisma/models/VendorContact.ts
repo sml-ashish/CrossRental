@@ -32,6 +32,7 @@ export type VendorContactMinAggregateOutputType = {
   telephone: string | null
   email: string | null
   isPrimary: boolean | null
+  receivesRfqs: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +45,7 @@ export type VendorContactMaxAggregateOutputType = {
   telephone: string | null
   email: string | null
   isPrimary: boolean | null
+  receivesRfqs: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +58,7 @@ export type VendorContactCountAggregateOutputType = {
   telephone: number
   email: number
   isPrimary: number
+  receivesRfqs: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -70,6 +73,7 @@ export type VendorContactMinAggregateInputType = {
   telephone?: true
   email?: true
   isPrimary?: true
+  receivesRfqs?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +86,7 @@ export type VendorContactMaxAggregateInputType = {
   telephone?: true
   email?: true
   isPrimary?: true
+  receivesRfqs?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -94,6 +99,7 @@ export type VendorContactCountAggregateInputType = {
   telephone?: true
   email?: true
   isPrimary?: true
+  receivesRfqs?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -179,6 +185,7 @@ export type VendorContactGroupByOutputType = {
   telephone: string | null
   email: string | null
   isPrimary: boolean
+  receivesRfqs: boolean
   createdAt: Date
   updatedAt: Date
   _count: VendorContactCountAggregateOutputType | null
@@ -212,6 +219,7 @@ export type VendorContactWhereInput = {
   telephone?: Prisma.StringNullableFilter<"VendorContact"> | string | null
   email?: Prisma.StringNullableFilter<"VendorContact"> | string | null
   isPrimary?: Prisma.BoolFilter<"VendorContact"> | boolean
+  receivesRfqs?: Prisma.BoolFilter<"VendorContact"> | boolean
   createdAt?: Prisma.DateTimeFilter<"VendorContact"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VendorContact"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
@@ -225,6 +233,7 @@ export type VendorContactOrderByWithRelationInput = {
   telephone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  receivesRfqs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   vendor?: Prisma.VendorOrderByWithRelationInput
@@ -241,6 +250,7 @@ export type VendorContactWhereUniqueInput = Prisma.AtLeast<{
   mobile?: Prisma.StringFilter<"VendorContact"> | string
   telephone?: Prisma.StringNullableFilter<"VendorContact"> | string | null
   isPrimary?: Prisma.BoolFilter<"VendorContact"> | boolean
+  receivesRfqs?: Prisma.BoolFilter<"VendorContact"> | boolean
   createdAt?: Prisma.DateTimeFilter<"VendorContact"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VendorContact"> | Date | string
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
@@ -254,6 +264,7 @@ export type VendorContactOrderByWithAggregationInput = {
   telephone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  receivesRfqs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.VendorContactCountOrderByAggregateInput
@@ -272,6 +283,7 @@ export type VendorContactScalarWhereWithAggregatesInput = {
   telephone?: Prisma.StringNullableWithAggregatesFilter<"VendorContact"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"VendorContact"> | string | null
   isPrimary?: Prisma.BoolWithAggregatesFilter<"VendorContact"> | boolean
+  receivesRfqs?: Prisma.BoolWithAggregatesFilter<"VendorContact"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"VendorContact"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"VendorContact"> | Date | string
 }
@@ -283,6 +295,7 @@ export type VendorContactCreateInput = {
   telephone?: string | null
   email?: string | null
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   vendor: Prisma.VendorCreateNestedOneWithoutContactsInput
@@ -296,6 +309,7 @@ export type VendorContactUncheckedCreateInput = {
   telephone?: string | null
   email?: string | null
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -307,6 +321,7 @@ export type VendorContactUpdateInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.VendorUpdateOneRequiredWithoutContactsNestedInput
@@ -320,6 +335,7 @@ export type VendorContactUncheckedUpdateInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -332,6 +348,7 @@ export type VendorContactCreateManyInput = {
   telephone?: string | null
   email?: string | null
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -343,6 +360,7 @@ export type VendorContactUpdateManyMutationInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -355,6 +373,7 @@ export type VendorContactUncheckedUpdateManyInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -377,6 +396,7 @@ export type VendorContactCountOrderByAggregateInput = {
   telephone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  receivesRfqs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -389,6 +409,7 @@ export type VendorContactMaxOrderByAggregateInput = {
   telephone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  receivesRfqs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -401,6 +422,7 @@ export type VendorContactMinOrderByAggregateInput = {
   telephone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   isPrimary?: Prisma.SortOrder
+  receivesRfqs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -454,6 +476,7 @@ export type VendorContactCreateWithoutVendorInput = {
   telephone?: string | null
   email?: string | null
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -465,6 +488,7 @@ export type VendorContactUncheckedCreateWithoutVendorInput = {
   telephone?: string | null
   email?: string | null
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -506,6 +530,7 @@ export type VendorContactScalarWhereInput = {
   telephone?: Prisma.StringNullableFilter<"VendorContact"> | string | null
   email?: Prisma.StringNullableFilter<"VendorContact"> | string | null
   isPrimary?: Prisma.BoolFilter<"VendorContact"> | boolean
+  receivesRfqs?: Prisma.BoolFilter<"VendorContact"> | boolean
   createdAt?: Prisma.DateTimeFilter<"VendorContact"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VendorContact"> | Date | string
 }
@@ -517,6 +542,7 @@ export type VendorContactCreateManyVendorInput = {
   telephone?: string | null
   email?: string | null
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -528,6 +554,7 @@ export type VendorContactUpdateWithoutVendorInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -539,6 +566,7 @@ export type VendorContactUncheckedUpdateWithoutVendorInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -550,6 +578,7 @@ export type VendorContactUncheckedUpdateManyWithoutVendorInput = {
   telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  receivesRfqs?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -564,6 +593,7 @@ export type VendorContactSelect<ExtArgs extends runtime.Types.Extensions.Interna
   telephone?: boolean
   email?: boolean
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -577,6 +607,7 @@ export type VendorContactSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   telephone?: boolean
   email?: boolean
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -590,6 +621,7 @@ export type VendorContactSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   telephone?: boolean
   email?: boolean
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -603,11 +635,12 @@ export type VendorContactSelectScalar = {
   telephone?: boolean
   email?: boolean
   isPrimary?: boolean
+  receivesRfqs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type VendorContactOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "name" | "mobile" | "telephone" | "email" | "isPrimary" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorContact"]>
+export type VendorContactOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "name" | "mobile" | "telephone" | "email" | "isPrimary" | "receivesRfqs" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorContact"]>
 export type VendorContactInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
 }
@@ -631,6 +664,7 @@ export type $VendorContactPayload<ExtArgs extends runtime.Types.Extensions.Inter
     telephone: string | null
     email: string | null
     isPrimary: boolean
+    receivesRfqs: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["vendorContact"]>
@@ -1064,6 +1098,7 @@ export interface VendorContactFieldRefs {
   readonly telephone: Prisma.FieldRef<"VendorContact", 'String'>
   readonly email: Prisma.FieldRef<"VendorContact", 'String'>
   readonly isPrimary: Prisma.FieldRef<"VendorContact", 'Boolean'>
+  readonly receivesRfqs: Prisma.FieldRef<"VendorContact", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"VendorContact", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"VendorContact", 'DateTime'>
 }

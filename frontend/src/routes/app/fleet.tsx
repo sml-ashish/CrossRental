@@ -134,7 +134,7 @@ export function FleetPage() {
         <button
           type="button"
           className="btn-primary"
-          onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined } })}
+          onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined, vendorId: undefined } })}
         >
           <Plus className="size-4" aria-hidden /> Add crane
         </button>
@@ -229,7 +229,7 @@ export function FleetPage() {
             <button
               type="button"
               className="btn-primary mt-4"
-              onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined } })}
+              onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined, vendorId: undefined } })}
             >
               <Plus className="size-4" aria-hidden /> Add crane
             </button>
@@ -248,7 +248,7 @@ export function FleetPage() {
                     success: "Marked as still accurate.",
                   })
                 }
-                onDuplicate={() => void navigate({ to: "/app/fleet/new", search: { duplicate: crane.id } })}
+                onDuplicate={() => void navigate({ to: "/app/fleet/new", search: { duplicate: crane.id, vendorId: undefined } })}
                 onUploadChart={(file) => uploadChart.mutate({ craneId: crane.id, file })}
                 onDownloadChart={() => {
                   void downloadLoadChart(crane).catch((error: unknown) =>
@@ -315,6 +315,9 @@ function CraneRow({
               <Badge tone="amber">Update due</Badge>
             ) : null}
             {!crane.isActive ? <Badge tone="neutral">Deactivated</Badge> : null}
+            {crane.updatedOnBehalf ? (
+              <Badge tone="blue">Updated by SML on your behalf</Badge>
+            ) : null}
           </div>
           <p className="mt-1 text-sm text-slate-600">
             {crane.make} {crane.model} · {crane.capacityT}T · {crane.yom}
@@ -336,6 +339,9 @@ function CraneRow({
             </span>
             {crane.availableFrom ? (
               <span>Available from {formatDate(crane.availableFrom)}</span>
+            ) : null}
+            {crane.expectedReadyDate ? (
+              <span>Expected ready {formatDate(crane.expectedReadyDate)}</span>
             ) : null}
             <span>
               Data last confirmed {crane.freshness.daysSinceUpdate}{" "}

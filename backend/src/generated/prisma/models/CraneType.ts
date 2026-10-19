@@ -202,6 +202,8 @@ export type CraneTypeWhereInput = {
   sortOrder?: Prisma.IntFilter<"CraneType"> | number
   cranes?: Prisma.CraneListRelationFilter
   rfqCandidates?: Prisma.RfqListRelationFilter
+  enquiryLines?: Prisma.EnquiryLineItemListRelationFilter
+  mobilisationRates?: Prisma.MobilisationRateListRelationFilter
 }
 
 export type CraneTypeOrderByWithRelationInput = {
@@ -210,6 +212,8 @@ export type CraneTypeOrderByWithRelationInput = {
   sortOrder?: Prisma.SortOrder
   cranes?: Prisma.CraneOrderByRelationAggregateInput
   rfqCandidates?: Prisma.RfqOrderByRelationAggregateInput
+  enquiryLines?: Prisma.EnquiryLineItemOrderByRelationAggregateInput
+  mobilisationRates?: Prisma.MobilisationRateOrderByRelationAggregateInput
 }
 
 export type CraneTypeWhereUniqueInput = Prisma.AtLeast<{
@@ -221,6 +225,8 @@ export type CraneTypeWhereUniqueInput = Prisma.AtLeast<{
   sortOrder?: Prisma.IntFilter<"CraneType"> | number
   cranes?: Prisma.CraneListRelationFilter
   rfqCandidates?: Prisma.RfqListRelationFilter
+  enquiryLines?: Prisma.EnquiryLineItemListRelationFilter
+  mobilisationRates?: Prisma.MobilisationRateListRelationFilter
 }, "code" | "name">
 
 export type CraneTypeOrderByWithAggregationInput = {
@@ -249,6 +255,8 @@ export type CraneTypeCreateInput = {
   sortOrder?: number
   cranes?: Prisma.CraneCreateNestedManyWithoutTypeOfCraneInput
   rfqCandidates?: Prisma.RfqCreateNestedManyWithoutCraneTypeRefInput
+  enquiryLines?: Prisma.EnquiryLineItemCreateNestedManyWithoutCraneTypeInput
+  mobilisationRates?: Prisma.MobilisationRateCreateNestedManyWithoutCraneTypeInput
 }
 
 export type CraneTypeUncheckedCreateInput = {
@@ -257,6 +265,8 @@ export type CraneTypeUncheckedCreateInput = {
   sortOrder?: number
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutTypeOfCraneInput
   rfqCandidates?: Prisma.RfqUncheckedCreateNestedManyWithoutCraneTypeRefInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedCreateNestedManyWithoutCraneTypeInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedCreateNestedManyWithoutCraneTypeInput
 }
 
 export type CraneTypeUpdateInput = {
@@ -265,6 +275,8 @@ export type CraneTypeUpdateInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   cranes?: Prisma.CraneUpdateManyWithoutTypeOfCraneNestedInput
   rfqCandidates?: Prisma.RfqUpdateManyWithoutCraneTypeRefNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUpdateManyWithoutCraneTypeNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUpdateManyWithoutCraneTypeNestedInput
 }
 
 export type CraneTypeUncheckedUpdateInput = {
@@ -273,6 +285,8 @@ export type CraneTypeUncheckedUpdateInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutTypeOfCraneNestedInput
   rfqCandidates?: Prisma.RfqUncheckedUpdateManyWithoutCraneTypeRefNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedUpdateManyWithoutCraneTypeNestedInput
 }
 
 export type CraneTypeCreateManyInput = {
@@ -324,6 +338,11 @@ export type CraneTypeScalarRelationFilter = {
   isNot?: Prisma.CraneTypeWhereInput
 }
 
+export type CraneTypeNullableScalarRelationFilter = {
+  is?: Prisma.CraneTypeWhereInput | null
+  isNot?: Prisma.CraneTypeWhereInput | null
+}
+
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
@@ -360,11 +379,43 @@ export type CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CraneTypeUpdateToOneWithWhereWithoutRfqCandidatesInput, Prisma.CraneTypeUpdateWithoutRfqCandidatesInput>, Prisma.CraneTypeUncheckedUpdateWithoutRfqCandidatesInput>
 }
 
+export type CraneTypeCreateNestedOneWithoutEnquiryLinesInput = {
+  create?: Prisma.XOR<Prisma.CraneTypeCreateWithoutEnquiryLinesInput, Prisma.CraneTypeUncheckedCreateWithoutEnquiryLinesInput>
+  connectOrCreate?: Prisma.CraneTypeCreateOrConnectWithoutEnquiryLinesInput
+  connect?: Prisma.CraneTypeWhereUniqueInput
+}
+
+export type CraneTypeUpdateOneWithoutEnquiryLinesNestedInput = {
+  create?: Prisma.XOR<Prisma.CraneTypeCreateWithoutEnquiryLinesInput, Prisma.CraneTypeUncheckedCreateWithoutEnquiryLinesInput>
+  connectOrCreate?: Prisma.CraneTypeCreateOrConnectWithoutEnquiryLinesInput
+  upsert?: Prisma.CraneTypeUpsertWithoutEnquiryLinesInput
+  disconnect?: Prisma.CraneTypeWhereInput | boolean
+  delete?: Prisma.CraneTypeWhereInput | boolean
+  connect?: Prisma.CraneTypeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CraneTypeUpdateToOneWithWhereWithoutEnquiryLinesInput, Prisma.CraneTypeUpdateWithoutEnquiryLinesInput>, Prisma.CraneTypeUncheckedUpdateWithoutEnquiryLinesInput>
+}
+
+export type CraneTypeCreateNestedOneWithoutMobilisationRatesInput = {
+  create?: Prisma.XOR<Prisma.CraneTypeCreateWithoutMobilisationRatesInput, Prisma.CraneTypeUncheckedCreateWithoutMobilisationRatesInput>
+  connectOrCreate?: Prisma.CraneTypeCreateOrConnectWithoutMobilisationRatesInput
+  connect?: Prisma.CraneTypeWhereUniqueInput
+}
+
+export type CraneTypeUpdateOneRequiredWithoutMobilisationRatesNestedInput = {
+  create?: Prisma.XOR<Prisma.CraneTypeCreateWithoutMobilisationRatesInput, Prisma.CraneTypeUncheckedCreateWithoutMobilisationRatesInput>
+  connectOrCreate?: Prisma.CraneTypeCreateOrConnectWithoutMobilisationRatesInput
+  upsert?: Prisma.CraneTypeUpsertWithoutMobilisationRatesInput
+  connect?: Prisma.CraneTypeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CraneTypeUpdateToOneWithWhereWithoutMobilisationRatesInput, Prisma.CraneTypeUpdateWithoutMobilisationRatesInput>, Prisma.CraneTypeUncheckedUpdateWithoutMobilisationRatesInput>
+}
+
 export type CraneTypeCreateWithoutCranesInput = {
   code: string
   name: string
   sortOrder?: number
   rfqCandidates?: Prisma.RfqCreateNestedManyWithoutCraneTypeRefInput
+  enquiryLines?: Prisma.EnquiryLineItemCreateNestedManyWithoutCraneTypeInput
+  mobilisationRates?: Prisma.MobilisationRateCreateNestedManyWithoutCraneTypeInput
 }
 
 export type CraneTypeUncheckedCreateWithoutCranesInput = {
@@ -372,6 +423,8 @@ export type CraneTypeUncheckedCreateWithoutCranesInput = {
   name: string
   sortOrder?: number
   rfqCandidates?: Prisma.RfqUncheckedCreateNestedManyWithoutCraneTypeRefInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedCreateNestedManyWithoutCraneTypeInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedCreateNestedManyWithoutCraneTypeInput
 }
 
 export type CraneTypeCreateOrConnectWithoutCranesInput = {
@@ -395,6 +448,8 @@ export type CraneTypeUpdateWithoutCranesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   rfqCandidates?: Prisma.RfqUpdateManyWithoutCraneTypeRefNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUpdateManyWithoutCraneTypeNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUpdateManyWithoutCraneTypeNestedInput
 }
 
 export type CraneTypeUncheckedUpdateWithoutCranesInput = {
@@ -402,6 +457,8 @@ export type CraneTypeUncheckedUpdateWithoutCranesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   rfqCandidates?: Prisma.RfqUncheckedUpdateManyWithoutCraneTypeRefNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedUpdateManyWithoutCraneTypeNestedInput
 }
 
 export type CraneTypeCreateWithoutRfqCandidatesInput = {
@@ -409,6 +466,8 @@ export type CraneTypeCreateWithoutRfqCandidatesInput = {
   name: string
   sortOrder?: number
   cranes?: Prisma.CraneCreateNestedManyWithoutTypeOfCraneInput
+  enquiryLines?: Prisma.EnquiryLineItemCreateNestedManyWithoutCraneTypeInput
+  mobilisationRates?: Prisma.MobilisationRateCreateNestedManyWithoutCraneTypeInput
 }
 
 export type CraneTypeUncheckedCreateWithoutRfqCandidatesInput = {
@@ -416,6 +475,8 @@ export type CraneTypeUncheckedCreateWithoutRfqCandidatesInput = {
   name: string
   sortOrder?: number
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutTypeOfCraneInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedCreateNestedManyWithoutCraneTypeInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedCreateNestedManyWithoutCraneTypeInput
 }
 
 export type CraneTypeCreateOrConnectWithoutRfqCandidatesInput = {
@@ -439,6 +500,8 @@ export type CraneTypeUpdateWithoutRfqCandidatesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   cranes?: Prisma.CraneUpdateManyWithoutTypeOfCraneNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUpdateManyWithoutCraneTypeNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUpdateManyWithoutCraneTypeNestedInput
 }
 
 export type CraneTypeUncheckedUpdateWithoutRfqCandidatesInput = {
@@ -446,6 +509,112 @@ export type CraneTypeUncheckedUpdateWithoutRfqCandidatesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutTypeOfCraneNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedUpdateManyWithoutCraneTypeNestedInput
+}
+
+export type CraneTypeCreateWithoutEnquiryLinesInput = {
+  code: string
+  name: string
+  sortOrder?: number
+  cranes?: Prisma.CraneCreateNestedManyWithoutTypeOfCraneInput
+  rfqCandidates?: Prisma.RfqCreateNestedManyWithoutCraneTypeRefInput
+  mobilisationRates?: Prisma.MobilisationRateCreateNestedManyWithoutCraneTypeInput
+}
+
+export type CraneTypeUncheckedCreateWithoutEnquiryLinesInput = {
+  code: string
+  name: string
+  sortOrder?: number
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutTypeOfCraneInput
+  rfqCandidates?: Prisma.RfqUncheckedCreateNestedManyWithoutCraneTypeRefInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedCreateNestedManyWithoutCraneTypeInput
+}
+
+export type CraneTypeCreateOrConnectWithoutEnquiryLinesInput = {
+  where: Prisma.CraneTypeWhereUniqueInput
+  create: Prisma.XOR<Prisma.CraneTypeCreateWithoutEnquiryLinesInput, Prisma.CraneTypeUncheckedCreateWithoutEnquiryLinesInput>
+}
+
+export type CraneTypeUpsertWithoutEnquiryLinesInput = {
+  update: Prisma.XOR<Prisma.CraneTypeUpdateWithoutEnquiryLinesInput, Prisma.CraneTypeUncheckedUpdateWithoutEnquiryLinesInput>
+  create: Prisma.XOR<Prisma.CraneTypeCreateWithoutEnquiryLinesInput, Prisma.CraneTypeUncheckedCreateWithoutEnquiryLinesInput>
+  where?: Prisma.CraneTypeWhereInput
+}
+
+export type CraneTypeUpdateToOneWithWhereWithoutEnquiryLinesInput = {
+  where?: Prisma.CraneTypeWhereInput
+  data: Prisma.XOR<Prisma.CraneTypeUpdateWithoutEnquiryLinesInput, Prisma.CraneTypeUncheckedUpdateWithoutEnquiryLinesInput>
+}
+
+export type CraneTypeUpdateWithoutEnquiryLinesInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  cranes?: Prisma.CraneUpdateManyWithoutTypeOfCraneNestedInput
+  rfqCandidates?: Prisma.RfqUpdateManyWithoutCraneTypeRefNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUpdateManyWithoutCraneTypeNestedInput
+}
+
+export type CraneTypeUncheckedUpdateWithoutEnquiryLinesInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutTypeOfCraneNestedInput
+  rfqCandidates?: Prisma.RfqUncheckedUpdateManyWithoutCraneTypeRefNestedInput
+  mobilisationRates?: Prisma.MobilisationRateUncheckedUpdateManyWithoutCraneTypeNestedInput
+}
+
+export type CraneTypeCreateWithoutMobilisationRatesInput = {
+  code: string
+  name: string
+  sortOrder?: number
+  cranes?: Prisma.CraneCreateNestedManyWithoutTypeOfCraneInput
+  rfqCandidates?: Prisma.RfqCreateNestedManyWithoutCraneTypeRefInput
+  enquiryLines?: Prisma.EnquiryLineItemCreateNestedManyWithoutCraneTypeInput
+}
+
+export type CraneTypeUncheckedCreateWithoutMobilisationRatesInput = {
+  code: string
+  name: string
+  sortOrder?: number
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutTypeOfCraneInput
+  rfqCandidates?: Prisma.RfqUncheckedCreateNestedManyWithoutCraneTypeRefInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedCreateNestedManyWithoutCraneTypeInput
+}
+
+export type CraneTypeCreateOrConnectWithoutMobilisationRatesInput = {
+  where: Prisma.CraneTypeWhereUniqueInput
+  create: Prisma.XOR<Prisma.CraneTypeCreateWithoutMobilisationRatesInput, Prisma.CraneTypeUncheckedCreateWithoutMobilisationRatesInput>
+}
+
+export type CraneTypeUpsertWithoutMobilisationRatesInput = {
+  update: Prisma.XOR<Prisma.CraneTypeUpdateWithoutMobilisationRatesInput, Prisma.CraneTypeUncheckedUpdateWithoutMobilisationRatesInput>
+  create: Prisma.XOR<Prisma.CraneTypeCreateWithoutMobilisationRatesInput, Prisma.CraneTypeUncheckedCreateWithoutMobilisationRatesInput>
+  where?: Prisma.CraneTypeWhereInput
+}
+
+export type CraneTypeUpdateToOneWithWhereWithoutMobilisationRatesInput = {
+  where?: Prisma.CraneTypeWhereInput
+  data: Prisma.XOR<Prisma.CraneTypeUpdateWithoutMobilisationRatesInput, Prisma.CraneTypeUncheckedUpdateWithoutMobilisationRatesInput>
+}
+
+export type CraneTypeUpdateWithoutMobilisationRatesInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  cranes?: Prisma.CraneUpdateManyWithoutTypeOfCraneNestedInput
+  rfqCandidates?: Prisma.RfqUpdateManyWithoutCraneTypeRefNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUpdateManyWithoutCraneTypeNestedInput
+}
+
+export type CraneTypeUncheckedUpdateWithoutMobilisationRatesInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutTypeOfCraneNestedInput
+  rfqCandidates?: Prisma.RfqUncheckedUpdateManyWithoutCraneTypeRefNestedInput
+  enquiryLines?: Prisma.EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeNestedInput
 }
 
 
@@ -456,11 +625,15 @@ export type CraneTypeUncheckedUpdateWithoutRfqCandidatesInput = {
 export type CraneTypeCountOutputType = {
   cranes: number
   rfqCandidates: number
+  enquiryLines: number
+  mobilisationRates: number
 }
 
 export type CraneTypeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cranes?: boolean | CraneTypeCountOutputTypeCountCranesArgs
   rfqCandidates?: boolean | CraneTypeCountOutputTypeCountRfqCandidatesArgs
+  enquiryLines?: boolean | CraneTypeCountOutputTypeCountEnquiryLinesArgs
+  mobilisationRates?: boolean | CraneTypeCountOutputTypeCountMobilisationRatesArgs
 }
 
 /**
@@ -487,6 +660,20 @@ export type CraneTypeCountOutputTypeCountRfqCandidatesArgs<ExtArgs extends runti
   where?: Prisma.RfqWhereInput
 }
 
+/**
+ * CraneTypeCountOutputType without action
+ */
+export type CraneTypeCountOutputTypeCountEnquiryLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EnquiryLineItemWhereInput
+}
+
+/**
+ * CraneTypeCountOutputType without action
+ */
+export type CraneTypeCountOutputTypeCountMobilisationRatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MobilisationRateWhereInput
+}
+
 
 export type CraneTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
@@ -494,6 +681,8 @@ export type CraneTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   sortOrder?: boolean
   cranes?: boolean | Prisma.CraneType$cranesArgs<ExtArgs>
   rfqCandidates?: boolean | Prisma.CraneType$rfqCandidatesArgs<ExtArgs>
+  enquiryLines?: boolean | Prisma.CraneType$enquiryLinesArgs<ExtArgs>
+  mobilisationRates?: boolean | Prisma.CraneType$mobilisationRatesArgs<ExtArgs>
   _count?: boolean | Prisma.CraneTypeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["craneType"]>
 
@@ -519,6 +708,8 @@ export type CraneTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type CraneTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cranes?: boolean | Prisma.CraneType$cranesArgs<ExtArgs>
   rfqCandidates?: boolean | Prisma.CraneType$rfqCandidatesArgs<ExtArgs>
+  enquiryLines?: boolean | Prisma.CraneType$enquiryLinesArgs<ExtArgs>
+  mobilisationRates?: boolean | Prisma.CraneType$mobilisationRatesArgs<ExtArgs>
   _count?: boolean | Prisma.CraneTypeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CraneTypeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -529,6 +720,8 @@ export type $CraneTypePayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     cranes: Prisma.$CranePayload<ExtArgs>[]
     rfqCandidates: Prisma.$RfqPayload<ExtArgs>[]
+    enquiryLines: Prisma.$EnquiryLineItemPayload<ExtArgs>[]
+    mobilisationRates: Prisma.$MobilisationRatePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     code: string
@@ -930,6 +1123,8 @@ export interface Prisma__CraneTypeClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   cranes<T extends Prisma.CraneType$cranesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CraneType$cranesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CranePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rfqCandidates<T extends Prisma.CraneType$rfqCandidatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CraneType$rfqCandidatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  enquiryLines<T extends Prisma.CraneType$enquiryLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CraneType$enquiryLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnquiryLineItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mobilisationRates<T extends Prisma.CraneType$mobilisationRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CraneType$mobilisationRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MobilisationRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1400,6 +1595,54 @@ export type CraneType$rfqCandidatesArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.RfqScalarFieldEnum | Prisma.RfqScalarFieldEnum[]
+}
+
+/**
+ * CraneType.enquiryLines
+ */
+export type CraneType$enquiryLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EnquiryLineItem
+   */
+  select?: Prisma.EnquiryLineItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EnquiryLineItem
+   */
+  omit?: Prisma.EnquiryLineItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnquiryLineItemInclude<ExtArgs> | null
+  where?: Prisma.EnquiryLineItemWhereInput
+  orderBy?: Prisma.EnquiryLineItemOrderByWithRelationInput | Prisma.EnquiryLineItemOrderByWithRelationInput[]
+  cursor?: Prisma.EnquiryLineItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EnquiryLineItemScalarFieldEnum | Prisma.EnquiryLineItemScalarFieldEnum[]
+}
+
+/**
+ * CraneType.mobilisationRates
+ */
+export type CraneType$mobilisationRatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MobilisationRate
+   */
+  select?: Prisma.MobilisationRateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MobilisationRate
+   */
+  omit?: Prisma.MobilisationRateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MobilisationRateInclude<ExtArgs> | null
+  where?: Prisma.MobilisationRateWhereInput
+  orderBy?: Prisma.MobilisationRateOrderByWithRelationInput | Prisma.MobilisationRateOrderByWithRelationInput[]
+  cursor?: Prisma.MobilisationRateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MobilisationRateScalarFieldEnum | Prisma.MobilisationRateScalarFieldEnum[]
 }
 
 /**

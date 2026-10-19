@@ -82,4 +82,32 @@ router.post("/:rfqId/cancel", requireCapability("rfq:cancel"), rfq.cancel);
 /** Manual reminder. The scheduled nudges are M7. */
 router.post("/:rfqId/remind", requireCapability("rfq:remind"), rfq.remind);
 
+/**
+ * Award (brief 6.7, M7; P3 makes it the CR path from comparison).
+ *
+ * `quotation:award` is held by admin and — since P3 — `sales_user`, so the
+ * capability check here admits the CR team; vendors are still refused. The
+ * service re-checks the role, because a route mounted too loosely later must
+ * not widen this: award books a crane and emails every vendor on the RFQ, so it
+ * is the one action worth gating twice.
+ */
+router.post(
+  "/:rfqId/quotations/:quotationId/award",
+  requireCapability("quotation:award"),
+  rfq.award,
+);
+
+/**
+ * Mark a quotation Under Review / Shortlisted / Rejected (P3, BPD 6.15).
+ *
+ * `quotation:review` is held by both internal roles; a vendor cannot reach it.
+ * The award is a separate route on purpose — a mark is a working note, the award
+ * is the commitment, and only the award path may reach Selected/Not Awarded.
+ */
+router.post(
+  "/:rfqId/quotations/:quotationId/mark",
+  requireCapability("quotation:review"),
+  rfq.mark,
+);
+
 export default router;

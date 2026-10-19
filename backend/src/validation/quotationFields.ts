@@ -24,16 +24,44 @@ import { parseDateInput, startOfUtcDay, todayUtcMidnight } from "../lib/dates";
 /** Days in a month for unit conversion. Brief 6.7 fixes this at 30. */
 export const DAYS_PER_MONTH = 30;
 
+/** Brief 6's fallback when the day basis is working days but the RFQ captured none. */
+export const DEFAULT_WORKING_DAYS_PER_MONTH = 26;
+
+/**
+ * The day-basis context an RFQ contributes to the total (brief 6): the admin
+ * setting decides which conversion applies, the RFQ supplies its own
+ * working-days figure when the working basis is chosen.
+ */
+export interface DayBasisContext {
+  rateDayBasis: "CALENDAR_DAYS" | "WORKING_DAYS_PER_MONTH";
+  workingDaysPerMonth?: number | null;
+}
+
+/** Days a month counts as, under the configured basis. */
+export function daysPerMonthFor(basis?: DayBasisContext | null): number {
+  if (basis?.rateDayBasis === "WORKING_DAYS_PER_MONTH") {
+    const days = basis.workingDaysPerMonth ?? DEFAULT_WORKING_DAYS_PER_MONTH;
+    return days > 0 ? days : DEFAULT_WORKING_DAYS_PER_MONTH;
+  }
+  return DAYS_PER_MONTH;
+}
+
 /**
  * Converts the RFQ's duration into days, the unit the total is worked out in.
  *
- * A month is 30 days by the brief's own instruction, not by any calendar
- * reckoning: the number goes in an email to a customer and has to be
- * reproducible. A duration that arrives as a fraction is kept as a fraction here
- * and rounded only at the point of display, so the vendor can see the working.
+ * A month is 30 days under the calendar basis (the brief's own instruction, not
+ * any calendar reckoning: the number goes in an email to a customer and has to
+ * be reproducible). Under the working-days basis the RFQ's captured figure —
+ * or the 26-day fallback — is used instead. A duration that arrives as a
+ * fraction is kept as a fraction here and rounded only at the point of
+ * display, so the vendor can see the working.
  */
-export function durationInDays(value: number, unit: DurationUnit): number {
-  return unit === DurationUnit.MONTHS ? value * DAYS_PER_MONTH : value;
+export function durationInDays(
+  value: number,
+  unit: DurationUnit,
+  dayBasis?: DayBasisContext | null,
+): number {
+  return unit === DurationUnit.MONTHS ? value * daysPerMonthFor(dayBasis) : value;
 }
 
 /**
@@ -54,22 +82,44 @@ export function calculateTotal(input: {
   durationValue: number;
   durationUnit: DurationUnit;
   mobilisationCharges: number;
+  demobilisationCharges?: number;
+  /** Brief 6: month conversion basis; omitted means the calendar default. */
+  dayBasis?: DayBasisContext | null;
 }): { rentalCharge: number; total: number; note: string } {
-  const { rentalRate, rateBasis, durationValue, durationUnit, mobilisationCharges } = input;
+  const {
+    rentalRate,
+    rateBasis,
+    durationValue,
+    durationUnit,
+    mobilisationCharges,
+    demobilisationCharges = 0,
+    dayBasis,
+  } = input;
+
+  // The dues and returns travel together: every line of the note names both so
+  // the arithmetic a receipt reproduces a year later is the one the vendor saw.
+  const bothCharges =
+    mobilisationCharges === 0 && demobilisationCharges === 0
+      ? ""
+      : mobilisationCharges === 0
+        ? `plus demobilisation ${money(demobilisationCharges)} `
+        : demobilisationCharges === 0
+          ? `plus mobilisation ${money(mobilisationCharges)} `
+          : `plus mobilisation ${money(mobilisationCharges)} and demobilisation ${money(demobilisationCharges)} `;
 
   if (rateBasis === RateBasis.LUMP_SUM) {
-    const total = round2(rentalRate + mobilisationCharges);
+    const total = round2(rentalRate + mobilisationCharges + demobilisationCharges);
     return {
       rentalCharge: round2(rentalRate),
       total,
-note:
-      `Lump sum ${money(rentalRate)} plus mobilisation ${money(mobilisationCharges)} ` +
-      `= ${money(total)}. A lump sum is the whole job, so the ${trimNumber(durationValue)} ` +
-      `${plural(durationUnit, durationValue)} rental period is not multiplied into it.`,
+      note:
+        `Lump sum ${money(rentalRate)} ${bothCharges}` +
+        `= ${money(total)}. A lump sum is the whole job, so the ${trimNumber(durationValue)} ` +
+        `${plural(durationUnit, durationValue)} rental period is not multiplied into it.`,
     };
   }
 
-  const days = durationInDays(durationValue, durationUnit);
+  const days = durationInDays(durationValue, durationUnit, dayBasis);
 
   let rentalCharge: number;
   let working: string;
@@ -89,20 +139,20 @@ note:
   } else {
     // A monthly rate priced against a duration given in days: turn the rate into
     // a daily one first, so the arithmetic shown matches the rate the vendor set.
-    const perDay = rentalRate / DAYS_PER_MONTH;
+    const perMonth = daysPerMonthFor(dayBasis);
+    const perDay = rentalRate / perMonth;
     rentalCharge = perDay * days;
     working =
-      `${money(rentalRate)} per month ÷ ${DAYS_PER_MONTH} days = ` +
+      `${money(rentalRate)} per month ÷ ${trimNumber(perMonth)} days = ` +
       `${money(perDay)} per day × ${trimNumber(days)} ` +
       `${plural(DurationUnit.DAYS, days)} = ${money(rentalCharge)}`;
   }
 
-  const total = round2(rentalCharge + mobilisationCharges);
+  const total = round2(rentalCharge + mobilisationCharges + demobilisationCharges);
   return {
     rentalCharge: round2(rentalCharge),
     total,
-    note:
-      `${working}, plus mobilisation ${money(mobilisationCharges)} = ${money(total)}.`,
+    note: `${working}, ${bothCharges}= ${money(total)}.`,
   };
 }
 
@@ -187,11 +237,22 @@ export const submitQuotationSchema = z.object({
     .number({ message: "Enter the mobilisation charges" })
     .min(0, "Mobilisation charges cannot be negative")
     .default(0),
+  // Brief A2: demobilisation sits beside mobilisation, defaults to 0, and is
+  // added into the total alongside it.
+  demobilisationCharges: z.coerce
+    .number({ message: "Enter the demobilisation charges" })
+    .min(0, "Demobilisation charges cannot be negative")
+    .default(0),
+  // Whether the quoted total already includes GST. A declaration for like-for-
+  // like comparison, not arithmetic; brief 6.7 defaults to Exclusive.
+  taxBasis: z
+    .enum(["EXCLUSIVE_OF_GST", "INCLUSIVE_OF_GST"])
+    .default("EXCLUSIVE_OF_GST"),
 
-  availabilityConfirmed: commercialAnswer.refine(
-    (v) => v === true,
-    "Confirm the crane is available for this requirement",
-  ),
+  // The service decides whether this is required: an RFQ whose start date is
+  // TBC (brief A3) does not ask the question, so the schema cannot refuse the
+  // answer "no" unconditionally.
+  availabilityConfirmed: commercialAnswer,
   /** Only meaningful for an Engaged crane; the service decides if it is needed. */
   availableFrom: z
     .union([z.string(), z.date(), z.null()])

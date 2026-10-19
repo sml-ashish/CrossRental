@@ -73,6 +73,8 @@ export type CraneMinAggregateOutputType = {
   geocodedBy: string | null
   geocodedAt: Date | null
   availableFrom: Date | null
+  expectedReadyDate: Date | null
+  updatedOnBehalf: boolean | null
   loadChartFileRef: string | null
   loadChartFileName: string | null
   loadChartMimeType: string | null
@@ -110,6 +112,8 @@ export type CraneMaxAggregateOutputType = {
   geocodedBy: string | null
   geocodedAt: Date | null
   availableFrom: Date | null
+  expectedReadyDate: Date | null
+  updatedOnBehalf: boolean | null
   loadChartFileRef: string | null
   loadChartFileName: string | null
   loadChartMimeType: string | null
@@ -147,6 +151,8 @@ export type CraneCountAggregateOutputType = {
   geocodedBy: number
   geocodedAt: number
   availableFrom: number
+  expectedReadyDate: number
+  updatedOnBehalf: number
   loadChartFileRef: number
   loadChartFileName: number
   loadChartMimeType: number
@@ -210,6 +216,8 @@ export type CraneMinAggregateInputType = {
   geocodedBy?: true
   geocodedAt?: true
   availableFrom?: true
+  expectedReadyDate?: true
+  updatedOnBehalf?: true
   loadChartFileRef?: true
   loadChartFileName?: true
   loadChartMimeType?: true
@@ -247,6 +255,8 @@ export type CraneMaxAggregateInputType = {
   geocodedBy?: true
   geocodedAt?: true
   availableFrom?: true
+  expectedReadyDate?: true
+  updatedOnBehalf?: true
   loadChartFileRef?: true
   loadChartFileName?: true
   loadChartMimeType?: true
@@ -284,6 +294,8 @@ export type CraneCountAggregateInputType = {
   geocodedBy?: true
   geocodedAt?: true
   availableFrom?: true
+  expectedReadyDate?: true
+  updatedOnBehalf?: true
   loadChartFileRef?: true
   loadChartFileName?: true
   loadChartMimeType?: true
@@ -408,6 +420,8 @@ export type CraneGroupByOutputType = {
   geocodedBy: string | null
   geocodedAt: Date | null
   availableFrom: Date | null
+  expectedReadyDate: Date | null
+  updatedOnBehalf: boolean
   loadChartFileRef: string | null
   loadChartFileName: string | null
   loadChartMimeType: string | null
@@ -468,6 +482,8 @@ export type CraneWhereInput = {
   geocodedBy?: Prisma.StringNullableFilter<"Crane"> | string | null
   geocodedAt?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
   availableFrom?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
+  expectedReadyDate?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFilter<"Crane"> | boolean
   loadChartFileRef?: Prisma.StringNullableFilter<"Crane"> | string | null
   loadChartFileName?: Prisma.StringNullableFilter<"Crane"> | string | null
   loadChartMimeType?: Prisma.StringNullableFilter<"Crane"> | string | null
@@ -485,6 +501,7 @@ export type CraneWhereInput = {
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
   quotations?: Prisma.QuotationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }
 
 export type CraneOrderByWithRelationInput = {
@@ -510,6 +527,8 @@ export type CraneOrderByWithRelationInput = {
   geocodedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   geocodedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   availableFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedReadyDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedOnBehalf?: Prisma.SortOrder
   loadChartFileRef?: Prisma.SortOrderInput | Prisma.SortOrder
   loadChartFileName?: Prisma.SortOrderInput | Prisma.SortOrder
   loadChartMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -527,6 +546,7 @@ export type CraneOrderByWithRelationInput = {
   vendor?: Prisma.VendorOrderByWithRelationInput
   quotations?: Prisma.QuotationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  reservations?: Prisma.ReservationOrderByRelationAggregateInput
 }
 
 export type CraneWhereUniqueInput = Prisma.AtLeast<{
@@ -555,6 +575,8 @@ export type CraneWhereUniqueInput = Prisma.AtLeast<{
   geocodedBy?: Prisma.StringNullableFilter<"Crane"> | string | null
   geocodedAt?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
   availableFrom?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
+  expectedReadyDate?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFilter<"Crane"> | boolean
   loadChartFileRef?: Prisma.StringNullableFilter<"Crane"> | string | null
   loadChartFileName?: Prisma.StringNullableFilter<"Crane"> | string | null
   loadChartMimeType?: Prisma.StringNullableFilter<"Crane"> | string | null
@@ -572,6 +594,7 @@ export type CraneWhereUniqueInput = Prisma.AtLeast<{
   vendor?: Prisma.XOR<Prisma.VendorScalarRelationFilter, Prisma.VendorWhereInput>
   quotations?: Prisma.QuotationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  reservations?: Prisma.ReservationListRelationFilter
 }, "id">
 
 export type CraneOrderByWithAggregationInput = {
@@ -597,6 +620,8 @@ export type CraneOrderByWithAggregationInput = {
   geocodedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   geocodedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   availableFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedReadyDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  updatedOnBehalf?: Prisma.SortOrder
   loadChartFileRef?: Prisma.SortOrderInput | Prisma.SortOrder
   loadChartFileName?: Prisma.SortOrderInput | Prisma.SortOrder
   loadChartMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -642,6 +667,8 @@ export type CraneScalarWhereWithAggregatesInput = {
   geocodedBy?: Prisma.StringNullableWithAggregatesFilter<"Crane"> | string | null
   geocodedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Crane"> | Date | string | null
   availableFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"Crane"> | Date | string | null
+  expectedReadyDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Crane"> | Date | string | null
+  updatedOnBehalf?: Prisma.BoolWithAggregatesFilter<"Crane"> | boolean
   loadChartFileRef?: Prisma.StringNullableWithAggregatesFilter<"Crane"> | string | null
   loadChartFileName?: Prisma.StringNullableWithAggregatesFilter<"Crane"> | string | null
   loadChartMimeType?: Prisma.StringNullableWithAggregatesFilter<"Crane"> | string | null
@@ -676,6 +703,8 @@ export type CraneCreateInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -693,6 +722,7 @@ export type CraneCreateInput = {
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateInput = {
@@ -718,6 +748,8 @@ export type CraneUncheckedCreateInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -732,6 +764,7 @@ export type CraneUncheckedCreateInput = {
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUpdateInput = {
@@ -754,6 +787,8 @@ export type CraneUpdateInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -771,6 +806,7 @@ export type CraneUpdateInput = {
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateInput = {
@@ -796,6 +832,8 @@ export type CraneUncheckedUpdateInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -810,6 +848,7 @@ export type CraneUncheckedUpdateInput = {
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneCreateManyInput = {
@@ -835,6 +874,8 @@ export type CraneCreateManyInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -869,6 +910,8 @@ export type CraneUpdateManyMutationInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -906,6 +949,8 @@ export type CraneUncheckedUpdateManyInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -953,6 +998,8 @@ export type CraneCountOrderByAggregateInput = {
   geocodedBy?: Prisma.SortOrder
   geocodedAt?: Prisma.SortOrder
   availableFrom?: Prisma.SortOrder
+  expectedReadyDate?: Prisma.SortOrder
+  updatedOnBehalf?: Prisma.SortOrder
   loadChartFileRef?: Prisma.SortOrder
   loadChartFileName?: Prisma.SortOrder
   loadChartMimeType?: Prisma.SortOrder
@@ -1002,6 +1049,8 @@ export type CraneMaxOrderByAggregateInput = {
   geocodedBy?: Prisma.SortOrder
   geocodedAt?: Prisma.SortOrder
   availableFrom?: Prisma.SortOrder
+  expectedReadyDate?: Prisma.SortOrder
+  updatedOnBehalf?: Prisma.SortOrder
   loadChartFileRef?: Prisma.SortOrder
   loadChartFileName?: Prisma.SortOrder
   loadChartMimeType?: Prisma.SortOrder
@@ -1039,6 +1088,8 @@ export type CraneMinOrderByAggregateInput = {
   geocodedBy?: Prisma.SortOrder
   geocodedAt?: Prisma.SortOrder
   availableFrom?: Prisma.SortOrder
+  expectedReadyDate?: Prisma.SortOrder
+  updatedOnBehalf?: Prisma.SortOrder
   loadChartFileRef?: Prisma.SortOrder
   loadChartFileName?: Prisma.SortOrder
   loadChartMimeType?: Prisma.SortOrder
@@ -1233,6 +1284,20 @@ export type EnumCraneApprovalStatusFieldUpdateOperationsInput = {
   set?: $Enums.CraneApprovalStatus
 }
 
+export type CraneCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.CraneCreateWithoutReservationsInput, Prisma.CraneUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.CraneCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.CraneWhereUniqueInput
+}
+
+export type CraneUpdateOneRequiredWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.CraneCreateWithoutReservationsInput, Prisma.CraneUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.CraneCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.CraneUpsertWithoutReservationsInput
+  connect?: Prisma.CraneWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CraneUpdateToOneWithWhereWithoutReservationsInput, Prisma.CraneUpdateWithoutReservationsInput>, Prisma.CraneUncheckedUpdateWithoutReservationsInput>
+}
+
 export type CraneCreateNestedOneWithoutQuotationsInput = {
   create?: Prisma.XOR<Prisma.CraneCreateWithoutQuotationsInput, Prisma.CraneUncheckedCreateWithoutQuotationsInput>
   connectOrCreate?: Prisma.CraneCreateOrConnectWithoutQuotationsInput
@@ -1283,6 +1348,8 @@ export type CraneCreateWithoutStateInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1299,6 +1366,7 @@ export type CraneCreateWithoutStateInput = {
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateWithoutStateInput = {
@@ -1323,6 +1391,8 @@ export type CraneUncheckedCreateWithoutStateInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1337,6 +1407,7 @@ export type CraneUncheckedCreateWithoutStateInput = {
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneCreateOrConnectWithoutStateInput = {
@@ -1391,6 +1462,8 @@ export type CraneScalarWhereInput = {
   geocodedBy?: Prisma.StringNullableFilter<"Crane"> | string | null
   geocodedAt?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
   availableFrom?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
+  expectedReadyDate?: Prisma.DateTimeNullableFilter<"Crane"> | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFilter<"Crane"> | boolean
   loadChartFileRef?: Prisma.StringNullableFilter<"Crane"> | string | null
   loadChartFileName?: Prisma.StringNullableFilter<"Crane"> | string | null
   loadChartMimeType?: Prisma.StringNullableFilter<"Crane"> | string | null
@@ -1425,6 +1498,8 @@ export type CraneCreateWithoutTypeOfCraneInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1441,6 +1516,7 @@ export type CraneCreateWithoutTypeOfCraneInput = {
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateWithoutTypeOfCraneInput = {
@@ -1465,6 +1541,8 @@ export type CraneUncheckedCreateWithoutTypeOfCraneInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1479,6 +1557,7 @@ export type CraneUncheckedCreateWithoutTypeOfCraneInput = {
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneCreateOrConnectWithoutTypeOfCraneInput = {
@@ -1527,6 +1606,8 @@ export type CraneCreateWithoutVendorInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1543,6 +1624,7 @@ export type CraneCreateWithoutVendorInput = {
   state: Prisma.StateCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateWithoutVendorInput = {
@@ -1567,6 +1649,8 @@ export type CraneUncheckedCreateWithoutVendorInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1581,6 +1665,7 @@ export type CraneUncheckedCreateWithoutVendorInput = {
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneCreateOrConnectWithoutVendorInput = {
@@ -1609,6 +1694,186 @@ export type CraneUpdateManyWithWhereWithoutVendorInput = {
   data: Prisma.XOR<Prisma.CraneUpdateManyMutationInput, Prisma.CraneUncheckedUpdateManyWithoutVendorInput>
 }
 
+export type CraneCreateWithoutReservationsInput = {
+  id?: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus: $Enums.CraneStatus
+  currentLocation: string
+  make: string
+  model: string
+  yom: number
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo: string
+  pincode?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: $Enums.CoordinateSource | null
+  geocodedBy?: string | null
+  geocodedAt?: Date | string | null
+  availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
+  loadChartFileRef?: string | null
+  loadChartFileName?: string | null
+  loadChartMimeType?: string | null
+  loadChartSizeBytes?: number | null
+  ownershipType?: $Enums.OwnershipType
+  isActive?: boolean
+  remarks?: string | null
+  approvalStatus?: $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  typeOfCrane: Prisma.CraneTypeCreateNestedOneWithoutCranesInput
+  state: Prisma.StateCreateNestedOneWithoutCranesInput
+  vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+}
+
+export type CraneUncheckedCreateWithoutReservationsInput = {
+  id?: string
+  vendorId: string
+  typeOfCraneCode: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus: $Enums.CraneStatus
+  currentLocation: string
+  stateCode: string
+  make: string
+  model: string
+  yom: number
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo: string
+  pincode?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: $Enums.CoordinateSource | null
+  geocodedBy?: string | null
+  geocodedAt?: Date | string | null
+  availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
+  loadChartFileRef?: string | null
+  loadChartFileName?: string | null
+  loadChartMimeType?: string | null
+  loadChartSizeBytes?: number | null
+  ownershipType?: $Enums.OwnershipType
+  isActive?: boolean
+  remarks?: string | null
+  approvalStatus?: $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+}
+
+export type CraneCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.CraneWhereUniqueInput
+  create: Prisma.XOR<Prisma.CraneCreateWithoutReservationsInput, Prisma.CraneUncheckedCreateWithoutReservationsInput>
+}
+
+export type CraneUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.CraneUpdateWithoutReservationsInput, Prisma.CraneUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.CraneCreateWithoutReservationsInput, Prisma.CraneUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.CraneWhereInput
+}
+
+export type CraneUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.CraneWhereInput
+  data: Prisma.XOR<Prisma.CraneUpdateWithoutReservationsInput, Prisma.CraneUncheckedUpdateWithoutReservationsInput>
+}
+
+export type CraneUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus?: Prisma.EnumCraneStatusFieldUpdateOperationsInput | $Enums.CraneStatus
+  currentLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  make?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.StringFieldUpdateOperationsInput | string
+  yom?: Prisma.IntFieldUpdateOperationsInput | number
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo?: Prisma.StringFieldUpdateOperationsInput | string
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ownershipType?: Prisma.EnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalStatus?: Prisma.EnumCraneApprovalStatusFieldUpdateOperationsInput | $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  typeOfCrane?: Prisma.CraneTypeUpdateOneRequiredWithoutCranesNestedInput
+  state?: Prisma.StateUpdateOneRequiredWithoutCranesNestedInput
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+}
+
+export type CraneUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  typeOfCraneCode?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus?: Prisma.EnumCraneStatusFieldUpdateOperationsInput | $Enums.CraneStatus
+  currentLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  stateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  make?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.StringFieldUpdateOperationsInput | string
+  yom?: Prisma.IntFieldUpdateOperationsInput | number
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo?: Prisma.StringFieldUpdateOperationsInput | string
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ownershipType?: Prisma.EnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalStatus?: Prisma.EnumCraneApprovalStatusFieldUpdateOperationsInput | $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+}
+
 export type CraneCreateWithoutQuotationsInput = {
   id?: string
   capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1629,6 +1894,8 @@ export type CraneCreateWithoutQuotationsInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1645,6 +1912,7 @@ export type CraneCreateWithoutQuotationsInput = {
   state: Prisma.StateCreateNestedOneWithoutCranesInput
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateWithoutQuotationsInput = {
@@ -1670,6 +1938,8 @@ export type CraneUncheckedCreateWithoutQuotationsInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1683,6 +1953,7 @@ export type CraneUncheckedCreateWithoutQuotationsInput = {
   updatedAt?: Date | string
   updatedBy?: string | null
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneCreateOrConnectWithoutQuotationsInput = {
@@ -1721,6 +1992,8 @@ export type CraneUpdateWithoutQuotationsInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1737,6 +2010,7 @@ export type CraneUpdateWithoutQuotationsInput = {
   state?: Prisma.StateUpdateOneRequiredWithoutCranesNestedInput
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateWithoutQuotationsInput = {
@@ -1762,6 +2036,8 @@ export type CraneUncheckedUpdateWithoutQuotationsInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1775,6 +2051,7 @@ export type CraneUncheckedUpdateWithoutQuotationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneCreateWithoutAuditLogsInput = {
@@ -1797,6 +2074,8 @@ export type CraneCreateWithoutAuditLogsInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1813,6 +2092,7 @@ export type CraneCreateWithoutAuditLogsInput = {
   state: Prisma.StateCreateNestedOneWithoutCranesInput
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateWithoutAuditLogsInput = {
@@ -1838,6 +2118,8 @@ export type CraneUncheckedCreateWithoutAuditLogsInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -1851,6 +2133,7 @@ export type CraneUncheckedCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneCreateOrConnectWithoutAuditLogsInput = {
@@ -1889,6 +2172,8 @@ export type CraneUpdateWithoutAuditLogsInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1905,6 +2190,7 @@ export type CraneUpdateWithoutAuditLogsInput = {
   state?: Prisma.StateUpdateOneRequiredWithoutCranesNestedInput
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateWithoutAuditLogsInput = {
@@ -1930,6 +2216,8 @@ export type CraneUncheckedUpdateWithoutAuditLogsInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1943,6 +2231,7 @@ export type CraneUncheckedUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneCreateManyStateInput = {
@@ -1967,6 +2256,8 @@ export type CraneCreateManyStateInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -2001,6 +2292,8 @@ export type CraneUpdateWithoutStateInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2017,6 +2310,7 @@ export type CraneUpdateWithoutStateInput = {
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateWithoutStateInput = {
@@ -2041,6 +2335,8 @@ export type CraneUncheckedUpdateWithoutStateInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2055,6 +2351,7 @@ export type CraneUncheckedUpdateWithoutStateInput = {
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateManyWithoutStateInput = {
@@ -2079,6 +2376,8 @@ export type CraneUncheckedUpdateManyWithoutStateInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2115,6 +2414,8 @@ export type CraneCreateManyTypeOfCraneInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -2149,6 +2450,8 @@ export type CraneUpdateWithoutTypeOfCraneInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2165,6 +2468,7 @@ export type CraneUpdateWithoutTypeOfCraneInput = {
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateWithoutTypeOfCraneInput = {
@@ -2189,6 +2493,8 @@ export type CraneUncheckedUpdateWithoutTypeOfCraneInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2203,6 +2509,7 @@ export type CraneUncheckedUpdateWithoutTypeOfCraneInput = {
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateManyWithoutTypeOfCraneInput = {
@@ -2227,6 +2534,8 @@ export type CraneUncheckedUpdateManyWithoutTypeOfCraneInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2263,6 +2572,8 @@ export type CraneCreateManyVendorInput = {
   geocodedBy?: string | null
   geocodedAt?: Date | string | null
   availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
   loadChartFileRef?: string | null
   loadChartFileName?: string | null
   loadChartMimeType?: string | null
@@ -2297,6 +2608,8 @@ export type CraneUpdateWithoutVendorInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2313,6 +2626,7 @@ export type CraneUpdateWithoutVendorInput = {
   state?: Prisma.StateUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateWithoutVendorInput = {
@@ -2337,6 +2651,8 @@ export type CraneUncheckedUpdateWithoutVendorInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2351,6 +2667,7 @@ export type CraneUncheckedUpdateWithoutVendorInput = {
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateManyWithoutVendorInput = {
@@ -2375,6 +2692,8 @@ export type CraneUncheckedUpdateManyWithoutVendorInput = {
   geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
   loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2397,11 +2716,13 @@ export type CraneUncheckedUpdateManyWithoutVendorInput = {
 export type CraneCountOutputType = {
   quotations: number
   auditLogs: number
+  reservations: number
 }
 
 export type CraneCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   quotations?: boolean | CraneCountOutputTypeCountQuotationsArgs
   auditLogs?: boolean | CraneCountOutputTypeCountAuditLogsArgs
+  reservations?: boolean | CraneCountOutputTypeCountReservationsArgs
 }
 
 /**
@@ -2428,6 +2749,13 @@ export type CraneCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types
   where?: Prisma.AuditLogWhereInput
 }
 
+/**
+ * CraneCountOutputType without action
+ */
+export type CraneCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationWhereInput
+}
+
 
 export type CraneSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2452,6 +2780,8 @@ export type CraneSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   geocodedBy?: boolean
   geocodedAt?: boolean
   availableFrom?: boolean
+  expectedReadyDate?: boolean
+  updatedOnBehalf?: boolean
   loadChartFileRef?: boolean
   loadChartFileName?: boolean
   loadChartMimeType?: boolean
@@ -2469,6 +2799,7 @@ export type CraneSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   quotations?: boolean | Prisma.Crane$quotationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Crane$auditLogsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Crane$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.CraneCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["crane"]>
 
@@ -2495,6 +2826,8 @@ export type CraneSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   geocodedBy?: boolean
   geocodedAt?: boolean
   availableFrom?: boolean
+  expectedReadyDate?: boolean
+  updatedOnBehalf?: boolean
   loadChartFileRef?: boolean
   loadChartFileName?: boolean
   loadChartMimeType?: boolean
@@ -2535,6 +2868,8 @@ export type CraneSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   geocodedBy?: boolean
   geocodedAt?: boolean
   availableFrom?: boolean
+  expectedReadyDate?: boolean
+  updatedOnBehalf?: boolean
   loadChartFileRef?: boolean
   loadChartFileName?: boolean
   loadChartMimeType?: boolean
@@ -2575,6 +2910,8 @@ export type CraneSelectScalar = {
   geocodedBy?: boolean
   geocodedAt?: boolean
   availableFrom?: boolean
+  expectedReadyDate?: boolean
+  updatedOnBehalf?: boolean
   loadChartFileRef?: boolean
   loadChartFileName?: boolean
   loadChartMimeType?: boolean
@@ -2589,13 +2926,14 @@ export type CraneSelectScalar = {
   updatedBy?: boolean
 }
 
-export type CraneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "typeOfCraneCode" | "capacityT" | "currentStatus" | "currentLocation" | "stateCode" | "make" | "model" | "yom" | "mainBoomM" | "fixedJibM" | "luffingJibM" | "windJibM" | "serialRegistrationNo" | "pincode" | "latitude" | "longitude" | "coordinateSource" | "geocodedBy" | "geocodedAt" | "availableFrom" | "loadChartFileRef" | "loadChartFileName" | "loadChartMimeType" | "loadChartSizeBytes" | "ownershipType" | "isActive" | "remarks" | "approvalStatus" | "statusUpdatedAt" | "createdAt" | "updatedAt" | "updatedBy", ExtArgs["result"]["crane"]>
+export type CraneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "vendorId" | "typeOfCraneCode" | "capacityT" | "currentStatus" | "currentLocation" | "stateCode" | "make" | "model" | "yom" | "mainBoomM" | "fixedJibM" | "luffingJibM" | "windJibM" | "serialRegistrationNo" | "pincode" | "latitude" | "longitude" | "coordinateSource" | "geocodedBy" | "geocodedAt" | "availableFrom" | "expectedReadyDate" | "updatedOnBehalf" | "loadChartFileRef" | "loadChartFileName" | "loadChartMimeType" | "loadChartSizeBytes" | "ownershipType" | "isActive" | "remarks" | "approvalStatus" | "statusUpdatedAt" | "createdAt" | "updatedAt" | "updatedBy", ExtArgs["result"]["crane"]>
 export type CraneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   typeOfCrane?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   state?: boolean | Prisma.StateDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   quotations?: boolean | Prisma.Crane$quotationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Crane$auditLogsArgs<ExtArgs>
+  reservations?: boolean | Prisma.Crane$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.CraneCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CraneIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2617,6 +2955,7 @@ export type $CranePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     vendor: Prisma.$VendorPayload<ExtArgs>
     quotations: Prisma.$QuotationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    reservations: Prisma.$ReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2641,6 +2980,8 @@ export type $CranePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     geocodedBy: string | null
     geocodedAt: Date | null
     availableFrom: Date | null
+    expectedReadyDate: Date | null
+    updatedOnBehalf: boolean
     loadChartFileRef: string | null
     loadChartFileName: string | null
     loadChartMimeType: string | null
@@ -3052,6 +3393,7 @@ export interface Prisma__CraneClient<T, Null = never, ExtArgs extends runtime.Ty
   vendor<T extends Prisma.VendorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VendorDefaultArgs<ExtArgs>>): Prisma.Prisma__VendorClient<runtime.Types.Result.GetResult<Prisma.$VendorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   quotations<T extends Prisma.Crane$quotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$quotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Crane$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reservations<T extends Prisma.Crane$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3103,6 +3445,8 @@ export interface CraneFieldRefs {
   readonly geocodedBy: Prisma.FieldRef<"Crane", 'String'>
   readonly geocodedAt: Prisma.FieldRef<"Crane", 'DateTime'>
   readonly availableFrom: Prisma.FieldRef<"Crane", 'DateTime'>
+  readonly expectedReadyDate: Prisma.FieldRef<"Crane", 'DateTime'>
+  readonly updatedOnBehalf: Prisma.FieldRef<"Crane", 'Boolean'>
   readonly loadChartFileRef: Prisma.FieldRef<"Crane", 'String'>
   readonly loadChartFileName: Prisma.FieldRef<"Crane", 'String'>
   readonly loadChartMimeType: Prisma.FieldRef<"Crane", 'String'>
@@ -3561,6 +3905,30 @@ export type Crane$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * Crane.reservations
+ */
+export type Crane$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Reservation
+   */
+  select?: Prisma.ReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Reservation
+   */
+  omit?: Prisma.ReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationInclude<ExtArgs> | null
+  where?: Prisma.ReservationWhereInput
+  orderBy?: Prisma.ReservationOrderByWithRelationInput | Prisma.ReservationOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
 }
 
 /**
