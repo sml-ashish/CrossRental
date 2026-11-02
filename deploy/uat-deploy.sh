@@ -19,6 +19,24 @@ REF="${1:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# Docker socket access needs the docker group. Add the deploy user once, then
+# re-run this script in a shell that has that group -- a group change does not
+# apply to the process that made it, and non-interactive SSH never re-logs-in.
+if [ "${UAT_DOCKER_GROUP_REEXEC:-}" != "1" ] && ! id -nG | tr ' ' '\n' | grep -qx docker; then
+  echo "[uat] $(id -un) is not in the docker group; adding it"
+  if ! sudo -n usermod -aG docker "$(id -un)"; then
+    echo "Could not add $(id -un) to the docker group without a password." >&2
+    echo "Run once on the server: sudo usermod -aG docker $(id -un)" >&2
+    exit 1
+  fi
+  printf -v script_q '%q' "$ROOT/deploy/uat-deploy.sh"
+  if [ -n "$REF" ]; then
+    printf -v ref_q '%q' "$REF"
+    exec env UAT_DOCKER_GROUP_REEXEC=1 sg docker -c "bash $script_q $ref_q"
+  fi
+  exec env UAT_DOCKER_GROUP_REEXEC=1 sg docker -c "bash $script_q"
+fi
+
 if [ ! -f .env ]; then
   echo "Missing .env in $ROOT. Copy .env.docker.example to .env and fill it in." >&2
   exit 1
