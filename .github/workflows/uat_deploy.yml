@@ -1,8 +1,12 @@
-name: Build & Deploy (UAT)
+name: UAT Deploy
 
-# Pushing a tag like uat_v1.2.0 runs the full CI suite, publishes both images
-# to GHCR, then rolls them out to the UAT server over SSH. Releases can be
-# created from the GitHub UI; creating one also pushes the tag and triggers this.
+# Single UAT pipeline. Push a tag like uat_v1.2.0 (or create a GitHub Release
+# with that tag) and this workflow:
+#   1. runs the backend and frontend checks,
+#   2. builds and pushes both images to GHCR,
+#   3. rolls them out to the UAT server over SSH.
+#
+# Nothing runs for branch pushes or pull requests.
 #
 # The server keeps its own `.env` in DEPLOY_PATH, created once from
 # `.env.docker.example`. It is not stored in GitHub. The workflow only updates
@@ -13,7 +17,7 @@ name: Build & Deploy (UAT)
 #   DEPLOY_HOST      UAT server hostname or IP
 #   DEPLOY_USER      SSH user (must be in the `docker` group)
 #   DEPLOY_SSH_KEY   private key for that user
-#   DEPLOY_PATH      directory holding docker-compose.yml + .env (e.g. /opt/crossrental-uat)
+#   DEPLOY_PATH      directory holding docker-compose.yml + .env
 #   DEPLOY_PORT      optional, defaults to 22
 #   GHCR_TOKEN       optional PAT with read:packages; only needed while the
 #                    GHCR packages are private (no token -> no login attempt)
@@ -32,13 +36,93 @@ permissions:
   packages: write
 
 jobs:
-  ci:
-    name: CI
-    uses: ./.github/workflows/ci.yml
+  backend:
+    name: Backend (typecheck + tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: crossrental
+          POSTGRES_PASSWORD: crossrental
+          POSTGRES_DB: crossrental_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crossrental -d crossrental_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://crossrental:crossrental@localhost:5432/crossrental_test
+      TEST_DATABASE_URL: postgresql://crossrental:crossrental@localhost:5432/crossrental_test
+      # Test-only placeholders: config/env requires these at import time.
+      JWT_SECRET: ci-test-jwt-secret
+      FIELD_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      SMTP_HOST: console
+      SMTP_USER: console
+      SMTP_PASS: console
+      MAIL_TRANSPORT: console
+      GEO_PROVIDER: stub
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply migrations to the test database
+        run: npx prisma migrate deploy
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Tests
+        run: npm test
+
+  frontend:
+    name: Frontend (typecheck + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
 
   build:
     name: Build & push ${{ matrix.name }}
-    needs: ci
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     strategy:
       matrix:
