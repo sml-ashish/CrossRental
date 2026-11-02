@@ -27,7 +27,9 @@ fi
 if [ -n "${DATABASE_URL:-}" ]; then
   echo "[uat] updating DATABASE_URL in .env"
   sed -i '/^[[:space:]]*DATABASE_URL[[:space:]]*=/d' .env
-  printf 'DATABASE_URL=%s\n' "$DATABASE_URL" >> .env
+  # Leading newline in case the file does not end with one, otherwise the line
+  # would be glued onto the previous entry and never match the check below.
+  printf '\nDATABASE_URL=%s\n' "$DATABASE_URL" >> .env
 fi
 
 chmod 600 .env 2>/dev/null || true
