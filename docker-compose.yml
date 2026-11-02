@@ -1,40 +1,31 @@
-# Cross-rental platform (UAT): Postgres + API + SPA.
+# Cross-rental platform (UAT): API + SPA.
+#
+# There is no database container here. UAT uses the existing `itsm-db` Postgres
+# container, which publishes 5432 on the host. The API reaches it through
+# `host.docker.internal` (mapped via extra_hosts, so it works on Linux too) and
+# connects with DATABASE_URL. Create the `crossrental` database in `itsm-db`
+# first.
 #
 # The Compose project name keeps UAT containers, networks and volumes separate
 # from any later production stack on the same host.
 name: crossrental-uat
 #
-# Local:   docker compose up --build
-# Server:  docker compose pull && docker compose up -d
+# Local:   docker compose up -d --build
+# Server:  bash deploy/uat-deploy.sh <tag>   (git pull + compose up --build)
 #
-# Host ports: frontend 5174, backend 3004. The database is not published; only
-# the two app containers are reachable from outside the compose network.
+# Images are built on the host from ./backend and ./frontend; nothing is pulled
+# from a registry.
+#
+# Host ports: frontend 5174, backend 3004.
 
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-crossrental}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
-      POSTGRES_DB: ${POSTGRES_DB:-crossrental}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crossrental} -d ${POSTGRES_DB:-crossrental}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-    restart: unless-stopped
-
   backend:
-    image: ${BACKEND_IMAGE:-ghcr.io/sml-ashish/crossrental-backend:latest}
     build:
       context: ./backend
     environment:
       NODE_ENV: production
       PORT: 3004
-      DATABASE_URL: postgresql://${POSTGRES_USER:-crossrental}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-crossrental}
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in .env}
       APP_URL: ${APP_URL:-http://localhost:5174}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5174}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
@@ -59,11 +50,10 @@ services:
       FLEET_APPROVAL_REQUIRED: ${FLEET_APPROVAL_REQUIRED:-false}
     ports:
       - "3004:3004"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - uploads:/app/uploads
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
       test:
         [
@@ -79,7 +69,6 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ${FRONTEND_IMAGE:-ghcr.io/sml-ashish/crossrental-frontend:latest}
     build:
       context: ./frontend
     ports:
@@ -90,5 +79,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  db_data:
   uploads:
