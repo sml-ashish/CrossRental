@@ -14,6 +14,8 @@ name: UAT Deploy
 #   DEPLOY_SSH_KEY   private key for that user
 #   DEPLOY_PATH      clone of this repository on the server (e.g. /home/ubuntu/CrossRental)
 #   DEPLOY_PORT      optional, defaults to 22
+#   UAT_DATABASE_URL optional; when set it is written into the server `.env` on
+#                    each deploy (the password must not live in git)
 
 on:
   push:
@@ -39,12 +41,13 @@ jobs:
         env:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           GIT_REF: ${{ github.ref_name }}
+          DATABASE_URL: ${{ secrets.UAT_DATABASE_URL }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
-          envs: DEPLOY_PATH,GIT_REF
+          envs: DEPLOY_PATH,GIT_REF,DATABASE_URL
           script: |
             set -e
             cd "$DEPLOY_PATH"

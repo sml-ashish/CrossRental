@@ -9,6 +9,10 @@
 # The `.env` file is untracked and hand-managed, so updating the checkout with
 # `git checkout -f` / `git pull` never overwrites it. Migrations and seeding
 # run from the backend container entrypoint on start.
+#
+# DATABASE_URL is never committed. If it is present in the environment (the
+# workflow passes it from the UAT_DATABASE_URL secret), this script writes it
+# into `.env`; otherwise `.env` must already contain it.
 set -euo pipefail
 
 REF="${1:-}"
@@ -20,8 +24,21 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+if [ -n "${DATABASE_URL:-}" ]; then
+  echo "[uat] updating DATABASE_URL in .env"
+  sed -i '/^[[:space:]]*DATABASE_URL[[:space:]]*=/d' .env
+  printf 'DATABASE_URL=%s\n' "$DATABASE_URL" >> .env
+fi
+
+chmod 600 .env 2>/dev/null || true
+
 if ! grep -q '^DATABASE_URL=' .env; then
   echo "DATABASE_URL is missing from $ROOT/.env (expected the file at the repo root, not backend/.env)." >&2
+  exit 1
+fi
+
+if [ ! -r .env ]; then
+  echo "$ROOT/.env is not readable by $(id -un); fix its ownership with sudo." >&2
   exit 1
 fi
 
