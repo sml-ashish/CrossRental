@@ -1,0 +1,94 @@
+# Cross-rental platform (UAT): Postgres + API + SPA.
+#
+# The Compose project name keeps UAT containers, networks and volumes separate
+# from any later production stack on the same host.
+name: crossrental-uat
+#
+# Local:   docker compose up --build
+# Server:  docker compose pull && docker compose up -d
+#
+# Host ports: frontend 5174, backend 3004. The database is not published; only
+# the two app containers are reachable from outside the compose network.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crossrental}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-crossrental}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crossrental} -d ${POSTGRES_DB:-crossrental}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/sml-ashish/crossrental-backend:latest}
+    build:
+      context: ./backend
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DATABASE_URL: postgresql://${POSTGRES_USER:-crossrental}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-crossrental}
+      APP_URL: ${APP_URL:-http://localhost:5174}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5174}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-12h}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:?set FIELD_ENCRYPTION_KEY in .env}
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:?set SMTP_USER in .env}
+      SMTP_PASS: ${SMTP_PASS:?set SMTP_PASS in .env}
+      MAIL_FROM: ${MAIL_FROM:-SML Crane Portal <cranes@sanghvimovers.com>}
+      INTERNAL_NOTIFY_EMAIL: ${INTERNAL_NOTIFY_EMAIL:-}
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /app/uploads
+      UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-10}
+      GEO_PROVIDER: ${GEO_PROVIDER:-disabled}
+      # UAT convenience: show the sign-in code on screen. Set false in production.
+      EXPOSE_OTP: ${EXPOSE_OTP:-true}
+      RUN_SEED: ${RUN_SEED:-true}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      FLEET_APPROVAL_REQUIRED: ${FLEET_APPROVAL_REQUIRED:-false}
+    ports:
+      - "3004:3004"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:3004/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/sml-ashish/crossrental-frontend:latest}
+    build:
+      context: ./frontend
+    ports:
+      - "5174:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  uploads:

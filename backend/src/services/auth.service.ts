@@ -303,7 +303,7 @@ function generateOtpCode(): string {
   return randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
-export async function requestLoginOtp(email: string, ipAddress?: string): Promise<void> {
+export async function requestLoginOtp(email: string, ipAddress?: string): Promise<string | null> {
   const normalised = email.trim().toLowerCase();
 
   const user = await prisma.user.findFirst({
@@ -311,7 +311,7 @@ export async function requestLoginOtp(email: string, ipAddress?: string): Promis
     select: { id: true, email: true, fullName: true, vendorId: true },
   });
 
-  if (!user) return; // Generic response stands; nothing is emailed.
+  if (!user) return null; // Generic response stands; nothing is emailed.
 
   const code = generateOtpCode();
 
@@ -346,6 +346,8 @@ export async function requestLoginOtp(email: string, ipAddress?: string): Promis
     entity: "User",
     entityId: user.id,
   });
+
+  return code;
 }
 
 export async function verifyLoginOtp(email: string, code: string): Promise<AuthResult> {

@@ -77,6 +77,9 @@ export const env = Object.freeze({
     passwordResetTtlHours: num("PASSWORD_RESET_TTL_HOURS", 1),
     loginOtpTtlMinutes: num("LOGIN_OTP_TTL_MINUTES", 10),
     loginOtpMaxAttempts: num("LOGIN_OTP_MAX_ATTEMPTS", 5),
+    // UAT only: return the code in the request response so testers do not need
+    // inbox access. Never enable this in production.
+    exposeOtp: bool("EXPOSE_OTP", false),
   }),
 
   rateLimits: Object.freeze({

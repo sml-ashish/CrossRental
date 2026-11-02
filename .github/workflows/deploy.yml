@@ -1,0 +1,133 @@
+name: Build & Deploy (UAT)
+
+# Pushing a tag like uat_v1.2.0 runs the full CI suite, publishes both images
+# to GHCR, then rolls them out to the UAT server over SSH. Releases can be
+# created from the GitHub UI; creating one also pushes the tag and triggers this.
+#
+# The server keeps its own `.env` in DEPLOY_PATH, created once from
+# `.env.docker.example`. It is not stored in GitHub. The workflow only updates
+# the two image-tag lines in it before pulling.
+#
+# Required secrets, stored in the `uat` GitHub Environment
+# (Settings -> Environments -> uat -> Environment secrets):
+#   DEPLOY_HOST      UAT server hostname or IP
+#   DEPLOY_USER      SSH user (must be in the `docker` group)
+#   DEPLOY_SSH_KEY   private key for that user
+#   DEPLOY_PATH      directory holding docker-compose.yml + .env (e.g. /opt/crossrental-uat)
+#   DEPLOY_PORT      optional, defaults to 22
+#   GHCR_TOKEN       optional PAT with read:packages; only needed while the
+#                    GHCR packages are private (no token -> no login attempt)
+
+on:
+  push:
+    tags: ["uat_v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-uat
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build & push ${{ matrix.name }}
+    needs: ci
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: backend
+            context: ./backend
+          - name: frontend
+            context: ./frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lowercase image prefix
+        run: |
+          echo "IMAGE_PREFIX=ghcr.io/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ github.ref_name }}
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Roll out to UAT
+    needs: build
+    runs-on: ubuntu-latest
+    environment: uat
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy compose file to the server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          source: "docker-compose.yml"
+          target: ${{ secrets.DEPLOY_PATH }}
+
+      - name: Pull and restart
+        uses: appleboy/ssh-action@v1
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GHCR_USER: ${{ github.repository_owner }}
+          IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          envs: DEPLOY_PATH,GHCR_TOKEN,GHCR_USER,IMAGE_PREFIX,IMAGE_TAG
+          script: |
+            set -e
+            cd "$DEPLOY_PATH"
+
+            if [ ! -f .env ]; then
+              echo "Missing .env in $DEPLOY_PATH. Copy .env.docker.example to .env and fill it in."
+              exit 1
+            fi
+
+            PREFIX="$(echo "$IMAGE_PREFIX" | tr '[:upper:]' '[:lower:]')"
+
+            if [ -n "$GHCR_TOKEN" ]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            fi
+
+            sed -i '/^BACKEND_IMAGE=/d;/^FRONTEND_IMAGE=/d' .env
+            {
+              echo "BACKEND_IMAGE=${PREFIX}-backend:${IMAGE_TAG}"
+              echo "FRONTEND_IMAGE=${PREFIX}-frontend:${IMAGE_TAG}"
+            } >> .env
+
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f

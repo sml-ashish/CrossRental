@@ -326,8 +326,14 @@ async function main() {
   await seedEmailTemplates();
   await seedSettings();
   await seedInternalUsers();
-  await seedDemoVendors();
-  await seedDemoCranes();
+  // Demo vendors and cranes exist for local testing. A production deployment
+  // sets SEED_DEMO_DATA=false so known demo credentials never reach a server.
+  if (process.env["SEED_DEMO_DATA"] === "false") {
+    console.log("[seed] skipping demo vendors and cranes");
+  } else {
+    await seedDemoVendors();
+    await seedDemoCranes();
+  }
   console.log("[seed] done");
 }
 

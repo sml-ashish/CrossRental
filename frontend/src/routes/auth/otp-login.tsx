@@ -23,6 +23,7 @@ export function OtpLoginPage() {
   const [stage, setStage] = useState<Stage>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [devCode, setDevCode] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -32,12 +33,13 @@ export function OtpLoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const res = await api<{ message: string }>("/auth/otp/request", {
+      const res = await api<{ message: string; devCode?: string }>("/auth/otp/request", {
         method: "POST",
         body: { email },
         anonymous: true,
       });
       setMessage(res.message);
+      setDevCode(res.devCode ?? null);
       setStage("code");
     } catch (cause) {
       setError(cause instanceof ApiError ? cause.message : "Something went wrong. Please try again.");
@@ -102,6 +104,28 @@ export function OtpLoginPage() {
             {message ? <Alert tone="info">{message}</Alert> : null}
 
             <div>
+              <label className="field-label" htmlFor="otp-email-locked">
+                Work email
+              </label>
+              <input
+                id="otp-email-locked"
+                type="email"
+                className="field-input"
+                value={email}
+                readOnly
+                disabled
+              />
+              {devCode ? (
+                <p className="mt-1.5 text-xs text-slate-500">
+                  UAT sign-in code:{" "}
+                  <span className="font-mono font-semibold tracking-[0.2em] text-slate-800">
+                    {devCode}
+                  </span>
+                </p>
+              ) : null}
+            </div>
+
+            <div>
               <label className="field-label" htmlFor="otp-code">
                 Sign-in code
               </label>
@@ -128,6 +152,7 @@ export function OtpLoginPage() {
               onClick={() => {
                 setStage("email");
                 setCode("");
+                setDevCode(null);
                 setError(null);
                 setMessage(null);
               }}

@@ -19,6 +19,7 @@ import {
 } from "../services/auth.service";
 import { recordAudit } from "../services/audit.service";
 import { capabilitiesOf } from "../utils/rbac";
+import { env } from "../config/env";
 
 /**
  * Auth endpoints. Note that no response here reveals whether an email address
@@ -89,11 +90,14 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const requestOtp = asyncHandler(async (req: Request, res: Response) => {
   const { email } = otpRequestSchema.parse(req.body);
-   
-  await requestLoginOtp(email, req.ip);
+
+  const code = await requestLoginOtp(email, req.ip);
   res.json({
     message:
       "If that email address belongs to an SML user account, a sign-in code has been sent.",
+    // UAT only (EXPOSE_OTP=true): lets testers read the code on screen instead
+    // of opening the mailbox. Off by default so production never leaks it.
+    ...(env.auth.exposeOtp && code ? { devCode: code } : {}),
   });
 });
 
