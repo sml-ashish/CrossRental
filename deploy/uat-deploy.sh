@@ -20,6 +20,11 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+if ! grep -q '^DATABASE_URL=' .env; then
+  echo "DATABASE_URL is missing from $ROOT/.env (expected the file at the repo root, not backend/.env)." >&2
+  exit 1
+fi
+
 echo "[uat] fetching refs"
 git fetch --all --tags --prune
 
@@ -36,8 +41,8 @@ else
 fi
 
 echo "[uat] building and starting containers"
-docker compose up -d --build --remove-orphans
+docker compose --env-file .env up -d --build --remove-orphans
 
 docker image prune -f
-docker compose ps
+docker compose --env-file .env ps
 echo "[uat] done"
