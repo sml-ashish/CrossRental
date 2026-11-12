@@ -16,6 +16,9 @@ import {
   type Crane,
 } from "@/lib/fleet";
 import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatGrid, StatTile } from "@/components/ui/stat-tile";
 import { Spinner } from "@/components/ui/spinner";
 import { Field, Select, TextInput } from "@/components/ui/form";
 import { Badge, StatusBadge } from "@/components/ui/badge";
@@ -120,28 +123,51 @@ export function FleetPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">My Fleet</h1>
-          <p className="mt-1 text-sm text-slate-500">
+      <PageHeader
+        title="My fleet"
+        description="The cranes you offer SML, kept current so they stay in the running for a hire."
+        meta={
+          <span className="text-xs text-slate-500">
             {fleet.isLoading
               ? "Loading your cranes…"
-              : `${activeCranes.length} active ${activeCranes.length === 1 ? "crane" : "cranes"}` +
-                (staleCount > 0 ? ` · ${staleCount} need a data update` : "") +
-                (unverifiedCount > 0 ? ` · ${unverifiedCount} missing a map pin` : "")}
-          </p>
-        </div>
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined, vendorId: undefined } })}
-        >
-          <Plus className="size-4" aria-hidden /> Add crane
-        </button>
-      </header>
+              : `${activeCranes.length} active ${activeCranes.length === 1 ? "crane" : "cranes"}`}
+          </span>
+        }
+        actions={
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined, vendorId: undefined } })}
+          >
+            <Plus className="size-4" aria-hidden /> Add crane
+          </button>
+        }
+      />
 
       {notice ? <Alert tone="success">{notice}</Alert> : null}
       {actionError ? <Alert tone="error">{actionError}</Alert> : null}
+
+      <StatGrid className="lg:grid-cols-3">
+        <StatTile
+          label="Active cranes"
+          value={activeCranes.length}
+          hint="listed to SML right now"
+        />
+        <StatTile
+          label="Need a data update"
+          value={staleCount}
+          hint="not confirmed recently"
+          tone={staleCount > 0 ? "amber" : "neutral"}
+          dot={staleCount > 0 ? "bg-amber-500" : "bg-emerald-500"}
+        />
+        <StatTile
+          label="Missing a map pin"
+          value={unverifiedCount}
+          hint="location cannot be searched"
+          tone={unverifiedCount > 0 ? "amber" : "neutral"}
+          dot={unverifiedCount > 0 ? "bg-amber-500" : "bg-emerald-500"}
+        />
+      </StatGrid>
 
       <div className="card p-4">
         <form
@@ -218,22 +244,27 @@ export function FleetPage() {
       ) : fleet.isError ? (
         <Alert tone="error">{fleet.error instanceof Error ? fleet.error.message : "Could not load your fleet."}</Alert>
       ) : cranes.length === 0 ? (
-        <div className="card p-8 text-center">
-          <p className="text-sm font-medium text-slate-900">No cranes to show</p>
-          <p className="mt-1 text-sm text-slate-500">
-            {query || status || typeOfCraneCode || stateCode
-              ? "No crane matches these filters. Try clearing them."
-              : "Add your first crane so SML can consider it for a job."}
-          </p>
-          {!query && !status && !typeOfCraneCode && !stateCode ? (
-            <button
-              type="button"
-              className="btn-primary mt-4"
-              onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined, vendorId: undefined } })}
-            >
-              <Plus className="size-4" aria-hidden /> Add crane
-            </button>
-          ) : null}
+        <div className="card">
+          <EmptyState
+            icon={<Search className="size-4" aria-hidden />}
+            title="No cranes to show"
+            description={
+              query || status || typeOfCraneCode || stateCode
+                ? "No crane matches these filters. Clear them to see the whole fleet."
+                : "Add your first crane so SML can consider it for a job."
+            }
+            action={
+              !query && !status && !typeOfCraneCode && !stateCode ? (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => void navigate({ to: "/app/fleet/new", search: { duplicate: undefined, vendorId: undefined } })}
+                >
+                  <Plus className="size-4" aria-hidden /> Add crane
+                </button>
+              ) : null
+            }
+          />
         </div>
       ) : (
         <ul className="space-y-3">
@@ -296,8 +327,8 @@ function CraneRow({
   onReactivate: () => void;
 }) {
   return (
-    <article className="card p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <article className="card overflow-hidden">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-mono text-sm font-semibold text-slate-900">
@@ -315,9 +346,6 @@ function CraneRow({
               <Badge tone="amber">Update due</Badge>
             ) : null}
             {!crane.isActive ? <Badge tone="neutral">Deactivated</Badge> : null}
-            {crane.updatedOnBehalf ? (
-              <Badge tone="blue">Updated by SML on your behalf</Badge>
-            ) : null}
           </div>
           <p className="mt-1 text-sm text-slate-600">
             {crane.make} {crane.model} · {crane.capacityT}T · {crane.yom}
@@ -412,15 +440,19 @@ function CraneRow({
         </div>
       </div>
 
-      {crane.loadChart ? (
-        <p className="mt-2 text-xs text-slate-500">
-          Load chart on file: <span className="font-medium">{crane.loadChart.fileName}</span>
-        </p>
-      ) : (
-        <p className="mt-2 flex items-center gap-1 text-xs text-slate-500">
-          <AlertCircle className="size-3.5" aria-hidden /> No load chart uploaded. SML asks for one before a hire.
-        </p>
-      )}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-slate-100 bg-slate-50/50 px-4 py-2 text-xs text-slate-500">
+        {crane.loadChart ? (
+          <p>
+            Load chart on file: <span className="font-medium text-slate-700">{crane.loadChart.fileName}</span>
+          </p>
+        ) : (
+          <p className="flex items-center gap-1">
+            <AlertCircle className="size-3.5" aria-hidden /> No load chart uploaded. SML asks for one
+            before a hire.
+          </p>
+        )}
+        <span className="font-mono text-[11px] text-slate-400">{crane.serialRegistrationNo}</span>
+      </div>
     </article>
   );
 }

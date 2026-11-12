@@ -3,19 +3,19 @@ import { api } from "@/lib/api";
 /**
  * Client for the communication history (P4, BPD 6.21).
  *
- * Built on the email log, so every entry is outbound: the platform records what
- * it sent, not what a vendor wrote back (inbound capture arrives with P6). Each
- * entry says whether it carried a business event, so the trail reads as sourcing
- * activity rather than a mailbox.
+ * Built on the email log, which P6 widened to inbound email and WhatsApp replies.
+ * Each entry says whether it carried a business event, so the trail reads as
+ * sourcing activity rather than a mailbox.
  */
 
 export interface CommunicationMessage {
   id: string;
-  channel: "EMAIL";
-  direction: "OUTBOUND";
+  channel: "EMAIL" | "WHATSAPP";
+  direction: "OUTBOUND" | "INBOUND";
   template: string;
   templateLabel: string;
   subject: string;
+  fromAddress: string | null;
   toEmail: string;
   ccEmail: string | null;
   status: string;
@@ -33,7 +33,7 @@ export interface CommunicationHistory {
     quotationId?: string;
   };
   messages: CommunicationMessage[];
-  /** False today: only outbound messages are logged; inbound is P6 work. */
+  /** True from P6: inbound email and WhatsApp replies are captured. */
   inboundCaptured: boolean;
 }
 

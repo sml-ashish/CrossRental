@@ -1,4 +1,4 @@
-# SML Crane Discovery & Vendor Repository
+# crossrentel
 
 Internal portal for Sanghvi Movers Limited: vendor onboarding, crane fleet
 management, RFQ distribution, quotations, award and hire tracking.
@@ -56,6 +56,9 @@ Seeded by `npm run seed`, all values fabricated:
 | --------------------------- | ------------------- | ------ | ------------------------------ |
 | `vendor1@example.com`       | `Vendor@Portal2026` | vendor | `/auth/login`                  |
 | `vendor2@example.com`       | `Vendor@Portal2026` | vendor | `/auth/login`                  |
+| `vendor3@example.com`       | `Vendor@Portal2026` | vendor | `/auth/login`                  |
+| `vendor4@example.com`       | `Vendor@Portal2026` | vendor | `/auth/login`                  |
+| `vendor5@example.com`       | `Vendor@Portal2026` | vendor | `/auth/login`                  |
 | `admin@sanghvimovers.com`   | none                | admin  | `/auth/otp` (emailed code)     |
 | `sales@sanghvimovers.com`   | none                | sales  | `/auth/otp` (emailed code)     |
 
@@ -197,17 +200,40 @@ admin approves them via `PATCH /api/cranes/:id/approval`. No screen for that yet
 
 ### Trying it
 
-`npm run seed` creates four demo cranes across the two demo vendors, so sign in
-as `vendor1@example.com` / `Vendor@Portal2026` and open **My Fleet**. They cover
-Available, Engaged and Under maintenance, and none carries coordinates, so they
-show the "no map pin" state — useful for seeing, and one reason the geocoding
-path is worth exercising by hand.
+`npm run seed` creates five demo vendors and 67 demo cranes, spread across 43
+Indian cities so the discovery map, the heat layer, distance ranking and the
+filters all have something to work on. Sign in as `vendor1@example.com` /
+`Vendor@Portal2026` and open **My Fleet** to see one vendor's slice of it.
 
-What the seed deliberately does *not* contain is a stale, deactivated or
-system-locked crane, because those three states only arise over time and none of
-them is worth faking into a fresh database. To see them, run the fleet check
-with `--keep` and use the credentials it prints, or deactivate a seeded crane by
-hand.
+The dataset is deliberately shaped:
+
+- **Dense clusters** in Ahmedabad, Vadodara, Pune, Mumbai, Mundra, Hyderabad and
+  Kolkata, with single cranes everywhere else, so the heat layer has both hot
+  spots and empty space — 42 cities in all.
+- **64 of them carry a coordinate** (real city positions, recorded as `manual`
+  because no geocoder produced them); the rest have none and land in the
+  "location unverified" group on discovery.
+- **Five are past the stale-update window** at 33, 65, 75, 80 and 95 days, so the
+  stale reminder and the stale badge both have data.
+- **Statuses vary**: available, engaged (with a future `availableFrom`) and under
+  maintenance (with an `expectedReadyDate`).
+- **Fourteen demo bookings** sit around today's date — running now, finished
+  earlier this month, starting later this month and reaching into the next, plus
+  three maintenance holds. The booking calendar is empty without them, so they
+  are relative to the seed date rather than fixed dates. A booking that has
+  started reads Hired and one that starts later reads Reserved, because that
+  split is derived from the date on read.
+
+Re-running the seed is safe: it never duplicates a row, it leaves a
+geocoder-produced (`auto`) pin alone, and it restores the demo pins and stale
+ages it owns. A demo booking is skipped when the crane already has an active
+reservation covering that window, so it never fights a real booking. Everything in it is fabricated — names, serials, PAN, GSTIN, bank
+details.
+
+What the seed deliberately does *not* contain is a system-locked crane, because
+that state only arises over time and is not worth faking into a fresh database.
+To see it, deactivate a seeded crane by hand or run the fleet check with
+`--keep`.
 
 ## RFQs (M4)
 
@@ -223,7 +249,9 @@ ten-crane enquiry is ten separate RFQs. The flow, end to end:
    so "SML checked where this actually is" is recorded separately from "SML typed
    it in".
 3. **The candidate picker** at `/app/rfqs/$rfqId` lists matching vendor cranes
-   grouped by vendor, nearest first, with the distance and how it was obtained.
+   grouped by vendor — technical view leads with the smallest adequate capacity
+   (distance breaks ties), distance view with the nearest — with the distance and
+   how it was obtained.
 4. **Pick vendors** from the picker or from the all-approved-vendors list, then
    **send**. Recipients resolve from vendor IDs to the vendor's own active email
    addresses — an address supplied by the browser is ignored, so a crafted request
@@ -479,8 +507,8 @@ dashboard counters, internal user management (create, role, enable/disable, rese
 credentials) and vendor suspension/reinstate, enforced at login, dispatch and the
 candidate picker.
 
-**P1** (native enquiry intake, enquiry screens, sourcing workspace) is the
-current phase. The enquiry and line-item tables were added (31 template fields,
+**P1** (native enquiry intake and enquiry screens) is the current phase. The
+enquiry and line-item tables were added (31 template fields,
 including the five scope terms — additional manpower, intra-site movement,
 pre-release, PPE and ROW — plus an internal-only block), with an RFQ now able to
 link back to the line it was raised from. Status is event driven: a
@@ -492,8 +520,8 @@ name cannot cross over, and a test asserts their absence by string. There is no
 SML crane fleet in this platform (all cranes are vendor cranes), so internal
 fulfilment is a manual line outcome rather than a machine match; the design
 stores it as Fulfilled Internally with no crane record. Screens: the enquiry list,
-the intake form, the detail with the trail, and the line workspace with vendor
-recommendations, RFQ history and quotations.
+the intake form, the detail with the trail, and the line editor. Quote comparison
+and final selection live on their own per-line screen.
 
 Verified at the time of writing: backend `tsc` clean and 388/388 tests, frontend
 typecheck and build clean, and both end-to-end scripts green against a running

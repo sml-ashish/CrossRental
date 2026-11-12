@@ -123,7 +123,6 @@ async function createLine(overrides: Record<string, unknown> = {}) {
           durationValue: 4,
           durationUnit: "MONTHS",
           rentalBudget: "Budget 9,00,000 per month",
-          rentalBudgetValue: 900_000,
           ...overrides,
         },
       ],
@@ -250,7 +249,6 @@ describe("quote comparison (P3, BPD 6.15)", () => {
 
     expect(body.rankRule).toBe("TOTAL_ESTIMATED_COST");
     expect(body.rentalBudget).toBe("Budget 9,00,000 per month");
-    expect(body.rentalBudgetValue).toBe(900_000);
     expect(body.quantity).toBe(1);
     expect(body.fullyAwarded).toBe(false);
     expect(body.quotations).toHaveLength(2);

@@ -8,6 +8,7 @@ import { recordAudit } from "./audit.service";
 import { requestLoginOtp, requestPasswordReset } from "./auth.service";
 import { sendTemplate } from "./email.service";
 import type { Actor } from "./rfq.service";
+import { adminAlerts, type AlertItem } from "./alert.service";
 
 /**
  * P0 B: the internal-only administration surface.
@@ -26,9 +27,16 @@ import type { Actor } from "./rfq.service";
  * `candidate.service.candidatesForRfq`.
  */
 
-export type InternalRole = Extract<UserRole, "admin_user" | "sales_user">;
+export type InternalRole = Extract<
+  UserRole,
+  "admin_user" | "sales_user" | "management_viewer"
+>;
 
-const INTERNAL_ROLES: readonly InternalRole[] = ["admin_user", "sales_user"];
+const INTERNAL_ROLES: readonly InternalRole[] = [
+  "admin_user",
+  "sales_user",
+  "management_viewer",
+];
 
 // --- B1: dashboard --------------------------------------------------------
 
@@ -39,8 +47,19 @@ export interface AdminDashboard {
     cranesStale: number;
     cranesUnverified: number;
     cranesLapsed: number;
+    // P5 additions.
+    fleetPendingValidation: number;
+    unmatchedQuotationResponses: number;
+    failedEmails: number;
   };
-  thresholds: { staleFlagDays: number };
+  thresholds: {
+    staleFlagDays: number;
+    fleetApprovalRequired: boolean;
+    alertRfqSlaHours: number;
+    alertQuotationExpiryDays: number;
+    alertBookingLeadDays: number;
+  };
+  alerts: AlertItem[];
 }
 
 /**
@@ -53,12 +72,18 @@ export async function adminDashboard(): Promise<AdminDashboard> {
   const staleBefore = new Date(Date.now() - settings.staleFlagDays * 86_400_000);
   const now = new Date();
 
+  const failedSince = new Date(Date.now() - 7 * 86_400_000);
+
   const [
     awaitingApproval,
     rfqsWithFailures,
     cranesStale,
     cranesUnverified,
     cranesLapsed,
+    fleetPendingValidation,
+    failedEmails,
+    unmatchedQuotationResponses,
+    alerts,
   ] = await Promise.all([
     prisma.vendor.count({ where: { onboardingStatus: OnboardingStatus.SUBMITTED } }),
     // A distinct RFQ, not a recipient: one failed address is one row to fix.
@@ -78,6 +103,14 @@ export async function adminDashboard(): Promise<AdminDashboard> {
         availableFrom: { lt: now },
       },
     }),
+    settings.fleetApprovalRequired
+      ? prisma.crane.count({ where: { isActive: true, approvalStatus: "PENDING" } })
+      : Promise.resolve(0),
+    prisma.emailLog.count({
+      where: { status: "FAILED", createdAt: { gte: failedSince } },
+    }),
+    prisma.inboundReply.count({ where: { status: "PENDING" } }),
+    adminAlerts(),
   ]);
 
   return {
@@ -87,8 +120,18 @@ export async function adminDashboard(): Promise<AdminDashboard> {
       cranesStale,
       cranesUnverified,
       cranesLapsed,
+      fleetPendingValidation,
+      unmatchedQuotationResponses,
+      failedEmails,
     },
-    thresholds: { staleFlagDays: settings.staleFlagDays },
+    thresholds: {
+      staleFlagDays: settings.staleFlagDays,
+      fleetApprovalRequired: settings.fleetApprovalRequired,
+      alertRfqSlaHours: settings.alertRfqSlaHours,
+      alertQuotationExpiryDays: settings.alertQuotationExpiryDays,
+      alertBookingLeadDays: settings.alertBookingLeadDays,
+    },
+    alerts,
   };
 }
 

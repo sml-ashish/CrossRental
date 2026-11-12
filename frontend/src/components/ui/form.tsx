@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Panel } from "@/components/ui/page-header";
 import { cn } from "@/lib/cn";
 
 /**
@@ -186,18 +187,18 @@ export function Checkbox({
 export function Section({
   title,
   description,
+  actions,
   children,
 }: {
   title: string;
   description?: string;
+  actions?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <section className="card p-5">
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-      {description ? <p className="mt-1 text-xs text-slate-500">{description}</p> : null}
-      <div className="mt-4 space-y-4">{children}</div>
-    </section>
+    <Panel title={title} description={description} actions={actions}>
+      <div className="space-y-4">{children}</div>
+    </Panel>
   );
 }
 

@@ -13,8 +13,8 @@ import { submissionDeadlineField } from "./rfqFields";
  * missed (additional manpower, intra-site movement, pre-release, PPE, ROW) are
  * first-class columns here.
  *
- * Customer name/address and the budget/notes/PO block are internal only: the
- * validators keep them, and the RFQ prefill deliberately drops them.
+ * Customer name/address and the budget are internal only: the validators keep
+ * them, and the RFQ prefill deliberately drops them.
  */
 
 const trimmed = (max: number) => z.string().trim().max(max);
@@ -73,8 +73,8 @@ const baseLineFields = {
   requiredWindJibM: optionalNumber("Wind jib length"),
   configurationNotes: optionalText(2000),
 
+  // No start date means "to be confirmed"; there is no separate flag.
   requiredStartDate: dateField.optional().nullable(),
-  startDateTbc: z.boolean().default(false),
   durationValue: optionalNumber("Duration"),
   durationUnit: z
     .enum([DurationUnit.DAYS, DurationUnit.MONTHS])
@@ -108,15 +108,10 @@ const baseLineFields = {
 
   // Internal only — never copied into an RFQ.
   rentalBudget: optionalText(300),
-  rentalBudgetValue: optionalNumber("Rental budget value"),
-  internalNotes: optionalText(4000),
-  poSapReference: optionalText(120),
 };
 
 const headerFields = {
-  externalReference: optionalText(120),
   enquiryDate: dateField.optional(),
-  salesPartnerName: optionalText(200),
   /** Defaults to the acting CR user when omitted. */
   crOwnerId: z.string().uuid("That is not a valid owner reference").optional(),
   customerName: trimmed(300).min(1, "Enter the customer name"),
@@ -125,9 +120,6 @@ const headerFields = {
   siteStateCode: trimmed(10).min(1, "Choose the state"),
   sitePincode: optionalText(10),
   region: optionalText(120),
-  businessVertical: optionalText(120),
-  crossRentalFlag: z.boolean().default(true),
-  notes: optionalText(4000),
 };
 
 /**
@@ -200,10 +192,16 @@ export const listEnquiriesQuerySchema = z.object({
     .optional(),
   search: trimmed(120).optional(),
   region: optionalText(120),
-  businessVertical: optionalText(120),
   stateCode: trimmed(10).optional(),
   from: dateField.optional(),
   to: dateField.optional(),
 });
 
 export type ListEnquiriesQuery = z.infer<typeof listEnquiriesQuerySchema>;
+
+/** The RFQ line picker: open lines that can carry a new RFQ. */
+export const listRaisableLinesQuerySchema = z.object({
+  search: trimmed(120).optional(),
+});
+
+export type ListRaisableLinesQuery = z.infer<typeof listRaisableLinesQuerySchema>;

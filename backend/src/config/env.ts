@@ -47,12 +47,42 @@ function list(name: string, fallback: string[]): string[] {
     .filter(Boolean);
 }
 
-export type GeoProvider = "stub" | "disabled";
+export type GeoProvider = "stub" | "disabled" | "google";
 export type StorageDriver = "local" | "s3";
+export type SsoProviderName = "disabled" | "entra";
+export type WhatsAppProviderName = "disabled" | "meta";
 
-const geoProviderRaw = str("GEO_PROVIDER", "disabled");
-if (geoProviderRaw !== "stub" && geoProviderRaw !== "disabled") {
-  throw new Error(`GEO_PROVIDER must be "stub" or "disabled", got "${geoProviderRaw}"`);
+// The mapping provider decision is no longer open: Google Maps is wired up for
+// geocoding and road distance. "stub" stays the development/test default and
+// "disabled" the production default, so a deployment that has not been given a
+// key fails closed (unverified locations, no distances) rather than inventing
+// coordinates.
+const geoProviderDefault =
+  str("NODE_ENV", "development") === "production" ? "disabled" : "stub";
+const geoProviderRaw = str("GEO_PROVIDER", geoProviderDefault);
+if (geoProviderRaw !== "stub" && geoProviderRaw !== "disabled" && geoProviderRaw !== "google") {
+  throw new Error(
+    `GEO_PROVIDER must be "google", "stub" or "disabled", got "${geoProviderRaw}"`,
+  );
+}
+
+const googleMapsServerApiKey = process.env["GOOGLE_MAPS_SERVER_API_KEY"]?.trim() || null;
+if (geoProviderRaw === "google" && !googleMapsServerApiKey) {
+  throw new Error(
+    'GEO_PROVIDER is "google" but GOOGLE_MAPS_SERVER_API_KEY is empty. Set the server key or change GEO_PROVIDER.',
+  );
+}
+
+const ssoProviderRaw = str("SSO_PROVIDER", "disabled");
+if (ssoProviderRaw !== "disabled" && ssoProviderRaw !== "entra") {
+  throw new Error(`SSO_PROVIDER must be "disabled" or "entra", got "${ssoProviderRaw}"`);
+}
+
+const whatsappProviderRaw = str("WHATSAPP_PROVIDER", "disabled");
+if (whatsappProviderRaw !== "disabled" && whatsappProviderRaw !== "meta") {
+  throw new Error(
+    `WHATSAPP_PROVIDER must be "disabled" or "meta", got "${whatsappProviderRaw}"`,
+  );
 }
 
 const storageDriverRaw = str("STORAGE_DRIVER", "local");
@@ -102,6 +132,45 @@ export const env = Object.freeze({
 
   fieldEncryptionKey: required("FIELD_ENCRYPTION_KEY"),
 
+  // P5 SSO. Open item 8's working assumption is Microsoft Entra ID with OTP
+  // kept as the fallback. The provider is disabled unless all four Entra
+  // values are present, so a misconfigured deploy fails closed.
+  sso: Object.freeze({
+    provider: ssoProviderRaw as SsoProviderName,
+    tenantId: process.env["SSO_TENANT_ID"] ?? null,
+    clientId: process.env["SSO_CLIENT_ID"] ?? null,
+    clientSecret: process.env["SSO_CLIENT_SECRET"] ?? null,
+    redirectUri: process.env["SSO_REDIRECT_URI"] ?? null,
+    allowedDomains: list("SSO_ALLOWED_DOMAINS", ["sanghvimovers.com"]),
+  }),
+
+  // P6: WhatsApp Cloud API. The provider is inert until the phone number id,
+  // access token and approved template are all present, so a half-configured
+  // deployment cannot silently send through the wrong sender.
+  whatsapp: Object.freeze({
+    provider: whatsappProviderRaw as WhatsAppProviderName,
+    apiVersion: str("WHATSAPP_API_VERSION", "v22.0"),
+    phoneNumberId: process.env["WHATSAPP_PHONE_NUMBER_ID"] ?? null,
+    accessToken: process.env["WHATSAPP_ACCESS_TOKEN"] ?? null,
+    verifyToken: process.env["WHATSAPP_VERIFY_TOKEN"] ?? null,
+    appSecret: process.env["WHATSAPP_APP_SECRET"] ?? null,
+    templateName: process.env["WHATSAPP_TEMPLATE_NAME"] ?? null,
+    templateLanguage: str("WHATSAPP_TEMPLATE_LANGUAGE", "en"),
+  }),
+
+  // P6: inbound email replies are polled from the shared mailbox. Polling is
+  // off unless a host and credentials are present, so tests and local builds
+  // never try to reach a real mailbox.
+  imap: Object.freeze({
+    enabled: bool("IMAP_POLL_ENABLED", false),
+    host: process.env["IMAP_HOST"] ?? null,
+    port: num("IMAP_PORT", 993),
+    secure: bool("IMAP_SECURE", true),
+    user: process.env["IMAP_USER"] ?? null,
+    pass: process.env["IMAP_PASS"] ?? null,
+    mailbox: str("IMAP_MAILBOX", "INBOX"),
+  }),
+
   onboarding: Object.freeze({
     // How long an invitation link stays usable. The vendor gets a reminder
     // before it lapses rather than the link simply dying.
@@ -121,9 +190,16 @@ export const env = Object.freeze({
     s3SecretAccessKey: process.env["AWS_SECRET_ACCESS_KEY"] ?? null,
   }),
 
+  // Google Maps: the Geocoding API resolves addresses and the Routes API
+  // (computeRoutes) measures road distance. Only the server key lives here; the
+  // browser gets its own referrer-restricted key through Vite.
   geo: Object.freeze({
     provider: geoProviderRaw as GeoProvider,
     distanceCacheDays: num("DISTANCE_CACHE_DAYS", 30),
+    googleServerApiKey: googleMapsServerApiKey,
+    googleRegion: str("GOOGLE_MAPS_REGION", "IN"),
+    googleLanguage: str("GOOGLE_MAPS_LANGUAGE", "en"),
+    googleTimeoutMs: num("GOOGLE_MAPS_TIMEOUT_MS", 8_000),
   }),
 
   // Seeded into app_settings on first run; the DB copy is what the app reads
@@ -144,6 +220,13 @@ export const env = Object.freeze({
     // P3: the comparison screen's default sort. Open item 5's working
     // assumption — total estimated cost ascending.
     QUOTE_RANK_RULE: str("QUOTE_RANK_RULE", "TOTAL_ESTIMATED_COST"),
+    // P5 alert SLAs (open item 11) and the report retention window. These are
+    // seeded once; the database copy is authoritative afterwards.
+    ALERT_RFQ_SLA_HOURS: num("ALERT_RFQ_SLA_HOURS", 48),
+    ALERT_QUOTATION_EXPIRY_DAYS: num("ALERT_QUOTATION_EXPIRY_DAYS", 3),
+    ALERT_BOOKING_LEAD_DAYS: num("ALERT_BOOKING_LEAD_DAYS", 7),
+    ALERT_EMAILS_ENABLED: bool("ALERT_EMAILS_ENABLED", true),
+    REPORT_RETENTION_MONTHS: num("REPORT_RETENTION_MONTHS", 84),
   }),
 
   // India bounding box, brief 5.2. Used by the geocode/pin-drop validators and

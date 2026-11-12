@@ -22,7 +22,7 @@ import {
 import { INTERNAL_USERS, VENDOR_PASSWORD, VENDOR_USERS } from "./fixtures";
 
 /**
- * P1: native enquiry intake, the line-item trail and the sourcing workspace.
+ * P1: native enquiry intake and the line-item trail.
  *
  * The phase's done-when is a journey — capture an enquiry with every template
  * field, see it Received Pending Sourcing, check the line internally, raise an
@@ -112,9 +112,6 @@ const inDays = (days: number) => new Date(Date.now() + days * 86_400_000);
 const INTERNAL_SECRETS = {
   customerName: "Secret Customer Co",
   customerAddress: "17 Hidden Industrial Estate, Nowhere",
-  salesPartnerName: "Secret Sales Partner",
-  internalNotes: "Internal: hold 5 percent margin",
-  poSapReference: "PO-INTERNAL-9911",
   rentalBudget: "Budget 9,00,000 per month",
 };
 
@@ -143,11 +140,8 @@ function enquiryPayload(overrides: Record<string, unknown> = {}) {
   return {
     customerName: INTERNAL_SECRETS.customerName,
     customerAddress: INTERNAL_SECRETS.customerAddress,
-    salesPartnerName: INTERNAL_SECRETS.salesPartnerName,
     siteLocation: "Vadodara",
     siteStateCode: "GJ",
-    internalNotes: INTERNAL_SECRETS.internalNotes,
-    poSapReference: INTERNAL_SECRETS.poSapReference,
     lines: [linePayload({ rentalBudget: INTERNAL_SECRETS.rentalBudget })],
     ...overrides,
   };
@@ -198,8 +192,6 @@ describe("enquiry intake (P1)", () => {
       prereleaseTerms: "No pre-release storage",
       ppeScope: "Helmets and harnesses by vendor",
       rowScope: "ROW along haul road to bay 4",
-      internalNotes: null,
-      poSapReference: null,
       rentalBudget: INTERNAL_SECRETS.rentalBudget,
     });
 
@@ -385,7 +377,7 @@ describe("RFQ from an enquiry line (P1)", () => {
     });
   });
 
-  it("appears in the line workspace with vendor recommendations and a Fresh RFQ", async () => {
+  it("is readable on its own and carries vendor recommendations", async () => {
     const enquiry = await createEnquiry();
     const lineId = enquiry.lines[0].id;
     const created = await call(app, "POST", `/api/enquiries/lines/${lineId}/rfq`, {
@@ -394,17 +386,24 @@ describe("RFQ from an enquiry line (P1)", () => {
     });
     expect(created.status).toBe(201);
 
-    const workspace = await call(
+    const line = await call(app, "GET", `/api/enquiries/lines/${lineId}`, {
+      token: ctx.salesToken,
+    });
+    expect(line.status).toBe(200);
+    expect(line.body.line.id).toBe(lineId);
+    expect(line.body.line.enquiryId).toBe(enquiry.id);
+    // The internal block stays on the internal endpoint, never on the RFQ.
+    expect(line.body.line.rentalBudget).toBeTruthy();
+
+    const recommendations = await call(
       app,
       "GET",
-      `/api/enquiries/lines/${lineId}/workspace`,
+      `/api/enquiries/lines/${lineId}/recommendations`,
       { token: ctx.salesToken },
     );
-    expect(workspace.status).toBe(200);
-    expect(workspace.body.workspace.rfqs).toHaveLength(1);
-    expect(workspace.body.workspace.rfqs[0].status).toBe("DRAFT");
+    expect(recommendations.status).toBe(200);
     // Two approved vendors each have a matching 250 t crawler.
-    expect(workspace.body.workspace.recommendations).toBeTruthy();
+    expect(recommendations.body.recommendations).toBeTruthy();
   });
 });
 

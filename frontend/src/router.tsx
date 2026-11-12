@@ -12,6 +12,7 @@ import { RedirectIfAuthenticated, RequireAuth } from "@/components/guards";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { LoginPage } from "@/routes/auth/login";
 import { OtpLoginPage } from "@/routes/auth/otp-login";
+import { SsoCallbackPage } from "@/routes/auth/sso";
 import { ActivatePage } from "@/routes/auth/activate";
 import { ResetPasswordPage } from "@/routes/auth/reset-password";
 import { AppLayout, VendorProfilePage } from "@/routes/app/placeholders";
@@ -23,7 +24,9 @@ import { VendorDetailPage } from "@/routes/app/vendor-detail";
 import { SapSheetPage } from "@/routes/app/sap-sheet";
 import { SettingsPage } from "@/routes/app/settings";
 import { AdminPage } from "@/routes/app/admin";
+import { ReplyQueuePage } from "@/routes/app/replies";
 import { RfqIndexPage } from "@/routes/app/rfqs";
+import { RfqNewPage } from "@/routes/app/rfq-new";
 import { RfqFormPage } from "@/routes/app/rfq-form";
 import { RfqDetailPage } from "@/routes/app/rfq-detail";
 import { VendorDashboardPage } from "@/routes/app/dashboard";
@@ -33,13 +36,16 @@ import {
   EnquiryLineEditorPage,
 } from "@/routes/app/enquiry-form";
 import { EnquiryDetailPage } from "@/routes/app/enquiry-detail";
-import { EnquiryLineWorkspacePage } from "@/routes/app/enquiry-line";
 import { LineComparisonPage } from "@/routes/app/line-comparison";
 import { BookingCalendarPage } from "@/routes/app/booking-calendar";
+import { VendorBookingCalendarPage } from "@/routes/app/vendor-calendar";
 import { DiscoveryPage } from "@/routes/app/discovery";
 import { CraneDetailPage } from "@/routes/app/crane-detail";
 import { CommunicationHistoryPage } from "@/routes/app/communications";
 import { EnquiryHistoryPage } from "@/routes/app/enquiry-history";
+import { SalesDashboardPage } from "@/routes/app/sales";
+import { ManagementDashboardPage } from "@/routes/app/management";
+import { ReportsPage } from "@/routes/app/reports";
 
 /**
  * Route map.
@@ -95,6 +101,12 @@ const otpLoginRoute = createRoute({
       <OtpLoginPage />
     </RedirectIfAuthenticated>
   ),
+});
+
+const ssoCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/auth/sso",
+  component: SsoCallbackPage,
 });
 
 const activateRoute = createRoute({
@@ -269,7 +281,7 @@ const rfqNewRoute = createRoute({
   path: "/rfqs/new",
   component: () => (
     <RequireAuth roles={["admin_user", "sales_user"]}>
-      <RfqFormPage />
+      <RfqNewPage />
     </RequireAuth>
   ),
 });
@@ -351,16 +363,6 @@ const enquiryLineNewRoute = createRoute({
   component: () => (
     <RequireAuth roles={["admin_user", "sales_user"]}>
       <EnquiryLineEditorPage />
-    </RequireAuth>
-  ),
-});
-
-const enquiryLineRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: "/enquiries/lines/$lineId",
-  component: () => (
-    <RequireAuth roles={["admin_user", "sales_user"]}>
-      <EnquiryLineWorkspacePage />
     </RequireAuth>
   ),
 });
@@ -465,10 +467,58 @@ const bookingsRoute = createRoute({
 });
 
 /**
+ * The vendor's own calendar. Same day states as the internal screen, but the
+ * backend scopes it to the caller's vendor from the token — there is no vendor
+ * filter on this route to widen. Vendors only, for the same reason.
+ */
+const vendorBookingsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/calendar",
+  component: () => (
+    <RequireAuth roles={["vendor_user"]}>
+      <VendorBookingCalendarPage />
+    </RequireAuth>
+  ),
+});
+
+/**
  * Sales can work the queue — search, chase, send invitations — so the route is
  * open to both internal roles. Approval controls are further restricted by the
  * backend, and the detail screen hides them from sales.
  */
+/** P5: the CR team's operational dashboard. */
+const salesDashboardRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/sales",
+  component: () => (
+    <RequireAuth roles={["admin_user", "sales_user"]}>
+      <SalesDashboardPage />
+    </RequireAuth>
+  ),
+});
+
+/** P5: the read-only Management Viewer dashboard. */
+const managementDashboardRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/management",
+  component: () => (
+    <RequireAuth roles={["admin_user", "management_viewer"]}>
+      <ManagementDashboardPage />
+    </RequireAuth>
+  ),
+});
+
+/** P5: reports. Sales are narrowed to their own enquiries by the API. */
+const reportsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/reports",
+  component: () => (
+    <RequireAuth roles={["admin_user", "sales_user", "management_viewer"]}>
+      <ReportsPage />
+    </RequireAuth>
+  ),
+});
+
 const approvalsRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/approvals",
@@ -529,9 +579,21 @@ const adminRoute = createRoute({
   ),
 });
 
+/** P6: email/WhatsApp replies that need an admin to complete the match. */
+const adminRepliesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/admin/replies",
+  component: () => (
+    <RequireAuth roles={["admin_user"]}>
+      <ReplyQueuePage />
+    </RequireAuth>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   otpLoginRoute,
+  ssoCallbackRoute,
   activateRoute,
   resetPasswordRoute,
   onboardingStartRoute,
@@ -552,7 +614,6 @@ const routeTree = rootRoute.addChildren([
     enquiryDetailRoute,
     enquiryEditRoute,
     enquiryLineNewRoute,
-    enquiryLineRoute,
     enquiryLineEditRoute,
     lineComparisonRoute,
     enquiryHistoryRoute,
@@ -560,12 +621,17 @@ const routeTree = rootRoute.addChildren([
     craneDetailRoute,
     communicationsRoute,
     bookingsRoute,
+    vendorBookingsRoute,
     approvalsRoute,
+    salesDashboardRoute,
+    managementDashboardRoute,
+    reportsRoute,
     vendorsRoute,
     vendorDetailRoute,
     sapSheetRoute,
     settingsRoute,
     adminRoute,
+    adminRepliesRoute,
   ]),
 ]);
 

@@ -12,7 +12,8 @@
 export const UserRole = {
   vendor_user: 'vendor_user',
   admin_user: 'admin_user',
-  sales_user: 'sales_user'
+  sales_user: 'sales_user',
+  management_viewer: 'management_viewer'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -278,10 +279,38 @@ export type QuotationStatus = (typeof QuotationStatus)[keyof typeof QuotationSta
 
 
 export const QuoteSource = {
-  PORTAL: 'PORTAL'
+  PORTAL: 'PORTAL',
+  EMAIL: 'EMAIL',
+  WHATSAPP: 'WHATSAPP',
+  MANUAL: 'MANUAL'
 } as const
 
 export type QuoteSource = (typeof QuoteSource)[keyof typeof QuoteSource]
+
+
+export const MessageChannel = {
+  EMAIL: 'EMAIL',
+  WHATSAPP: 'WHATSAPP'
+} as const
+
+export type MessageChannel = (typeof MessageChannel)[keyof typeof MessageChannel]
+
+
+export const MessageDirection = {
+  OUTBOUND: 'OUTBOUND',
+  INBOUND: 'INBOUND'
+} as const
+
+export type MessageDirection = (typeof MessageDirection)[keyof typeof MessageDirection]
+
+
+export const InboundReplyStatus = {
+  PENDING: 'PENDING',
+  CONVERTED: 'CONVERTED',
+  DISMISSED: 'DISMISSED'
+} as const
+
+export type InboundReplyStatus = (typeof InboundReplyStatus)[keyof typeof InboundReplyStatus]
 
 
 export const DistanceMethod = {

@@ -9,6 +9,11 @@ import { invalidateDistancesFrom } from "./distance.service";
 import { onRfqSent } from "./enquiryTrail.service";
 import { tryGeocode, isInsideIndia, type GeoPoint } from "../lib/geo";
 import { sendTemplate, optionalBlock } from "./email.service";
+import {
+  isWhatsAppConfigured,
+  normaliseWhatsAppNumber,
+  sendWhatsAppTemplate,
+} from "./whatsapp.service";
 import { getSettings } from "../utils/settings";
 import {
   createRfqSchema,
@@ -20,6 +25,7 @@ import {
   confirmSitePinSchema,
   listRfqsQuerySchema,
   listApprovedVendorsQuerySchema,
+  candidateQuerySchema,
   type CreateRfqInput,
   type UpdateRfqInput,
   type SendRfqInput,
@@ -29,12 +35,15 @@ import {
   type ConfirmSitePinInput,
   type ListRfqsQuery,
   type ListApprovedVendorsQuery,
+  type CandidateQuery,
 } from "../validation/rfqFields";
 import {
   CoordinateSource,
   DistanceMethod,
   DurationUnit,
   EmailDeliveryStatus,
+  EnquiryLineTrailStatus,
+  MessageChannel,
   OnboardingStatus,
   ResponseStatus,
   RfqRollupStatus,
@@ -146,6 +155,7 @@ const RFQ_SELECT = {
   createdAt: true,
   updatedAt: true,
   sentAt: true,
+  channels: true,
   siteState: { select: { name: true } },
   craneTypeRef: { select: { name: true } },
   createdBy: { select: { id: true, email: true, fullName: true } },
@@ -295,11 +305,61 @@ async function stateNameOf(code: string): Promise<string> {
 
 // --- create / update ------------------------------------------------------
 
+/**
+ * Resolve the enquiry line an RFQ is being raised against.
+ *
+ * Returns the enquiry number and line number *from the line itself*, so the two
+ * snapshot columns can never drift from the line they claim to belong to. A
+ * cancelled line is refused here as well as in the workspace UI: the trail has
+ * already ended, and an RFQ against it would be untraceable.
+ */
+async function lineIdentityOf(enquiryLineId: string) {
+  const line = await prisma.enquiryLineItem.findUnique({
+    where: { id: enquiryLineId },
+    select: {
+      lineNo: true,
+      cancelledAt: true,
+      trailStatus: true,
+      enquiry: { select: { enquiryNo: true } },
+    },
+  });
+  if (!line) throw AppError.badRequest("That enquiry line does not exist");
+  if (line.cancelledAt) {
+    throw AppError.badRequest(
+      "That enquiry line is cancelled — raise the RFQ from an active line",
+    );
+  }
+  // Sourcing has ended for these; a new RFQ would reopen a closed trail.
+  if (
+    line.trailStatus === EnquiryLineTrailStatus.VENDOR_FINALISED ||
+    line.trailStatus === EnquiryLineTrailStatus.BOOKED ||
+    line.trailStatus === EnquiryLineTrailStatus.CLOSED ||
+    line.trailStatus === EnquiryLineTrailStatus.FULFILLED_INTERNALLY
+  ) {
+    throw AppError.badRequest(
+      "That enquiry line is already finalised — raise the RFQ from a line still in sourcing",
+    );
+  }
+  return {
+    enquiryNo: line.enquiry.enquiryNo,
+    lineNo: String(line.lineNo),
+  };
+}
+
 export async function createRfq(raw: unknown, actor: Actor) {
   assertInternal(actor);
   const input: CreateRfqInput = createRfqSchema.parse(raw);
   await assertCraneType(input.craneType);
   const stateName = await stateNameOf(input.siteStateCode);
+
+  // The line is the source of truth when supplied; the legacy SAP pair is only
+  // a fallback for callers that arrive without a native line.
+  const identity = input.enquiryLineId
+    ? await lineIdentityOf(input.enquiryLineId)
+    : { enquiryNo: input.enquiryNo, lineNo: input.lineNo };
+  if (!identity.enquiryNo || !identity.lineNo) {
+    throw AppError.badRequest("Choose the enquiry line this RFQ is for");
+  }
 
   const site = await resolveSite({
     siteLocation: input.siteLocation,
@@ -317,8 +377,8 @@ export async function createRfq(raw: unknown, actor: Actor) {
   // checked/unchecked XOR, which reports keys the payload legitimately has.
   const data: Prisma.RfqUncheckedCreateInput = {
     rfqNumber,
-    enquiryNo: input.enquiryNo,
-    lineNo: input.lineNo,
+    enquiryNo: identity.enquiryNo,
+    lineNo: identity.lineNo,
     enquiryLineId: input.enquiryLineId ?? null,
     craneType: input.craneType,
     capacityT: input.capacityT,
@@ -427,8 +487,7 @@ export async function updateRfq(rfqId: string, raw: unknown, actor: Actor) {
   // plain columns, and Prisma's `Update | UncheckedUpdate` overload union then
   // resolves the object literal to a type missing keys it genuinely has.
   const data: Prisma.RfqUncheckedUpdateInput = {
-    enquiryNo: input.enquiryNo,
-    lineNo: input.lineNo,
+    // `enquiryNo`/`lineNo` are a snapshot of the line and are not editable.
     craneType: input.craneType,
     capacityT: input.capacityT,
     capacityRule: input.capacityRule,
@@ -550,6 +609,7 @@ export async function listRfqs(rawQuery: unknown, actor: Actor) {
         select: {
           id: true,
           emailDeliveryStatus: true,
+          whatsappDeliveryStatus: true,
           responseStatus: true,
           vendor: { select: { name: true } },
         },
@@ -562,6 +622,7 @@ export async function listRfqs(rawQuery: unknown, actor: Actor) {
     const recipients = row.recipients as unknown as Array<{
       id: string;
       emailDeliveryStatus: string;
+      whatsappDeliveryStatus: string | null;
       responseStatus: string;
       vendor: { name: string };
     }>;
@@ -572,7 +633,9 @@ export async function listRfqs(rawQuery: unknown, actor: Actor) {
         (r) => r.responseStatus === ResponseStatus.QUOTED,
       ).length,
       failedCount: recipients.filter(
-        (r) => r.emailDeliveryStatus === EmailDeliveryStatus.FAILED,
+        (r) =>
+          r.emailDeliveryStatus === EmailDeliveryStatus.FAILED ||
+          r.whatsappDeliveryStatus === EmailDeliveryStatus.FAILED,
       ).length,
       pendingCount: recipients.filter(
         (r) => r.responseStatus === ResponseStatus.PENDING,
@@ -581,6 +644,7 @@ export async function listRfqs(rawQuery: unknown, actor: Actor) {
         recipientId: r.id,
         vendorName: r.vendor.name,
         emailDeliveryStatus: r.emailDeliveryStatus,
+        whatsappDeliveryStatus: r.whatsappDeliveryStatus,
         responseStatus: r.responseStatus,
       })),
     };
@@ -625,6 +689,10 @@ export async function getRfqDetail(rfqId: string, actor: Actor) {
           emails: true,
           emailDeliveryStatus: true,
           emailDeliveryError: true,
+          whatsappPhones: true,
+          whatsappDeliveryStatus: true,
+          whatsappDeliveryError: true,
+          whatsappMessageIds: true,
           firstViewedAt: true,
           responseStatus: true,
           respondedAt: true,
@@ -659,6 +727,9 @@ export async function getRfqDetail(rfqId: string, actor: Actor) {
       emails: r.emails,
       emailDeliveryStatus: r.emailDeliveryStatus,
       emailDeliveryError: r.emailDeliveryError,
+      whatsappPhones: r.whatsappPhones,
+      whatsappDeliveryStatus: r.whatsappDeliveryStatus,
+      whatsappDeliveryError: r.whatsappDeliveryError,
       firstViewedAt: r.firstViewedAt,
       responseStatus: r.responseStatus,
       respondedAt: r.respondedAt,
@@ -701,6 +772,7 @@ async function listQuotationsForRfq(rfqId: string) {
       distanceToSiteKm: true,
       distanceMethod: true,
       warnings: true,
+      source: true,
       status: true,
       submittedAt: true,
       vendor: { select: { name: true } },
@@ -735,6 +807,7 @@ async function listQuotationsForRfq(rfqId: string) {
     distanceMethod: r.distanceMethod,
     distanceApproximate: r.distanceMethod === DistanceMethod.straight_line,
     warnings: (r.warnings as string[] | null) ?? [],
+    source: r.source,
     status: r.status,
     submittedAt: r.submittedAt,
   }));
@@ -794,7 +867,10 @@ export async function listApprovedVendors(rawQuery: unknown, actor: Actor) {
  */
 async function resolveRecipients(
   vendorIds: string[],
-): Promise<Array<{ vendorId: string; vendorName: string; emails: string[] }>> {
+  channels: MessageChannel[],
+): Promise<
+  Array<{ vendorId: string; vendorName: string; emails: string[]; phones: string[] }>
+> {
   const vendors = await prisma.vendor.findMany({
     where: { id: { in: vendorIds } },
     select: {
@@ -807,7 +883,7 @@ async function resolveRecipients(
         select: { email: true },
       },
       contacts: {
-        select: { email: true, isPrimary: true, receivesRfqs: true },
+        select: { email: true, mobile: true, isPrimary: true, receivesRfqs: true },
       },
     },
   });
@@ -842,15 +918,39 @@ async function resolveRecipients(
     if (emails.length === 0) {
       emails.push(...vendor.users.map((u) => u.email));
     }
-    if (emails.length === 0) {
+    if (channels.includes(MessageChannel.EMAIL) && emails.length === 0) {
       refused.push(`${vendor.name ?? "A vendor"} has no active user to email`);
       return [];
     }
+
+    // P6 WhatsApp: the same RFQ contacts' mobiles, then the primary contact,
+    // then the vendor's switchboard number. Sent numbers are normalised at send
+    // time and stored on the recipient row so a reply can be matched back.
+    const whatsappContacts = vendor.contacts.filter(
+      (c) => c.receivesRfqs && c.mobile && c.mobile.trim().length > 0,
+    );
+    const phoneSource =
+      whatsappContacts.length > 0
+        ? whatsappContacts
+        : vendor.contacts.filter((c) => c.isPrimary && c.mobile);
+    const phones = [
+      ...new Set(
+        phoneSource
+          .map((c) => normaliseWhatsAppNumber(c.mobile))
+          .filter((phone): phone is string => phone !== null),
+      ),
+    ];
+    if (channels.includes(MessageChannel.WHATSAPP) && phones.length === 0) {
+      refused.push(`${vendor.name ?? "A vendor"} has no contact mobile for WhatsApp`);
+      return [];
+    }
+
     return [
       {
         vendorId: vendor.id,
         vendorName: vendor.name ?? "Unnamed vendor",
         emails,
+        phones,
       },
     ];
   });
@@ -1009,7 +1109,14 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
     );
   }
 
-  const recipients = await resolveRecipients(input.vendorIds);
+  const channels = input.channels as MessageChannel[];
+  if (channels.includes(MessageChannel.WHATSAPP) && !isWhatsAppConfigured()) {
+    throw AppError.conflict(
+      "WhatsApp is not configured on this deployment, so choose email only or ask an admin to finish the WhatsApp setup",
+    );
+  }
+
+  const recipients = await resolveRecipients(input.vendorIds, channels);
   const full = await loadRfqForMail(rfqId);
 
   // The snapshot is what the sales user saw, filtered to each vendor's own cranes.
@@ -1032,8 +1139,13 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
 
   const portalBase = process.env.PORTAL_BASE_URL ?? "http://localhost:5173";
   const vars = invitationVars(full, rfqId, portalBase);
-  const results: Array<{ vendorId: string; status: string; error?: string }> =
-    [];
+  const results: Array<{
+    vendorId: string;
+    status: string;
+    emailStatus: string | null;
+    whatsappStatus: string | null;
+    error?: string;
+  }> = [];
 
   for (const recipient of recipients) {
     const offered = [
@@ -1041,30 +1153,63 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
       ...picker.unverified,
     ].filter((c) => c.vendorId === recipient.vendorId);
 
-    let delivery: EmailDeliveryStatus = EmailDeliveryStatus.SENT;
-    let error: string | null = null;
-
-    for (const address of recipient.emails) {
-      try {
-        const sent = await sendTemplate({
-          to: address,
-          template: "rfq_invitation",
-          entity: "rfq",
-          entityId: rfqId,
-          vars,
-        });
-        if (!sent.sent) {
-          delivery = EmailDeliveryStatus.FAILED;
-          error = sent.error ?? "The mail server refused the message";
+    let emailStatus: EmailDeliveryStatus | null = null;
+    let emailError: string | null = null;
+    if (channels.includes(MessageChannel.EMAIL)) {
+      emailStatus = EmailDeliveryStatus.SENT;
+      for (const address of recipient.emails) {
+        try {
+          const sent = await sendTemplate({
+            to: address,
+            template: "rfq_invitation",
+            entity: "rfq",
+            entityId: rfqId,
+            vars,
+          });
+          if (!sent.sent) {
+            emailStatus = EmailDeliveryStatus.FAILED;
+            emailError = sent.error ?? "The mail server refused the message";
+          }
+        } catch (err) {
+          emailStatus = EmailDeliveryStatus.FAILED;
+          emailError =
+            err instanceof Error ? err.message : "The mail server refused the message";
         }
-      } catch (err) {
-        delivery = EmailDeliveryStatus.FAILED;
-        error =
-          err instanceof Error
-            ? err.message
-            : "The mail server refused the message";
       }
     }
+
+    let whatsappStatus: EmailDeliveryStatus | null = null;
+    let whatsappError: string | null = null;
+    const whatsappMessageIds: string[] = [];
+    if (channels.includes(MessageChannel.WHATSAPP)) {
+      whatsappStatus = EmailDeliveryStatus.SENT;
+      // One message per vendor contact would spam the same office. The first
+      // number is the RFQ contact; the row keeps every number for matching.
+      for (const phone of recipient.phones.slice(0, 1)) {
+        const sent = await sendWhatsAppTemplate({
+          to: phone,
+          vendorName: recipient.vendorName,
+          rfqNumber: full.rfqNumber,
+          siteLocation: full.siteLocation,
+          submissionDeadline: String(vars.submissionDeadline),
+          portalUrl: String(vars.rfqUrl),
+        });
+        if (sent.sent) {
+          if (sent.messageId) whatsappMessageIds.push(sent.messageId);
+        } else {
+          whatsappStatus = EmailDeliveryStatus.FAILED;
+          whatsappError = sent.error ?? "WhatsApp rejected the message";
+        }
+      }
+    }
+
+    const attempted: Array<EmailDeliveryStatus | null> = [emailStatus, whatsappStatus];
+    const overall = attempted
+      .filter((status): status is EmailDeliveryStatus => status !== null)
+      .every((status) => status === EmailDeliveryStatus.SENT)
+      ? EmailDeliveryStatus.SENT
+      : EmailDeliveryStatus.FAILED;
+    const error = [emailError, whatsappError].filter(Boolean).join("; ") || null;
 
     // Stored now, never recomputed: cranes move, and re-deriving this later would
     // rewrite what the vendor was actually offered.
@@ -1082,21 +1227,39 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
         rfqId,
         vendorId: recipient.vendorId,
         emails: recipient.emails,
-        emailDeliveryStatus: delivery,
-        emailDeliveryError: error,
+        emailDeliveryStatus: emailStatus ?? EmailDeliveryStatus.QUEUED,
+        emailDeliveryError: emailError,
+        whatsappPhones: recipient.phones,
+        whatsappDeliveryStatus: whatsappStatus,
+        whatsappDeliveryError: whatsappError,
+        whatsappMessageIds,
         candidateSnapshot: snapshot as never,
       },
       update: {
         emails: recipient.emails,
-        emailDeliveryStatus: delivery,
-        emailDeliveryError: error,
         candidateSnapshot: snapshot as never,
+        ...(emailStatus === null
+          ? {}
+          : {
+              emailDeliveryStatus: emailStatus,
+              emailDeliveryError: emailError,
+            }),
+        ...(whatsappStatus === null
+          ? {}
+          : {
+              whatsappPhones: recipient.phones,
+              whatsappDeliveryStatus: whatsappStatus,
+              whatsappDeliveryError: whatsappError,
+              whatsappMessageIds,
+            }),
       },
     });
 
     results.push({
       vendorId: recipient.vendorId,
-      status: delivery,
+      status: overall,
+      emailStatus,
+      whatsappStatus,
       error: error ?? undefined,
     });
   }
@@ -1106,6 +1269,7 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
     data: {
       status: RfqStatus.SENT,
       sentAt: new Date(),
+      channels,
       // Brief 6.7's roll-up, kept as an extension point for the later line-item
       // status trail. A re-send must not roll a Quotes-Received RFQ backwards.
       rollupStatus:
@@ -1141,8 +1305,13 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
 }
 
 /** Candidate picker for an unsaved or saved RFQ (brief 7.9). */
-export async function getCandidates(rfqId: string, actor: Actor) {
+export async function getCandidates(
+  rfqId: string,
+  rawQuery: unknown,
+  actor: Actor,
+) {
   assertInternal(actor);
+  const query: CandidateQuery = candidateQuerySchema.parse(rawQuery ?? {});
   const rfq = await prisma.rfq.findUnique({
     where: { id: rfqId },
     select: {
@@ -1163,7 +1332,7 @@ export async function getCandidates(rfqId: string, actor: Actor) {
     },
   });
   if (!rfq) throw AppError.notFound("That RFQ does not exist");
-  return candidatesForRfq({ ...rfq, site: rfq.siteState });
+  return candidatesForRfq({ ...rfq, site: rfq.siteState }, { mode: query.mode });
 }
 
 // --- deadline actions ----------------------------------------------------

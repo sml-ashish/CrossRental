@@ -1,11 +1,13 @@
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
+import { tryGeocode, type GeoPoint } from "../lib/geo";
 import { distancesTo, type Distance } from "./distance.service";
 import { getSettings } from "../utils/settings";
 import {
   CraneApprovalStatus,
   CraneStatus,
   OwnershipType,
+  type UserRole,
 } from "../generated/prisma/client";
 import {
   discoveryQuerySchema,
@@ -24,13 +26,14 @@ import {
  * about availability, because discovery is a browse tool: the user chooses
  * whether to include engaged or under-maintenance cranes, and the status is
  * shown on every row. Distance is produced only when the user supplies a site
- * pin, which the stub provider measures like everywhere else.
+ * pin or address, which the configured provider (Google, stub or disabled)
+ * measures like everywhere else.
  */
 
 export interface DiscoveryActor {
   id: string;
   email: string;
-  role: "admin_user" | "sales_user" | "vendor_user";
+  role: UserRole;
   vendorId: string | null;
 }
 
@@ -233,13 +236,28 @@ export async function searchCranes(
     select: DISCOVERY_SELECT,
   })) as unknown as DiscoveryRow[];
 
+  // A site arrives either as a coordinate pair (what the map sends back) or as
+  // free text (what a user with no pin can type). The pair wins; the text goes
+  // through the configured geo provider, which is Google when one is set.
+  let sitePoint: GeoPoint | null = null;
   const siteLat = query.siteLat;
   const siteLng = query.siteLng;
-  const hasSite =
+  if (
     siteLat !== undefined &&
     siteLng !== undefined &&
     Number.isFinite(siteLat) &&
-    Number.isFinite(siteLng);
+    Number.isFinite(siteLng)
+  ) {
+    sitePoint = { lat: siteLat, lng: siteLng };
+  } else if (query.siteLocation) {
+    const geocoded = await tryGeocode({
+      location: query.siteLocation,
+      state: "",
+      pincode: query.sitePincode ?? null,
+    });
+    if (geocoded.ok) sitePoint = geocoded.point;
+  }
+  const hasSite = sitePoint !== null;
 
   const located: DiscoveryRow[] = [];
   const unverifiedRows: DiscoveryRow[] = [];
@@ -249,9 +267,9 @@ export async function searchCranes(
   }
 
   const measured = new Map<string, Distance | null>();
-  if (hasSite) {
+  if (sitePoint) {
     const results = await distancesTo(
-      { lat: siteLat as number, lng: siteLng as number },
+      sitePoint,
       located.map((r) => ({
         lat: num(r.latitude) as number,
         lng: num(r.longitude) as number,
@@ -339,7 +357,7 @@ export async function searchCranes(
 
   return {
     distancesAvailable: hasSite,
-    site: hasSite ? { latitude: siteLat as number, longitude: siteLng as number } : null,
+    site: sitePoint ? { latitude: sitePoint.lat, longitude: sitePoint.lng } : null,
     groups: [...groups.values()].sort((a, b) => {
       if (a.nearestKm === null && b.nearestKm === null)
         return a.vendorName.localeCompare(b.vendorName);

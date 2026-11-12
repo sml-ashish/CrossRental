@@ -40,6 +40,8 @@ export type RfqVendorRecipientMinAggregateOutputType = {
   vendorId: string | null
   emailDeliveryStatus: $Enums.EmailDeliveryStatus | null
   emailDeliveryError: string | null
+  whatsappDeliveryStatus: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError: string | null
   firstViewedAt: Date | null
   responseStatus: $Enums.ResponseStatus | null
   respondedAt: Date | null
@@ -57,6 +59,8 @@ export type RfqVendorRecipientMaxAggregateOutputType = {
   vendorId: string | null
   emailDeliveryStatus: $Enums.EmailDeliveryStatus | null
   emailDeliveryError: string | null
+  whatsappDeliveryStatus: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError: string | null
   firstViewedAt: Date | null
   responseStatus: $Enums.ResponseStatus | null
   respondedAt: Date | null
@@ -75,6 +79,10 @@ export type RfqVendorRecipientCountAggregateOutputType = {
   emails: number
   emailDeliveryStatus: number
   emailDeliveryError: number
+  whatsappPhones: number
+  whatsappDeliveryStatus: number
+  whatsappDeliveryError: number
+  whatsappMessageIds: number
   firstViewedAt: number
   responseStatus: number
   respondedAt: number
@@ -103,6 +111,8 @@ export type RfqVendorRecipientMinAggregateInputType = {
   vendorId?: true
   emailDeliveryStatus?: true
   emailDeliveryError?: true
+  whatsappDeliveryStatus?: true
+  whatsappDeliveryError?: true
   firstViewedAt?: true
   responseStatus?: true
   respondedAt?: true
@@ -120,6 +130,8 @@ export type RfqVendorRecipientMaxAggregateInputType = {
   vendorId?: true
   emailDeliveryStatus?: true
   emailDeliveryError?: true
+  whatsappDeliveryStatus?: true
+  whatsappDeliveryError?: true
   firstViewedAt?: true
   responseStatus?: true
   respondedAt?: true
@@ -138,6 +150,10 @@ export type RfqVendorRecipientCountAggregateInputType = {
   emails?: true
   emailDeliveryStatus?: true
   emailDeliveryError?: true
+  whatsappPhones?: true
+  whatsappDeliveryStatus?: true
+  whatsappDeliveryError?: true
+  whatsappMessageIds?: true
   firstViewedAt?: true
   responseStatus?: true
   respondedAt?: true
@@ -244,6 +260,10 @@ export type RfqVendorRecipientGroupByOutputType = {
   emails: string[]
   emailDeliveryStatus: $Enums.EmailDeliveryStatus
   emailDeliveryError: string | null
+  whatsappPhones: string[]
+  whatsappDeliveryStatus: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError: string | null
+  whatsappMessageIds: string[]
   firstViewedAt: Date | null
   responseStatus: $Enums.ResponseStatus
   respondedAt: Date | null
@@ -286,6 +306,10 @@ export type RfqVendorRecipientWhereInput = {
   emails?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.StringNullableFilter<"RfqVendorRecipient"> | string | null
+  whatsappPhones?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
+  whatsappDeliveryStatus?: Prisma.EnumEmailDeliveryStatusNullableFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.StringNullableFilter<"RfqVendorRecipient"> | string | null
+  whatsappMessageIds?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   firstViewedAt?: Prisma.DateTimeNullableFilter<"RfqVendorRecipient"> | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFilter<"RfqVendorRecipient"> | $Enums.ResponseStatus
   respondedAt?: Prisma.DateTimeNullableFilter<"RfqVendorRecipient"> | Date | string | null
@@ -307,6 +331,10 @@ export type RfqVendorRecipientOrderByWithRelationInput = {
   emails?: Prisma.SortOrder
   emailDeliveryStatus?: Prisma.SortOrder
   emailDeliveryError?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappPhones?: Prisma.SortOrder
+  whatsappDeliveryStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappDeliveryError?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappMessageIds?: Prisma.SortOrder
   firstViewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -332,6 +360,10 @@ export type RfqVendorRecipientWhereUniqueInput = Prisma.AtLeast<{
   emails?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.StringNullableFilter<"RfqVendorRecipient"> | string | null
+  whatsappPhones?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
+  whatsappDeliveryStatus?: Prisma.EnumEmailDeliveryStatusNullableFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.StringNullableFilter<"RfqVendorRecipient"> | string | null
+  whatsappMessageIds?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   firstViewedAt?: Prisma.DateTimeNullableFilter<"RfqVendorRecipient"> | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFilter<"RfqVendorRecipient"> | $Enums.ResponseStatus
   respondedAt?: Prisma.DateTimeNullableFilter<"RfqVendorRecipient"> | Date | string | null
@@ -353,6 +385,10 @@ export type RfqVendorRecipientOrderByWithAggregationInput = {
   emails?: Prisma.SortOrder
   emailDeliveryStatus?: Prisma.SortOrder
   emailDeliveryError?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappPhones?: Prisma.SortOrder
+  whatsappDeliveryStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappDeliveryError?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappMessageIds?: Prisma.SortOrder
   firstViewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -380,6 +416,10 @@ export type RfqVendorRecipientScalarWhereWithAggregatesInput = {
   emails?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusWithAggregatesFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.StringNullableWithAggregatesFilter<"RfqVendorRecipient"> | string | null
+  whatsappPhones?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
+  whatsappDeliveryStatus?: Prisma.EnumEmailDeliveryStatusNullableWithAggregatesFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.StringNullableWithAggregatesFilter<"RfqVendorRecipient"> | string | null
+  whatsappMessageIds?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   firstViewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RfqVendorRecipient"> | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusWithAggregatesFilter<"RfqVendorRecipient"> | $Enums.ResponseStatus
   respondedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RfqVendorRecipient"> | Date | string | null
@@ -397,6 +437,10 @@ export type RfqVendorRecipientCreateInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -418,6 +462,10 @@ export type RfqVendorRecipientUncheckedCreateInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -435,6 +483,10 @@ export type RfqVendorRecipientUpdateInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -456,6 +508,10 @@ export type RfqVendorRecipientUncheckedUpdateInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -475,6 +531,10 @@ export type RfqVendorRecipientCreateManyInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -492,6 +552,10 @@ export type RfqVendorRecipientUpdateManyMutationInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -511,6 +575,10 @@ export type RfqVendorRecipientUncheckedUpdateManyInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -553,6 +621,10 @@ export type RfqVendorRecipientCountOrderByAggregateInput = {
   emails?: Prisma.SortOrder
   emailDeliveryStatus?: Prisma.SortOrder
   emailDeliveryError?: Prisma.SortOrder
+  whatsappPhones?: Prisma.SortOrder
+  whatsappDeliveryStatus?: Prisma.SortOrder
+  whatsappDeliveryError?: Prisma.SortOrder
+  whatsappMessageIds?: Prisma.SortOrder
   firstViewedAt?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrder
@@ -575,6 +647,8 @@ export type RfqVendorRecipientMaxOrderByAggregateInput = {
   vendorId?: Prisma.SortOrder
   emailDeliveryStatus?: Prisma.SortOrder
   emailDeliveryError?: Prisma.SortOrder
+  whatsappDeliveryStatus?: Prisma.SortOrder
+  whatsappDeliveryError?: Prisma.SortOrder
   firstViewedAt?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrder
@@ -592,6 +666,8 @@ export type RfqVendorRecipientMinOrderByAggregateInput = {
   vendorId?: Prisma.SortOrder
   emailDeliveryStatus?: Prisma.SortOrder
   emailDeliveryError?: Prisma.SortOrder
+  whatsappDeliveryStatus?: Prisma.SortOrder
+  whatsappDeliveryError?: Prisma.SortOrder
   firstViewedAt?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrder
@@ -695,6 +771,14 @@ export type RfqVendorRecipientCreateemailsInput = {
   set: string[]
 }
 
+export type RfqVendorRecipientCreatewhatsappPhonesInput = {
+  set: string[]
+}
+
+export type RfqVendorRecipientCreatewhatsappMessageIdsInput = {
+  set: string[]
+}
+
 export type RfqVendorRecipientUpdateemailsInput = {
   set?: string[]
   push?: string | string[]
@@ -702,6 +786,20 @@ export type RfqVendorRecipientUpdateemailsInput = {
 
 export type EnumEmailDeliveryStatusFieldUpdateOperationsInput = {
   set?: $Enums.EmailDeliveryStatus
+}
+
+export type RfqVendorRecipientUpdatewhatsappPhonesInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput = {
+  set?: $Enums.EmailDeliveryStatus | null
+}
+
+export type RfqVendorRecipientUpdatewhatsappMessageIdsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type EnumResponseStatusFieldUpdateOperationsInput = {
@@ -713,6 +811,10 @@ export type RfqVendorRecipientCreateWithoutVendorInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -732,6 +834,10 @@ export type RfqVendorRecipientUncheckedCreateWithoutVendorInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -780,6 +886,10 @@ export type RfqVendorRecipientScalarWhereInput = {
   emails?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.StringNullableFilter<"RfqVendorRecipient"> | string | null
+  whatsappPhones?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
+  whatsappDeliveryStatus?: Prisma.EnumEmailDeliveryStatusNullableFilter<"RfqVendorRecipient"> | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.StringNullableFilter<"RfqVendorRecipient"> | string | null
+  whatsappMessageIds?: Prisma.StringNullableListFilter<"RfqVendorRecipient">
   firstViewedAt?: Prisma.DateTimeNullableFilter<"RfqVendorRecipient"> | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFilter<"RfqVendorRecipient"> | $Enums.ResponseStatus
   respondedAt?: Prisma.DateTimeNullableFilter<"RfqVendorRecipient"> | Date | string | null
@@ -797,6 +907,10 @@ export type RfqVendorRecipientCreateWithoutRfqInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -816,6 +930,10 @@ export type RfqVendorRecipientUncheckedCreateWithoutRfqInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -860,6 +978,10 @@ export type RfqVendorRecipientCreateManyVendorInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -877,6 +999,10 @@ export type RfqVendorRecipientUpdateWithoutVendorInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -896,6 +1022,10 @@ export type RfqVendorRecipientUncheckedUpdateWithoutVendorInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -914,6 +1044,10 @@ export type RfqVendorRecipientUncheckedUpdateManyWithoutVendorInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -932,6 +1066,10 @@ export type RfqVendorRecipientCreateManyRfqInput = {
   emails?: Prisma.RfqVendorRecipientCreateemailsInput | string[]
   emailDeliveryStatus?: $Enums.EmailDeliveryStatus
   emailDeliveryError?: string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientCreatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientCreatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Date | string | null
   responseStatus?: $Enums.ResponseStatus
   respondedAt?: Date | string | null
@@ -949,6 +1087,10 @@ export type RfqVendorRecipientUpdateWithoutRfqInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -968,6 +1110,10 @@ export type RfqVendorRecipientUncheckedUpdateWithoutRfqInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -986,6 +1132,10 @@ export type RfqVendorRecipientUncheckedUpdateManyWithoutRfqInput = {
   emails?: Prisma.RfqVendorRecipientUpdateemailsInput | string[]
   emailDeliveryStatus?: Prisma.EnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus
   emailDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappPhones?: Prisma.RfqVendorRecipientUpdatewhatsappPhonesInput | string[]
+  whatsappDeliveryStatus?: Prisma.NullableEnumEmailDeliveryStatusFieldUpdateOperationsInput | $Enums.EmailDeliveryStatus | null
+  whatsappDeliveryError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappMessageIds?: Prisma.RfqVendorRecipientUpdatewhatsappMessageIdsInput | string[]
   firstViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseStatus?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1007,6 +1157,10 @@ export type RfqVendorRecipientSelect<ExtArgs extends runtime.Types.Extensions.In
   emails?: boolean
   emailDeliveryStatus?: boolean
   emailDeliveryError?: boolean
+  whatsappPhones?: boolean
+  whatsappDeliveryStatus?: boolean
+  whatsappDeliveryError?: boolean
+  whatsappMessageIds?: boolean
   firstViewedAt?: boolean
   responseStatus?: boolean
   respondedAt?: boolean
@@ -1028,6 +1182,10 @@ export type RfqVendorRecipientSelectCreateManyAndReturn<ExtArgs extends runtime.
   emails?: boolean
   emailDeliveryStatus?: boolean
   emailDeliveryError?: boolean
+  whatsappPhones?: boolean
+  whatsappDeliveryStatus?: boolean
+  whatsappDeliveryError?: boolean
+  whatsappMessageIds?: boolean
   firstViewedAt?: boolean
   responseStatus?: boolean
   respondedAt?: boolean
@@ -1049,6 +1207,10 @@ export type RfqVendorRecipientSelectUpdateManyAndReturn<ExtArgs extends runtime.
   emails?: boolean
   emailDeliveryStatus?: boolean
   emailDeliveryError?: boolean
+  whatsappPhones?: boolean
+  whatsappDeliveryStatus?: boolean
+  whatsappDeliveryError?: boolean
+  whatsappMessageIds?: boolean
   firstViewedAt?: boolean
   responseStatus?: boolean
   respondedAt?: boolean
@@ -1070,6 +1232,10 @@ export type RfqVendorRecipientSelectScalar = {
   emails?: boolean
   emailDeliveryStatus?: boolean
   emailDeliveryError?: boolean
+  whatsappPhones?: boolean
+  whatsappDeliveryStatus?: boolean
+  whatsappDeliveryError?: boolean
+  whatsappMessageIds?: boolean
   firstViewedAt?: boolean
   responseStatus?: boolean
   respondedAt?: boolean
@@ -1082,7 +1248,7 @@ export type RfqVendorRecipientSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RfqVendorRecipientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqId" | "vendorId" | "emails" | "emailDeliveryStatus" | "emailDeliveryError" | "firstViewedAt" | "responseStatus" | "respondedAt" | "declineReason" | "declineNote" | "reminderCount" | "lastReminderAt" | "candidateSnapshot" | "createdAt" | "updatedAt", ExtArgs["result"]["rfqVendorRecipient"]>
+export type RfqVendorRecipientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqId" | "vendorId" | "emails" | "emailDeliveryStatus" | "emailDeliveryError" | "whatsappPhones" | "whatsappDeliveryStatus" | "whatsappDeliveryError" | "whatsappMessageIds" | "firstViewedAt" | "responseStatus" | "respondedAt" | "declineReason" | "declineNote" | "reminderCount" | "lastReminderAt" | "candidateSnapshot" | "createdAt" | "updatedAt", ExtArgs["result"]["rfqVendorRecipient"]>
 export type RfqVendorRecipientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -1109,6 +1275,10 @@ export type $RfqVendorRecipientPayload<ExtArgs extends runtime.Types.Extensions.
     emails: string[]
     emailDeliveryStatus: $Enums.EmailDeliveryStatus
     emailDeliveryError: string | null
+    whatsappPhones: string[]
+    whatsappDeliveryStatus: $Enums.EmailDeliveryStatus | null
+    whatsappDeliveryError: string | null
+    whatsappMessageIds: string[]
     firstViewedAt: Date | null
     responseStatus: $Enums.ResponseStatus
     respondedAt: Date | null
@@ -1550,6 +1720,10 @@ export interface RfqVendorRecipientFieldRefs {
   readonly emails: Prisma.FieldRef<"RfqVendorRecipient", 'String[]'>
   readonly emailDeliveryStatus: Prisma.FieldRef<"RfqVendorRecipient", 'EmailDeliveryStatus'>
   readonly emailDeliveryError: Prisma.FieldRef<"RfqVendorRecipient", 'String'>
+  readonly whatsappPhones: Prisma.FieldRef<"RfqVendorRecipient", 'String[]'>
+  readonly whatsappDeliveryStatus: Prisma.FieldRef<"RfqVendorRecipient", 'EmailDeliveryStatus'>
+  readonly whatsappDeliveryError: Prisma.FieldRef<"RfqVendorRecipient", 'String'>
+  readonly whatsappMessageIds: Prisma.FieldRef<"RfqVendorRecipient", 'String[]'>
   readonly firstViewedAt: Prisma.FieldRef<"RfqVendorRecipient", 'DateTime'>
   readonly responseStatus: Prisma.FieldRef<"RfqVendorRecipient", 'ResponseStatus'>
   readonly respondedAt: Prisma.FieldRef<"RfqVendorRecipient", 'DateTime'>

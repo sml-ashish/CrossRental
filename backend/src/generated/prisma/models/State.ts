@@ -28,18 +28,21 @@ export type StateMinAggregateOutputType = {
   code: string | null
   name: string | null
   isUnionTerritory: boolean | null
+  region: string | null
 }
 
 export type StateMaxAggregateOutputType = {
   code: string | null
   name: string | null
   isUnionTerritory: boolean | null
+  region: string | null
 }
 
 export type StateCountAggregateOutputType = {
   code: number
   name: number
   isUnionTerritory: number
+  region: number
   _all: number
 }
 
@@ -48,18 +51,21 @@ export type StateMinAggregateInputType = {
   code?: true
   name?: true
   isUnionTerritory?: true
+  region?: true
 }
 
 export type StateMaxAggregateInputType = {
   code?: true
   name?: true
   isUnionTerritory?: true
+  region?: true
 }
 
 export type StateCountAggregateInputType = {
   code?: true
   name?: true
   isUnionTerritory?: true
+  region?: true
   _all?: true
 }
 
@@ -139,6 +145,7 @@ export type StateGroupByOutputType = {
   code: string
   name: string
   isUnionTerritory: boolean
+  region: string | null
   _count: StateCountAggregateOutputType | null
   _min: StateMinAggregateOutputType | null
   _max: StateMaxAggregateOutputType | null
@@ -166,6 +173,7 @@ export type StateWhereInput = {
   code?: Prisma.StringFilter<"State"> | string
   name?: Prisma.StringFilter<"State"> | string
   isUnionTerritory?: Prisma.BoolFilter<"State"> | boolean
+  region?: Prisma.StringNullableFilter<"State"> | string | null
   vendorsOperating?: Prisma.StateVendorRegionListRelationFilter
   rfqs?: Prisma.RfqListRelationFilter
   cranes?: Prisma.CraneListRelationFilter
@@ -177,6 +185,7 @@ export type StateOrderByWithRelationInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isUnionTerritory?: Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
   vendorsOperating?: Prisma.StateVendorRegionOrderByRelationAggregateInput
   rfqs?: Prisma.RfqOrderByRelationAggregateInput
   cranes?: Prisma.CraneOrderByRelationAggregateInput
@@ -191,6 +200,7 @@ export type StateWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.StateWhereInput[]
   NOT?: Prisma.StateWhereInput | Prisma.StateWhereInput[]
   isUnionTerritory?: Prisma.BoolFilter<"State"> | boolean
+  region?: Prisma.StringNullableFilter<"State"> | string | null
   vendorsOperating?: Prisma.StateVendorRegionListRelationFilter
   rfqs?: Prisma.RfqListRelationFilter
   cranes?: Prisma.CraneListRelationFilter
@@ -202,6 +212,7 @@ export type StateOrderByWithAggregationInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isUnionTerritory?: Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StateCountOrderByAggregateInput
   _max?: Prisma.StateMaxOrderByAggregateInput
   _min?: Prisma.StateMinOrderByAggregateInput
@@ -214,12 +225,14 @@ export type StateScalarWhereWithAggregatesInput = {
   code?: Prisma.StringWithAggregatesFilter<"State"> | string
   name?: Prisma.StringWithAggregatesFilter<"State"> | string
   isUnionTerritory?: Prisma.BoolWithAggregatesFilter<"State"> | boolean
+  region?: Prisma.StringNullableWithAggregatesFilter<"State"> | string | null
 }
 
 export type StateCreateInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
@@ -231,6 +244,7 @@ export type StateUncheckedCreateInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
@@ -242,6 +256,7 @@ export type StateUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
@@ -253,6 +268,7 @@ export type StateUncheckedUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
@@ -264,36 +280,42 @@ export type StateCreateManyInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
 }
 
 export type StateUpdateManyMutationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StateUncheckedUpdateManyInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StateCountOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isUnionTerritory?: Prisma.SortOrder
+  region?: Prisma.SortOrder
 }
 
 export type StateMaxOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isUnionTerritory?: Prisma.SortOrder
+  region?: Prisma.SortOrder
 }
 
 export type StateMinOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
   isUnionTerritory?: Prisma.SortOrder
+  region?: Prisma.SortOrder
 }
 
 export type StateScalarRelationFilter = {
@@ -312,6 +334,10 @@ export type StringFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type StateCreateNestedOneWithoutVendorsOperatingInput = {
@@ -390,6 +416,7 @@ export type StateCreateWithoutVendorsOperatingInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
   vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
@@ -400,6 +427,7 @@ export type StateUncheckedCreateWithoutVendorsOperatingInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
   vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
@@ -426,6 +454,7 @@ export type StateUpdateWithoutVendorsOperatingInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
   vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
@@ -436,6 +465,7 @@ export type StateUncheckedUpdateWithoutVendorsOperatingInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
   vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
@@ -446,6 +476,7 @@ export type StateCreateWithoutVendorsWithAddressInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
@@ -456,6 +487,7 @@ export type StateUncheckedCreateWithoutVendorsWithAddressInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
@@ -482,6 +514,7 @@ export type StateUpdateWithoutVendorsWithAddressInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
@@ -492,6 +525,7 @@ export type StateUncheckedUpdateWithoutVendorsWithAddressInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
@@ -502,6 +536,7 @@ export type StateCreateWithoutCranesInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
@@ -512,6 +547,7 @@ export type StateUncheckedCreateWithoutCranesInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
@@ -538,6 +574,7 @@ export type StateUpdateWithoutCranesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
@@ -548,6 +585,7 @@ export type StateUncheckedUpdateWithoutCranesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
@@ -558,6 +596,7 @@ export type StateCreateWithoutRfqsInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
   vendorsWithAddress?: Prisma.VendorCreateNestedManyWithoutAddressStateInput
@@ -568,6 +607,7 @@ export type StateUncheckedCreateWithoutRfqsInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
   vendorsWithAddress?: Prisma.VendorUncheckedCreateNestedManyWithoutAddressStateInput
@@ -594,6 +634,7 @@ export type StateUpdateWithoutRfqsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
   vendorsWithAddress?: Prisma.VendorUpdateManyWithoutAddressStateNestedInput
@@ -604,6 +645,7 @@ export type StateUncheckedUpdateWithoutRfqsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
   vendorsWithAddress?: Prisma.VendorUncheckedUpdateManyWithoutAddressStateNestedInput
@@ -614,6 +656,7 @@ export type StateCreateWithoutEnquiriesInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneCreateNestedManyWithoutStateInput
@@ -624,6 +667,7 @@ export type StateUncheckedCreateWithoutEnquiriesInput = {
   code: string
   name: string
   isUnionTerritory?: boolean
+  region?: string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutStateInput
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutSiteStateInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutStateInput
@@ -650,6 +694,7 @@ export type StateUpdateWithoutEnquiriesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutStateNestedInput
@@ -660,6 +705,7 @@ export type StateUncheckedUpdateWithoutEnquiriesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isUnionTerritory?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendorsOperating?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutStateNestedInput
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutSiteStateNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutStateNestedInput
@@ -737,6 +783,7 @@ export type StateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   code?: boolean
   name?: boolean
   isUnionTerritory?: boolean
+  region?: boolean
   vendorsOperating?: boolean | Prisma.State$vendorsOperatingArgs<ExtArgs>
   rfqs?: boolean | Prisma.State$rfqsArgs<ExtArgs>
   cranes?: boolean | Prisma.State$cranesArgs<ExtArgs>
@@ -749,21 +796,24 @@ export type StateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   code?: boolean
   name?: boolean
   isUnionTerritory?: boolean
+  region?: boolean
 }, ExtArgs["result"]["state"]>
 
 export type StateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
   isUnionTerritory?: boolean
+  region?: boolean
 }, ExtArgs["result"]["state"]>
 
 export type StateSelectScalar = {
   code?: boolean
   name?: boolean
   isUnionTerritory?: boolean
+  region?: boolean
 }
 
-export type StateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "isUnionTerritory", ExtArgs["result"]["state"]>
+export type StateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "isUnionTerritory" | "region", ExtArgs["result"]["state"]>
 export type StateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendorsOperating?: boolean | Prisma.State$vendorsOperatingArgs<ExtArgs>
   rfqs?: boolean | Prisma.State$rfqsArgs<ExtArgs>
@@ -788,6 +838,7 @@ export type $StatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     code: string
     name: string
     isUnionTerritory: boolean
+    region: string | null
   }, ExtArgs["result"]["state"]>
   composites: {}
 }
@@ -1219,6 +1270,7 @@ export interface StateFieldRefs {
   readonly code: Prisma.FieldRef<"State", 'String'>
   readonly name: Prisma.FieldRef<"State", 'String'>
   readonly isUnionTerritory: Prisma.FieldRef<"State", 'Boolean'>
+  readonly region: Prisma.FieldRef<"State", 'String'>
 }
     
 

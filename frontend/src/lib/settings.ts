@@ -66,13 +66,20 @@ export type MasterLists = Record<MasterListKey, string[]>;
 export interface PortalSettings {
   rateDayBasis: RateDayBasis;
   quoteRankRule: QuoteRankRule;
+  alertRfqSlaHours: number;
+  alertQuotationExpiryDays: number;
+  alertBookingLeadDays: number;
+  alertEmailsEnabled: boolean;
+  reportRetentionMonths: number;
 }
 
 export async function loadSettings(): Promise<{ settings: PortalSettings }> {
   return api<{ settings: PortalSettings }>("/settings");
 }
 
-export async function updateSettings(rateDayBasis: RateDayBasis): Promise<{ settings: PortalSettings }> {
+export async function updateSettings(
+  rateDayBasis: RateDayBasis,
+): Promise<{ settings: PortalSettings }> {
   return api<{ settings: PortalSettings }>("/settings", {
     method: "PATCH",
     body: { rateDayBasis },
@@ -92,4 +99,111 @@ export async function updateMasterList(
     method: "PUT",
     body: { values },
   });
+}
+
+/** P5 alert SLAs and retention, all editable on the settings screen. */
+export type AlertSettings = Pick<
+  PortalSettings,
+  | "alertRfqSlaHours"
+  | "alertQuotationExpiryDays"
+  | "alertBookingLeadDays"
+  | "alertEmailsEnabled"
+  | "reportRetentionMonths"
+>;
+
+export type PortalSettingsP5 = PortalSettings & AlertSettings;
+
+export async function updateAlertSettings(
+  input: Partial<AlertSettings & { rateDayBasis: RateDayBasis }>,
+): Promise<{ settings: PortalSettingsP5 }> {
+  return api<{ settings: PortalSettingsP5 }>("/settings", {
+    method: "PATCH",
+    body: input,
+  });
+}
+
+export interface MobilisationRate {
+  id: string;
+  craneTypeCode: string;
+  craneTypeName: string;
+  capacityMinT: number;
+  capacityMaxT: number | null;
+  ownershipType: "VENDOR" | "SML" | null;
+  ratePerKm: number;
+  isActive: boolean;
+}
+
+export async function loadMobilisationRates(): Promise<MobilisationRate[]> {
+  const res = await api<{ rates: MobilisationRate[] }>("/settings/mobilisation-rates");
+  return res.rates;
+}
+
+export async function updateMobilisationRate(
+  id: string,
+  input: Partial<Pick<MobilisationRate, "ratePerKm" | "capacityMinT" | "capacityMaxT" | "ownershipType" | "isActive">>,
+): Promise<MobilisationRate> {
+  const res = await api<{ rate: MobilisationRate }>(`/settings/mobilisation-rates/${id}`, {
+    method: "PATCH",
+    body: input,
+  });
+  return res.rate;
+}
+
+export async function createMobilisationRate(input: {
+  craneTypeCode: string;
+  capacityMinT: number;
+  capacityMaxT: number | null;
+  ownershipType: "VENDOR" | "SML" | null;
+  ratePerKm: number;
+}): Promise<MobilisationRate> {
+  const res = await api<{ rate: MobilisationRate }>("/settings/mobilisation-rates", {
+    method: "POST",
+    body: input,
+  });
+  return res.rate;
+}
+
+export interface EmailTemplateRow {
+  key: string;
+  subject: string;
+  bodyHtml: string;
+  updatedAt: string;
+}
+
+export async function loadEmailTemplates(): Promise<EmailTemplateRow[]> {
+  const res = await api<{ templates: EmailTemplateRow[] }>("/settings/email-templates");
+  return res.templates;
+}
+
+export async function updateEmailTemplate(
+  key: string,
+  input: { subject: string; bodyHtml: string },
+): Promise<EmailTemplateRow> {
+  const res = await api<{ template: EmailTemplateRow }>(`/settings/email-templates/${key}`, {
+    method: "PUT",
+    body: input,
+  });
+  return res.template;
+}
+
+export interface StateRegionRow {
+  code: string;
+  name: string;
+  region: string | null;
+}
+
+export async function loadStateRegions(): Promise<StateRegionRow[]> {
+  const res = await api<{ states: StateRegionRow[] }>("/settings/states");
+  return res.states;
+}
+
+export async function updateStateRegion(
+  code: string,
+  region: string | null,
+): Promise<StateRegionRow> {
+  const res = await api<{ state: StateRegionRow }>(`/settings/states/${code}`, {
+    method: "PATCH",
+    body: { region },
+  });
+  return res.state;
 }

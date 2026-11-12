@@ -56,7 +56,11 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 /** Candidate picker: matching vendor cranes grouped by vendor, nearest first. */
 export const candidates = asyncHandler(async (req: Request, res: Response) => {
   res.json({
-    candidates: await rfqs.getCandidates(param(req, "rfqId"), actorOf(req)),
+    candidates: await rfqs.getCandidates(
+      param(req, "rfqId"),
+      req.query,
+      actorOf(req),
+    ),
   });
 });
 

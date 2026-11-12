@@ -121,7 +121,6 @@ export type RfqAttachment = Prisma.RfqAttachmentModel
  * Model Reservation
  * *
  *  * The dated commitment record (brief 5.3 / 6.1 as revised).
- *  *
  *  * A crane is committed through reservations, not through a stored status: the
  *  * "Booked" and "Hired" badges are derived from active reservations, and a
  *  * release is an operation on this row rather than a status flip. An award
@@ -150,7 +149,6 @@ export type QuotationAttachment = Prisma.QuotationAttachmentModel
  * Model Enquiry
  * *
  *  * The enquiry header (BPD 6.3/6.4, P1 section 2).
- *  *
  *  * The CR team types these in today; a future SAP feed would call the same
  *  * `createEnquiry(payload, source)` service, which is why `source` is a column
  *  * even though `manual` is the only value that exists. The customer's name and
@@ -163,7 +161,6 @@ export type Enquiry = Prisma.EnquiryModel
  *  * One requirement line on an enquiry, derived from the Cross Rental Enquiry
  *  * Template (P1 section 2). All 31 template rows are represented, including the
  *  * five scope terms the first draft of the field list missed.
- *  *
  *  * `rentalBudget`, `internalNotes` and `poSapReference` are internal only, as is
  *  * the customer block on the header: none of them is ever copied into an RFQ.
  */
@@ -180,9 +177,25 @@ export type EnquirySequence = Prisma.EnquirySequenceModel
 export type AuditLog = Prisma.AuditLogModel
 /**
  * Model EmailLog
- * 
+ * *
+ *  * Every message the platform sent or received.
+ *  * P6 widened this from outbound email only: `channel`, `direction`, the
+ *  * inbound body and the provider's message id let WhatsApp and email replies
+ *  * share the communication history the screen already reads. `toEmail` keeps its
+ *  * old name for compatibility but now carries the destination address (email or
+ *  * phone) for both channels.
  */
 export type EmailLog = Prisma.EmailLogModel
+/**
+ * Model InboundReply
+ * *
+ *  * P6 assisted validation queue.
+ *  * A reply that cannot be turned into a complete quotation on its own lands
+ *  * here. The parsed fields are deliberately columns rather than JSON: an admin
+ *  * edits them in the queue, and the converted quotation records where it came
+ *  * from through `QuoteSource`.
+ */
+export type InboundReply = Prisma.InboundReplyModel
 /**
  * Model DistanceCache
  * 
@@ -207,12 +220,10 @@ export type EmailTemplate = Prisma.EmailTemplateModel
  * Model RecommendationSnapshot
  * *
  *  * A frozen recommendation result for one enquiry line (BPD 7.1, P2 section 1).
- *  *
  *  * The brief is explicit that a recommendation is a snapshot, not a live view:
  *  * crane locations move, so a result sales acted on yesterday must still read the
  *  * same way tomorrow. Every evaluation writes a new row and none is ever edited;
  *  * a refresh adds a row rather than replacing one.
- *  *
  *  * The SML and vendor sets live in separate columns on purpose. The hard rule is
  *  * that the two are never merged, and two columns make a merge a deliberate
  *  * schema change rather than an accident in a mapper.
@@ -224,7 +235,6 @@ export type RecommendationSnapshot = Prisma.RecommendationSnapshotModel
  *  * Per-km mobilisation rate by crane category and capacity band (BPD 5.5, P2
  *  * section 2). The owner supplies the values; until Admin Configuration (P5)
  *  * they are seeded from src/lib/mobilisationRates.ts.
- *  *
  *  * `capacityMaxT` null means "no upper bound". `ownershipType` null means the
  *  * rate applies regardless of who owns the crane; a row that names an ownership
  *  * type wins over a null row for that crane.

@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import type { UserRole } from "@/lib/auth";
+import type { AlertItem } from "@/lib/internalDashboard";
 
 /**
  * Admin-only surface (P0 B).
@@ -15,14 +16,27 @@ export interface AdminDashboardCounts {
   cranesStale: number;
   cranesUnverified: number;
   cranesLapsed: number;
+  fleetPendingValidation: number;
+  unmatchedQuotationResponses: number;
+  failedEmails: number;
 }
 
 export interface AdminDashboard {
   counts: AdminDashboardCounts;
-  thresholds: { staleFlagDays: number };
+  thresholds: {
+    staleFlagDays: number;
+    fleetApprovalRequired: boolean;
+    alertRfqSlaHours: number;
+    alertQuotationExpiryDays: number;
+    alertBookingLeadDays: number;
+  };
+  alerts: AlertItem[];
 }
 
-export type InternalRole = Extract<UserRole, "admin_user" | "sales_user">;
+export type InternalRole = Extract<
+  UserRole,
+  "admin_user" | "sales_user" | "management_viewer"
+>;
 
 export interface AdminUser {
   id: string;

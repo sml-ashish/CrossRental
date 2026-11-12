@@ -21,7 +21,6 @@ import {
   type ListCranesQuery,
 } from "../validation/craneFields";
 import { CraneApprovalStatus, CraneStatus } from "../generated/prisma/client";
-import { sendTemplate } from "./email.service";
 import type { ValidatedUpload } from "../middleware/upload";
 
 /**
@@ -113,44 +112,15 @@ async function resolveWriteTarget(
   return { vendorId: vendor.id, onBehalf: true };
 }
 
-/** A short human label for a crane, used in the on-behalf notification. */
-function craneLabel(row: {
-  make: string;
-  model: string;
-  capacityT: unknown;
-  serialRegistrationNo: string;
-}): string {
-  return `${row.make} ${row.model} — ${Number(row.capacityT)} t (${row.serialRegistrationNo})`;
-}
-
 /**
- * Brief D1: tell the vendor an SML user changed their crane. Losses are
- * swallowed and logged like every other notification.
+ * The vendor a bulk import writes to.
+ *
+ * Resolved once, before any row is read, so a sheet aimed at a vendor who is
+ * missing, not approved, or outside the caller's permission is refused without
+ * parsing 250 rows and without writing anything.
  */
-async function notifyFleetUpdatedOnBehalf(
-  vendorId: string,
-  craneId: string,
-  label: string,
-  actorName: string | null | undefined,
-): Promise<void> {
-  const vendor = await prisma.vendor.findUnique({
-    where: { id: vendorId },
-    select: { name: true, email: true },
-  });
-  if (!vendor?.email) return;
-  const portalBase = process.env.PORTAL_BASE_URL ?? "http://localhost:5173";
-  await sendTemplate({
-    to: vendor.email,
-    template: "fleet_updated_on_behalf",
-    entity: "crane",
-    entityId: craneId,
-    vars: {
-      vendorName: vendor.name ?? "The vendor",
-      craneLabel: label,
-      actorName: actorName ?? "An SML user",
-      craneUrl: `${portalBase}/app/fleet/${craneId}/edit`,
-    },
-  }).catch((err) => console.error("[crane] on-behalf mail failed", err));
+export async function resolveImportTarget(actor: Actor, vendorId: string) {
+  return resolveWriteTarget(actor, vendorId);
 }
 
 /** The write half of {@link resolveWriteTarget} for an existing crane. */
@@ -708,7 +678,10 @@ async function approvalStatusForNewWork(): Promise<CraneApprovalStatus> {
 // Create
 // ---------------------------------------------------------------------------
 
-export async function createCrane(rawInput: unknown, actor: Actor) {
+export async function createCrane(
+  rawInput: unknown,
+  actor: Actor,
+) {
   const parsed = createCraneSchema.safeParse(rawInput);
   if (!parsed.success) throw parsed.error;
   const input = parsed.data as CreateCraneInput;
@@ -779,15 +752,6 @@ export async function createCrane(rawInput: unknown, actor: Actor) {
     actor: auditActor(actor),
     onBehalfOfVendor: onBehalf,
   });
-
-  if (onBehalf) {
-    await notifyFleetUpdatedOnBehalf(
-      vendorId,
-      row.id,
-      craneLabel(row),
-      actor.email,
-    );
-  }
 
   return await toView(row);
 }
@@ -1024,15 +988,6 @@ export async function updateCrane(
       actor: auditActor(actor),
       onBehalfOfVendor: onBehalf,
     });
-
-    if (onBehalf) {
-      await notifyFleetUpdatedOnBehalf(
-        existing.vendorId,
-        craneId,
-        craneLabel(row),
-        actor.email,
-      );
-    }
   }
 
   return await toView(row);

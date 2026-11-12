@@ -16,7 +16,6 @@ import type * as Prisma from "../internal/prismaNamespace"
  * Model Reservation
  * *
  *  * The dated commitment record (brief 5.3 / 6.1 as revised).
- *  *
  *  * A crane is committed through reservations, not through a stored status: the
  *  * "Booked" and "Hired" badges are derived from active reservations, and a
  *  * release is an operation on this row rather than a status flip. An award

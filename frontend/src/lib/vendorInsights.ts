@@ -1,6 +1,19 @@
 import { api } from "@/lib/api";
 import type { Crane } from "@/lib/fleet";
-import type { VendorParticipation } from "@/lib/recommendations";
+
+/**
+ * BPD 6.7 participation, derived only from RFQ participation (not performance).
+ * These figures are counts and ratios, never a ranking or a score.
+ */
+export interface VendorParticipation {
+  invitations: number;
+  quoted: number;
+  awarded: number;
+  /** Quoted as a percentage of invited; null when never invited. */
+  responsivenessPct: number | null;
+  /** Awarded as a percentage of quoted; null when never quoted. */
+  winPct: number | null;
+}
 
 /**
  * Client for the vendor detail discovery view (P4, BPD 6.10).

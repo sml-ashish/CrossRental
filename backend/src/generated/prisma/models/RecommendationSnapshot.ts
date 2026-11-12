@@ -16,12 +16,10 @@ import type * as Prisma from "../internal/prismaNamespace"
  * Model RecommendationSnapshot
  * *
  *  * A frozen recommendation result for one enquiry line (BPD 7.1, P2 section 1).
- *  *
  *  * The brief is explicit that a recommendation is a snapshot, not a live view:
  *  * crane locations move, so a result sales acted on yesterday must still read the
  *  * same way tomorrow. Every evaluation writes a new row and none is ever edited;
  *  * a refresh adds a row rather than replacing one.
- *  *
  *  * The SML and vendor sets live in separate columns on purpose. The hard rule is
  *  * that the two are never merged, and two columns make a merge a deliberate
  *  * schema change rather than an accident in a mapper.

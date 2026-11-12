@@ -259,7 +259,7 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
           </div>
           <div>
             <h1 className="text-lg font-semibold text-slate-900">Vendor registration</h1>
-            <p className="text-xs text-slate-500">Sanghvi Movers Limited — Crane Discovery</p>
+            <p className="text-xs text-slate-500">Sanghvi Movers Limited — crossrentel</p>
           </div>
         </div>
       </header>

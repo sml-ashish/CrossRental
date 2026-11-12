@@ -46,16 +46,23 @@ export interface Distance {
 /** Cache granularity in decimal degrees; ~110 m, well below geocode precision. */
 const PRECISION = 3;
 
-function roundCoord(value: number): number {
-  return Number(value.toFixed(PRECISION));
-}
-
+/**
+ * The stored key, as a fixed three-decimal string.
+ *
+ * The columns are `numeric`, and a JavaScript number is sent as a float: for a
+ * value like `23.023` the two are not bit-identical, so Postgres compares
+ * `numeric = double precision` by casting the exact decimal to a binary float
+ * and the lookup misses. A string is parsed as an exact decimal by the driver,
+ * so the cache actually hits. This was invisible until real coordinates with
+ * three decimals arrived — `18.5` is exactly representable and `23.023` is not.
+ */
 function cacheKey(origin: GeoPoint, destination: GeoPoint) {
+  const coord = (value: number) => value.toFixed(PRECISION);
   return {
-    originLat: roundCoord(origin.lat),
-    originLng: roundCoord(origin.lng),
-    destLat: roundCoord(destination.lat),
-    destLng: roundCoord(destination.lng),
+    originLat: coord(origin.lat),
+    originLng: coord(origin.lng),
+    destLat: coord(destination.lat),
+    destLng: coord(destination.lng),
   };
 }
 
@@ -85,10 +92,21 @@ export async function distanceBetween(
 ): Promise<Distance | null> {
   const key = cacheKey(origin, destination);
 
-  const cached = await prisma.distanceCache.findFirst({
-    where: key,
-    select: { roadDistanceKm: true, provider: true, calculatedAt: true },
-  });
+  // Best-effort, like the write below: a cache read failure must degrade to a
+  // provider call, not fail the page.
+  let cached: {
+    roadDistanceKm: unknown;
+    provider: string;
+    calculatedAt: Date;
+  } | null = null;
+  try {
+    cached = await prisma.distanceCache.findFirst({
+      where: key,
+      select: { roadDistanceKm: true, provider: true, calculatedAt: true },
+    });
+  } catch (err) {
+    console.error("[distance] could not read cache", err);
+  }
 
   if (cached && isFresh(cached.calculatedAt)) {
     return {
@@ -149,18 +167,28 @@ export async function distanceBetween(
 /**
  * Distances from many origins to one destination.
  *
- * Sequential rather than parallel on purpose: a real provider will rate-limit,
- * and firing an unbounded `Promise.all` at one is how a quota disappears. The
- * cache absorbs the repeat calls, which is the case that actually matters.
+ * Bounded concurrency rather than one at a time or all at once. One at a time
+ * made a 64-crane discovery take 17 seconds of pure waiting per new job site,
+ * which is a bad screen and a timeout risk at real fleet sizes; an unbounded
+ * `Promise.all` is how a provider quota disappears. Four in flight keeps a real
+ * fleet inside a few seconds while staying well below per-second limits, and the
+ * cache still absorbs every repeat search.
  */
 export async function distancesTo(
   destination: GeoPoint,
   origins: GeoPoint[],
+  concurrency = 4,
 ): Promise<Array<Distance | null>> {
-  const out: Array<Distance | null> = [];
-  for (const origin of origins) {
-    out.push(await distanceBetween(origin, destination));
-  }
+  const out: Array<Distance | null> = new Array(origins.length).fill(null);
+  let next = 0;
+  const worker = async () => {
+    while (next < origins.length) {
+      const index = next++;
+      out[index] = await distanceBetween(origins[index] as GeoPoint, destination);
+    }
+  };
+  const lanes = Math.max(1, Math.min(concurrency, origins.length));
+  await Promise.all(Array.from({ length: lanes }, () => worker()));
   return out;
 }
 
@@ -178,8 +206,8 @@ export async function invalidateDistancesFrom(point: GeoPoint): Promise<void> {
   try {
     await prisma.distanceCache.deleteMany({
       where: {
-        originLat: roundCoord(point.lat),
-        originLng: roundCoord(point.lng),
+        originLat: point.lat.toFixed(PRECISION),
+        originLng: point.lng.toFixed(PRECISION),
       },
     });
   } catch (err) {

@@ -41,6 +41,7 @@ export type VendorInvitationMinAggregateOutputType = {
   email: string | null
   companyName: string | null
   contactName: string | null
+  contactNumber: string | null
   createdById: string | null
   expiresAt: Date | null
   vendorId: string | null
@@ -56,6 +57,7 @@ export type VendorInvitationMaxAggregateOutputType = {
   email: string | null
   companyName: string | null
   contactName: string | null
+  contactNumber: string | null
   createdById: string | null
   expiresAt: Date | null
   vendorId: string | null
@@ -71,6 +73,7 @@ export type VendorInvitationCountAggregateOutputType = {
   email: number
   companyName: number
   contactName: number
+  contactNumber: number
   createdById: number
   expiresAt: number
   vendorId: number
@@ -88,6 +91,7 @@ export type VendorInvitationMinAggregateInputType = {
   email?: true
   companyName?: true
   contactName?: true
+  contactNumber?: true
   createdById?: true
   expiresAt?: true
   vendorId?: true
@@ -103,6 +107,7 @@ export type VendorInvitationMaxAggregateInputType = {
   email?: true
   companyName?: true
   contactName?: true
+  contactNumber?: true
   createdById?: true
   expiresAt?: true
   vendorId?: true
@@ -118,6 +123,7 @@ export type VendorInvitationCountAggregateInputType = {
   email?: true
   companyName?: true
   contactName?: true
+  contactNumber?: true
   createdById?: true
   expiresAt?: true
   vendorId?: true
@@ -206,6 +212,7 @@ export type VendorInvitationGroupByOutputType = {
   email: string | null
   companyName: string | null
   contactName: string | null
+  contactNumber: string | null
   createdById: string
   expiresAt: Date
   vendorId: string | null
@@ -242,6 +249,7 @@ export type VendorInvitationWhereInput = {
   email?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   companyName?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   contactName?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
+  contactNumber?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   createdById?: Prisma.StringFilter<"VendorInvitation"> | string
   expiresAt?: Prisma.DateTimeFilter<"VendorInvitation"> | Date | string
   vendorId?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
@@ -259,6 +267,7 @@ export type VendorInvitationOrderByWithRelationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   companyName?: Prisma.SortOrderInput | Prisma.SortOrder
   contactName?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   vendorId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -279,6 +288,7 @@ export type VendorInvitationWhereUniqueInput = Prisma.AtLeast<{
   email?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   companyName?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   contactName?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
+  contactNumber?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   createdById?: Prisma.StringFilter<"VendorInvitation"> | string
   expiresAt?: Prisma.DateTimeFilter<"VendorInvitation"> | Date | string
   vendorId?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
@@ -296,6 +306,7 @@ export type VendorInvitationOrderByWithAggregationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   companyName?: Prisma.SortOrderInput | Prisma.SortOrder
   contactName?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   vendorId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -317,6 +328,7 @@ export type VendorInvitationScalarWhereWithAggregatesInput = {
   email?: Prisma.StringNullableWithAggregatesFilter<"VendorInvitation"> | string | null
   companyName?: Prisma.StringNullableWithAggregatesFilter<"VendorInvitation"> | string | null
   contactName?: Prisma.StringNullableWithAggregatesFilter<"VendorInvitation"> | string | null
+  contactNumber?: Prisma.StringNullableWithAggregatesFilter<"VendorInvitation"> | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"VendorInvitation"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"VendorInvitation"> | Date | string
   vendorId?: Prisma.StringNullableWithAggregatesFilter<"VendorInvitation"> | string | null
@@ -332,6 +344,7 @@ export type VendorInvitationCreateInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   expiresAt: Date | string
   submittedAt?: Date | string | null
   revokedAt?: Date | string | null
@@ -347,6 +360,7 @@ export type VendorInvitationUncheckedCreateInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   createdById: string
   expiresAt: Date | string
   vendorId?: string | null
@@ -362,6 +376,7 @@ export type VendorInvitationUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -377,6 +392,7 @@ export type VendorInvitationUncheckedUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -392,6 +408,7 @@ export type VendorInvitationCreateManyInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   createdById: string
   expiresAt: Date | string
   vendorId?: string | null
@@ -407,6 +424,7 @@ export type VendorInvitationUpdateManyMutationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -420,6 +438,7 @@ export type VendorInvitationUncheckedUpdateManyInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -445,6 +464,7 @@ export type VendorInvitationCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
   contactName?: Prisma.SortOrder
+  contactNumber?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
@@ -460,6 +480,7 @@ export type VendorInvitationMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
   contactName?: Prisma.SortOrder
+  contactNumber?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
@@ -475,6 +496,7 @@ export type VendorInvitationMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
   contactName?: Prisma.SortOrder
+  contactNumber?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   vendorId?: Prisma.SortOrder
@@ -574,6 +596,7 @@ export type VendorInvitationCreateWithoutVendorInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   expiresAt: Date | string
   submittedAt?: Date | string | null
   revokedAt?: Date | string | null
@@ -588,6 +611,7 @@ export type VendorInvitationUncheckedCreateWithoutVendorInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   createdById: string
   expiresAt: Date | string
   submittedAt?: Date | string | null
@@ -631,6 +655,7 @@ export type VendorInvitationScalarWhereInput = {
   email?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   companyName?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   contactName?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
+  contactNumber?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
   createdById?: Prisma.StringFilter<"VendorInvitation"> | string
   expiresAt?: Prisma.DateTimeFilter<"VendorInvitation"> | Date | string
   vendorId?: Prisma.StringNullableFilter<"VendorInvitation"> | string | null
@@ -646,6 +671,7 @@ export type VendorInvitationCreateWithoutCreatedByInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   expiresAt: Date | string
   submittedAt?: Date | string | null
   revokedAt?: Date | string | null
@@ -660,6 +686,7 @@ export type VendorInvitationUncheckedCreateWithoutCreatedByInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   expiresAt: Date | string
   vendorId?: string | null
   submittedAt?: Date | string | null
@@ -700,6 +727,7 @@ export type VendorInvitationCreateManyVendorInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   createdById: string
   expiresAt: Date | string
   submittedAt?: Date | string | null
@@ -714,6 +742,7 @@ export type VendorInvitationUpdateWithoutVendorInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -728,6 +757,7 @@ export type VendorInvitationUncheckedUpdateWithoutVendorInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -742,6 +772,7 @@ export type VendorInvitationUncheckedUpdateManyWithoutVendorInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -756,6 +787,7 @@ export type VendorInvitationCreateManyCreatedByInput = {
   email?: string | null
   companyName?: string | null
   contactName?: string | null
+  contactNumber?: string | null
   expiresAt: Date | string
   vendorId?: string | null
   submittedAt?: Date | string | null
@@ -770,6 +802,7 @@ export type VendorInvitationUpdateWithoutCreatedByInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -784,6 +817,7 @@ export type VendorInvitationUncheckedUpdateWithoutCreatedByInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -798,6 +832,7 @@ export type VendorInvitationUncheckedUpdateManyWithoutCreatedByInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -814,6 +849,7 @@ export type VendorInvitationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   email?: boolean
   companyName?: boolean
   contactName?: boolean
+  contactNumber?: boolean
   createdById?: boolean
   expiresAt?: boolean
   vendorId?: boolean
@@ -831,6 +867,7 @@ export type VendorInvitationSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   email?: boolean
   companyName?: boolean
   contactName?: boolean
+  contactNumber?: boolean
   createdById?: boolean
   expiresAt?: boolean
   vendorId?: boolean
@@ -848,6 +885,7 @@ export type VendorInvitationSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   email?: boolean
   companyName?: boolean
   contactName?: boolean
+  contactNumber?: boolean
   createdById?: boolean
   expiresAt?: boolean
   vendorId?: boolean
@@ -865,6 +903,7 @@ export type VendorInvitationSelectScalar = {
   email?: boolean
   companyName?: boolean
   contactName?: boolean
+  contactNumber?: boolean
   createdById?: boolean
   expiresAt?: boolean
   vendorId?: boolean
@@ -874,7 +913,7 @@ export type VendorInvitationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type VendorInvitationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tokenHash" | "email" | "companyName" | "contactName" | "createdById" | "expiresAt" | "vendorId" | "submittedAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorInvitation"]>
+export type VendorInvitationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tokenHash" | "email" | "companyName" | "contactName" | "contactNumber" | "createdById" | "expiresAt" | "vendorId" | "submittedAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorInvitation"]>
 export type VendorInvitationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorInvitation$vendorArgs<ExtArgs>
@@ -904,6 +943,10 @@ export type $VendorInvitationPayload<ExtArgs extends runtime.Types.Extensions.In
     email: string | null
     companyName: string | null
     contactName: string | null
+    /**
+     * The number SML will call about this vendor, captured at invitation time.
+     */
+    contactNumber: string | null
     createdById: string
     expiresAt: Date
     /**
@@ -1349,6 +1392,7 @@ export interface VendorInvitationFieldRefs {
   readonly email: Prisma.FieldRef<"VendorInvitation", 'String'>
   readonly companyName: Prisma.FieldRef<"VendorInvitation", 'String'>
   readonly contactName: Prisma.FieldRef<"VendorInvitation", 'String'>
+  readonly contactNumber: Prisma.FieldRef<"VendorInvitation", 'String'>
   readonly createdById: Prisma.FieldRef<"VendorInvitation", 'String'>
   readonly expiresAt: Prisma.FieldRef<"VendorInvitation", 'DateTime'>
   readonly vendorId: Prisma.FieldRef<"VendorInvitation", 'String'>

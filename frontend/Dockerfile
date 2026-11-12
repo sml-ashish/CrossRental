@@ -12,6 +12,13 @@ COPY . .
 
 # The app calls the API through a relative `/api` (see src/lib/api.ts), so no
 # backend origin has to be baked in at build time.
+#
+# The Maps JavaScript API key is different: Vite inlines VITE_* values into the
+# bundle, so the browser key is a build argument. It must be restricted by HTTP
+# referrer and limited to the Maps JavaScript API.
+ARG VITE_GOOGLE_MAPS_BROWSER_KEY=
+ENV VITE_GOOGLE_MAPS_BROWSER_KEY=$VITE_GOOGLE_MAPS_BROWSER_KEY
+
 RUN npm run build
 
 # --- runtime ---------------------------------------------------------------

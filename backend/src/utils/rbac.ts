@@ -12,9 +12,15 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   vendor_user: "Vendor",
   admin_user: "Administrator",
   sales_user: "Sales",
+  management_viewer: "Management Viewer",
 };
 
-export const INTERNAL_ROLES: UserRole[] = ["admin_user", "sales_user"];
+/** Every non-vendor role. Management is internal but read-only. */
+export const INTERNAL_ROLES: UserRole[] = [
+  "admin_user",
+  "sales_user",
+  "management_viewer",
+];
 
 export type Capability =
   | "vendor:approve"
@@ -40,7 +46,11 @@ export type Capability =
   // (overview decision), so both internal roles hold these.
   | "enquiry:view"
   | "enquiry:create"
-  | "enquiry:manage";
+  | "enquiry:manage"
+  // P5: reports on the caller's own scope (sales) and across the platform
+  // (admin / management viewer). Writes never use these.
+  | "reports:view"
+  | "reports:view_all";
 
 const CAPABILITIES: Record<UserRole, Capability[]> = {
   // `rfq:respond` is deliberately absent from every internal role: a quotation is
@@ -69,6 +79,9 @@ const CAPABILITIES: Record<UserRole, Capability[]> = {
     "enquiry:view",
     "enquiry:create",
     "enquiry:manage",
+    // P5: admin reports cover the whole platform, including management's view.
+    "reports:view",
+    "reports:view_all",
   ],
   // Sales creates, sends and tracks RFQs, reads approved fleets, works
   // enquiries, and — since P3 — runs quote comparison and the award (the CR path
@@ -93,7 +106,12 @@ const CAPABILITIES: Record<UserRole, Capability[]> = {
     "enquiry:view",
     "enquiry:create",
     "enquiry:manage",
+    // P5: sales reports are limited to their own enquiries in the service.
+    "reports:view",
   ],
+  // P5: a management viewer is read-only by construction — it holds no
+  // operational capability at all, only the aggregate reports.
+  management_viewer: ["reports:view_all"],
 };
 
 export function can(role: UserRole, capability: Capability): boolean {

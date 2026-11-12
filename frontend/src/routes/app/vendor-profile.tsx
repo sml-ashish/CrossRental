@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader, Panel } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 
@@ -84,16 +86,18 @@ export function VendorProfilePage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold text-slate-900">{data.name}</h1>
-        <p className="mt-0.5 text-sm text-slate-500">
-          {data.sapVendorCode ? `SAP vendor code ${data.sapVendorCode}` : "Vendor code not assigned yet"}
-        </p>
-      </header>
+      <PageHeader
+        title={data.name}
+        description={
+          data.sapVendorCode
+            ? `SAP vendor code ${data.sapVendorCode}`
+            : "Vendor code not assigned yet"
+        }
+        meta={<Badge tone="neutral">{data.onboardingStatus}</Badge>}
+      />
 
-      <section className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900">Registration</h2>
-        <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+      <Panel title="Registration">
+        <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
           <Field label="Legal name" value={data.name} />
           <Field label="Nature of company" value={data.natureOfCompany} />
           <div className="sm:col-span-2">
@@ -129,16 +133,14 @@ export function VendorProfilePage() {
           />
           <Field label="Operating regions" value={data.operatingRegions.join(", ") || "—"} />
           <Field label="Fleet size" value={String(data.totalFleetSize)} />
-          <Field label="Status" value={data.onboardingStatus} />
         </dl>
-      </section>
+      </Panel>
 
-      <section className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900">Bank details</h2>
-        <p className="mt-1 text-xs text-slate-500">
-          Account number and IFSC are stored encrypted and are never shown in full in the portal.
-        </p>
-        <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+      <Panel
+        title="Bank details"
+        description="Account number and IFSC are stored encrypted and are never shown in full in the portal."
+      >
+        <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
           <Field label="Account holder" value={data.bankAccountHolderName ?? "—"} />
           <Field label="Bank" value={data.bankName ?? "—"} />
           <Field label="Branch" value={data.bankBranch ?? "—"} />
@@ -146,13 +148,12 @@ export function VendorProfilePage() {
           <Field label="Account number" value={data.bankAccountNo} mono />
           <Field label="IFSC" value={data.bankIfsc} mono />
         </dl>
-      </section>
+      </Panel>
 
-      <section className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900">Contacts</h2>
-        <ul className="mt-3 divide-y divide-slate-100">
+      <Panel title="Contacts" bodyClassName="p-0">
+        <ul className="divide-y divide-slate-100">
           {data.contacts.map((contact) => (
-            <li key={contact.id} className="flex items-center justify-between gap-4 py-2.5">
+            <li key={contact.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-slate-800">
                   {contact.name}
@@ -168,7 +169,7 @@ export function VendorProfilePage() {
             </li>
           ))}
         </ul>
-      </section>
+      </Panel>
     </div>
   );
 }

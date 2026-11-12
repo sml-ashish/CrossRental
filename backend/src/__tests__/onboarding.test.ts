@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import { beforeAll, afterAll, beforeEach, describe, expect, it } from "vitest";
 import type { Express } from "express";
 import {
@@ -14,6 +15,8 @@ import {
   useTestDatabase,
 } from "./harness";
 import { INTERNAL_USERS, VENDOR_USERS } from "./fixtures";
+import { INVITE_SHEET_COLUMNS } from "../lib/vendorInviteSheet";
+import { XLSX_MIME } from "../middleware/upload";
 
 /**
  * Milestone 2: vendor registration and approval (brief 7.2, 7.3).
@@ -150,7 +153,7 @@ async function signInVendor(email: string) {
 async function invite(adminToken: string, email = APPLICANT_EMAIL) {
   const res = await call(app, "POST", "/api/vendors/invitations", {
     token: adminToken,
-    body: { email, companyName: "Onboarding Test Cranes", contactName: "Rita Owner" },
+    body: { name: "Onboarding Test Cranes", email, contactNumber: "9820011223" },
   });
   expect(res.status, `invite failed: ${JSON.stringify(res.body)}`).toBe(201);
   return { invitationId: res.body.invitationId as string, token: res.body.token as string };
@@ -206,7 +209,7 @@ describe("M2 invitations", () => {
     const ctx = await seedAndSignIn();
     const res = await call(app, "POST", "/api/vendors/invitations", {
       token: ctx.salesToken,
-      body: { email: APPLICANT_EMAIL, companyName: "From Sales" },
+      body: { name: "From Sales Cranes", email: APPLICANT_EMAIL, contactNumber: "9820011223" },
     });
     expect(res.status).toBe(201);
   });
@@ -215,7 +218,7 @@ describe("M2 invitations", () => {
     const ctx = await seedAndSignIn();
     const res = await call(app, "POST", "/api/vendors/invitations", {
       token: ctx.vendorToken,
-      body: { email: "attacker@onboarding.test" },
+      body: { name: "Attacker Cranes", email: "attacker@onboarding.test", contactNumber: "9820011223" },
     });
     expect(res.status).toBe(403);
   });
@@ -223,7 +226,7 @@ describe("M2 invitations", () => {
   it("requires authentication to invite", async () => {
     await seedAndSignIn();
     const res = await call(app, "POST", "/api/vendors/invitations", {
-      body: { email: APPLICANT_EMAIL },
+      body: { name: "No Session Cranes", email: APPLICANT_EMAIL, contactNumber: "9820011223" },
     });
     expect(res.status).toBe(401);
   });
@@ -233,7 +236,7 @@ describe("M2 invitations", () => {
     await invite(ctx.adminToken);
     const res = await call(app, "POST", "/api/vendors/invitations", {
       token: ctx.adminToken,
-      body: { email: APPLICANT_EMAIL },
+      body: { name: "Second Try Cranes", email: APPLICANT_EMAIL, contactNumber: "9820011223" },
     });
     // Two live links would leave the vendor unable to tell which is current.
     expect(res.status).toBe(409);
@@ -291,6 +294,208 @@ describe("M2 invitations", () => {
     const days = (row.expiresAt.getTime() - row.createdAt.getTime()) / 86_400_000;
     expect(days).toBeGreaterThan(6.9);
     expect(days).toBeLessThan(7.1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Bulk invitations
+// ---------------------------------------------------------------------------
+
+let inviteRowCounter = 0;
+
+/** A complete, valid invitation row; override only what a test is about. */
+function inviteRow(overrides: Record<string, string> = {}): Record<string, string> {
+  inviteRowCounter += 1;
+  return {
+    name: `Bulk Vendor ${inviteRowCounter}`,
+    email: `bulk.vendor.${inviteRowCounter}@onboarding.test`,
+    contactNumber: "9820011223",
+    ...overrides,
+  };
+}
+
+async function inviteWorkbook(
+  rows: Array<Record<string, string>>,
+  options: { headers?: string[] } = {},
+): Promise<Buffer> {
+  const book = new ExcelJS.Workbook();
+  const sheet = book.addWorksheet("Invitations");
+  sheet.addRow(options.headers ?? INVITE_SHEET_COLUMNS.map((column) => column.label));
+  for (const row of rows) {
+    sheet.addRow(INVITE_SHEET_COLUMNS.map((column) => row[column.key] ?? null));
+  }
+  const buffer = await book.xlsx.writeBuffer();
+  return Buffer.from(buffer);
+}
+
+function uploadInvites(
+  buffer: Buffer,
+  options: { token?: string; dryRun: boolean },
+) {
+  return callUpload(
+    app,
+    "POST",
+    `/api/vendors/invitations/bulk?dryRun=${options.dryRun ? "true" : "false"}`,
+    { buffer, fileName: "invitations.xlsx", mimeType: XLSX_MIME },
+    { token: options.token },
+  );
+}
+
+describe("M2 bulk invitations", () => {
+  it("previews a sheet without creating or emailing anything", async () => {
+    const ctx = await seedAndSignIn();
+    const file = await inviteWorkbook([inviteRow(), inviteRow()]);
+
+    const res = await uploadInvites(file, { token: ctx.salesToken, dryRun: true });
+
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect(res.body.summary).toMatchObject({ total: 2, valid: 2, imported: 0, skipped: 0, failed: 0 });
+    expect(res.body.rows.every((row: { status: string }) => row.status === "valid")).toBe(true);
+    expect(await testPrisma.vendorInvitation.count()).toBe(0);
+  });
+
+  it("imports valid rows and creates one invitation per email", async () => {
+    const ctx = await seedAndSignIn();
+    const file = await inviteWorkbook([inviteRow(), inviteRow()]);
+
+    const res = await uploadInvites(file, { token: ctx.salesToken, dryRun: false });
+
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
+    expect(res.body.summary).toMatchObject({ total: 2, imported: 2, valid: 0, skipped: 0, failed: 0 });
+    expect(await testPrisma.vendorInvitation.count()).toBe(2);
+  });
+
+  it("stores the name and contact number on the invitation", async () => {
+    const ctx = await seedAndSignIn();
+    const row = inviteRow({ name: "Bulk Named Cranes", contactNumber: "+91 98200 44556" });
+    const file = await inviteWorkbook([row]);
+
+    const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: false });
+    expect(res.status).toBe(201);
+
+    const saved = await testPrisma.vendorInvitation.findFirstOrThrow({
+      where: { email: row["email"] },
+    });
+    expect(saved.companyName).toBe("Bulk Named Cranes");
+    // `mobileField` strips the +91 and spaces, so the stored value is canonical.
+    expect(saved.contactNumber).toBe("9820044556");
+  });
+
+  it("skips an email that already has an account", async () => {
+    const ctx = await seedAndSignIn();
+    const file = await inviteWorkbook([
+      inviteRow({ email: VENDOR_USERS.a }),
+      inviteRow(),
+    ]);
+
+    const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: true });
+
+    expect(res.status).toBe(200);
+    expect(res.body.summary).toMatchObject({ total: 2, valid: 1, skipped: 1, failed: 0 });
+    expect(res.body.rows[0].message).toMatch(/account already exists/i);
+  });
+
+  it("skips an email whose invitation is already outstanding", async () => {
+    const ctx = await seedAndSignIn();
+    const email = "already.invited@onboarding.test";
+    await call(app, "POST", "/api/vendors/invitations", {
+      token: ctx.adminToken,
+      body: { name: "Already Invited Cranes", email, contactNumber: "9820011223" },
+    });
+
+    const file = await inviteWorkbook([inviteRow({ email })]);
+    const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: false });
+
+    expect(res.status).toBe(201);
+    expect(res.body.summary).toMatchObject({ total: 1, imported: 0, skipped: 1 });
+    expect(res.body.rows[0].message).toMatch(/already outstanding/i);
+    // The original invitation is untouched; no second link was created.
+    expect(await testPrisma.vendorInvitation.count()).toBe(1);
+  });
+
+  it("skips a repeated email earlier in the same file", async () => {
+    const ctx = await seedAndSignIn();
+    const email = "repeat@onboarding.test";
+    const file = await inviteWorkbook([
+      inviteRow({ email }),
+      inviteRow({ email, name: "Repeat Second Row" }),
+    ]);
+
+    const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: false });
+
+    expect(res.status).toBe(201);
+    expect(res.body.summary).toMatchObject({ total: 2, imported: 1, skipped: 1 });
+    expect(res.body.rows[1].message).toMatch(/earlier in the file/i);
+    expect(await testPrisma.vendorInvitation.count()).toBe(1);
+  });
+
+  it("fails bad emails and bad numbers without stopping the valid rows", async () => {
+    const ctx = await seedAndSignIn();
+    const file = await inviteWorkbook([
+      inviteRow({ email: "not-an-email" }),
+      inviteRow({ contactNumber: "12345" }),
+      inviteRow(),
+    ]);
+
+    const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: false });
+
+    expect(res.status).toBe(201);
+    expect(res.body.summary).toMatchObject({ total: 3, imported: 1, failed: 2 });
+    expect(res.body.rows[0].message).toMatch(/Email/i);
+    expect(res.body.rows[1].message).toMatch(/Contact number/i);
+    expect(await testPrisma.vendorInvitation.count()).toBe(1);
+  });
+
+  it("refuses a file without the required columns", async () => {
+    const ctx = await seedAndSignIn();
+    const file = await inviteWorkbook(
+      [{ email: "missing.columns@onboarding.test" }],
+      { headers: ["Email"] },
+    );
+
+    const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: true });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/columns are missing/i);
+  });
+
+  it("refuses a file that is not an .xlsx workbook", async () => {
+    const ctx = await seedAndSignIn();
+    const res = await uploadInvites(Buffer.from("PK\u0003\u0004not really a workbook"), {
+      token: ctx.adminToken,
+      dryRun: true,
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("refuses to let a vendor bulk invite anybody", async () => {
+    const ctx = await seedAndSignIn();
+    const file = await inviteWorkbook([inviteRow()]);
+
+    const res = await uploadInvites(file, { token: ctx.vendorToken, dryRun: false });
+
+    expect(res.status).toBe(403);
+    expect(await testPrisma.vendorInvitation.count()).toBe(0);
+  });
+
+  it("serves the .xlsx template to admin and sales", async () => {
+    const ctx = await seedAndSignIn();
+
+    const admin = await callRaw(app, "/api/vendors/invitations/bulk/template", {
+      token: ctx.adminToken,
+    });
+    expect(admin.status).toBe(200);
+    expect(admin.headers.get("content-type")).toBe(XLSX_MIME);
+
+    const sales = await callRaw(app, "/api/vendors/invitations/bulk/template", {
+      token: ctx.salesToken,
+    });
+    expect(sales.status).toBe(200);
+
+    const vendor = await callRaw(app, "/api/vendors/invitations/bulk/template", {
+      token: ctx.vendorToken,
+    });
+    expect(vendor.status).toBe(403);
   });
 });
 

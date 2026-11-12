@@ -9,7 +9,7 @@ import {
   emptyLine,
   enquiryToForm,
   getEnquiry,
-  getLineWorkspace,
+  getLine,
   lineToForm,
   updateEnquiry,
   updateLine,
@@ -19,9 +19,9 @@ import {
 import { fetchReferenceData, type ReferenceOption } from "@/lib/fleet";
 import { ApiError } from "@/lib/api";
 import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  Checkbox,
   Field,
   Section,
   Select,
@@ -113,30 +113,17 @@ export function EnquiryFormPage() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold text-slate-900">
-          {editing ? "Edit enquiry" : "New enquiry"}
-        </h1>
-        <p className="mt-0.5 text-sm text-slate-500">
-          Customer and commercial details stay internal and are never sent to vendors.
-        </p>
-      </header>
+      <PageHeader
+        title={editing ? "Edit enquiry" : "New enquiry"}
+        description="Customer and commercial details stay internal and are never sent to vendors."
+      />
 
       {error ? <Alert tone="error">{error}</Alert> : null}
 
       <Section title="Enquiry" description="Who the job is for, and where it is.">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="External reference" htmlFor="externalReference" hint="The Sales Partner's reference, if any.">
-            <TextInput id="externalReference" {...u("externalReference")} />
-          </Field>
-          <Field label="Sales Partner" htmlFor="salesPartnerName" hint="Internal only — never shown to vendors.">
-            <TextInput id="salesPartnerName" {...u("salesPartnerName")} />
-          </Field>
           <Field label="Enquiry date" htmlFor="enquiryDate">
             <TextInput id="enquiryDate" type="date" {...u("enquiryDate")} />
-          </Field>
-          <Field label="Business vertical" htmlFor="businessVertical">
-            <TextInput id="businessVertical" {...u("businessVertical")} />
           </Field>
         </div>
 
@@ -170,15 +157,6 @@ export function EnquiryFormPage() {
             <TextInput id="region" {...u("region")} />
           </Field>
         </div>
-        <Checkbox
-          id="crossRentalFlag"
-          checked={form.crossRentalFlag}
-          onChange={(checked) => set("crossRentalFlag", checked)}
-          label="Cross-rental enquiry"
-        />
-        <Field label="Notes" htmlFor="notes" hint="Internal only.">
-          <TextArea id="notes" rows={2} {...u("notes")} />
-        </Field>
       </Section>
 
       {editing ? null : (
@@ -249,8 +227,8 @@ export function EnquiryLineEditorPage() {
     queryFn: fetchReferenceData,
   });
   const existing = useQuery({
-    queryKey: ["line-workspace", params.lineId],
-    queryFn: () => getLineWorkspace(params.lineId as string),
+    queryKey: ["line", params.lineId],
+    queryFn: () => getLine(params.lineId as string),
     enabled: editing,
   });
 
@@ -260,7 +238,7 @@ export function EnquiryLineEditorPage() {
   const [saving, setSaving] = useState(false);
 
   if (editing && existing.data && !loaded) {
-    setLine(lineToForm(existing.data.workspace.line));
+    setLine(lineToForm(existing.data.line));
     setLoaded(true);
   }
 
@@ -271,10 +249,11 @@ export function EnquiryLineEditorPage() {
     try {
       if (editing) {
         await updateLine(params.lineId as string, line);
-        await queryClient.invalidateQueries({ queryKey: ["line-workspace", params.lineId] });
+        const enquiryId = existing.data?.line.enquiryId ?? params.enquiryId;
+        await queryClient.invalidateQueries({ queryKey: ["line", params.lineId] });
         void navigate({
-          to: "/app/enquiries/lines/$lineId",
-          params: { lineId: params.lineId as string },
+          to: "/app/enquiries/$enquiryId",
+          params: { enquiryId: enquiryId as string },
         });
       } else {
         await addLine(params.enquiryId as string, line);
@@ -301,11 +280,7 @@ export function EnquiryLineEditorPage() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold text-slate-900">
-          {editing ? "Edit line item" : "Add line item"}
-        </h1>
-      </header>
+      <PageHeader title={editing ? "Edit line item" : "Add line item"} />
       {error ? <Alert tone="error">{error}</Alert> : null}
       <LineFields
         idPrefix="line"
@@ -456,15 +431,6 @@ function LineFields({
           <TextInput id={`${idPrefix}-wdm`} inputMode="numeric" {...t("workingDaysPerMonth")} />
         </Field>
       </div>
-      <div className="mt-2">
-        <Checkbox
-          id={`${idPrefix}-tbc`}
-          checked={value.startDateTbc}
-          onChange={(checked) => set("startDateTbc", checked)}
-          label="Start date to be confirmed"
-        />
-      </div>
-
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <Field label="OT charges" htmlFor={`${idPrefix}-ot`}>
           <TextInput id={`${idPrefix}-ot`} {...t("otCharges")} />
@@ -544,16 +510,7 @@ function LineFields({
           <Field label="Rental budget" htmlFor={`${idPrefix}-budget`}>
             <TextInput id={`${idPrefix}-budget`} {...t("rentalBudget")} />
           </Field>
-          <Field label="Budget value" htmlFor={`${idPrefix}-budgetValue`}>
-            <TextInput id={`${idPrefix}-budgetValue`} inputMode="decimal" {...t("rentalBudgetValue")} />
-          </Field>
-          <Field label="PO / SAP reference" htmlFor={`${idPrefix}-po`}>
-            <TextInput id={`${idPrefix}-po`} {...t("poSapReference")} />
-          </Field>
         </div>
-        <Field label="Internal notes" htmlFor={`${idPrefix}-internalNotes`} className="mt-4">
-          <TextArea id={`${idPrefix}-internalNotes`} rows={2} {...t("internalNotes")} />
-        </Field>
       </div>
     </div>
   );

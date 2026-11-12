@@ -16,7 +16,6 @@ import type * as Prisma from "../internal/prismaNamespace"
  * Model Enquiry
  * *
  *  * The enquiry header (BPD 6.3/6.4, P1 section 2).
- *  *
  *  * The CR team types these in today; a future SAP feed would call the same
  *  * `createEnquiry(payload, source)` service, which is why `source` is a column
  *  * even though `manual` is the only value that exists. The customer's name and
@@ -45,10 +44,8 @@ export type EnquirySumAggregateOutputType = {
 export type EnquiryMinAggregateOutputType = {
   id: string | null
   enquiryNo: string | null
-  externalReference: string | null
   enquiryDate: Date | null
   source: $Enums.EnquirySource | null
-  salesPartnerName: string | null
   crOwnerId: string | null
   customerName: string | null
   customerAddress: string | null
@@ -59,10 +56,7 @@ export type EnquiryMinAggregateOutputType = {
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
   siteCoordinateSource: $Enums.CoordinateSource | null
-  businessVertical: string | null
-  crossRentalFlag: boolean | null
   overallStatus: $Enums.EnquiryOverallStatus | null
-  notes: string | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -71,10 +65,8 @@ export type EnquiryMinAggregateOutputType = {
 export type EnquiryMaxAggregateOutputType = {
   id: string | null
   enquiryNo: string | null
-  externalReference: string | null
   enquiryDate: Date | null
   source: $Enums.EnquirySource | null
-  salesPartnerName: string | null
   crOwnerId: string | null
   customerName: string | null
   customerAddress: string | null
@@ -85,10 +77,7 @@ export type EnquiryMaxAggregateOutputType = {
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
   siteCoordinateSource: $Enums.CoordinateSource | null
-  businessVertical: string | null
-  crossRentalFlag: boolean | null
   overallStatus: $Enums.EnquiryOverallStatus | null
-  notes: string | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -97,10 +86,8 @@ export type EnquiryMaxAggregateOutputType = {
 export type EnquiryCountAggregateOutputType = {
   id: number
   enquiryNo: number
-  externalReference: number
   enquiryDate: number
   source: number
-  salesPartnerName: number
   crOwnerId: number
   customerName: number
   customerAddress: number
@@ -111,10 +98,7 @@ export type EnquiryCountAggregateOutputType = {
   siteLatitude: number
   siteLongitude: number
   siteCoordinateSource: number
-  businessVertical: number
-  crossRentalFlag: number
   overallStatus: number
-  notes: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -135,10 +119,8 @@ export type EnquirySumAggregateInputType = {
 export type EnquiryMinAggregateInputType = {
   id?: true
   enquiryNo?: true
-  externalReference?: true
   enquiryDate?: true
   source?: true
-  salesPartnerName?: true
   crOwnerId?: true
   customerName?: true
   customerAddress?: true
@@ -149,10 +131,7 @@ export type EnquiryMinAggregateInputType = {
   siteLatitude?: true
   siteLongitude?: true
   siteCoordinateSource?: true
-  businessVertical?: true
-  crossRentalFlag?: true
   overallStatus?: true
-  notes?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -161,10 +140,8 @@ export type EnquiryMinAggregateInputType = {
 export type EnquiryMaxAggregateInputType = {
   id?: true
   enquiryNo?: true
-  externalReference?: true
   enquiryDate?: true
   source?: true
-  salesPartnerName?: true
   crOwnerId?: true
   customerName?: true
   customerAddress?: true
@@ -175,10 +152,7 @@ export type EnquiryMaxAggregateInputType = {
   siteLatitude?: true
   siteLongitude?: true
   siteCoordinateSource?: true
-  businessVertical?: true
-  crossRentalFlag?: true
   overallStatus?: true
-  notes?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -187,10 +161,8 @@ export type EnquiryMaxAggregateInputType = {
 export type EnquiryCountAggregateInputType = {
   id?: true
   enquiryNo?: true
-  externalReference?: true
   enquiryDate?: true
   source?: true
-  salesPartnerName?: true
   crOwnerId?: true
   customerName?: true
   customerAddress?: true
@@ -201,10 +173,7 @@ export type EnquiryCountAggregateInputType = {
   siteLatitude?: true
   siteLongitude?: true
   siteCoordinateSource?: true
-  businessVertical?: true
-  crossRentalFlag?: true
   overallStatus?: true
-  notes?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -300,10 +269,8 @@ export type EnquiryGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type EnquiryGroupByOutputType = {
   id: string
   enquiryNo: string
-  externalReference: string | null
   enquiryDate: Date
   source: $Enums.EnquirySource
-  salesPartnerName: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -314,10 +281,7 @@ export type EnquiryGroupByOutputType = {
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
   siteCoordinateSource: $Enums.CoordinateSource | null
-  businessVertical: string | null
-  crossRentalFlag: boolean
   overallStatus: $Enums.EnquiryOverallStatus
-  notes: string | null
   createdById: string | null
   createdAt: Date
   updatedAt: Date
@@ -349,10 +313,8 @@ export type EnquiryWhereInput = {
   NOT?: Prisma.EnquiryWhereInput | Prisma.EnquiryWhereInput[]
   id?: Prisma.StringFilter<"Enquiry"> | string
   enquiryNo?: Prisma.StringFilter<"Enquiry"> | string
-  externalReference?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   enquiryDate?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
   source?: Prisma.EnumEnquirySourceFilter<"Enquiry"> | $Enums.EnquirySource
-  salesPartnerName?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   crOwnerId?: Prisma.StringFilter<"Enquiry"> | string
   customerName?: Prisma.StringFilter<"Enquiry"> | string
   customerAddress?: Prisma.StringFilter<"Enquiry"> | string
@@ -363,10 +325,7 @@ export type EnquiryWhereInput = {
   siteLatitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableFilter<"Enquiry"> | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  crossRentalFlag?: Prisma.BoolFilter<"Enquiry"> | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
-  notes?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdById?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
@@ -379,10 +338,8 @@ export type EnquiryWhereInput = {
 export type EnquiryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
-  externalReference?: Prisma.SortOrderInput | Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
   source?: Prisma.SortOrder
-  salesPartnerName?: Prisma.SortOrderInput | Prisma.SortOrder
   crOwnerId?: Prisma.SortOrder
   customerName?: Prisma.SortOrder
   customerAddress?: Prisma.SortOrder
@@ -393,10 +350,7 @@ export type EnquiryOrderByWithRelationInput = {
   siteLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
   siteLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
   siteCoordinateSource?: Prisma.SortOrderInput | Prisma.SortOrder
-  businessVertical?: Prisma.SortOrderInput | Prisma.SortOrder
-  crossRentalFlag?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
-  notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -412,10 +366,8 @@ export type EnquiryWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.EnquiryWhereInput | Prisma.EnquiryWhereInput[]
   OR?: Prisma.EnquiryWhereInput[]
   NOT?: Prisma.EnquiryWhereInput | Prisma.EnquiryWhereInput[]
-  externalReference?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   enquiryDate?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
   source?: Prisma.EnumEnquirySourceFilter<"Enquiry"> | $Enums.EnquirySource
-  salesPartnerName?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   crOwnerId?: Prisma.StringFilter<"Enquiry"> | string
   customerName?: Prisma.StringFilter<"Enquiry"> | string
   customerAddress?: Prisma.StringFilter<"Enquiry"> | string
@@ -426,10 +378,7 @@ export type EnquiryWhereUniqueInput = Prisma.AtLeast<{
   siteLatitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableFilter<"Enquiry"> | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  crossRentalFlag?: Prisma.BoolFilter<"Enquiry"> | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
-  notes?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdById?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
@@ -442,10 +391,8 @@ export type EnquiryWhereUniqueInput = Prisma.AtLeast<{
 export type EnquiryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
-  externalReference?: Prisma.SortOrderInput | Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
   source?: Prisma.SortOrder
-  salesPartnerName?: Prisma.SortOrderInput | Prisma.SortOrder
   crOwnerId?: Prisma.SortOrder
   customerName?: Prisma.SortOrder
   customerAddress?: Prisma.SortOrder
@@ -456,10 +403,7 @@ export type EnquiryOrderByWithAggregationInput = {
   siteLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
   siteLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
   siteCoordinateSource?: Prisma.SortOrderInput | Prisma.SortOrder
-  businessVertical?: Prisma.SortOrderInput | Prisma.SortOrder
-  crossRentalFlag?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
-  notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -476,10 +420,8 @@ export type EnquiryScalarWhereWithAggregatesInput = {
   NOT?: Prisma.EnquiryScalarWhereWithAggregatesInput | Prisma.EnquiryScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
   enquiryNo?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
-  externalReference?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
   enquiryDate?: Prisma.DateTimeWithAggregatesFilter<"Enquiry"> | Date | string
   source?: Prisma.EnumEnquirySourceWithAggregatesFilter<"Enquiry"> | $Enums.EnquirySource
-  salesPartnerName?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
   crOwnerId?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
   customerName?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
   customerAddress?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
@@ -490,10 +432,7 @@ export type EnquiryScalarWhereWithAggregatesInput = {
   siteLatitude?: Prisma.DecimalNullableWithAggregatesFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.DecimalNullableWithAggregatesFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableWithAggregatesFilter<"Enquiry"> | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
-  crossRentalFlag?: Prisma.BoolWithAggregatesFilter<"Enquiry"> | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusWithAggregatesFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
-  notes?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
   createdById?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Enquiry"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Enquiry"> | Date | string
@@ -502,10 +441,8 @@ export type EnquiryScalarWhereWithAggregatesInput = {
 export type EnquiryCreateInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -514,10 +451,7 @@ export type EnquiryCreateInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   crOwner: Prisma.UserCreateNestedOneWithoutOwnedEnquiriesInput
@@ -529,10 +463,8 @@ export type EnquiryCreateInput = {
 export type EnquiryUncheckedCreateInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -543,10 +475,7 @@ export type EnquiryUncheckedCreateInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -556,10 +485,8 @@ export type EnquiryUncheckedCreateInput = {
 export type EnquiryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -568,10 +495,7 @@ export type EnquiryUpdateInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crOwner?: Prisma.UserUpdateOneRequiredWithoutOwnedEnquiriesNestedInput
@@ -583,10 +507,8 @@ export type EnquiryUpdateInput = {
 export type EnquiryUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -597,10 +519,7 @@ export type EnquiryUncheckedUpdateInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -610,10 +529,8 @@ export type EnquiryUncheckedUpdateInput = {
 export type EnquiryCreateManyInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -624,10 +541,7 @@ export type EnquiryCreateManyInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -636,10 +550,8 @@ export type EnquiryCreateManyInput = {
 export type EnquiryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -648,10 +560,7 @@ export type EnquiryUpdateManyMutationInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -659,10 +568,8 @@ export type EnquiryUpdateManyMutationInput = {
 export type EnquiryUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -673,10 +580,7 @@ export type EnquiryUncheckedUpdateManyInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -695,10 +599,8 @@ export type EnquiryOrderByRelationAggregateInput = {
 export type EnquiryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
-  externalReference?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
   source?: Prisma.SortOrder
-  salesPartnerName?: Prisma.SortOrder
   crOwnerId?: Prisma.SortOrder
   customerName?: Prisma.SortOrder
   customerAddress?: Prisma.SortOrder
@@ -709,10 +611,7 @@ export type EnquiryCountOrderByAggregateInput = {
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
   siteCoordinateSource?: Prisma.SortOrder
-  businessVertical?: Prisma.SortOrder
-  crossRentalFlag?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
-  notes?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -726,10 +625,8 @@ export type EnquiryAvgOrderByAggregateInput = {
 export type EnquiryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
-  externalReference?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
   source?: Prisma.SortOrder
-  salesPartnerName?: Prisma.SortOrder
   crOwnerId?: Prisma.SortOrder
   customerName?: Prisma.SortOrder
   customerAddress?: Prisma.SortOrder
@@ -740,10 +637,7 @@ export type EnquiryMaxOrderByAggregateInput = {
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
   siteCoordinateSource?: Prisma.SortOrder
-  businessVertical?: Prisma.SortOrder
-  crossRentalFlag?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
-  notes?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -752,10 +646,8 @@ export type EnquiryMaxOrderByAggregateInput = {
 export type EnquiryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
-  externalReference?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
   source?: Prisma.SortOrder
-  salesPartnerName?: Prisma.SortOrder
   crOwnerId?: Prisma.SortOrder
   customerName?: Prisma.SortOrder
   customerAddress?: Prisma.SortOrder
@@ -766,10 +658,7 @@ export type EnquiryMinOrderByAggregateInput = {
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
   siteCoordinateSource?: Prisma.SortOrder
-  businessVertical?: Prisma.SortOrder
-  crossRentalFlag?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
-  notes?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -936,10 +825,8 @@ export type EnquiryUpdateOneRequiredWithoutLinesNestedInput = {
 export type EnquiryCreateWithoutSiteStateInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -948,10 +835,7 @@ export type EnquiryCreateWithoutSiteStateInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   crOwner: Prisma.UserCreateNestedOneWithoutOwnedEnquiriesInput
@@ -962,10 +846,8 @@ export type EnquiryCreateWithoutSiteStateInput = {
 export type EnquiryUncheckedCreateWithoutSiteStateInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -975,10 +857,7 @@ export type EnquiryUncheckedCreateWithoutSiteStateInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1017,10 +896,8 @@ export type EnquiryScalarWhereInput = {
   NOT?: Prisma.EnquiryScalarWhereInput | Prisma.EnquiryScalarWhereInput[]
   id?: Prisma.StringFilter<"Enquiry"> | string
   enquiryNo?: Prisma.StringFilter<"Enquiry"> | string
-  externalReference?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   enquiryDate?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
   source?: Prisma.EnumEnquirySourceFilter<"Enquiry"> | $Enums.EnquirySource
-  salesPartnerName?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   crOwnerId?: Prisma.StringFilter<"Enquiry"> | string
   customerName?: Prisma.StringFilter<"Enquiry"> | string
   customerAddress?: Prisma.StringFilter<"Enquiry"> | string
@@ -1031,10 +908,7 @@ export type EnquiryScalarWhereInput = {
   siteLatitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableFilter<"Enquiry"> | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  crossRentalFlag?: Prisma.BoolFilter<"Enquiry"> | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
-  notes?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdById?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
@@ -1043,10 +917,8 @@ export type EnquiryScalarWhereInput = {
 export type EnquiryCreateWithoutCrOwnerInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -1055,10 +927,7 @@ export type EnquiryCreateWithoutCrOwnerInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   siteState: Prisma.StateCreateNestedOneWithoutEnquiriesInput
@@ -1069,10 +938,8 @@ export type EnquiryCreateWithoutCrOwnerInput = {
 export type EnquiryUncheckedCreateWithoutCrOwnerInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -1082,10 +949,7 @@ export type EnquiryUncheckedCreateWithoutCrOwnerInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1105,10 +969,8 @@ export type EnquiryCreateManyCrOwnerInputEnvelope = {
 export type EnquiryCreateWithoutCreatedByInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -1117,10 +979,7 @@ export type EnquiryCreateWithoutCreatedByInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   crOwner: Prisma.UserCreateNestedOneWithoutOwnedEnquiriesInput
@@ -1131,10 +990,8 @@ export type EnquiryCreateWithoutCreatedByInput = {
 export type EnquiryUncheckedCreateWithoutCreatedByInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -1145,10 +1002,7 @@ export type EnquiryUncheckedCreateWithoutCreatedByInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   lines?: Prisma.EnquiryLineItemUncheckedCreateNestedManyWithoutEnquiryInput
@@ -1199,10 +1053,8 @@ export type EnquiryUpdateManyWithWhereWithoutCreatedByInput = {
 export type EnquiryCreateWithoutLinesInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -1211,10 +1063,7 @@ export type EnquiryCreateWithoutLinesInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   crOwner: Prisma.UserCreateNestedOneWithoutOwnedEnquiriesInput
@@ -1225,10 +1074,8 @@ export type EnquiryCreateWithoutLinesInput = {
 export type EnquiryUncheckedCreateWithoutLinesInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -1239,10 +1086,7 @@ export type EnquiryUncheckedCreateWithoutLinesInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1267,10 +1111,8 @@ export type EnquiryUpdateToOneWithWhereWithoutLinesInput = {
 export type EnquiryUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1279,10 +1121,7 @@ export type EnquiryUpdateWithoutLinesInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crOwner?: Prisma.UserUpdateOneRequiredWithoutOwnedEnquiriesNestedInput
@@ -1293,10 +1132,8 @@ export type EnquiryUpdateWithoutLinesInput = {
 export type EnquiryUncheckedUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1307,10 +1144,7 @@ export type EnquiryUncheckedUpdateWithoutLinesInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1319,10 +1153,8 @@ export type EnquiryUncheckedUpdateWithoutLinesInput = {
 export type EnquiryCreateManySiteStateInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -1332,10 +1164,7 @@ export type EnquiryCreateManySiteStateInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1344,10 +1173,8 @@ export type EnquiryCreateManySiteStateInput = {
 export type EnquiryUpdateWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1356,10 +1183,7 @@ export type EnquiryUpdateWithoutSiteStateInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crOwner?: Prisma.UserUpdateOneRequiredWithoutOwnedEnquiriesNestedInput
@@ -1370,10 +1194,8 @@ export type EnquiryUpdateWithoutSiteStateInput = {
 export type EnquiryUncheckedUpdateWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1383,10 +1205,7 @@ export type EnquiryUncheckedUpdateWithoutSiteStateInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1396,10 +1215,8 @@ export type EnquiryUncheckedUpdateWithoutSiteStateInput = {
 export type EnquiryUncheckedUpdateManyWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1409,10 +1226,7 @@ export type EnquiryUncheckedUpdateManyWithoutSiteStateInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1421,10 +1235,8 @@ export type EnquiryUncheckedUpdateManyWithoutSiteStateInput = {
 export type EnquiryCreateManyCrOwnerInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   customerName: string
   customerAddress: string
   siteLocation: string
@@ -1434,10 +1246,7 @@ export type EnquiryCreateManyCrOwnerInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1446,10 +1255,8 @@ export type EnquiryCreateManyCrOwnerInput = {
 export type EnquiryCreateManyCreatedByInput = {
   id?: string
   enquiryNo: string
-  externalReference?: string | null
   enquiryDate: Date | string
   source?: $Enums.EnquirySource
-  salesPartnerName?: string | null
   crOwnerId: string
   customerName: string
   customerAddress: string
@@ -1460,10 +1267,7 @@ export type EnquiryCreateManyCreatedByInput = {
   siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: $Enums.CoordinateSource | null
-  businessVertical?: string | null
-  crossRentalFlag?: boolean
   overallStatus?: $Enums.EnquiryOverallStatus
-  notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1471,10 +1275,8 @@ export type EnquiryCreateManyCreatedByInput = {
 export type EnquiryUpdateWithoutCrOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1483,10 +1285,7 @@ export type EnquiryUpdateWithoutCrOwnerInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   siteState?: Prisma.StateUpdateOneRequiredWithoutEnquiriesNestedInput
@@ -1497,10 +1296,8 @@ export type EnquiryUpdateWithoutCrOwnerInput = {
 export type EnquiryUncheckedUpdateWithoutCrOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1510,10 +1307,7 @@ export type EnquiryUncheckedUpdateWithoutCrOwnerInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1523,10 +1317,8 @@ export type EnquiryUncheckedUpdateWithoutCrOwnerInput = {
 export type EnquiryUncheckedUpdateManyWithoutCrOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1536,10 +1328,7 @@ export type EnquiryUncheckedUpdateManyWithoutCrOwnerInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1548,10 +1337,8 @@ export type EnquiryUncheckedUpdateManyWithoutCrOwnerInput = {
 export type EnquiryUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1560,10 +1347,7 @@ export type EnquiryUpdateWithoutCreatedByInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   crOwner?: Prisma.UserUpdateOneRequiredWithoutOwnedEnquiriesNestedInput
@@ -1574,10 +1358,8 @@ export type EnquiryUpdateWithoutCreatedByInput = {
 export type EnquiryUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1588,10 +1370,7 @@ export type EnquiryUncheckedUpdateWithoutCreatedByInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lines?: Prisma.EnquiryLineItemUncheckedUpdateManyWithoutEnquiryNestedInput
@@ -1600,10 +1379,8 @@ export type EnquiryUncheckedUpdateWithoutCreatedByInput = {
 export type EnquiryUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
-  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.EnumEnquirySourceFieldUpdateOperationsInput | $Enums.EnquirySource
-  salesPartnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   crOwnerId?: Prisma.StringFieldUpdateOperationsInput | string
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1614,10 +1391,7 @@ export type EnquiryUncheckedUpdateManyWithoutCreatedByInput = {
   siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
-  businessVertical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  crossRentalFlag?: Prisma.BoolFieldUpdateOperationsInput | boolean
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
-  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1656,10 +1430,8 @@ export type EnquiryCountOutputTypeCountLinesArgs<ExtArgs extends runtime.Types.E
 export type EnquirySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   enquiryNo?: boolean
-  externalReference?: boolean
   enquiryDate?: boolean
   source?: boolean
-  salesPartnerName?: boolean
   crOwnerId?: boolean
   customerName?: boolean
   customerAddress?: boolean
@@ -1670,10 +1442,7 @@ export type EnquirySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   siteLatitude?: boolean
   siteLongitude?: boolean
   siteCoordinateSource?: boolean
-  businessVertical?: boolean
-  crossRentalFlag?: boolean
   overallStatus?: boolean
-  notes?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1687,10 +1456,8 @@ export type EnquirySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type EnquirySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   enquiryNo?: boolean
-  externalReference?: boolean
   enquiryDate?: boolean
   source?: boolean
-  salesPartnerName?: boolean
   crOwnerId?: boolean
   customerName?: boolean
   customerAddress?: boolean
@@ -1701,10 +1468,7 @@ export type EnquirySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   siteLatitude?: boolean
   siteLongitude?: boolean
   siteCoordinateSource?: boolean
-  businessVertical?: boolean
-  crossRentalFlag?: boolean
   overallStatus?: boolean
-  notes?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1716,10 +1480,8 @@ export type EnquirySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type EnquirySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   enquiryNo?: boolean
-  externalReference?: boolean
   enquiryDate?: boolean
   source?: boolean
-  salesPartnerName?: boolean
   crOwnerId?: boolean
   customerName?: boolean
   customerAddress?: boolean
@@ -1730,10 +1492,7 @@ export type EnquirySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   siteLatitude?: boolean
   siteLongitude?: boolean
   siteCoordinateSource?: boolean
-  businessVertical?: boolean
-  crossRentalFlag?: boolean
   overallStatus?: boolean
-  notes?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1745,10 +1504,8 @@ export type EnquirySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type EnquirySelectScalar = {
   id?: boolean
   enquiryNo?: boolean
-  externalReference?: boolean
   enquiryDate?: boolean
   source?: boolean
-  salesPartnerName?: boolean
   crOwnerId?: boolean
   customerName?: boolean
   customerAddress?: boolean
@@ -1759,16 +1516,13 @@ export type EnquirySelectScalar = {
   siteLatitude?: boolean
   siteLongitude?: boolean
   siteCoordinateSource?: boolean
-  businessVertical?: boolean
-  crossRentalFlag?: boolean
   overallStatus?: boolean
-  notes?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EnquiryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryNo" | "externalReference" | "enquiryDate" | "source" | "salesPartnerName" | "crOwnerId" | "customerName" | "customerAddress" | "siteLocation" | "siteStateCode" | "sitePincode" | "region" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "businessVertical" | "crossRentalFlag" | "overallStatus" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiry"]>
+export type EnquiryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryNo" | "enquiryDate" | "source" | "crOwnerId" | "customerName" | "customerAddress" | "siteLocation" | "siteStateCode" | "sitePincode" | "region" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "overallStatus" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiry"]>
 export type EnquiryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   crOwner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
@@ -1798,13 +1552,8 @@ export type $EnquiryPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     enquiryNo: string
-    externalReference: string | null
     enquiryDate: Date
     source: $Enums.EnquirySource
-    /**
-     * The Sales Partner's name, free text. Sales Partners have no account.
-     */
-    salesPartnerName: string | null
     crOwnerId: string
     customerName: string
     customerAddress: string
@@ -1815,10 +1564,7 @@ export type $EnquiryPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     siteLatitude: runtime.Decimal | null
     siteLongitude: runtime.Decimal | null
     siteCoordinateSource: $Enums.CoordinateSource | null
-    businessVertical: string | null
-    crossRentalFlag: boolean
     overallStatus: $Enums.EnquiryOverallStatus
-    notes: string | null
     createdById: string | null
     createdAt: Date
     updatedAt: Date
@@ -2251,10 +1997,8 @@ export interface Prisma__EnquiryClient<T, Null = never, ExtArgs extends runtime.
 export interface EnquiryFieldRefs {
   readonly id: Prisma.FieldRef<"Enquiry", 'String'>
   readonly enquiryNo: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly externalReference: Prisma.FieldRef<"Enquiry", 'String'>
   readonly enquiryDate: Prisma.FieldRef<"Enquiry", 'DateTime'>
   readonly source: Prisma.FieldRef<"Enquiry", 'EnquirySource'>
-  readonly salesPartnerName: Prisma.FieldRef<"Enquiry", 'String'>
   readonly crOwnerId: Prisma.FieldRef<"Enquiry", 'String'>
   readonly customerName: Prisma.FieldRef<"Enquiry", 'String'>
   readonly customerAddress: Prisma.FieldRef<"Enquiry", 'String'>
@@ -2265,10 +2009,7 @@ export interface EnquiryFieldRefs {
   readonly siteLatitude: Prisma.FieldRef<"Enquiry", 'Decimal'>
   readonly siteLongitude: Prisma.FieldRef<"Enquiry", 'Decimal'>
   readonly siteCoordinateSource: Prisma.FieldRef<"Enquiry", 'CoordinateSource'>
-  readonly businessVertical: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly crossRentalFlag: Prisma.FieldRef<"Enquiry", 'Boolean'>
   readonly overallStatus: Prisma.FieldRef<"Enquiry", 'EnquiryOverallStatus'>
-  readonly notes: Prisma.FieldRef<"Enquiry", 'String'>
   readonly createdById: Prisma.FieldRef<"Enquiry", 'String'>
   readonly createdAt: Prisma.FieldRef<"Enquiry", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Enquiry", 'DateTime'>

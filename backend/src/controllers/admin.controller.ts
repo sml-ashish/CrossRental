@@ -28,7 +28,7 @@ function actorOf(req: Request): Actor {
  * plan puts configuration and user management out of the sales role's reach.
  */
 
-const internalRole = z.enum(["admin_user", "sales_user"]);
+const internalRole = z.enum(["admin_user", "sales_user", "management_viewer"]);
 
 const createUserSchema = z.object({
   email: emailField,

@@ -3,7 +3,7 @@
 Read `00-overview.md` and `open-items.md` (item 5) first.
 
 ## 1. Quote Comparison (BPD 6.15)
-Opens from the line workspace. Columns: vendor, crane, rental rate and basis, tax basis, mobilisation, demobilisation, total estimated cost, distance, crane age, availability confirmation, validity, response time, remarks, recommendation rank, warnings.
+Opens from the enquiry line card. Columns: vendor, crane, rental rate and basis, tax basis, mobilisation, demobilisation, total estimated cost, distance, crane age, availability confirmation, validity, response time, remarks, recommendation rank, warnings.
 - Mark each quotation Under Review, Shortlisted, Rejected or Selected with a **reason code** (master list).
 - Default rank by total estimated cost ascending (configurable).
 - Line moves to Under Evaluation when the first quotation is marked.

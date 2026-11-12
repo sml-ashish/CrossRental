@@ -2,9 +2,11 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { AppError } from "../middleware/errorHandler";
 import { AuthedRequest, vendorScopeOf } from "../middleware/auth";
-import { validateUpload, ACCEPTED_UPLOAD_LABEL } from "../middleware/upload";
+import { validateUpload, validateSpreadsheet, uploadedFile, ACCEPTED_UPLOAD_LABEL, XLSX_MIME } from "../middleware/upload";
 import * as cranes from "../services/crane.service";
+import * as bulkCranes from "../services/bulkCrane.service";
 import { craneProfile } from "../services/craneProfile.service";
+import { previewCraneLocation } from "../services/locationPreview.service";
 import type { Actor } from "../services/crane.service";
 
 /**
@@ -49,6 +51,48 @@ export const profile = asyncHandler(async (req: Request, res: Response) => {
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ crane: await cranes.createCrane(req.body, actorOf(req)) });
+});
+
+/**
+ * Bulk upload (sales and admin). `dryRun=true` validates the sheet and returns
+ * the same per-row report without writing anything.
+ */
+export const bulkImport = asyncHandler(async (req: Request, res: Response) => {
+  const file = validateSpreadsheet(uploadedFile(req));
+  const vendorId =
+    typeof req.body?.vendorId === "string" ? (req.body.vendorId as string) : "";
+  const dryRun = req.query["dryRun"] === "true";
+  const result = await bulkCranes.importCranes({
+    actor: actorOf(req),
+    vendorId,
+    buffer: file.buffer,
+    dryRun,
+  });
+  res.status(dryRun ? 200 : 201).json(result);
+});
+
+/** The `.xlsx` template, with dropdowns for the reference lists. */
+export const bulkTemplate = asyncHandler(async (req: Request, res: Response) => {
+  const buffer = await bulkCranes.craneImportTemplate(actorOf(req));
+  res.setHeader("Content-Type", XLSX_MIME);
+  res.setHeader(
+    "Content-Disposition",
+    'attachment; filename="crossrentel-crane-upload.xlsx"',
+  );
+  res.setHeader("Content-Length", String(buffer.length));
+  res.send(buffer);
+});
+
+/**
+ * Previews the fields a pasted Google Maps link can fill (brief 6.3).
+ *
+ * Read-only: the vendor reviews the suggestion and the normal create/update
+ * call still validates and stores it. No crane is touched, so there is no
+ * vendor scope to enforce beyond the write capability on the route.
+ */
+export const locationPreview = asyncHandler(async (req: Request, res: Response) => {
+  const link = typeof req.body?.link === "string" ? (req.body.link as string) : "";
+  res.json({ location: await previewCraneLocation(link) });
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {

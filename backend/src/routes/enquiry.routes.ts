@@ -6,7 +6,7 @@ import { apiLimiter } from "../middleware/rateLimiter";
 const router = Router();
 
 /**
- * /api/enquiries — native enquiry intake and the sourcing workspace (P1).
+ * /api/enquiries — native enquiry intake (P1).
  *
  * Internal only, like the RFQ router: `enquiry:*` is held by admin and the CR
  * team (`sales_user`) alone. The line paths are declared before `/:enquiryId`
@@ -16,10 +16,16 @@ const router = Router();
 router.use(apiLimiter, requireAuth);
 
 // --- lines (static first) ---
+/** Open lines for the RFQ creation picker; declared before `/lines/:lineId`. */
 router.get(
-  "/lines/:lineId/workspace",
+  "/lines",
   requireCapability("enquiry:view"),
-  enquiry.workspace,
+  enquiry.listRaisableLines,
+);
+router.get(
+  "/lines/:lineId",
+  requireCapability("enquiry:view"),
+  enquiry.line,
 );
 router.get(
   "/lines/:lineId/recommendations",

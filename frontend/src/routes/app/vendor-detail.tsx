@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Download, FileSpreadsheet, Pencil, Plus, Send, ShieldCheck } from "lucide-react";
+import { Download, FileSpreadsheet, Pencil, Plus, Send, ShieldCheck } from "lucide-react";
 import {
   approveVendor,
   DOCUMENT_LABELS,
@@ -22,8 +22,11 @@ import {
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { PageHeader, Panel } from "@/components/ui/page-header";
 import { Field, ReadOnlyValue, Section, Select, TextArea, TextInput } from "@/components/ui/form";
 import { ForbiddenNotice } from "@/components/guards";
+import { BulkCraneUpload } from "@/components/crane-bulk-upload";
+import { BulkLoadCharts } from "@/components/bulk-load-charts";
 import { ApiError } from "@/lib/api";
 
 /**
@@ -196,23 +199,11 @@ export function VendorDetailPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <Link
-          to="/app/approvals"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Back to approvals
-        </Link>
-      </div>
-
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-semibold text-slate-900">{vendor.name ?? "(no name yet)"}</h1>
-            <StatusBadge status={vendor.onboardingStatus} />
-          </div>
-          <p className="mt-1 text-sm text-slate-500">
+      <PageHeader
+        back={{ to: "/app/approvals", label: "Back to approvals" }}
+        title={vendor.name ?? "(no name yet)"}
+        description={
+          <>
             {vendor.sapVendorCode ? (
               <span className="font-mono">Vendor code {vendor.sapVendorCode}</span>
             ) : (
@@ -221,33 +212,35 @@ export function VendorDetailPage() {
             {vendor.approvedAt
               ? ` · approved ${new Date(vendor.approvedAt).toLocaleDateString()}`
               : ""}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {canApprove ? (
-            <Link
-              to="/app/vendors/$vendorId/sap-sheet"
-              params={{ vendorId }}
-              className="btn-secondary px-3 py-2 text-sm"
-            >
-              <FileSpreadsheet className="size-4" aria-hidden />
-              SAP creation sheet
-            </Link>
-          ) : null}
-          {canApprove && vendor.onboardingStatus === "APPROVED" ? (
-            <button
-              type="button"
-              className="btn-secondary px-3 py-2 text-sm"
-              onClick={() => resend.mutate()}
-              disabled={resend.isPending}
-            >
-              {resend.isPending ? <Spinner /> : <Send className="size-4" aria-hidden />}
-              Resend activation link
-            </button>
-          ) : null}
-        </div>
-      </header>
+          </>
+        }
+        meta={<StatusBadge status={vendor.onboardingStatus} />}
+        actions={
+          <>
+            {canApprove ? (
+              <Link
+                to="/app/vendors/$vendorId/sap-sheet"
+                params={{ vendorId }}
+                className="btn-secondary"
+              >
+                <FileSpreadsheet className="size-4" aria-hidden />
+                SAP creation sheet
+              </Link>
+            ) : null}
+            {canApprove && vendor.onboardingStatus === "APPROVED" ? (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => resend.mutate()}
+                disabled={resend.isPending}
+              >
+                {resend.isPending ? <Spinner /> : <Send className="size-4" aria-hidden />}
+                Resend activation link
+              </button>
+            ) : null}
+          </>
+        }
+      />
 
       {missingDocuments.length > 0 ? (
         <Alert tone="info" title="Required documents outstanding">
@@ -529,14 +522,18 @@ export function VendorDetailPage() {
                 }`}
           </p>
           {vendor.onboardingStatus === "APPROVED" ? (
-            <Link
-              to="/app/fleet/new"
-              search={{ vendorId, duplicate: undefined }}
-              className="btn-secondary px-3 py-2 text-sm"
-            >
-              <Plus className="size-4" aria-hidden />
-              Add crane
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <BulkCraneUpload vendorId={vendorId} vendorName={vendor.name ?? "this vendor"} />
+              <BulkLoadCharts vendorId={vendorId} cranes={fleet.data?.cranes ?? []} />
+              <Link
+                to="/app/fleet/new"
+                search={{ vendorId, duplicate: undefined }}
+                className="btn-secondary px-3 py-2 text-sm"
+              >
+                <Plus className="size-4" aria-hidden />
+                Add crane
+              </Link>
+            </div>
           ) : null}
         </div>
 
@@ -771,39 +768,44 @@ export function VendorDetailPage() {
 
       {canApprove && vendor.onboardingStatus === "SUBMITTED" ? (
         decision === null ? (
-          <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900">Decision</h2>
-              <p className="mt-0.5 text-xs text-slate-500">
-                    Approving creates the vendor&apos;s portal login and emails an activation link.
-                </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="btn-secondary px-4 py-2.5 text-sm"
-                onClick={() => setDecision("reject")}
-              >
-                Reject
-              </button>
-              <button
-                type="button"
-                className="btn-primary px-4 py-2.5 text-sm"
-                onClick={() => setDecision("approve")}
-              >
-                <ShieldCheck className="size-4" aria-hidden />
-                Approve
-              </button>
-            </div>
-          </div>
+          <Panel
+            title="Decision"
+            description="Approving creates the vendor's portal login and emails an activation link."
+            actions={
+              <>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setDecision("reject")}
+                >
+                  Reject
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => setDecision("approve")}
+                >
+                  <ShieldCheck className="size-4" aria-hidden />
+                  Approve
+                </button>
+              </>
+            }
+          >
+            <p className="text-xs text-slate-500">
+              Approving cannot be undone from here; a suspended vendor can be reinstated later.
+            </p>
+          </Panel>
         ) : (
-          <div className="card space-y-4 p-5">
+          <Panel
+            title={decision === "approve" ? "Approve this registration" : "Reject this registration"}
+            description={
+              decision === "approve"
+                ? "The office-use fields above are saved with the approval."
+                : "The vendor is told the reason, so write it for them to read."
+            }
+          >
             {decision === "approve" ? (
               <>
-                <h2 className="text-sm font-semibold text-slate-900">Approve this registration</h2>
-                <p className="text-xs text-slate-500">
-                  The office-use fields above are saved with the approval.
-                </p>
                 <Field label="Remarks" htmlFor="approve-remarks" hint="Optional. Kept in the history.">
                   <TextArea
                     id="approve-remarks"
@@ -815,7 +817,7 @@ export function VendorDetailPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="btn-primary px-4 py-2.5 text-sm"
+                    className="btn-primary"
                     onClick={() => approve.mutate()}
                     disabled={deciding || missingDocuments.length > 0}
                   >
@@ -824,7 +826,7 @@ export function VendorDetailPage() {
                   </button>
                   <button
                     type="button"
-                    className="btn-secondary px-4 py-2.5 text-sm"
+                    className="btn-secondary"
                     onClick={() => setDecision(null)}
                     disabled={deciding}
                   >
@@ -840,7 +842,6 @@ export function VendorDetailPage() {
               </>
             ) : (
               <>
-                <h2 className="text-sm font-semibold text-slate-900">Reject this registration</h2>
                 <Field
                   label="Remarks"
                   htmlFor="reject-remarks"
@@ -858,7 +859,7 @@ export function VendorDetailPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="btn-primary px-4 py-2.5 text-sm"
+                    className="btn-primary"
                     onClick={() => reject.mutate()}
                     disabled={deciding || rejectionRemarks.trim() === ""}
                   >
@@ -867,7 +868,7 @@ export function VendorDetailPage() {
                   </button>
                   <button
                     type="button"
-                    className="btn-secondary px-4 py-2.5 text-sm"
+                    className="btn-secondary"
                     onClick={() => setDecision(null)}
                     disabled={deciding}
                   >
@@ -876,7 +877,7 @@ export function VendorDetailPage() {
                 </div>
               </>
             )}
-          </div>
+          </Panel>
         )
       ) : null}
     </div>

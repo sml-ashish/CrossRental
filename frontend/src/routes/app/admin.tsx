@@ -4,8 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
-import { Field, Section, Select, TextInput } from "@/components/ui/form";
+import { PageHeader, Panel } from "@/components/ui/page-header";
+import { StatTile } from "@/components/ui/stat-tile";
+import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
+import { Field, Select, TextInput } from "@/components/ui/form";
 import { useAuth } from "@/lib/auth";
+import { AlertList } from "@/components/alerts";
 import {
   createAdminUser,
   loadAdminDashboard,
@@ -27,17 +31,8 @@ import {
 const ROLE_OPTIONS = [
   { value: "admin_user", label: "Admin" },
   { value: "sales_user", label: "Sales (CR team)" },
+  { value: "management_viewer", label: "Management Viewer" },
 ] as const;
-
-function CounterCard({ value, label, hint }: { value: number; label: string; hint?: string }) {
-  return (
-    <>
-      <p className="text-2xl font-semibold text-slate-900">{value}</p>
-      <p className="mt-1 text-sm text-slate-600">{label}</p>
-      {hint && value > 0 ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
-    </>
-  );
-}
 
 export function AdminPage() {
   const dashboard = useQuery({ queryKey: ["admin", "dashboard"], queryFn: loadAdminDashboard });
@@ -52,67 +47,84 @@ export function AdminPage() {
 
   const counts = dashboard.data?.counts;
   const staleFlagDays = dashboard.data?.thresholds.staleFlagDays ?? 60;
-  const fleetHint = "The SML fleet screen arrives in P1; count only for now.";
+  const fleetHint = "Vendor fleet records awaiting validation.";
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold text-slate-900">Admin</h1>
-        <p className="mt-0.5 text-sm text-slate-500">
-          The day's exceptions and the SML staff who operate the portal.
-        </p>
-      </header>
+      <PageHeader
+        title="Admin"
+        description="The day's exceptions and the SML staff who operate the portal."
+      />
 
       {dashboard.error ? (
         <Alert tone="error">{(dashboard.error as Error).message}</Alert>
       ) : null}
 
-      <Section title="Attention">
+      <Panel title="Attention">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Link
-            to="/app/approvals"
-            className="card block p-4 transition-colors hover:border-brand-300"
-          >
-            <CounterCard
+          <Link to="/app/approvals" className="block">
+            <StatTile
               value={counts?.awaitingApproval ?? 0}
               label="Registrations awaiting approval"
+              className="h-full transition-colors hover:border-brand-300"
             />
           </Link>
 
-          <Link
-            to="/app/rfqs"
-            search={{ delivery: "FAILED" }}
-            className="card block p-4 transition-colors hover:border-brand-300"
-          >
-            <CounterCard
+          <Link to="/app/rfqs" search={{ delivery: "FAILED" }} className="block">
+            <StatTile
               value={counts?.rfqsWithFailures ?? 0}
               label="RFQs with email delivery failures"
+              className="h-full transition-colors hover:border-brand-300"
             />
           </Link>
 
-          <div className="card p-4">
-            <CounterCard
-              value={counts?.cranesStale ?? 0}
-              label={`Cranes stale (${staleFlagDays}+ days)`}
-              hint={fleetHint}
+          <StatTile
+            value={counts?.cranesStale ?? 0}
+            label={`Cranes stale (${staleFlagDays}+ days)`}
+            hint={fleetHint}
+            className="h-full"
+          />
+          <StatTile
+            value={counts?.cranesUnverified ?? 0}
+            label="Cranes with no map location"
+            hint={fleetHint}
+            className="h-full"
+          />
+          <StatTile
+            value={counts?.cranesLapsed ?? 0}
+            label="Engaged cranes past their release date"
+            hint={fleetHint}
+            className="h-full"
+          />
+          {dashboard.data?.thresholds.fleetApprovalRequired ? (
+            <StatTile
+              value={counts?.fleetPendingValidation ?? 0}
+              label="Fleet records pending validation"
+              className="h-full"
             />
-          </div>
-          <div className="card p-4">
-            <CounterCard
-              value={counts?.cranesUnverified ?? 0}
-              label="Cranes with no map location"
-              hint={fleetHint}
+          ) : null}
+          <Link to="/app/admin/replies" className="block">
+            <StatTile
+              value={counts?.unmatchedQuotationResponses ?? 0}
+              label="Replies awaiting validation"
+              hint="Match the vendor, RFQ and crane, or dismiss it."
+              className="h-full transition-colors hover:border-brand-300"
             />
-          </div>
-          <div className="card p-4">
-            <CounterCard
-              value={counts?.cranesLapsed ?? 0}
-              label="Engaged cranes past their release date"
-              hint={fleetHint}
-            />
-          </div>
+          </Link>
+          <StatTile
+            value={counts?.failedEmails ?? 0}
+            label="Emails failed in the last 7 days"
+            className="h-full"
+          />
         </div>
-      </Section>
+      </Panel>
+
+      <Panel
+        title="Alerts"
+        description={`SLA: ${dashboard.data?.thresholds.alertRfqSlaHours ?? 48}h for RFQ responses, ${dashboard.data?.thresholds.alertQuotationExpiryDays ?? 3} days for quotation expiry, ${dashboard.data?.thresholds.alertBookingLeadDays ?? 7} days before a booking starts.`}
+      >
+        <AlertList alerts={dashboard.data?.alerts ?? []} />
+      </Panel>
 
       <UserManagement />
     </div>
@@ -155,44 +167,44 @@ function UserManagement() {
   });
 
   return (
-    <Section title="SML users">
-      <p className="mb-4 text-sm text-slate-500">
-        Internal accounts sign in with a one-time code sent to their email — there
-        is no password. Deactivating an account ends its sessions immediately.
-      </p>
+    <Panel
+      title="SML users"
+      description="Internal accounts sign in with a one-time code sent to their email — there is no password. Deactivating an account ends its sessions immediately."
+    >
+      <div className="space-y-4">
+        {notice ? <Alert tone="success">{notice}</Alert> : null}
+        {create.isError ? <Alert tone="error">{(create.error as Error).message}</Alert> : null}
+        {update.isError ? <Alert tone="error">{(update.error as Error).message}</Alert> : null}
+        {reset.isError ? <Alert tone="error">{(reset.error as Error).message}</Alert> : null}
 
-      {notice ? <Alert tone="success">{notice}</Alert> : null}
-      {create.isError ? <Alert tone="error">{(create.error as Error).message}</Alert> : null}
-      {update.isError ? <Alert tone="error">{(update.error as Error).message}</Alert> : null}
-      {reset.isError ? <Alert tone="error">{(reset.error as Error).message}</Alert> : null}
+        <form
+          className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            create.mutate();
+          }}
+        >
+          <Field label="Email" htmlFor="admin-user-email">
+            <TextInput id="admin-user-email" type="email" value={email} onChange={setEmail} />
+          </Field>
+          <Field label="Full name" htmlFor="admin-user-name">
+            <TextInput id="admin-user-name" value={fullName} onChange={setFullName} />
+          </Field>
+          <Field label="Role" htmlFor="admin-user-role">
+            <Select
+              id="admin-user-role"
+              value={role}
+              onChange={(value) => setRole(value as InternalRole)}
+              options={ROLE_OPTIONS}
+            />
+          </Field>
+          <button type="submit" className="btn-primary" disabled={create.isPending || !email.trim()}>
+            {create.isPending ? "Creating…" : "Create user"}
+          </button>
+        </form>
+      </div>
 
-      <form
-        className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-4"
-        onSubmit={(event) => {
-          event.preventDefault();
-          create.mutate();
-        }}
-      >
-        <Field label="Email" htmlFor="admin-user-email">
-          <TextInput id="admin-user-email" type="email" value={email} onChange={setEmail} />
-        </Field>
-        <Field label="Full name" htmlFor="admin-user-name">
-          <TextInput id="admin-user-name" value={fullName} onChange={setFullName} />
-        </Field>
-        <Field label="Role" htmlFor="admin-user-role">
-          <Select
-            id="admin-user-role"
-            value={role}
-            onChange={(value) => setRole(value as InternalRole)}
-            options={ROLE_OPTIONS}
-          />
-        </Field>
-        <button type="submit" className="btn-primary" disabled={create.isPending || !email.trim()}>
-          {create.isPending ? "Creating…" : "Create user"}
-        </button>
-      </form>
-
-      <div className="mt-5 overflow-x-auto">
+      <div className="mt-4">
         {users.isLoading ? (
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Spinner /> Loading users
@@ -200,35 +212,37 @@ function UserManagement() {
         ) : users.error ? (
           <Alert tone="error">{(users.error as Error).message}</Alert>
         ) : (
-          <table className="w-full min-w-[48rem] text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="py-2.5 pr-4 font-medium">User</th>
-                <th className="py-2.5 pr-4 font-medium">Role</th>
-                <th className="py-2.5 pr-4 font-medium">Status</th>
-                <th className="py-2.5 pr-4 font-medium">Last sign-in</th>
-                <th className="py-2.5 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {(users.data ?? []).map((row) => (
-                <UserRow
-                  key={row.id}
-                  row={row}
-                  isMe={row.id === me?.id}
-                  busy={update.isPending || reset.isPending}
-                  onChangeRole={(next) => update.mutate({ id: row.id, input: { role: next } })}
-                  onToggleActive={() =>
-                    update.mutate({ id: row.id, input: { isActive: !row.isActive } })
-                  }
-                  onReset={() => reset.mutate(row.id)}
-                />
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-hidden rounded-lg border border-slate-200">
+            <Table>
+              <THead>
+                <tr>
+                  <TH>User</TH>
+                  <TH>Role</TH>
+                  <TH>Status</TH>
+                  <TH>Last sign-in</TH>
+                  <TH align="right">Actions</TH>
+                </tr>
+              </THead>
+              <TBody>
+                {(users.data ?? []).map((row) => (
+                  <UserRow
+                    key={row.id}
+                    row={row}
+                    isMe={row.id === me?.id}
+                    busy={update.isPending || reset.isPending}
+                    onChangeRole={(next) => update.mutate({ id: row.id, input: { role: next } })}
+                    onToggleActive={() =>
+                      update.mutate({ id: row.id, input: { isActive: !row.isActive } })
+                    }
+                    onReset={() => reset.mutate(row.id)}
+                  />
+                ))}
+              </TBody>
+            </Table>
+          </div>
         )}
       </div>
-    </Section>
+    </Panel>
   );
 }
 
@@ -248,12 +262,12 @@ function UserRow({
   onReset: () => void;
 }) {
   return (
-    <tr className="align-middle">
-      <td className="py-3 pr-4">
+    <TR className="align-middle">
+      <TD>
         <p className="font-medium text-slate-900">{row.fullName ?? "—"}</p>
-        <p className="text-xs text-slate-500">{row.email}</p>
-      </td>
-      <td className="py-3 pr-4">
+        <p className="text-[11px] text-slate-500">{row.email}</p>
+      </TD>
+      <TD>
         <Select
           id={`role-${row.id}`}
           aria-label={`Role for ${row.email}`}
@@ -262,17 +276,17 @@ function UserRow({
           options={ROLE_OPTIONS}
           disabled={busy}
         />
-      </td>
-      <td className="py-3 pr-4">
+      </TD>
+      <TD>
         <Badge tone={row.isActive ? "emerald" : "neutral"}>
           {row.isActive ? "Active" : "Disabled"}
         </Badge>
-      </td>
-      <td className="py-3 pr-4 text-xs text-slate-500">
+      </TD>
+      <TD className="text-xs text-slate-500">
         {row.lastLoginAt ? new Date(row.lastLoginAt).toLocaleString() : "Never"}
-      </td>
-      <td className="py-3">
-        <div className="flex flex-wrap gap-2">
+      </TD>
+      <TD align="right">
+        <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
             className="btn-secondary px-3 py-1.5 text-xs"
@@ -291,7 +305,7 @@ function UserRow({
             {row.isActive ? "Disable" : "Enable"}
           </button>
         </div>
-      </td>
-    </tr>
+      </TD>
+    </TR>
   );
 }

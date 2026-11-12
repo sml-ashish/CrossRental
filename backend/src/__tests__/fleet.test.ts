@@ -1039,7 +1039,7 @@ describe("fleet: expected ready date (D4)", () => {
 });
 
 describe("fleet: updates on behalf of a vendor (D1)", () => {
-  it("emails the vendor and marks the audit when a sales user edits", async () => {
+  it("marks the audit when a sales user edits, without emailing the vendor", async () => {
     await call(app, "PUT", `/api/cranes/${ctx.a.craneId}`, {
       token: ctx.salesToken,
       body: cranePayload({
@@ -1055,7 +1055,7 @@ describe("fleet: updates on behalf of a vendor (D1)", () => {
       where: { template: "fleet_updated_on_behalf" },
       orderBy: { createdAt: "desc" },
     });
-    expect(mail).not.toBeNull();
+    expect(mail).toBeNull();
 
     const audit = await testPrisma.auditLog.findFirst({
       where: { entity: "crane", entityId: ctx.a.craneId, action: "crane_updated" },
@@ -1080,5 +1080,98 @@ describe("fleet: updates on behalf of a vendor (D1)", () => {
     expect(
       (await testPrisma.crane.findUniqueOrThrow({ where: { id: ctx.a.craneId } })).updatedOnBehalf,
     ).toBe(false);
+  });
+});
+// ---------------------------------------------------------------------------
+// "Fill from link" on the crane form (brief 6.3)
+// ---------------------------------------------------------------------------
+
+/**
+ * The preview is read-only: it turns a pasted Google Maps link into the fields
+ * the form would fill. These tests pin the two halves of that promise — a link
+ * with a place and a pin fills both, and a link that knows less leaves the rest
+ * empty rather than inventing it. The suite forces GEO_PROVIDER=stub, so the
+ * reverse lookup is deliberately unavailable here; that is the point of the
+ * "coordinates only" case below.
+ */
+describe("fleet: location preview from a Google Maps link", () => {
+  const preview = (token: string | undefined, link: string) =>
+    call(app, "POST", "/api/cranes/location-preview", {
+      ...(token ? { token } : {}),
+      body: { link },
+    });
+
+  it("fills the location, state, pincode and pin from a full link", async () => {
+    const res = await preview(
+      tokenA,
+      "https://www.google.com/maps/place/Ahmedabad+Yard,+GJ+380015/@23.0225,72.5714,17z",
+    );
+
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const location = res.body.location;
+    expect(location.latitude).toBeCloseTo(23.0225, 5);
+    expect(location.longitude).toBeCloseTo(72.5714, 5);
+    expect(location.currentLocation).toBe("Ahmedabad Yard");
+    expect(location.stateCode).toBe("GJ");
+    expect(location.stateName).toBe("State GJ");
+    expect(location.pincode).toBe("380015");
+    expect(location.source).toBe("maps_link");
+    expect(location.note).toMatch(/Filled/);
+  });
+
+  it("geocodes a link that names a place but carries no pin", async () => {
+    const res = await preview(
+      tokenA,
+      "https://www.google.com/maps?q=Surat+Yard,+GJ+395003",
+    );
+
+    expect(res.status).toBe(200);
+    const location = res.body.location;
+    expect(location.latitude).not.toBeNull();
+    expect(location.longitude).not.toBeNull();
+    expect(location.currentLocation).toBe("Surat Yard");
+    expect(location.stateCode).toBe("GJ");
+    expect(location.pincode).toBe("395003");
+    // The pin came from the provider, not from the URL.
+    expect(location.source).toBe("place_text");
+  });
+
+  it("returns the pin from a coordinates-only link and says what is missing", async () => {
+    const res = await preview(
+      tokenA,
+      "https://www.google.com/maps?q=23.0225,72.5714",
+    );
+
+    expect(res.status).toBe(200);
+    const location = res.body.location;
+    expect(location.latitude).toBeCloseTo(23.0225, 5);
+    expect(location.longitude).toBeCloseTo(72.5714, 5);
+    expect(location.currentLocation).toBeNull();
+    expect(location.stateCode).toBeNull();
+    expect(location.pincode).toBeNull();
+    expect(location.note).toMatch(/Could not tell/i);
+  });
+
+  it("returns a note, not an error, for a link that is not Google Maps", async () => {
+    const res = await preview(tokenA, "https://example.com/where-is-this");
+
+    expect(res.status).toBe(200);
+    expect(res.body.location.latitude).toBeNull();
+    expect(res.body.location.source).toBe("none");
+    expect(res.body.location.note).toMatch(/not a Google Maps link/i);
+  });
+
+  it("is open to a sales user writing on a vendor's behalf", async () => {
+    const res = await preview(
+      ctx.salesToken,
+      "https://www.google.com/maps/place/Ahmedabad+Yard/@23.0225,72.5714,17z",
+    );
+    expect(res.status).toBe(200);
+    expect(res.body.location.latitude).toBeCloseTo(23.0225, 5);
+  });
+
+  it("refuses an anonymous caller", async () => {
+    const res = await preview(undefined, "https://www.google.com/maps?q=23.0225,72.5714");
+    expect(res.status).toBe(401);
   });
 });

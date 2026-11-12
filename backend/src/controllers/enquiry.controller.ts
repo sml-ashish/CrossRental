@@ -38,6 +38,15 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
   res.json({ enquiries: rows });
 });
 
+/** Open enquiry lines, for the line-driven RFQ creation screen. */
+export const listRaisableLines = asyncHandler(
+  async (req: Request, res: Response) => {
+    res.json({
+      lines: await enquiries.listRaisableLines(req.query, actorOf(req)),
+    });
+  },
+);
+
 export const create = asyncHandler(async (req: Request, res: Response) => {
   res
     .status(201)
@@ -116,11 +125,9 @@ export const createRfq = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-/** The line's sourcing workspace: recommendations, RFQ history, quotations. */
-export const workspace = asyncHandler(async (req: Request, res: Response) => {
-  res.json({
-    workspace: await enquiries.getLineWorkspace(param(req, "lineId"), actorOf(req)),
-  });
+/** One line item, for the editor and the comparison screen. */
+export const line = asyncHandler(async (req: Request, res: Response) => {
+  res.json(await enquiries.getLine(param(req, "lineId"), actorOf(req)));
 });
 
 /** The line's comparable quotations, ranked (P3, BPD 6.15). */

@@ -13,6 +13,8 @@ import {
 import { approveVendor, rejectVendor, resendActivation } from "../services/approval.service";
 import { buildSapSheet, renderSapSheetXls } from "../services/sapSheet.service";
 import { readOnboardingDocument } from "../services/documents.service";
+import * as bulkInvites from "../services/bulkInvite.service";
+import { validateSpreadsheet, uploadedFile, XLSX_MIME } from "../middleware/upload";
 import type { OfficeUseReview } from "../services/approval.service";
 
 /**
@@ -76,6 +78,33 @@ function param(req: Request, key: string): string {
 export const createInvitation = asyncHandler(async (req: Request, res: Response) => {
   const result = await inviteVendor(req.body, actorOf(req));
   res.status(201).json(result);
+});
+
+/**
+ * Bulk invitations (admin and sales). `dryRun=true` validates the sheet and
+ * returns the same per-row report without writing anything or sending mail.
+ */
+export const bulkImportInvitations = asyncHandler(async (req: Request, res: Response) => {
+  const file = validateSpreadsheet(uploadedFile(req));
+  const dryRun = req.query["dryRun"] === "true";
+  const result = await bulkInvites.importInvitations({
+    actor: actorOf(req),
+    buffer: file.buffer,
+    dryRun,
+  });
+  res.status(dryRun ? 200 : 201).json(result);
+});
+
+/** The `.xlsx` template for the bulk invitation upload. */
+export const bulkInviteTemplate = asyncHandler(async (req: Request, res: Response) => {
+  const buffer = await bulkInvites.inviteImportTemplate(actorOf(req));
+  res.setHeader("Content-Type", XLSX_MIME);
+  res.setHeader(
+    "Content-Disposition",
+    'attachment; filename="crossrentel-vendor-invitations.xlsx"',
+  );
+  res.setHeader("Content-Length", String(buffer.length));
+  res.send(buffer);
 });
 
 /**

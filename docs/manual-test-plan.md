@@ -1,6 +1,6 @@
 # Manual test plan
 
-Manual walkthrough of the Crane Discovery & Vendor Repository Platform, mapped to
+Manual walkthrough of crossrentel, mapped to
 the BPD (Cross Rental_Platform_BPD.docx, sections 2, 4, 5 and 6) and checked
 against what is actually built in this repo: phases **P0–P4** (vendor portal from
 the base build, native enquiry intake, recommendation engine, booking calendar,
@@ -28,15 +28,22 @@ result to confirm. `[ ]` = not yet tried, `[x]` = passed.
 | Sales / CR (`sales_user`) | `/auth/otp` | `sales@sanghvimovers.com` | Code printed in the backend terminal |
 | Vendor 1 | `/auth/login` | `vendor1@example.com` / `Vendor@Portal2026` | M K Hiring (demo) |
 | Vendor 2 | `/auth/login` | `vendor2@example.com` / `Vendor@Portal2026` | VJ Cranes (demo) |
+| Vendor 3 | `/auth/login` | `vendor3@example.com` / `Vendor@Portal2026` | Sanghvi Heavy Lift (demo) |
+| Vendor 4 | `/auth/login` | `vendor4@example.com` / `Vendor@Portal2026` | Southline Crane Services (demo) |
+| Vendor 5 | `/auth/login` | `vendor5@example.com` / `Vendor@Portal2026` | Eastern Lifters (demo) |
 
 Internal users are **OTP-only**; vendors are **password-only**. Requesting an OTP
 for a vendor address deliberately does nothing.
 
 ### Seeded dummy data
 
-- 2 approved vendors with 4 cranes: `DEMO-MK-0001` (Crawler 400t, Available, GJ),
-  `DEMO-MK-0002` (Tyre-mounted 700t, Engaged, AP), `DEMO-VJ-0001` (Crawler 2500t,
-  Available, GJ), `DEMO-VJ-0002` (Crawler 2500t, Under maintenance, GJ).
+- 5 approved vendors with 67 cranes across 42 cities — enough to exercise the
+  discovery map: seven dense city clusters, a long tail of single cranes, 64
+  cranes with a stored coordinate and 2 active ones without (so the
+  "location unverified" group is populated).
+- Statuses are mixed (available, engaged with a future `availableFrom`, under
+  maintenance with an `expectedReadyDate`), and five cranes are 33–95 days past
+  their last update so the stale badge and stale reminder have data.
 - No enquiries — create them during the walkthrough.
 
 ---
@@ -47,9 +54,9 @@ for a vendor address deliberately does nothing.
 |---|---|---|
 | Vendor repository, onboarding & approval | 5.3, 6.20 | Built |
 | Fleet management (vendor + on-behalf) | 6.19, D1 | Built |
-| Enquiry intake, detail, line workspace | 4.1–4.2, 6.3–6.5 | Built (manual capture; no SAP feed) |
+| Enquiry intake, detail, line detail | 4.1–4.2, 6.3–6.5 | Built (manual capture; no SAP feed) |
 | Recommendation engine, SML/vendor segregation, snapshot | 4.5, 5.4, 6.6–6.7 | Built |
-| Mobilisation cost estimate | 5.5 | Built (fabricated rate table; geocoding stub) |
+| Mobilisation cost estimate | 5.5 | Built (fabricated rate table; Google or stub geocoding by config) |
 | RFQ generation, dispatch, tracking | 4.7, 5.6, 6.12–6.13 | Built (email only) |
 | Quotation capture (portal) | 4.8, 6.14 | Built |
 | Quote comparison, marks, final selection / booking | 4.9–4.10, 6.15–6.16 | Built |
@@ -61,8 +68,9 @@ for a vendor address deliberately does nothing.
 | Admin configuration, user management | 6.22 | Built (partial) |
 | SAP integration | 4.1, 5.1–5.2 | **Parked** — manual intake only |
 | WhatsApp, reply parsing, validation queue | 4.8, 5.7, P6 | **Not built** |
-| Heat maps | 5.10, 6.9 | **Skipped** — discovery shows a coordinate plot only |
-| Reports/analytics, management dashboard, SSO | 5.15, 6.2, 6.23, P5 | **Not built** |
+| Heat maps | 5.10, 6.9 | Built — Google Maps heat overlay (canvas PNG on a `GroundOverlay`), toggle on discovery |
+| Reports/analytics, management dashboard | 5.15, 6.2, 6.23 | Built |
+| SSO (Microsoft Entra) | 6.1, P5 | Built — needs tenant credentials to verify; OTP remains the fallback |
 | Inspection / GO-NO-GO, vendor performance analysis | — | **Out of scope** |
 
 ---
@@ -81,9 +89,13 @@ for a vendor address deliberately does nothing.
       `/app/approvals`.
 - [ ] Vendor: sign in with `vendor1@example.com`. Expect to land on
       `/app/dashboard`.
-- [ ] Confirm the nav differs by role (internal: Enquiries, Discovery, RFQs,
-      Bookings, Create RFQ, Quotations, Vendor Onboarding, Admin, Settings;
-      vendor: Dashboard, My Fleet, RFQs).
+- [ ] Confirm the nav differs by role. Internal nav is grouped: **Overview**
+      (Dashboard), **Sourcing** (Enquiries, Discovery, RFQs, Quotations),
+      **Operations** (Booking calendar), **Network** (Vendor onboarding),
+      **Insights** (Reports, Admin, Reply queue, Settings). Vendors see
+      Dashboard, RFQs, My fleet.
+- [ ] Below `lg` width, confirm the sidebar collapses to a hamburger that opens
+      a drawer; Escape and following a link close it.
 - [ ] Sign out; confirm redirect to `/auth/login`.
 
 Vendor password lifecycle (not the OTP path):
@@ -120,30 +132,56 @@ Vendor password lifecycle (not the OTP path):
 - [ ] Test "Edit" on the enquiry and on a line; test cancelling a line with a
       reason.
 
-### 3.4 Line sourcing workspace (BPD 6.5–6.7, 4.3–4.6)
+### 3.4 Line detail (BPD 6.5, 4.3–4.6)
 
-- [ ] Open a line (`/app/enquiries/lines/$lineId`).
-- [ ] Confirm the **SML section** appears first. Expect it to carry only the
-      manual internal check (SML has no fleet — open item 2).
-- [ ] Confirm the **Vendor recommendations** section lists matching vendor cranes
-      grouped by vendor, with distance / mobilisation estimate and any boom or
-      jib shortfall warnings.
-- [ ] Toggle the sort between Distance and mobilisation cost; confirm the order
-      changes and the caption "The two sets are never merged." holds — SML and
-      vendor results are always separate.
-- [ ] Click "Re-evaluate"; confirm a new snapshot is written and older snapshots
-      remain listed below.
+- [ ] Open a line's editor from the enquiry detail (`Edit line`) and confirm
+      every template field, including the internal-only budget and PO/SAP
+      reference, loads and saves.
+- [ ] Confirm the line card links into **Compare quotes** for that line.
+- [ ] The recommendation engine (P2) is API-only now: `GET
+      /api/enquiries/lines/:lineId/recommendations` returns the two separate
+      sets (SML empty, vendors ranked), and `POST …/recommendations/refresh`
+      writes a new snapshot while older snapshots remain. Its output is surfaced
+      as the recommendation rank badge on the comparison screen.
+- [ ] With `GEO_PROVIDER=google`, distances are **road** kilometres and the
+      snapshot records `provider: "google"`. The job site is geocoded once and
+      stored on the enquiry (`siteCoordinateSource = auto`); a refresh reuses
+      that pin instead of calling Google again.
+- [ ] A line with a site nobody has used yet takes a few seconds on first
+      evaluation (one route per candidate); a refresh is fast because the
+      distance cache answers. If every distance disappears, check the backend log
+      for the provider and the Google error text before suspecting the engine.
 
 ### 3.5 Raise an RFQ (BPD 6.12–6.13, 4.7)
 
-- [ ] Set a submission deadline on the line and click "Raise RFQ".
+Every RFQ is raised against one enquiry line item. There is no free-form
+enquiry/line entry any more: the line is the input, and the enquiry/line
+reference is derived from it on the server.
+
+- [ ] From an enquiry line card, click "Raise RFQ", set the submission deadline
+      and confirm. Alternatively open `/app/rfqs` → "Raise RFQ" and pick the line
+      from the picker (the picker only lists lines with a crane type and
+      capacity that are still open for sourcing).
 - [ ] Confirm navigation to `/app/rfqs/$rfqId` and the recipient list.
+- [ ] Confirm the RFQ detail header shows `Enquiry {enquiryNo}/{lineNo}` and its
+      "Open line item" link opens that line's editor.
+- [ ] In "Choose vendors to send to", toggle **Technical** and **Distance
+      based**. Technical matches the RFQ's crane type and capacity (at least, or
+      exactly when the RFQ says so); Distance based keeps the type but drops the
+      tonnage filter, listing the nearest cranes of that type at any capacity and
+      flagging any that are below the required tonnage. Selections survive the
+      switch.
+- [ ] Edit the draft: the "Raised against" panel shows the enquiry and line
+      numbers read-only, with no way to retype them.
 - [ ] Confirm an `rfq_invitation` email block appears in the backend terminal.
 - [ ] On the RFQ detail, edit the deadline ("Extend deadline"); confirm the
       `rfq_deadline_changed` email in the terminal.
 - [ ] Cancel an RFQ; confirm the cancelled banner and vendor notification.
 - [ ] `/app/rfqs` tracking list: confirm RFQ number, linked enquiry/line, status
       and delivery state. Try `?delivery=FAILED` to filter failures.
+- [ ] API check: `POST /api/rfqs` with an `enquiryLineId` whose `enquiryNo`/
+      `lineNo` disagree with the body still stores the line's own values, and a
+      cancelled line is refused.
 
 ### 3.6 Communication history (BPD 6.21)
 
@@ -180,8 +218,29 @@ Prerequisite: at least one vendor quotation exists (do §4.4 first), then return
 
 ### 3.9 Booking calendar (BPD 5.12, 6.17)
 
-- [ ] `/app/bookings`. Change the date range, ownership and crane type.
+- [ ] `/app/bookings`. It opens on the current month as a **month grid**
+      (Monday first), with `‹ month ›` and **Today** above it.
 - [ ] Confirm the legend: Free, Reserved, Hired, Blocked, Under maintenance.
+- [ ] Confirm the grid draws whole weeks: days from the previous and next month
+      appear muted at the edges, and the current day carries a filled circle.
+- [ ] Confirm a day cell lists the cranes that are **not** free as coloured
+      chips joined to the serial (max two, then `+N more`) and shows the count of
+      busy cranes. A free day stays quiet.
+- [ ] Click a day. The detail opens directly **under that week's row** — the
+      date, busy/free/total counters, and every busy crane grouped by state
+      (Hired, Reserved, Blocked, Under maintenance) with capacity and vendor.
+      Clicking another day moves the panel to that week.
+- [ ] Switch to **Timeline**: one compact row per crane over the same month,
+      only non-free days marked, weekends tinted. Switching back must show the
+      same states.
+- [ ] Confirm the summary strip above the grid (utilisation, hired, reserved,
+      blocked, maintenance crane-days) moves when you change month or filters.
+- [ ] Move to the previous and next month. The seeded demo bookings straddle
+      today, so each of last, this and next month has hired, reserved and
+      blocked days. Confirm a booking that started reads **Hired** and one that
+      starts later reads **Reserved**.
+- [ ] Filter by ownership and crane type. The grid and the timeline both narrow,
+      and the day counts follow.
 - [ ] Confirm the awarded crane shows Reserved across the booking window.
 
 ### 3.10 Manual vendor discovery (BPD 6.8, 5.9)
@@ -191,11 +250,44 @@ Prerequisite: at least one vendor quotation exists (do §4.4 first), then return
       size, fleet size (min), YOM from/to, ownership, availability.
 - [ ] Confirm results in **grouped** view (vendor header + nearest distance) and
       **flat** view (ranked table).
-- [ ] Switch to the **map (stub)** view; confirm it plots stored coordinates only
-      and says there are no tiles while the provider is on hold.
+- [ ] Enter a job site as text (`Vadodara, Gujarat`, pincode `390001`) and search.
+      The address is geocoded server-side; the note should say the list is sorted
+      by **road** distance and each crane should show a road figure. With a primer
+      such as `Mundra, Gujarat` the nearest rows should be the Mundra cranes.
+- [ ] Switch to **Map and heat map**. Expect Google tiles, a red job-site pin, a
+      marker per crane (clustered with a count at national zoom), and heat blobs
+      whose colour follows density. Toggle **Heat map** off and on.
+- [ ] If `VITE_GOOGLE_MAPS_BROWSER_KEY` is empty, the map falls back to the
+      coordinate plot and says why — confirm that message rather than a blank box.
 - [ ] Confirm "Location unverified" cranes are listed separately and cannot be
       distance-sorted.
 - [ ] From a row, open Crane detail and Vendor detail.
+
+#### Map and heat walkthrough (Google Maps)
+
+Run this after `npm run seed` with `GEO_PROVIDER=google` on the backend and a
+browser key in `frontend/.env`. The seeded fleet is built for it; the counts
+below are the expected answers, not illustrations.
+
+| Step | Expected |
+| --- | --- |
+| `select count(*) total, count("latitude") mapped, count(*) filter (where "latitude" is null) unverified from cranes where "isActive";` | `66 / 64 / 2` |
+| Open **Map and heat map**, no filters | 64 markers, clustered at national zoom; header says 64 of 66 have coordinates |
+| Zoom into Gujarat | Ahmedabad, Vadodara and Mundra clusters split into single pins |
+| Toggle **Heat map** off then on | Blobs disappear and return; the viewport does not jump |
+| Site `Vadodara, Gujarat` + `390001` | note: "sorted by road distance"; nearest Vadodara **3.47 km**, then Ahmedabad ~110 km, Surat ~154 km |
+| Site `Mundra, Gujarat` + `370421` | nearest Mundra **2.15 km**; the ranking changes, not just the note |
+| Repeat either search | near-instant (was 14 s cold); `distance_cache` row count unchanged |
+| Bad site `zzzz nowhere` | "Job site not found", list unsorted, no error page |
+| Filters `LARGE` + capacity ≥ 600 t + Available | 16 cranes across 3 vendors, markers and heat follow |
+| Unverified group | `DEMO-SL-0111`, `DEMO-EL-0113`; no distance, absent from the map |
+| Stale badge | 5 cranes at 33, 65, 75, 80 and 95 days |
+| Empty `VITE_GOOGLE_MAPS_BROWSER_KEY`, restart | coordinate plot plus "not configured" message |
+
+The first search at a job site nobody has used yet takes ~7 s (64 real Routes
+calls, 4 in flight); every repeat is cached for 30 days. If no crane gets a
+distance, check `GEO_PROVIDER` and the backend log line `geo provider: google`
+before suspecting the map.
 
 ### 3.11 Vendor detail (BPD 6.10)
 
@@ -243,6 +335,54 @@ Prerequisite: at least one vendor quotation exists (do §4.4 first), then return
 - [ ] Upload a load chart; download it back.
 - [ ] "Confirm still accurate" and "Duplicate" behave as expected; the freshness
       badge updates after a confirm.
+
+**Bulk upload (sales/admin, `.xlsx`)**
+
+- [ ] Open a vendor at `/app/vendors/:vendorId` and use Fleet → "Bulk upload".
+      Download the template; it has `Cranes`, `Lists` and `Instructions` sheets
+      and dropdowns for crane type, state and status.
+- [ ] Add two valid rows, choose the file, and confirm "Check file" lists both as
+      Ready without changing the fleet. Then import; both cranes appear and the
+      vendor receives one summary email (not one per crane).
+- [ ] Imported cranes are visible in the vendor's fleet and in the normal edit
+      form; their rules are the single-crane rules.
+- [ ] Paste a Google Maps link with coordinates into the Maps column; confirm the
+      saved crane is pinned there. Leave the Maps cell empty and confirm the
+      pincode locates the crane. Paste a non-Maps URL and confirm a warning plus
+      pincode fallback.
+- [ ] Re-upload a serial already on the fleet and a serial repeated in the same
+      file: both are skipped and named in the report, and no existing crane is
+      changed.
+- [ ] Make one row invalid (no pincode, capacity 0, unknown crane type) and
+      confirm the other rows still import while the report names the Excel row and
+      column.
+- [ ] Upload a file with a missing mandatory header, a non-`.xlsx` file, and a
+      sheet with 251 rows: each is refused with a usable message and nothing is
+      written.
+- [ ] As a vendor user, confirm `/app/vendors/:id` is not reachable and
+      `GET /api/cranes/bulk/template` answers 403.
+
+**Bulk load charts (sales/admin)**
+
+- [ ] Fleet → "Attach charts". Drop a batch of PDF/JPG/PNG files named after
+      crane serials; confirm each is matched to the right crane and nothing is
+      uploaded before the button is pressed.
+- [ ] Confirm `SERIAL.pdf`, `SERIAL-chart.pdf`, `SERIAL (1).pdf` and
+      `serial with spaces.pdf` all match by serial, while a name containing a
+      longer serial is not wrongly claimed as a prefix.
+- [ ] Add an unmatched file and an ambiguous file: both are left out until a
+      crane is chosen. Add a `.txt` file and a file over 10 MB: both are refused
+      before any request.
+- [ ] Select two files for the same crane and upload; the second is skipped
+      with "one chart per crane" rather than replacing the first.
+- [ ] Attach a chart to a crane that already has one: the row starts deselected;
+      tick it to opt in (it then shows "Will replace"), and after upload it
+      reports "Replaced".
+- [ ] One failing upload (for example a malformed PDF) reports that row as
+      failed while the rest attach; the fleet then shows each crane's chart, and
+      the audit trail records `crane_load_chart_uploaded` per crane.
+- [ ] Confirm a vendor user cannot reach the screen or the chart endpoints for
+      another vendor's crane.
 
 ### 4.3 RFQ inbox and quotation (BPD 6.14, 4.8)
 

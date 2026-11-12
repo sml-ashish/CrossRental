@@ -449,6 +449,56 @@ describe("the candidate picker", () => {
     expect(all).toEqual([...all].sort((x, y) => x - y));
   });
 
+  it("leads with the smallest adequate capacity, distance breaking ties", async () => {
+    const rfq = await createRfq({ siteLatitude: 22.3072, siteLongitude: 73.1812 });
+    // Both fixture cranes are 250 t, so distance decides between the vendors.
+    await placeCrane(ctx.a.craneId, 23.0, 74.0);
+    await placeCrane(ctx.b.craneId, 22.35, 73.2);
+    // A much larger crane from vendor A parked at the site itself.
+    const big = await appPrisma.crane.create({
+      data: {
+        vendorId: ctx.a.vendorId,
+        serialRegistrationNo: "BIG-500-1",
+        typeOfCraneCode: "CRAWLER",
+        capacityT: 500,
+        currentStatus: "AVAILABLE",
+        currentLocation: "Site yard",
+        stateCode: "GJ",
+        make: "Demo",
+        model: "Big-500",
+        yom: 2021,
+        latitude: 22.3072,
+        longitude: 73.1812,
+        coordinateSource: "manual",
+      },
+      select: { id: true },
+    });
+
+    const res = await call(app, "GET", `/api/rfqs/${rfq.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    expect(res.status).toBe(200);
+
+    const groups = res.body.candidates.located as Array<{
+      vendorId: string;
+      nearestKm: number;
+      cranes: Array<{ craneId: string; capacityT: number; distanceKm: number }>;
+    }>;
+
+    // Vendor B's 250 t crane is nearer, so it leads the equal-capacity pair.
+    expect(groups[0].vendorId).toBe(ctx.b.vendorId);
+    expect(groups[1].vendorId).toBe(ctx.a.vendorId);
+
+    // Vendor A's own list leads with the 250 t crane even though the 500 t one
+    // is parked at the site: capacity decides, distance only breaks ties.
+    expect(groups[1].cranes.map((c) => c.capacityT)).toEqual([250, 500]);
+    expect(groups[1].cranes[0].craneId).toBe(ctx.a.craneId);
+    expect(groups[1].cranes[1].craneId).toBe(big.id);
+
+    // The card's "nearest" figure is still the nearest crane, not the first.
+    expect(groups[1].nearestKm).toBeLessThan(groups[0].nearestKm);
+  });
+
   it("keeps the coordinates and grouping it will later snapshot", async () => {
     const rfq = await createRfq();
     const res = await call(app, "GET", `/api/rfqs/${rfq.id}/candidates`, {
@@ -529,6 +579,75 @@ describe("the candidate picker", () => {
     expect(res.body.candidates.located).toHaveLength(0);
     expect(res.body.candidates.unverified).toHaveLength(0);
     expect(res.body.candidates.capacityRule).toContain("at least 500");
+  });
+
+  it("lists the same type at any capacity, nearest first, in distance mode", async () => {
+    const rfq = await createRfq({ capacityT: 500 });
+    const technical = await call(app, "GET", `/api/rfqs/${rfq.id}/candidates`, {
+      token: ctx.salesToken,
+    });
+    expect(technical.body.candidates.mode).toBe("technical");
+    expect(technical.body.candidates.located).toHaveLength(0);
+
+    // Vendor B much closer to the site than vendor A.
+    await placeCrane(ctx.a.craneId, 23.0, 74.0);
+    await placeCrane(ctx.b.craneId, 22.35, 73.2);
+
+    const res = await call(
+      app,
+      "GET",
+      `/api/rfqs/${rfq.id}/candidates?mode=distance`,
+      { token: ctx.salesToken },
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.candidates.mode).toBe("distance");
+    expect(res.body.candidates.capacityMatch).toBe("none");
+    expect(res.body.candidates.capacityRule).toContain("any capacity");
+
+    const groups = res.body.candidates.located as Array<{
+      vendorId: string;
+      cranes: Array<{
+        capacityT: number;
+        belowRequiredCapacity: boolean;
+        distanceKm: number;
+      }>;
+    }>;
+    const cranes = groups.flatMap((g) => g.cranes);
+    expect(cranes).toHaveLength(2);
+    // Below the 500 t requirement, and flagged rather than hidden.
+    expect(cranes.every((c) => c.capacityT < 500)).toBe(true);
+    expect(cranes.every((c) => c.belowRequiredCapacity)).toBe(true);
+    expect(groups[0].vendorId).toBe(ctx.b.vendorId);
+    const distances = cranes.map((c) => c.distanceKm);
+    expect(distances).toEqual([...distances].sort((x, y) => x - y));
+  });
+
+  it("keeps the crane type in distance mode and refuses an unknown mode", async () => {
+    await appPrisma.craneType.upsert({
+      where: { code: "TYRE" },
+      create: { code: "TYRE", name: "Tyre Mounted Crane", sortOrder: 20 },
+      update: {},
+    });
+    const rfq = await createRfq({ craneType: "TYRE", capacityT: 500 });
+
+    const typed = await call(
+      app,
+      "GET",
+      `/api/rfqs/${rfq.id}/candidates?mode=distance`,
+      { token: ctx.salesToken },
+    );
+    // Distance mode drops tonnage, not the crane type.
+    expect(typed.status).toBe(200);
+    expect(typed.body.candidates.located).toHaveLength(0);
+
+    const bad = await call(
+      app,
+      "GET",
+      `/api/rfqs/${rfq.id}/candidates?mode=nearest`,
+      { token: ctx.salesToken },
+    );
+    expect(bad.status).toBe(400);
   });
 
   it("stores the richer requirement fields (brief A3)", async () => {

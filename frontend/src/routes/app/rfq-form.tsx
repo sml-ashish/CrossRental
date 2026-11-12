@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api";
 import {
   EMPTY_RFQ_FORM,
-  createRfq,
   getRfq,
   rfqToForm,
   updateRfq,
@@ -12,17 +11,28 @@ import {
 } from "@/lib/rfqs";
 import { fetchReferenceData } from "@/lib/fleet";
 import { Alert } from "@/components/ui/alert";
-import { Checkbox, Field, Section, Select, TextArea, TextInput } from "@/components/ui/form";
+import {
+  Checkbox,
+  Field,
+  ReadOnlyValue,
+  Section,
+  Select,
+  TextArea,
+  TextInput,
+} from "@/components/ui/form";
+import { PageHeader, Panel } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 
 /**
- * Creating and editing an RFQ (brief 7.9, fields from 5.4).
+ * Editing an RFQ (brief 7.9, fields from 5.4).
  *
- * Both share one screen and one serialisation, because the second version of a
- * form is the first one with something missed in it. Only a draft is editable —
- * the backend refuses once it is sent, since the requirement is already in
- * vendor inboxes by then and changing it silently would invalidate quotations
- * being prepared against it.
+ * Creation is not here: every RFQ is raised from an enquiry line, which is what
+ * gives the requirement its quantity, capacity and duration. `/app/rfqs/new` is
+ * a line picker, and this screen only edits the draft that picker produces.
+ *
+ * Only a draft is editable — the backend refuses once it is sent, since the
+ * requirement is already in vendor inboxes by then and changing it silently
+ * would invalidate quotations being prepared against it.
  *
  * The job-site pin is typed rather than dragged. Brief 4 open item 1 puts the
  * mapping provider on hold and 6.8 asks for a placeholder map until one is
@@ -33,8 +43,7 @@ import { Spinner } from "@/components/ui/spinner";
  */
 
 export function RfqFormPage() {
-  const { rfqId } = useParams({ strict: false }) as { rfqId?: string };
-  const isEdit = Boolean(rfqId);
+  const { rfqId } = useParams({ strict: false }) as { rfqId: string };
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -45,8 +54,7 @@ export function RfqFormPage() {
 
   const existing = useQuery({
     queryKey: ["rfq", rfqId],
-    queryFn: () => getRfq(rfqId as string),
-    enabled: isEdit,
+    queryFn: () => getRfq(rfqId),
   });
 
   useEffect(() => {
@@ -58,8 +66,7 @@ export function RfqFormPage() {
   const locked = existing.data?.rfq ? existing.data.rfq.status !== "DRAFT" : false;
 
   const save = useMutation({
-    mutationFn: () =>
-      isEdit ? updateRfq(rfqId as string, form) : createRfq(form),
+    mutationFn: () => updateRfq(rfqId, form),
     onSuccess: (result) => {
       setFieldErrors({});
       void queryClient.invalidateQueries({ queryKey: ["rfqs"] });
@@ -96,7 +103,7 @@ export function RfqFormPage() {
     [reference.data],
   );
 
-  if (isEdit && existing.isLoading) {
+  if (existing.isLoading) {
     return (
       <div className="flex items-center gap-2 text-sm text-slate-500">
         <Spinner /> Loading the RFQ
@@ -106,15 +113,11 @@ export function RfqFormPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold text-slate-900">
-          {isEdit ? `Edit ${existing.data?.rfq.rfqNumber ?? "RFQ"}` : "Create RFQ"}
-        </h1>
-        <p className="mt-0.5 text-sm text-slate-500">
-          One RFQ covers one enquiry line item. Saving stores a draft; vendors are only
-          emailed when you send it.
-        </p>
-      </header>
+      <PageHeader
+        title={`Edit ${existing.data?.rfq.rfqNumber ?? "RFQ"}`}
+        mono
+        description="One RFQ covers one enquiry line item. Saving stores a draft; vendors are only emailed when you send it."
+      />
 
       {locked ? (
         <Alert tone="info" title="This RFQ has already been sent">
@@ -134,33 +137,32 @@ export function RfqFormPage() {
           save.mutate();
         }}
       >
-        <Section
-          title="Enquiry line item"
-          description="Typed in for now. The SAP feed replaces these two fields in a later phase."
+        <Panel
+          title="Raised against"
+          description="An RFQ always belongs to one enquiry line item. The line supplies the requirement and the enquiry/line reference; this RFQ is a snapshot of it."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Enquiry number" htmlFor="rfq-enquiry" required error={fieldErrors.enquiryNo}>
-              <TextInput
-                id="rfq-enquiry"
-                value={form.enquiryNo}
-                onChange={(v) => set("enquiryNo", v)}
-                disabled={locked}
-                invalid={Boolean(fieldErrors.enquiryNo)}
-                placeholder="SP/2026/0412"
-              />
-            </Field>
-            <Field label="Line number" htmlFor="rfq-line" required error={fieldErrors.lineNo}>
-              <TextInput
-                id="rfq-line"
-                value={form.lineNo}
-                onChange={(v) => set("lineNo", v)}
-                disabled={locked}
-                invalid={Boolean(fieldErrors.lineNo)}
-                placeholder="10"
-              />
-            </Field>
-          </div>
-        </Section>
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <ReadOnlyValue
+              label="Enquiry number"
+              value={existing.data?.rfq.enquiryNo ?? "—"}
+            />
+            <ReadOnlyValue
+              label="Line number"
+              value={existing.data?.rfq.lineNo ?? "—"}
+            />
+          </dl>
+          {existing.data?.rfq.enquiryLineId ? (
+            <div className="mt-4">
+              <Link
+                to="/app/enquiries/lines/$lineId/edit"
+                params={{ lineId: existing.data.rfq.enquiryLineId }}
+                className="btn-secondary"
+              >
+                Open line item
+              </Link>
+            </div>
+          ) : null}
+        </Panel>
 
         <Section title="Requirement">
           <div className="grid gap-4 sm:grid-cols-3">
@@ -648,12 +650,10 @@ export function RfqFormPage() {
               disabled={save.isPending}
             >
               {save.isPending ? <Spinner /> : null}
-              {isEdit ? "Save changes" : "Save draft"}
+              Save changes
             </button>
             <p className="text-xs text-slate-500">
-              {isEdit
-                ? "Saving keeps the RFQ a draft until you send it."
-                : "You will pick vendors and send it on the next screen."}
+              Saving keeps the RFQ a draft until you send it.
             </p>
           </div>
         ) : null}

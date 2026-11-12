@@ -78,10 +78,10 @@ Show RFQ, quote and finalisation summaries as counts per stage (BPD 6.4).
 - **Enquiry create and edit:** the form above, line-item table, pre-filled term defaults, pin-confirm map, clear "internal only" marking on customer and budget fields.
 - **Enquiry inbox (6.3):** number, date, customer, site, region, line count, owner, overall status, RFQ, quote and finalisation summaries. Filters: date range, region, crane category, customer, status, stage.
 - **Enquiry detail (6.4):** header, line table, rolled-up counts, drill into a line. Internal-only fields visible to internal users only.
-- **Line-item sourcing workspace (6.5):** SML recommendations, vendor recommendations, RFQ history, quotations, comparison, final selection. P2 and P3 sections appear as they ship.
+- **Line detail:** the line editor, with the internal-only block, and the link into quote comparison (P3).
 - **SML fleet section (6.6):** shown before vendors. Matches by type and capacity (honouring `capacity_rule`) and basic availability.
 - **SML crane list (admin):** add, edit, deactivate.
 - **Internal fulfilment:** mark "Fulfilled internally" or "Checked internally, not available".
 
 ## Done when
-A CR user enters an enquiry with several lines using every template field, including internal-only customer and budget. It appears in the inbox as Received, Pending Sourcing. Matching SML cranes appear first in the workspace. An RFQ created from a line links to it and carries no customer name, address or budget (tested). Trail and roll-up follow the definitions above.
+A CR user enters an enquiry with several lines using every template field, including internal-only customer and budget. It appears in the inbox as Received, Pending Sourcing. An RFQ created from a line links to it and carries no customer name, address or budget (tested). Trail and roll-up follow the definitions above.

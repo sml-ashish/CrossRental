@@ -1,8 +1,10 @@
 import { Router } from "express";
 import * as vendor from "../controllers/vendor.controller";
 import * as approval from "../controllers/approval.controller";
-import { requireAuth, requireCapability } from "../middleware/auth";
+import * as reservations from "../controllers/reservations.controller";
+import { requireAuth, requireCapability, requireRole } from "../middleware/auth";
 import { apiLimiter } from "../middleware/rateLimiter";
+import { uploadSpreadsheet } from "../middleware/upload";
 
 const router = Router();
 
@@ -30,6 +32,17 @@ const router = Router();
 
 // --- the vendor's own record ---
 router.get("/me", apiLimiter, requireAuth, vendor.getMyVendor);
+/**
+ * The vendor's own booking calendar (BPD 6.17). Scoped by the token inside the
+ * service, so `?vendorId=` cannot widen it. Declared before "/:vendorId".
+ */
+router.get(
+  "/me/booking-calendar",
+  apiLimiter,
+  requireAuth,
+  requireRole("vendor_user"),
+  reservations.vendorCalendar,
+);
 router.get("/reference-data", apiLimiter, requireAuth, vendor.getReferenceData);
 
 // --- invitations (admin + sales) ---
@@ -47,6 +60,25 @@ router.get(
   requireAuth,
   requireCapability("vendor:view_all"),
   approval.listInvitations,
+);
+
+// Bulk invitations: the template, then the preview/import of an .xlsx sheet.
+// Same capability as inviting one vendor, so a sales user cannot gain reach
+// through the file that they do not have through the form.
+router.get(
+  "/invitations/bulk/template",
+  apiLimiter,
+  requireAuth,
+  requireCapability("vendor:invite"),
+  approval.bulkInviteTemplate,
+);
+router.post(
+  "/invitations/bulk",
+  apiLimiter,
+  requireAuth,
+  requireCapability("vendor:invite"),
+  uploadSpreadsheet("file"),
+  approval.bulkImportInvitations,
 );
 
 // --- queue and detail (admin + sales; bank fields admin-only) ---

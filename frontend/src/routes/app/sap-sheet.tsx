@@ -1,8 +1,9 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Download, Printer } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 import { downloadSapSheet, loadSapSheet } from "@/lib/onboarding";
 import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 
 /**
@@ -51,37 +52,33 @@ export function SapSheetPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-        <Link
-          to="/app/vendors/$vendorId"
-          params={{ vendorId }}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Back to the registration
-        </Link>
-        <div className="flex gap-2">
-          <button type="button" className="btn-secondary px-3 py-2 text-sm" onClick={() => window.print()}>
-            <Printer className="size-4" aria-hidden />
-            Print
-          </button>
-          <button type="button" className="btn-primary px-3 py-2 text-sm" onClick={() => void exportExcel()}>
-            <Download className="size-4" aria-hidden />
-            Export to Excel
-          </button>
-        </div>
-      </div>
-
-      <article className="card p-6">
-        <header className="border-b border-slate-200 pb-4">
-          <h1 className="text-xl font-semibold text-slate-900">SAP vendor creation sheet</h1>
-          <p className="mt-1 text-sm text-slate-500">
+      <PageHeader
+        className="print:hidden"
+        back={{ to: `/app/vendors/${vendorId}`, label: "Back to the registration" }}
+        title="SAP vendor creation sheet"
+        mono
+        description={
+          <>
             {data.vendorName || "Vendor"}
             {data.sapVendorCode ? ` · code ${data.sapVendorCode}` : " · no SAP code assigned"}
-          </p>
-        </header>
+          </>
+        }
+        actions={
+          <>
+            <button type="button" className="btn-secondary" onClick={() => window.print()}>
+              <Printer className="size-4" aria-hidden />
+              Print
+            </button>
+            <button type="button" className="btn-primary" onClick={() => void exportExcel()}>
+              <Download className="size-4" aria-hidden />
+              Export to Excel
+            </button>
+          </>
+        }
+      />
 
-        <div className="mt-4 space-y-5">
+      <article className="card p-6 print:border-0 print:shadow-none">
+        <div className="space-y-5">
           {data.sections.map((section) => (
             <section key={section.title} className="break-inside-avoid">
               <h2 className="border-b border-slate-100 pb-1 text-sm font-semibold text-slate-800">

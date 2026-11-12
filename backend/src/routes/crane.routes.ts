@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as crane from "../controllers/crane.controller";
 import { requireAuth, requireAnyCapability, requireCapability } from "../middleware/auth";
-import { uploadSingle } from "../middleware/upload";
+import { uploadSingle, uploadSpreadsheet } from "../middleware/upload";
 import { apiLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
@@ -38,6 +38,26 @@ const canReadFleet = requireAnyCapability("fleet:edit_own", "fleet:view_all");
  * "on behalf of" and emails the vendor.
  */
 const canWriteFleet = requireAnyCapability("fleet:edit_own", "fleet:edit_all");
+
+/**
+ * Bulk crane upload (sales and admin, `fleet:edit_all` — the same capability as
+ * adding one crane on a vendor's behalf). Declared before the `/:craneId` reads
+ * so the literal paths can never be captured by a parameter route.
+ */
+router.get("/bulk/template", requireCapability("fleet:edit_all"), crane.bulkTemplate);
+router.post(
+  "/bulk",
+  requireCapability("fleet:edit_all"),
+  uploadSpreadsheet("file"),
+  crane.bulkImport,
+);
+
+/**
+ * "Fill from link" on the crane form (brief 6.3). A preview only: it parses the
+ * pasted Google Maps link and suggests location, state, pincode and pin without
+ * writing anything. Declared before `/:craneId` so the literal path wins.
+ */
+router.post("/location-preview", canWriteFleet, crane.locationPreview);
 
 // --- reads ---
 router.get("/", canReadFleet, crane.list);

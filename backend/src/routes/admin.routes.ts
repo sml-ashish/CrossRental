@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as admin from "../controllers/admin.controller";
+import * as inbound from "../controllers/inbound.controller";
 import { requireAuth, requireCapability } from "../middleware/auth";
 import { apiLimiter } from "../middleware/rateLimiter";
 
@@ -20,6 +21,13 @@ router.get("/users", admin.listUsers);
 router.post("/users", admin.createUser);
 router.patch("/users/:id", admin.updateUser);
 router.post("/users/:id/reset-credentials", admin.resetCredentials);
+
+router.get("/replies", inbound.list);
+router.get("/replies/:id", inbound.get);
+router.patch("/replies/:id", inbound.patch);
+router.post("/replies/:id/convert", inbound.convert);
+router.post("/replies/:id/retry", inbound.retry);
+router.post("/replies/:id/dismiss", inbound.dismiss);
 
 router.post("/vendors/:id/suspend", admin.suspend);
 router.post("/vendors/:id/reinstate", admin.reinstate);

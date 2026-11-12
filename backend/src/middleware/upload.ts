@@ -60,7 +60,10 @@ const upload = multer({
 });
 
 /** Wraps a multer middleware so its errors become AppErrors with usable codes. */
-function handle(middleware: RequestHandler): RequestHandler {
+function handle(
+  middleware: RequestHandler,
+  maxBytes: number = env.storage.uploadMaxBytes,
+): RequestHandler {
   return (req, res, next) => {
     middleware(req, res, (err: unknown) => {
       if (!err) {
@@ -72,7 +75,7 @@ function handle(middleware: RequestHandler): RequestHandler {
           next(
             new AppError(
               `File is too large. Maximum size is ${Math.round(
-                env.storage.uploadMaxBytes / (1024 * 1024),
+                maxBytes / (1024 * 1024),
               )} MB.`,
               413,
               "FILE_TOO_LARGE",
@@ -88,9 +91,7 @@ function handle(middleware: RequestHandler): RequestHandler {
   };
 }
 
-export const uploadSingle = (field: string): RequestHandler => handle(upload.single(field));
-
-export const uploadOptional = (field: string): RequestHandler =>
+export const uploadSingle = (field: string): RequestHandler => handle(upload.single(field));export const uploadOptional = (field: string): RequestHandler =>
   handle(upload.fields([{ name: field, maxCount: 1 }]) as RequestHandler);
 
 /**
@@ -153,4 +154,68 @@ export function safeFileName(name: string): string {
       .replace(/[^\w.\- ]+/g, "_")
       .slice(0, 200) || "upload"
   );
+}
+
+/**
+ * Spreadsheet uploads for the bulk crane import.
+ *
+ * Deliberately separate from the document uploader: an `.xlsx` is a ZIP
+ * container, so the PDF/JPEG/PNG magic-byte allow-list cannot describe it. The
+ * checks here are the extension, the declared MIME type, and the ZIP signature —
+ * enough to refuse a renamed `.csv` or a random file before a parser sees it.
+ * The size cap is lower than the document cap because a 250-row crane sheet is
+ * small, and a large upload is far more likely to be a mistake than a fleet.
+ */
+export const XLSX_MIME =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+export const XLSX_MAX_BYTES = 5 * 1024 * 1024;
+
+const spreadsheetUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: XLSX_MAX_BYTES, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    const dot = file.originalname.toLowerCase().lastIndexOf(".");
+    const ext = dot >= 0 ? file.originalname.slice(dot).toLowerCase() : "";
+    // Browsers disagree about the MIME type of an .xlsx; the extension and the
+    // bytes below are the real checks, so octet-stream is tolerated here.
+    const mimeOk =
+      file.mimetype === XLSX_MIME || file.mimetype === "application/octet-stream";
+    if (ext !== ".xlsx" || !mimeOk) {
+      cb(AppError.badRequest("Only .xlsx spreadsheets are accepted"));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+export const uploadSpreadsheet = (field: string): RequestHandler =>
+  handle(spreadsheetUpload.single(field), XLSX_MAX_BYTES);
+
+export interface ValidatedSpreadsheet {
+  buffer: Buffer;
+  fileName: string;
+  sizeBytes: number;
+}
+
+/** Confirms the bytes really are a ZIP-based workbook before parsing. */
+export function validateSpreadsheet(
+  file: Express.Multer.File | undefined,
+): ValidatedSpreadsheet {
+  if (!file) {
+    throw AppError.badRequest("Attach the .xlsx file to upload");
+  }
+  const isZipArchive =
+    file.buffer.length >= 4 &&
+    file.buffer[0] === 0x50 &&
+    file.buffer[1] === 0x4b &&
+    file.buffer[2] === 0x03 &&
+    file.buffer[3] === 0x04;
+  if (!isZipArchive) {
+    throw AppError.badRequest("That file is not a valid .xlsx workbook");
+  }
+  return {
+    buffer: file.buffer,
+    fileName: safeFileName(file.originalname),
+    sizeBytes: file.size,
+  };
 }

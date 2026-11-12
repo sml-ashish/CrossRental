@@ -30,6 +30,14 @@ import type { DurationUnit, OwnershipType } from "../generated/prisma/client";
  * the filter to equality for that enquiry alone.
  */
 
+/**
+ * How the picker ranks. `technical` is the brief 6.9 list: crane type *and*
+ * capacity match, nearest first. `distance` is the sourcing aid sales asked
+ * for: the same crane type at any capacity, nearest first, so a nearby crane
+ * that is short on tonnage is still visible.
+ */
+export type CandidateMode = "technical" | "distance";
+
 export interface CandidateCrane {
   craneId: string;
   vendorId: string;
@@ -37,6 +45,8 @@ export interface CandidateCrane {
   typeOfCraneCode: string;
   typeOfCraneName: string;
   capacityT: number;
+  /** True when the crane is lighter than the RFQ asks for (distance mode only). */
+  belowRequiredCapacity: boolean;
   make: string;
   model: string;
   yom: number | null;
@@ -58,6 +68,8 @@ export interface CandidateCrane {
   locationUnverified: boolean;
   stale: boolean;
   daysSinceUpdate: number;
+  /** When the crane's details were last edited, for the picker's freshness line. */
+  lastUpdatedAt: string;
   distanceKm: number | null;
   distanceMethod: string | null;
   distanceApproximate: boolean;
@@ -74,6 +86,8 @@ export interface CandidateGroup {
 }
 
 export interface CandidateList {
+  /** Which ranking produced this list. */
+  mode: CandidateMode;
   site: {
     siteLocation: string;
     stateCode: string;
@@ -86,7 +100,8 @@ export interface CandidateList {
   distancesAvailable: boolean;
   located: CandidateGroup[];
   unverified: CandidateCrane[];
-  capacityMatch: "gte" | "equals";
+  /** `none` in distance mode: capacity was deliberately not filtered. */
+  capacityMatch: "gte" | "equals" | "none";
   capacityRule: string;
   /** Brief C3: true when the RFQ has no fixed start, so date checks were skipped. */
   startDateTbc: boolean;
@@ -115,6 +130,7 @@ const CANDIDATE_SELECT = {
   latitude: true,
   longitude: true,
   statusUpdatedAt: true,
+  updatedAt: true,
   typeOfCrane: { select: { name: true } },
   state: { select: { name: true } },
   vendor: { select: { id: true, name: true, onboardingStatus: true } },
@@ -141,6 +157,7 @@ type CandidateRow = {
   latitude: unknown;
   longitude: unknown;
   statusUpdatedAt: Date;
+  updatedAt: Date;
   typeOfCrane: { name: string };
   state: { name: string };
   vendor: { id: string; name: string; onboardingStatus: string };
@@ -194,20 +211,26 @@ export interface CandidateRfq {
  */
 export async function candidatesForRfq(
   rfq: CandidateRfq,
+  options: { mode?: CandidateMode } = {},
 ): Promise<CandidateList> {
   const settings = await getSettings();
   const required = num(rfq.capacityT) ?? 0;
   const tbc = rfq.startDateTbc === true;
+  const mode: CandidateMode = options.mode ?? "technical";
 
   let rows = (await prisma.crane.findMany({
     where: {
       isActive: true,
       typeOfCraneCode: rfq.craneType,
       // "At least" the required capacity unless the RFQ demands an exact match.
+      // Distance mode drops the tonnage filter entirely: it answers "what is
+      // near the site", and the UI labels each crane that is short on capacity.
       capacityT:
-        (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
-          ? { equals: required }
-          : { gte: required },
+        mode === "distance"
+          ? undefined
+          : (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
+            ? { equals: required }
+            : { gte: required },
       // P0 B2: a suspended vendor's cranes leave the candidate set entirely.
       vendor: {
         onboardingStatus: OnboardingStatus.APPROVED,
@@ -301,6 +324,7 @@ export async function candidatesForRfq(
       typeOfCraneCode: row.typeOfCraneCode,
       typeOfCraneName: row.typeOfCrane.name,
       capacityT: num(row.capacityT) ?? 0,
+      belowRequiredCapacity: (num(row.capacityT) ?? 0) < required,
       make: row.make,
       model: row.model,
       yom: row.yom,
@@ -323,6 +347,7 @@ export async function candidatesForRfq(
       locationUnverified: false,
       stale: days >= settings.staleFlagDays,
       daysSinceUpdate: days,
+      lastUpdatedAt: row.updatedAt.toISOString(),
       distanceKm: distance?.km ?? null,
       distanceMethod: distance?.method ?? null,
       distanceApproximate: distance?.approximate ?? false,
@@ -333,8 +358,16 @@ export async function candidatesForRfq(
     shape(row, measured.get(row.id) ?? null),
   );
 
-  // Nulls last: a crane we cannot measure should not outrank one we can.
+  // Technical answers "which crane can do the lift", so the smallest adequate
+  // capacity leads and distance breaks the tie — a 600 t requirement should
+  // offer the 800 t crane before a 2500 t one, however far away the big crane
+  // is. Distance mode is a proximity question, so it stays nearest-first.
+  // Nulls last either way: a crane we cannot measure should not outrank one we
+  // can.
   locatedCranes.sort((a, b) => {
+    if (mode === "technical" && a.capacityT !== b.capacityT) {
+      return a.capacityT - b.capacityT;
+    }
     if (a.distanceKm === null && b.distanceKm === null)
       return a.capacityT - b.capacityT;
     if (a.distanceKm === null) return 1;
@@ -369,14 +402,25 @@ export async function candidatesForRfq(
     }
     group.cranes.push(crane);
   }
+  // A vendor card's "nearest" figure is its closest crane, not its first one:
+  // in technical mode the list leads with capacity, so the first crane is the
+  // smallest, not necessarily the nearest.
   for (const group of groups.values()) {
-    const first = group.cranes[0];
-    group.nearestKm = first?.distanceKm ?? null;
-    group.distanceMethod = first?.distanceMethod ?? null;
-    group.distanceApproximate = first?.distanceApproximate ?? false;
+    const nearest = group.cranes.reduce<CandidateCrane | null>(
+      (best, crane) =>
+        crane.distanceKm !== null &&
+        (best === null || (best.distanceKm ?? Infinity) > crane.distanceKm)
+          ? crane
+          : best,
+      null,
+    );
+    group.nearestKm = nearest?.distanceKm ?? null;
+    group.distanceMethod = nearest?.distanceMethod ?? null;
+    group.distanceApproximate = nearest?.distanceApproximate ?? false;
   }
 
   return {
+    mode,
     site: {
       siteLocation: rfq.siteLocation,
       stateCode: rfq.siteStateCode,
@@ -387,6 +431,22 @@ export async function candidatesForRfq(
     },
     distancesAvailable: !siteUnverified,
     located: [...groups.values()].sort((a, b) => {
+      // Technical groups follow the crane that leads them — smallest adequate
+      // capacity, then its distance. Distance groups follow their nearest one.
+      if (mode === "technical") {
+        const ac = a.cranes[0];
+        const bc = b.cranes[0];
+        if ((ac?.capacityT ?? 0) !== (bc?.capacityT ?? 0)) {
+          return (ac?.capacityT ?? 0) - (bc?.capacityT ?? 0);
+        }
+        if (ac?.distanceKm != null && bc?.distanceKm != null) {
+          if (ac.distanceKm !== bc.distanceKm) return ac.distanceKm - bc.distanceKm;
+        } else if (ac?.distanceKm == null && bc?.distanceKm != null) {
+          return 1;
+        } else if (ac?.distanceKm != null && bc?.distanceKm == null) {
+          return -1;
+        }
+      }
       if (a.nearestKm === null && b.nearestKm === null)
         return a.vendorName.localeCompare(b.vendorName);
       if (a.nearestKm === null) return 1;
@@ -395,13 +455,17 @@ export async function candidatesForRfq(
     }),
     unverified: unverifiedCranes,
     capacityMatch:
-      (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
-        ? "equals"
-        : "gte",
+      mode === "distance"
+        ? "none"
+        : (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
+          ? "equals"
+          : "gte",
     capacityRule:
-      (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
-        ? `Cranes of this type with exactly ${required} t capacity`
-        : `Cranes of this type with at least ${required} t capacity`,
+      mode === "distance"
+        ? `Cranes of this type at any capacity, nearest first — ${required} t is the requirement, not a filter`
+        : (rfq.capacityRule ?? CapacityRule.AT_LEAST) === CapacityRule.EXACT
+          ? `Cranes of this type with exactly ${required} t capacity, nearest first`
+          : `Cranes of this type with at least ${required} t capacity, smallest adequate first`,
     startDateTbc: tbc,
     notice: tbc
       ? "The start date is to be confirmed, so cranes are not checked against the work dates. Confirm availability with each vendor before committing."

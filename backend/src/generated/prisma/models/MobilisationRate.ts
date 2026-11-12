@@ -18,7 +18,6 @@ import type * as Prisma from "../internal/prismaNamespace"
  *  * Per-km mobilisation rate by crane category and capacity band (BPD 5.5, P2
  *  * section 2). The owner supplies the values; until Admin Configuration (P5)
  *  * they are seeded from src/lib/mobilisationRates.ts.
- *  *
  *  * `capacityMaxT` null means "no upper bound". `ownershipType` null means the
  *  * rate applies regardless of who owns the crane; a row that names an ownership
  *  * type wins over a null row for that crane.

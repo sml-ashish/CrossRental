@@ -4,9 +4,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Search, Send } from "lucide-react";
 import { inviteVendor, listVendors, resendActivation, type QueueVendor } from "@/lib/onboarding";
 import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader, Panel } from "@/components/ui/page-header";
+import { SearchInput, Toolbar } from "@/components/ui/toolbar";
+import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
 import { Spinner } from "@/components/ui/spinner";
 import { Field, TextInput } from "@/components/ui/form";
 import { StatusBadge } from "@/components/ui/badge";
+import { BulkInviteUpload } from "@/components/vendor-bulk-invite";
+import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth";
 
 /**
@@ -52,110 +58,129 @@ export function ApprovalQueuePage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">Vendor approvals</h1>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Registrations submitted through the vendor portal.
-          </p>
-        </div>
-        <InviteVendorCard />
-      </header>
+      <PageHeader
+        title="Vendor approvals"
+        description="Registrations submitted through the vendor portal, and the invitations sent to start them."
+        meta={
+          queue.data?.counts?.SUBMITTED !== undefined ? (
+            <span className="text-xs text-slate-500">
+              {queue.data.counts.SUBMITTED} awaiting review
+            </span>
+          ) : null
+        }
+      />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setStatus(tab.value)}
-            className={
-              status === tab.value
-                ? "rounded-full bg-brand-600 px-3 py-1.5 text-xs font-medium text-white"
-                : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-slate-300"
-            }
-          >
-            {tab.label}
-            {queue.data?.counts?.[tab.value] !== undefined && tab.value !== "ALL" ? (
-              <span className="ml-1.5 opacity-70">{queue.data.counts[tab.value]}</span>
-            ) : null}
-          </button>
-        ))}
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 space-y-5">
+          <Toolbar>
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                Status
+              </p>
+              <div className="mt-1 flex flex-wrap gap-1" role="tablist" aria-label="Vendor status">
+                {STATUS_TABS.map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={status === tab.value}
+                    onClick={() => setStatus(tab.value)}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                      status === tab.value
+                        ? "bg-slate-900 text-white"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                    )}
+                  >
+                    {tab.label}
+                    {queue.data?.counts?.[tab.value] !== undefined && tab.value !== "ALL" ? (
+                      <span className="ml-1.5 opacity-70">{queue.data.counts[tab.value]}</span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <form
+              className="flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setSearch(searchInput);
+              }}
+            >
+              <SearchInput
+                value={searchInput}
+                onChange={setSearchInput}
+                placeholder="Company, email, PAN or vendor code"
+                label="Search vendors"
+                className="w-64"
+              />
+              <button type="submit" className="btn-secondary py-[7px]">
+                Search
+              </button>
+              {search ? (
+                <button
+                  type="button"
+                  className="btn-secondary py-[7px]"
+                  onClick={() => {
+                    setSearch("");
+                    setSearchInput("");
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+            </form>
+          </Toolbar>
+
+          {queue.isLoading ? (
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <Spinner /> Loading registrations
+            </div>
+          ) : queue.error ? (
+            <Alert title="Could not load the queue">{(queue.error as Error).message}</Alert>
+          ) : (queue.data?.vendors.length ?? 0) === 0 ? (
+            <div className="card">
+              <EmptyState
+                icon={<Search className="size-4" aria-hidden />}
+                title="Nothing in this view"
+                description="Registrations appear here as vendors submit them. Send an invitation to start one."
+              />
+            </div>
+          ) : (
+            <Panel bodyClassName="">
+              <Table>
+                <THead>
+                  <tr>
+                    <TH>Vendor</TH>
+                    <TH>PAN / GSTIN</TH>
+                    <TH className="hidden lg:table-cell">Regions</TH>
+                    <TH>Status</TH>
+                    <TH align="right">Documents</TH>
+                    <TH />
+                  </tr>
+                </THead>
+                <TBody>
+                  {(queue.data?.vendors ?? []).map((vendor) => (
+                    <QueueRow
+                      key={vendor.id}
+                      vendor={vendor}
+                      isAdmin={isAdmin}
+                      onResend={() => resend.mutate(vendor.id)}
+                      resending={resend.isPending && resend.variables === vendor.id}
+                    />
+                  ))}
+                </TBody>
+              </Table>
+            </Panel>
+          )}
+        </div>
+
+        <div className="xl:sticky xl:top-20">
+          <InviteVendorCard />
+          <BulkInviteUpload />
+        </div>
       </div>
-
-      <form
-        className="flex gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setSearch(searchInput);
-        }}
-      >
-        <div className="relative flex-1">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
-            aria-hidden
-          />
-          <input
-            className="field-input pl-9"
-            placeholder="Search by company, email, PAN or vendor code"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            aria-label="Search vendors"
-          />
-        </div>
-        <button type="submit" className="btn-secondary px-4 text-sm">
-          Search
-        </button>
-        {search ? (
-          <button
-            type="button"
-            className="btn-secondary px-4 text-sm"
-            onClick={() => {
-              setSearch("");
-              setSearchInput("");
-            }}
-          >
-            Clear
-          </button>
-        ) : null}
-      </form>
-
-      {queue.isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <Spinner /> Loading registrations
-        </div>
-      ) : queue.error ? (
-        <Alert title="Could not load the queue">{(queue.error as Error).message}</Alert>
-      ) : (queue.data?.vendors.length ?? 0) === 0 ? (
-        <div className="card p-8 text-center text-sm text-slate-500">
-          Nothing here. Registrations appear as vendors submit them.
-        </div>
-      ) : (
-        <div className="card overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-2.5 font-medium">Vendor</th>
-                <th className="px-4 py-2.5 font-medium">PAN / GSTIN</th>
-                <th className="hidden px-4 py-2.5 font-medium lg:table-cell">Regions</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
-                <th className="px-4 py-2.5 font-medium">Documents</th>
-                <th className="px-4 py-2.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {(queue.data?.vendors ?? []).map((vendor) => (
-                <QueueRow
-                  key={vendor.id}
-                  vendor={vendor}
-                  isAdmin={isAdmin}
-                  onResend={() => resend.mutate(vendor.id)}
-                  resending={resend.isPending && resend.variables === vendor.id}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 }
@@ -174,8 +199,8 @@ function QueueRow({
   const primary = vendor.contacts[0];
 
   return (
-    <tr className="align-top hover:bg-slate-50/60">
-      <td className="px-4 py-3">
+    <TR className="align-top">
+      <TD>
         <Link
           to="/app/vendors/$vendorId"
           params={{ vendorId: vendor.id }}
@@ -183,23 +208,25 @@ function QueueRow({
         >
           {vendor.name ?? "(no name yet)"}
         </Link>
-        <p className="mt-0.5 text-xs text-slate-500">{primary?.email ?? vendor.email ?? "—"}</p>
+        <p className="mt-0.5 text-[11px] text-slate-500">{primary?.email ?? vendor.email ?? "—"}</p>
         {vendor.sapVendorCode ? (
-          <p className="mt-0.5 font-mono text-xs text-slate-500">{vendor.sapVendorCode}</p>
+          <p className="mt-0.5 font-mono text-[11px] text-slate-500">{vendor.sapVendorCode}</p>
         ) : null}
-      </td>
-      <td className="px-4 py-3 font-mono text-xs text-slate-700">
+      </TD>
+      <TD className="font-mono text-xs">
         <p>{vendor.pan ?? "—"}</p>
-        <p className="text-slate-500">{vendor.gstn ?? ""}</p>
-      </td>
-      <td className="hidden px-4 py-3 text-xs text-slate-600 lg:table-cell">
+        <p className="text-[11px] text-slate-500">{vendor.gstn ?? ""}</p>
+      </TD>
+      <TD className="hidden text-xs lg:table-cell">
         {vendor.operatingRegions.join(", ") || "—"}
-      </td>
-      <td className="px-4 py-3">
+      </TD>
+      <TD>
         <StatusBadge status={vendor.onboardingStatus} />
-      </td>
-      <td className="px-4 py-3 text-xs text-slate-600">{vendor.documents.length}/3</td>
-      <td className="px-4 py-3 text-right">
+      </TD>
+      <TD align="right" className="text-xs tabular-nums">
+        {vendor.documents.length}/3
+      </TD>
+      <TD align="right">
         <div className="flex items-center justify-end gap-2">
           {isAdmin && vendor.onboardingStatus === "APPROVED" ? (
             <button
@@ -217,8 +244,8 @@ function QueueRow({
             {isAdmin ? "Review" : "View"}
           </Link>
         </div>
-      </td>
-    </tr>
+      </TD>
+    </TR>
   );
 }
 
@@ -231,26 +258,36 @@ function QueueRow({
  * new one.
  */
 function InviteVendorCard() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [contactName, setContactName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [link, setLink] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const invite = useMutation({
-    mutationFn: () => inviteVendor({ email: email.trim(), companyName, contactName }),
+    mutationFn: () =>
+      inviteVendor({
+        name: name.trim(),
+        email: email.trim(),
+        contactNumber: contactNumber.trim(),
+      }),
     onSuccess: (result) => {
       // Matches the link the backend emails, so a pasted copy behaves identically.
       setLink(`${window.location.origin}/onboarding/start?token=${encodeURIComponent(result.token)}`);
+      setEmailSent(result.emailSent);
       setCopied(false);
+      setName("");
       setEmail("");
-      setCompanyName("");
-      setContactName("");
+      setContactNumber("");
     },
   });
 
+  const complete =
+    name.trim().length >= 2 && email.trim() !== "" && contactNumber.trim() !== "";
+
   return (
-    <div className="card w-full p-4 sm:max-w-md">
+    <div className="card w-full p-4">
       <h2 className="text-sm font-semibold text-slate-900">Invite a vendor to register</h2>
       <form
         className="mt-3 space-y-3"
@@ -259,6 +296,14 @@ function InviteVendorCard() {
           invite.mutate();
         }}
       >
+        <Field label="Vendor name" htmlFor="invite-name" required>
+          <TextInput
+            id="invite-name"
+            value={name}
+            onChange={setName}
+            placeholder="Registered company name"
+          />
+        </Field>
         <Field label="Email address" htmlFor="invite-email" required>
           <TextInput
             id="invite-email"
@@ -269,18 +314,25 @@ function InviteVendorCard() {
             placeholder="vendor@example.com"
           />
         </Field>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Company" htmlFor="invite-company">
-            <TextInput id="invite-company" value={companyName} onChange={setCompanyName} />
-          </Field>
-          <Field label="Contact person" htmlFor="invite-contact">
-            <TextInput id="invite-contact" value={contactName} onChange={setContactName} />
-          </Field>
-        </div>
+        <Field
+          label="Contact number"
+          htmlFor="invite-contact-number"
+          required
+          hint="10-digit mobile number; +91 or a leading 0 is removed."
+        >
+          <TextInput
+            id="invite-contact-number"
+            type="tel"
+            value={contactNumber}
+            onChange={setContactNumber}
+            inputMode="tel"
+            placeholder="9876543210"
+          />
+        </Field>
         <button
           type="submit"
           className="btn-primary w-full px-3 py-2 text-sm"
-          disabled={invite.isPending || email.trim() === ""}
+          disabled={invite.isPending || !complete}
         >
           {invite.isPending ? <Spinner /> : null}
           Send invitation
@@ -295,9 +347,14 @@ function InviteVendorCard() {
 
       {link ? (
         <div className="mt-3">
-          <Alert tone="success" title="Invitation created">
+          <Alert
+            tone={emailSent ? "success" : "error"}
+            title={emailSent ? "Invitation created" : "Invitation created — email not sent"}
+          >
             <p className="text-xs">
-              A copy of the link, in case the email does not arrive. It cannot be shown again.
+              {emailSent
+                ? "A copy of the link, in case the email does not arrive. It cannot be shown again."
+                : "The email could not be sent from this deployment. Copy the link below and send it to the vendor directly. It cannot be shown again."}
             </p>
             <div className="mt-2 flex gap-2">
               <input

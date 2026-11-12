@@ -34,11 +34,11 @@ import type { Actor } from "./rfq.service";
  * and never recomputed in place: crane locations move, and sales must be able
  * to see the list they actually acted on. `refresh` writes another row.
  *
- * **Distances run on the provider interface.** With the geocoding decision on
- * hold that interface is the stub (open item 13), so distances are synthetic
- * and labelled `straight_line`. The `provider` on the snapshot records which
- * one produced the numbers, so a synthetic figure is never mistaken for a real
- * one later.
+ * **Distances run on the provider interface.** That interface is Google when
+ * `GEO_PROVIDER=google` (open item 13, resolved) and the stub otherwise, so the
+ * numbers are real road distance or synthetic straight-line depending on
+ * configuration. The `provider` on the snapshot records which one produced them,
+ * so a synthetic figure is never mistaken for a real one later.
  */
 
 /** A candidate crane with its cost and warning detail added (P2). */
@@ -152,7 +152,6 @@ const LINE_FOR_RECOMMENDATION = {
   capacityT: true,
   capacityRule: true,
   requiredStartDate: true,
-  startDateTbc: true,
   durationValue: true,
   durationUnit: true,
   workingDaysPerMonth: true,
@@ -337,7 +336,7 @@ async function buildRecommendation(
         locationUnverified: num(line.enquiry.siteLatitude) === null,
       },
       distancesAvailable: false,
-      startDateTbc: line.startDateTbc,
+      startDateTbc: line.requiredStartDate === null,
       capacityRule: "Cranes matching this requirement",
       notice: "This line needs a crane type and capacity before candidates can be matched.",
       sml: emptySml,
@@ -355,7 +354,7 @@ async function buildRecommendation(
     requiredStartDate: line.requiredStartDate ?? new Date(),
     durationValue: line.durationValue ?? 1,
     durationUnit: line.durationUnit ?? DurationUnit.DAYS,
-    startDateTbc: line.startDateTbc,
+    startDateTbc: line.requiredStartDate === null,
     workingDaysPerMonth: line.workingDaysPerMonth,
     siteLocation: line.enquiry.siteLocation,
     siteStateCode: line.enquiry.siteStateCode,

@@ -14,7 +14,13 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model EmailLog
- * 
+ * *
+ *  * Every message the platform sent or received.
+ *  * P6 widened this from outbound email only: `channel`, `direction`, the
+ *  * inbound body and the provider's message id let WhatsApp and email replies
+ *  * share the communication history the screen already reads. `toEmail` keeps its
+ *  * old name for compatibility but now carries the destination address (email or
+ *  * phone) for both channels.
  */
 export type EmailLogModel = runtime.Types.Result.DefaultSelection<Prisma.$EmailLogPayload>
 
@@ -32,6 +38,12 @@ export type EmailLogMinAggregateOutputType = {
   subject: string | null
   status: $Enums.EmailLogStatus | null
   error: string | null
+  channel: $Enums.MessageChannel | null
+  direction: $Enums.MessageDirection | null
+  fromAddress: string | null
+  bodyText: string | null
+  bodyHtml: string | null
+  providerMessageId: string | null
   entity: string | null
   entityId: string | null
   createdAt: Date | null
@@ -45,6 +57,12 @@ export type EmailLogMaxAggregateOutputType = {
   subject: string | null
   status: $Enums.EmailLogStatus | null
   error: string | null
+  channel: $Enums.MessageChannel | null
+  direction: $Enums.MessageDirection | null
+  fromAddress: string | null
+  bodyText: string | null
+  bodyHtml: string | null
+  providerMessageId: string | null
   entity: string | null
   entityId: string | null
   createdAt: Date | null
@@ -58,6 +76,12 @@ export type EmailLogCountAggregateOutputType = {
   subject: number
   status: number
   error: number
+  channel: number
+  direction: number
+  fromAddress: number
+  bodyText: number
+  bodyHtml: number
+  providerMessageId: number
   entity: number
   entityId: number
   createdAt: number
@@ -73,6 +97,12 @@ export type EmailLogMinAggregateInputType = {
   subject?: true
   status?: true
   error?: true
+  channel?: true
+  direction?: true
+  fromAddress?: true
+  bodyText?: true
+  bodyHtml?: true
+  providerMessageId?: true
   entity?: true
   entityId?: true
   createdAt?: true
@@ -86,6 +116,12 @@ export type EmailLogMaxAggregateInputType = {
   subject?: true
   status?: true
   error?: true
+  channel?: true
+  direction?: true
+  fromAddress?: true
+  bodyText?: true
+  bodyHtml?: true
+  providerMessageId?: true
   entity?: true
   entityId?: true
   createdAt?: true
@@ -99,6 +135,12 @@ export type EmailLogCountAggregateInputType = {
   subject?: true
   status?: true
   error?: true
+  channel?: true
+  direction?: true
+  fromAddress?: true
+  bodyText?: true
+  bodyHtml?: true
+  providerMessageId?: true
   entity?: true
   entityId?: true
   createdAt?: true
@@ -185,6 +227,12 @@ export type EmailLogGroupByOutputType = {
   subject: string
   status: $Enums.EmailLogStatus
   error: string | null
+  channel: $Enums.MessageChannel
+  direction: $Enums.MessageDirection
+  fromAddress: string | null
+  bodyText: string | null
+  bodyHtml: string | null
+  providerMessageId: string | null
   entity: string | null
   entityId: string | null
   createdAt: Date
@@ -219,9 +267,16 @@ export type EmailLogWhereInput = {
   subject?: Prisma.StringFilter<"EmailLog"> | string
   status?: Prisma.EnumEmailLogStatusFilter<"EmailLog"> | $Enums.EmailLogStatus
   error?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  channel?: Prisma.EnumMessageChannelFilter<"EmailLog"> | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFilter<"EmailLog"> | $Enums.MessageDirection
+  fromAddress?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  bodyText?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  bodyHtml?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  providerMessageId?: Prisma.StringNullableFilter<"EmailLog"> | string | null
   entity?: Prisma.StringNullableFilter<"EmailLog"> | string | null
   entityId?: Prisma.StringNullableFilter<"EmailLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EmailLog"> | Date | string
+  inboundReply?: Prisma.XOR<Prisma.InboundReplyNullableScalarRelationFilter, Prisma.InboundReplyWhereInput> | null
 }
 
 export type EmailLogOrderByWithRelationInput = {
@@ -232,13 +287,21 @@ export type EmailLogOrderByWithRelationInput = {
   subject?: Prisma.SortOrder
   status?: Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  fromAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  bodyText?: Prisma.SortOrderInput | Prisma.SortOrder
+  bodyHtml?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   entity?: Prisma.SortOrderInput | Prisma.SortOrder
   entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  inboundReply?: Prisma.InboundReplyOrderByWithRelationInput
 }
 
 export type EmailLogWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  providerMessageId?: string
   AND?: Prisma.EmailLogWhereInput | Prisma.EmailLogWhereInput[]
   OR?: Prisma.EmailLogWhereInput[]
   NOT?: Prisma.EmailLogWhereInput | Prisma.EmailLogWhereInput[]
@@ -248,10 +311,16 @@ export type EmailLogWhereUniqueInput = Prisma.AtLeast<{
   subject?: Prisma.StringFilter<"EmailLog"> | string
   status?: Prisma.EnumEmailLogStatusFilter<"EmailLog"> | $Enums.EmailLogStatus
   error?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  channel?: Prisma.EnumMessageChannelFilter<"EmailLog"> | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFilter<"EmailLog"> | $Enums.MessageDirection
+  fromAddress?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  bodyText?: Prisma.StringNullableFilter<"EmailLog"> | string | null
+  bodyHtml?: Prisma.StringNullableFilter<"EmailLog"> | string | null
   entity?: Prisma.StringNullableFilter<"EmailLog"> | string | null
   entityId?: Prisma.StringNullableFilter<"EmailLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EmailLog"> | Date | string
-}, "id">
+  inboundReply?: Prisma.XOR<Prisma.InboundReplyNullableScalarRelationFilter, Prisma.InboundReplyWhereInput> | null
+}, "id" | "providerMessageId">
 
 export type EmailLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -261,6 +330,12 @@ export type EmailLogOrderByWithAggregationInput = {
   subject?: Prisma.SortOrder
   status?: Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  fromAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  bodyText?: Prisma.SortOrderInput | Prisma.SortOrder
+  bodyHtml?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   entity?: Prisma.SortOrderInput | Prisma.SortOrder
   entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -280,6 +355,12 @@ export type EmailLogScalarWhereWithAggregatesInput = {
   subject?: Prisma.StringWithAggregatesFilter<"EmailLog"> | string
   status?: Prisma.EnumEmailLogStatusWithAggregatesFilter<"EmailLog"> | $Enums.EmailLogStatus
   error?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+  channel?: Prisma.EnumMessageChannelWithAggregatesFilter<"EmailLog"> | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionWithAggregatesFilter<"EmailLog"> | $Enums.MessageDirection
+  fromAddress?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+  bodyText?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+  bodyHtml?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+  providerMessageId?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
   entity?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
   entityId?: Prisma.StringNullableWithAggregatesFilter<"EmailLog"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"EmailLog"> | Date | string
@@ -293,9 +374,16 @@ export type EmailLogCreateInput = {
   subject: string
   status?: $Enums.EmailLogStatus
   error?: string | null
+  channel?: $Enums.MessageChannel
+  direction?: $Enums.MessageDirection
+  fromAddress?: string | null
+  bodyText?: string | null
+  bodyHtml?: string | null
+  providerMessageId?: string | null
   entity?: string | null
   entityId?: string | null
   createdAt?: Date | string
+  inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutMessageLogInput
 }
 
 export type EmailLogUncheckedCreateInput = {
@@ -306,9 +394,16 @@ export type EmailLogUncheckedCreateInput = {
   subject: string
   status?: $Enums.EmailLogStatus
   error?: string | null
+  channel?: $Enums.MessageChannel
+  direction?: $Enums.MessageDirection
+  fromAddress?: string | null
+  bodyText?: string | null
+  bodyHtml?: string | null
+  providerMessageId?: string | null
   entity?: string | null
   entityId?: string | null
   createdAt?: Date | string
+  inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutMessageLogInput
 }
 
 export type EmailLogUpdateInput = {
@@ -319,9 +414,16 @@ export type EmailLogUpdateInput = {
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEmailLogStatusFieldUpdateOperationsInput | $Enums.EmailLogStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumMessageChannelFieldUpdateOperationsInput | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  fromAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  inboundReply?: Prisma.InboundReplyUpdateOneWithoutMessageLogNestedInput
 }
 
 export type EmailLogUncheckedUpdateInput = {
@@ -332,9 +434,16 @@ export type EmailLogUncheckedUpdateInput = {
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEmailLogStatusFieldUpdateOperationsInput | $Enums.EmailLogStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumMessageChannelFieldUpdateOperationsInput | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  fromAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutMessageLogNestedInput
 }
 
 export type EmailLogCreateManyInput = {
@@ -345,6 +454,12 @@ export type EmailLogCreateManyInput = {
   subject: string
   status?: $Enums.EmailLogStatus
   error?: string | null
+  channel?: $Enums.MessageChannel
+  direction?: $Enums.MessageDirection
+  fromAddress?: string | null
+  bodyText?: string | null
+  bodyHtml?: string | null
+  providerMessageId?: string | null
   entity?: string | null
   entityId?: string | null
   createdAt?: Date | string
@@ -358,6 +473,12 @@ export type EmailLogUpdateManyMutationInput = {
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEmailLogStatusFieldUpdateOperationsInput | $Enums.EmailLogStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumMessageChannelFieldUpdateOperationsInput | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  fromAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +492,12 @@ export type EmailLogUncheckedUpdateManyInput = {
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumEmailLogStatusFieldUpdateOperationsInput | $Enums.EmailLogStatus
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumMessageChannelFieldUpdateOperationsInput | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  fromAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -384,6 +511,12 @@ export type EmailLogCountOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   status?: Prisma.SortOrder
   error?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  fromAddress?: Prisma.SortOrder
+  bodyText?: Prisma.SortOrder
+  bodyHtml?: Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrder
   entity?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -397,6 +530,12 @@ export type EmailLogMaxOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   status?: Prisma.SortOrder
   error?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  fromAddress?: Prisma.SortOrder
+  bodyText?: Prisma.SortOrder
+  bodyHtml?: Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrder
   entity?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -410,13 +549,138 @@ export type EmailLogMinOrderByAggregateInput = {
   subject?: Prisma.SortOrder
   status?: Prisma.SortOrder
   error?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
+  direction?: Prisma.SortOrder
+  fromAddress?: Prisma.SortOrder
+  bodyText?: Prisma.SortOrder
+  bodyHtml?: Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrder
   entity?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
+export type EmailLogScalarRelationFilter = {
+  is?: Prisma.EmailLogWhereInput
+  isNot?: Prisma.EmailLogWhereInput
+}
+
 export type EnumEmailLogStatusFieldUpdateOperationsInput = {
   set?: $Enums.EmailLogStatus
+}
+
+export type EnumMessageChannelFieldUpdateOperationsInput = {
+  set?: $Enums.MessageChannel
+}
+
+export type EnumMessageDirectionFieldUpdateOperationsInput = {
+  set?: $Enums.MessageDirection
+}
+
+export type EmailLogCreateNestedOneWithoutInboundReplyInput = {
+  create?: Prisma.XOR<Prisma.EmailLogCreateWithoutInboundReplyInput, Prisma.EmailLogUncheckedCreateWithoutInboundReplyInput>
+  connectOrCreate?: Prisma.EmailLogCreateOrConnectWithoutInboundReplyInput
+  connect?: Prisma.EmailLogWhereUniqueInput
+}
+
+export type EmailLogUpdateOneRequiredWithoutInboundReplyNestedInput = {
+  create?: Prisma.XOR<Prisma.EmailLogCreateWithoutInboundReplyInput, Prisma.EmailLogUncheckedCreateWithoutInboundReplyInput>
+  connectOrCreate?: Prisma.EmailLogCreateOrConnectWithoutInboundReplyInput
+  upsert?: Prisma.EmailLogUpsertWithoutInboundReplyInput
+  connect?: Prisma.EmailLogWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EmailLogUpdateToOneWithWhereWithoutInboundReplyInput, Prisma.EmailLogUpdateWithoutInboundReplyInput>, Prisma.EmailLogUncheckedUpdateWithoutInboundReplyInput>
+}
+
+export type EmailLogCreateWithoutInboundReplyInput = {
+  id?: string
+  toEmail: string
+  ccEmail?: string | null
+  template: string
+  subject: string
+  status?: $Enums.EmailLogStatus
+  error?: string | null
+  channel?: $Enums.MessageChannel
+  direction?: $Enums.MessageDirection
+  fromAddress?: string | null
+  bodyText?: string | null
+  bodyHtml?: string | null
+  providerMessageId?: string | null
+  entity?: string | null
+  entityId?: string | null
+  createdAt?: Date | string
+}
+
+export type EmailLogUncheckedCreateWithoutInboundReplyInput = {
+  id?: string
+  toEmail: string
+  ccEmail?: string | null
+  template: string
+  subject: string
+  status?: $Enums.EmailLogStatus
+  error?: string | null
+  channel?: $Enums.MessageChannel
+  direction?: $Enums.MessageDirection
+  fromAddress?: string | null
+  bodyText?: string | null
+  bodyHtml?: string | null
+  providerMessageId?: string | null
+  entity?: string | null
+  entityId?: string | null
+  createdAt?: Date | string
+}
+
+export type EmailLogCreateOrConnectWithoutInboundReplyInput = {
+  where: Prisma.EmailLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.EmailLogCreateWithoutInboundReplyInput, Prisma.EmailLogUncheckedCreateWithoutInboundReplyInput>
+}
+
+export type EmailLogUpsertWithoutInboundReplyInput = {
+  update: Prisma.XOR<Prisma.EmailLogUpdateWithoutInboundReplyInput, Prisma.EmailLogUncheckedUpdateWithoutInboundReplyInput>
+  create: Prisma.XOR<Prisma.EmailLogCreateWithoutInboundReplyInput, Prisma.EmailLogUncheckedCreateWithoutInboundReplyInput>
+  where?: Prisma.EmailLogWhereInput
+}
+
+export type EmailLogUpdateToOneWithWhereWithoutInboundReplyInput = {
+  where?: Prisma.EmailLogWhereInput
+  data: Prisma.XOR<Prisma.EmailLogUpdateWithoutInboundReplyInput, Prisma.EmailLogUncheckedUpdateWithoutInboundReplyInput>
+}
+
+export type EmailLogUpdateWithoutInboundReplyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  toEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  ccEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  template?: Prisma.StringFieldUpdateOperationsInput | string
+  subject?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEmailLogStatusFieldUpdateOperationsInput | $Enums.EmailLogStatus
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumMessageChannelFieldUpdateOperationsInput | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  fromAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EmailLogUncheckedUpdateWithoutInboundReplyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  toEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  ccEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  template?: Prisma.StringFieldUpdateOperationsInput | string
+  subject?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEmailLogStatusFieldUpdateOperationsInput | $Enums.EmailLogStatus
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.EnumMessageChannelFieldUpdateOperationsInput | $Enums.MessageChannel
+  direction?: Prisma.EnumMessageDirectionFieldUpdateOperationsInput | $Enums.MessageDirection
+  fromAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bodyHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -429,9 +693,16 @@ export type EmailLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   subject?: boolean
   status?: boolean
   error?: boolean
+  channel?: boolean
+  direction?: boolean
+  fromAddress?: boolean
+  bodyText?: boolean
+  bodyHtml?: boolean
+  providerMessageId?: boolean
   entity?: boolean
   entityId?: boolean
   createdAt?: boolean
+  inboundReply?: boolean | Prisma.EmailLog$inboundReplyArgs<ExtArgs>
 }, ExtArgs["result"]["emailLog"]>
 
 export type EmailLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -442,6 +713,12 @@ export type EmailLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   subject?: boolean
   status?: boolean
   error?: boolean
+  channel?: boolean
+  direction?: boolean
+  fromAddress?: boolean
+  bodyText?: boolean
+  bodyHtml?: boolean
+  providerMessageId?: boolean
   entity?: boolean
   entityId?: boolean
   createdAt?: boolean
@@ -455,6 +732,12 @@ export type EmailLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   subject?: boolean
   status?: boolean
   error?: boolean
+  channel?: boolean
+  direction?: boolean
+  fromAddress?: boolean
+  bodyText?: boolean
+  bodyHtml?: boolean
+  providerMessageId?: boolean
   entity?: boolean
   entityId?: boolean
   createdAt?: boolean
@@ -468,16 +751,29 @@ export type EmailLogSelectScalar = {
   subject?: boolean
   status?: boolean
   error?: boolean
+  channel?: boolean
+  direction?: boolean
+  fromAddress?: boolean
+  bodyText?: boolean
+  bodyHtml?: boolean
+  providerMessageId?: boolean
   entity?: boolean
   entityId?: boolean
   createdAt?: boolean
 }
 
-export type EmailLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "toEmail" | "ccEmail" | "template" | "subject" | "status" | "error" | "entity" | "entityId" | "createdAt", ExtArgs["result"]["emailLog"]>
+export type EmailLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "toEmail" | "ccEmail" | "template" | "subject" | "status" | "error" | "channel" | "direction" | "fromAddress" | "bodyText" | "bodyHtml" | "providerMessageId" | "entity" | "entityId" | "createdAt", ExtArgs["result"]["emailLog"]>
+export type EmailLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  inboundReply?: boolean | Prisma.EmailLog$inboundReplyArgs<ExtArgs>
+}
+export type EmailLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type EmailLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $EmailLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "EmailLog"
-  objects: {}
+  objects: {
+    inboundReply: Prisma.$InboundReplyPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     toEmail: string
@@ -486,6 +782,12 @@ export type $EmailLogPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     subject: string
     status: $Enums.EmailLogStatus
     error: string | null
+    channel: $Enums.MessageChannel
+    direction: $Enums.MessageDirection
+    fromAddress: string | null
+    bodyText: string | null
+    bodyHtml: string | null
+    providerMessageId: string | null
     entity: string | null
     entityId: string | null
     createdAt: Date
@@ -883,6 +1185,7 @@ readonly fields: EmailLogFieldRefs;
  */
 export interface Prisma__EmailLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  inboundReply<T extends Prisma.EmailLog$inboundReplyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmailLog$inboundReplyArgs<ExtArgs>>): Prisma.Prisma__InboundReplyClient<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -919,6 +1222,12 @@ export interface EmailLogFieldRefs {
   readonly subject: Prisma.FieldRef<"EmailLog", 'String'>
   readonly status: Prisma.FieldRef<"EmailLog", 'EmailLogStatus'>
   readonly error: Prisma.FieldRef<"EmailLog", 'String'>
+  readonly channel: Prisma.FieldRef<"EmailLog", 'MessageChannel'>
+  readonly direction: Prisma.FieldRef<"EmailLog", 'MessageDirection'>
+  readonly fromAddress: Prisma.FieldRef<"EmailLog", 'String'>
+  readonly bodyText: Prisma.FieldRef<"EmailLog", 'String'>
+  readonly bodyHtml: Prisma.FieldRef<"EmailLog", 'String'>
+  readonly providerMessageId: Prisma.FieldRef<"EmailLog", 'String'>
   readonly entity: Prisma.FieldRef<"EmailLog", 'String'>
   readonly entityId: Prisma.FieldRef<"EmailLog", 'String'>
   readonly createdAt: Prisma.FieldRef<"EmailLog", 'DateTime'>
@@ -939,6 +1248,10 @@ export type EmailLogFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
+  /**
    * Filter, which EmailLog to fetch.
    */
   where: Prisma.EmailLogWhereUniqueInput
@@ -957,6 +1270,10 @@ export type EmailLogFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
+  /**
    * Filter, which EmailLog to fetch.
    */
   where: Prisma.EmailLogWhereUniqueInput
@@ -974,6 +1291,10 @@ export type EmailLogFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the EmailLog
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
   /**
    * Filter, which EmailLog to fetch.
    */
@@ -1023,6 +1344,10 @@ export type EmailLogFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
+  /**
    * Filter, which EmailLog to fetch.
    */
   where?: Prisma.EmailLogWhereInput
@@ -1070,6 +1395,10 @@ export type EmailLogFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the EmailLog
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
   /**
    * Filter, which EmailLogs to fetch.
    */
@@ -1119,6 +1448,10 @@ export type EmailLogCreateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
+  /**
    * The data needed to create a EmailLog.
    */
   data: Prisma.XOR<Prisma.EmailLogCreateInput, Prisma.EmailLogUncheckedCreateInput>
@@ -1166,6 +1499,10 @@ export type EmailLogUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the EmailLog
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
   /**
    * The data needed to update a EmailLog.
    */
@@ -1233,6 +1570,10 @@ export type EmailLogUpsertArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
+  /**
    * The filter to search for the EmailLog to update in case it exists.
    */
   where: Prisma.EmailLogWhereUniqueInput
@@ -1259,6 +1600,10 @@ export type EmailLogDeleteArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
+  /**
    * Filter which EmailLog to delete.
    */
   where: Prisma.EmailLogWhereUniqueInput
@@ -1279,6 +1624,25 @@ export type EmailLogDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * EmailLog.inboundReply
+ */
+export type EmailLog$inboundReplyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InboundReply
+   */
+  select?: Prisma.InboundReplySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InboundReply
+   */
+  omit?: Prisma.InboundReplyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InboundReplyInclude<ExtArgs> | null
+  where?: Prisma.InboundReplyWhereInput
+}
+
+/**
  * EmailLog without action
  */
 export type EmailLogDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1290,4 +1654,8 @@ export type EmailLogDefaultArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the EmailLog
    */
   omit?: Prisma.EmailLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailLogInclude<ExtArgs> | null
 }

@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { api, ApiError } from "@/lib/api";
 import { AuthLayout } from "@/components/auth-layout";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { ROLE_HOME, useAuth } from "@/lib/auth";
+import { loadSsoStatus, startSso } from "@/lib/sso";
 
 type Stage = "email" | "code";
 
@@ -27,6 +29,27 @@ export function OtpLoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [ssoError, setSsoError] = useState<string | null>(null);
+  const [ssoStarting, setSsoStarting] = useState(false);
+
+  const sso = useQuery({
+    queryKey: ["sso-status"],
+    queryFn: loadSsoStatus,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  async function onSso() {
+    setSsoError(null);
+    setSsoStarting(true);
+    try {
+      window.location.assign(await startSso());
+    } catch (cause) {
+      setSsoError(
+        cause instanceof ApiError ? cause.message : "Single sign-on is unavailable right now.",
+      );
+      setSsoStarting(false);
+    }
+  }
 
   async function onRequestCode(event: React.FormEvent) {
     event.preventDefault();
@@ -67,6 +90,26 @@ export function OtpLoginPage() {
   return (
     <AuthLayout>
       <div className="card w-full max-w-sm p-6">
+        {sso.data?.enabled ? (
+          <>
+            <button
+              type="button"
+              className="btn-secondary w-full"
+              disabled={ssoStarting}
+              onClick={() => void onSso()}
+            >
+              {ssoStarting ? <Spinner /> : null}
+              Sign in with Microsoft
+            </button>
+            <div className="my-4 flex items-center gap-3 text-xs uppercase tracking-wide text-slate-400">
+              <span className="h-px flex-1 bg-slate-200" />
+              or
+              <span className="h-px flex-1 bg-slate-200" />
+            </div>
+            {ssoError ? <Alert>{ssoError}</Alert> : null}
+          </>
+        ) : null}
+
         <h1 className="text-lg font-semibold text-slate-900">SML staff sign-in</h1>
         <p className="mt-1 text-sm text-slate-500">
           {stage === "email"

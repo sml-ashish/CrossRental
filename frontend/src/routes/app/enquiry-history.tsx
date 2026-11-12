@@ -1,9 +1,11 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { History } from "lucide-react";
 import { getEnquiryHistory, type HistoryEntry } from "@/lib/enquiryHistory";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader, Panel } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 
 /**
@@ -50,35 +52,32 @@ export function EnquiryHistoryPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <Link
-          to="/app/enquiries/$enquiryId"
-          params={{ enquiryId }}
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Back to the enquiry
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold text-slate-900">Sourcing history</h1>
-        <p className="mt-0.5 text-sm text-slate-500">
-          {entries.length} recorded change{entries.length === 1 ? "" : "s"} across this enquiry and
-          everything raised from it.
-        </p>
-      </div>
+      <PageHeader
+        back={{ to: `/app/enquiries/${enquiryId}`, label: "Back to the enquiry" }}
+        title="Sourcing history"
+        description="Every recorded change across this enquiry and everything raised from it."
+        meta={
+          <span className="text-xs text-slate-500">
+            {entries.length} change{entries.length === 1 ? "" : "s"}
+          </span>
+        }
+      />
 
-      {entries.length === 0 ? (
-        <section className="card p-5">
-          <p className="text-sm text-slate-500">Nothing has been recorded against this enquiry yet.</p>
-        </section>
-      ) : (
-        <section className="card p-5">
+      <Panel bodyClassName={entries.length === 0 ? undefined : "p-5"}>
+        {entries.length === 0 ? (
+          <EmptyState
+            icon={<History className="size-4" aria-hidden />}
+            title="Nothing recorded yet"
+            description="Changes to this enquiry, its lines, RFQs and quotations will appear here."
+          />
+        ) : (
           <ol className="space-y-4">
             {entries.map((entry) => (
               <HistoryRow key={entry.id} entry={entry} />
             ))}
           </ol>
-        </section>
-      )}
+        )}
+      </Panel>
     </div>
   );
 }

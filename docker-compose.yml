@@ -31,18 +31,45 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-12h}
       FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:?set FIELD_ENCRYPTION_KEY in .env}
+      # P5 SSO stays disabled unless a provider is fully configured.
+      SSO_PROVIDER: ${SSO_PROVIDER:-disabled}
+      SSO_TENANT_ID: ${SSO_TENANT_ID:-}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-}
+      SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
+      SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-sanghvimovers.com}
       SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST in .env}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_USER: ${SMTP_USER:?set SMTP_USER in .env}
       SMTP_PASS: ${SMTP_PASS:?set SMTP_PASS in .env}
       MAIL_FROM: ${MAIL_FROM:-SML Crane Portal <cranes@sanghvimovers.com>}
+      # P6 WhatsApp + IMAP reply capture. Both stay inert until configured.
+      WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-disabled}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v22.0}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+      WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+      WHATSAPP_TEMPLATE_NAME: ${WHATSAPP_TEMPLATE_NAME:-}
+      WHATSAPP_TEMPLATE_LANGUAGE: ${WHATSAPP_TEMPLATE_LANGUAGE:-en}
+      IMAP_POLL_ENABLED: ${IMAP_POLL_ENABLED:-false}
+      IMAP_HOST: ${IMAP_HOST:-}
+      IMAP_PORT: ${IMAP_PORT:-993}
+      IMAP_SECURE: ${IMAP_SECURE:-true}
+      IMAP_USER: ${IMAP_USER:-}
+      IMAP_PASS: ${IMAP_PASS:-}
+      IMAP_MAILBOX: ${IMAP_MAILBOX:-INBOX}
       INTERNAL_NOTIFY_EMAIL: ${INTERNAL_NOTIFY_EMAIL:-}
       MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
       STORAGE_DRIVER: local
       STORAGE_LOCAL_DIR: /app/uploads
       UPLOAD_MAX_MB: ${UPLOAD_MAX_MB:-10}
       GEO_PROVIDER: ${GEO_PROVIDER:-disabled}
+      GOOGLE_MAPS_SERVER_API_KEY: ${GOOGLE_MAPS_SERVER_API_KEY:-}
+      GOOGLE_MAPS_REGION: ${GOOGLE_MAPS_REGION:-IN}
+      GOOGLE_MAPS_LANGUAGE: ${GOOGLE_MAPS_LANGUAGE:-en}
+      GOOGLE_MAPS_TIMEOUT_MS: ${GOOGLE_MAPS_TIMEOUT_MS:-8000}
       # UAT convenience: show the sign-in code on screen. Set false in production.
       EXPOSE_OTP: ${EXPOSE_OTP:-true}
       RUN_SEED: ${RUN_SEED:-true}
@@ -71,6 +98,10 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        # Vite inlines this at build time. Use a browser key restricted by
+        # HTTP referrer, never the server key.
+        VITE_GOOGLE_MAPS_BROWSER_KEY: ${VITE_GOOGLE_MAPS_BROWSER_KEY:-}
     ports:
       - "5174:80"
     depends_on:

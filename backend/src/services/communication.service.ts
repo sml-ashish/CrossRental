@@ -6,13 +6,10 @@ import type { Actor } from "./crane.service";
  * Communication history (BPD 6.21): the chronological messages behind an
  * enquiry, a line, an RFQ or a quotation.
  *
- * It is built on `EmailLog`, which is the only place the platform records a
- * message it sent. Every entry here is therefore outbound: the platform sends
- * RFQ invitations, reminders, receipts, awards and rejections, but an inbound
- * vendor reply is not captured yet — that arrives with the WhatsApp/parsing work
- * in P6 and would extend this reader rather than replace it. Each entry says
- * whether it carried a business event (dispatch, award, not-award, reminder) so
- * the screen reads as a trail rather than a mailbox.
+ * It is built on `EmailLog`, which records both outbound mail and the inbound
+ * email/WhatsApp replies P6 captures. Each entry says whether it carried a
+ * business event (dispatch, award, not-award, reminder) so the screen reads as
+ * a trail rather than a mailbox.
  */
 
 export interface CommunicationActor {
@@ -31,11 +28,12 @@ export interface CommunicationScope {
 
 export interface CommunicationMessage {
   id: string;
-  channel: "EMAIL";
-  direction: "OUTBOUND";
+  channel: "EMAIL" | "WHATSAPP";
+  direction: "OUTBOUND" | "INBOUND";
   template: string;
   templateLabel: string;
   subject: string;
+  fromAddress: string | null;
   toEmail: string;
   ccEmail: string | null;
   status: string;
@@ -49,8 +47,8 @@ export interface CommunicationMessage {
 export interface CommunicationHistory {
   scope: CommunicationScope;
   messages: CommunicationMessage[];
-  /** True when an inbound channel is not yet captured, so the screen can say so. */
-  inboundCaptured: false;
+  /** Inbound replies are captured from P6 on. Kept for older clients. */
+  inboundCaptured: true;
 }
 
 const TEMPLATE_LABELS: Record<string, string> = {
@@ -61,7 +59,6 @@ const TEMPLATE_LABELS: Record<string, string> = {
   password_reset: "Password reset",
   login_otp: "Login code",
   fleet_update_reminder: "Fleet update reminder",
-  fleet_updated_on_behalf: "Fleet updated on your behalf",
   rfq_invitation: "RFQ invitation",
   rfq_reminder: "RFQ reminder",
   quotation_receipt: "Quotation receipt",
@@ -71,6 +68,8 @@ const TEMPLATE_LABELS: Record<string, string> = {
   rfq_deadline_changed: "Deadline changed",
   reservation_released: "Reservation released",
   internal_user_created: "Internal user created",
+  inbound_email: "Inbound email reply",
+  inbound_whatsapp: "Inbound WhatsApp reply",
 };
 
 /** Which templates carry a business event, as opposed to a plain notice. */
@@ -82,6 +81,8 @@ const BUSINESS_EVENTS: Record<string, string> = {
   quotation_awarded: "Award finalised",
   quotation_not_awarded: "Marked not awarded",
   rfq_deadline_changed: "Deadline extended",
+  inbound_email: "Vendor reply received",
+  inbound_whatsapp: "Vendor reply received",
 };
 
 function assertInternal(actor: CommunicationActor): void {
@@ -185,27 +186,32 @@ export async function messagesFor(
           template: true,
           subject: true,
           status: true,
+          channel: true,
+          direction: true,
+          fromAddress: true,
           entity: true,
           entityId: true,
           createdAt: true,
+          inboundReply: { select: { receivedAt: true } },
         },
       })
     : [];
 
   return {
     scope,
-    inboundCaptured: false,
+    inboundCaptured: true,
     messages: rows.map((row) => ({
       id: row.id,
-      channel: "EMAIL" as const,
-      direction: "OUTBOUND" as const,
+      channel: row.channel,
+      direction: row.direction,
       template: row.template,
       templateLabel: TEMPLATE_LABELS[row.template] ?? row.template.replaceAll("_", " "),
       subject: row.subject,
+      fromAddress: row.fromAddress,
       toEmail: row.toEmail,
       ccEmail: row.ccEmail,
       status: row.status,
-      sentAt: row.createdAt.toISOString(),
+      sentAt: (row.inboundReply?.receivedAt ?? row.createdAt).toISOString(),
       entity: row.entity,
       entityId: row.entityId,
       businessEvent: BUSINESS_EVENTS[row.template] ?? null,

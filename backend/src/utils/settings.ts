@@ -19,6 +19,13 @@ export const SETTING_KEYS = [
   // P3: how the comparison screen ranks comparable quotations. Open item 5's
   // working assumption is total estimated cost ascending; kept configurable.
   "QUOTE_RANK_RULE",
+  // P5: alert SLAs and report retention (open item 11). Owner supplies the
+  // final values; these defaults keep the alerts meaningful until then.
+  "ALERT_RFQ_SLA_HOURS",
+  "ALERT_QUOTATION_EXPIRY_DAYS",
+  "ALERT_BOOKING_LEAD_DAYS",
+  "ALERT_EMAILS_ENABLED",
+  "REPORT_RETENTION_MONTHS",
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];
@@ -35,6 +42,11 @@ export interface PortalSettings {
   rfqReminderMinWindowHours: number;
   rateDayBasis: RateDayBasis;
   quoteRankRule: QuoteRankRule;
+  alertRfqSlaHours: number;
+  alertQuotationExpiryDays: number;
+  alertBookingLeadDays: number;
+  alertEmailsEnabled: boolean;
+  reportRetentionMonths: number;
 }
 
 const FALLBACK: PortalSettings = {
@@ -52,6 +64,11 @@ const FALLBACK: PortalSettings = {
     env.defaultSettings.QUOTE_RANK_RULE === "TOTAL_ESTIMATED_COST"
       ? "TOTAL_ESTIMATED_COST"
       : "TOTAL_ESTIMATED_COST",
+  alertRfqSlaHours: env.defaultSettings.ALERT_RFQ_SLA_HOURS,
+  alertQuotationExpiryDays: env.defaultSettings.ALERT_QUOTATION_EXPIRY_DAYS,
+  alertBookingLeadDays: env.defaultSettings.ALERT_BOOKING_LEAD_DAYS,
+  alertEmailsEnabled: env.defaultSettings.ALERT_EMAILS_ENABLED,
+  reportRetentionMonths: env.defaultSettings.REPORT_RETENTION_MONTHS,
 };
 
 let cache: { value: PortalSettings; loadedAt: number } | null = null;
@@ -104,6 +121,25 @@ export async function getSettings(): Promise<PortalSettings> {
       map.get("QUOTE_RANK_RULE") === "TOTAL_ESTIMATED_COST"
         ? "TOTAL_ESTIMATED_COST"
         : FALLBACK.quoteRankRule,
+    alertRfqSlaHours: parseNumber(
+      map.get("ALERT_RFQ_SLA_HOURS") ?? "",
+      FALLBACK.alertRfqSlaHours,
+    ),
+    alertQuotationExpiryDays: parseNumber(
+      map.get("ALERT_QUOTATION_EXPIRY_DAYS") ?? "",
+      FALLBACK.alertQuotationExpiryDays,
+    ),
+    alertBookingLeadDays: parseNumber(
+      map.get("ALERT_BOOKING_LEAD_DAYS") ?? "",
+      FALLBACK.alertBookingLeadDays,
+    ),
+    alertEmailsEnabled: parseBoolean(
+      map.get("ALERT_EMAILS_ENABLED") ?? String(FALLBACK.alertEmailsEnabled),
+    ),
+    reportRetentionMonths: parseNumber(
+      map.get("REPORT_RETENTION_MONTHS") ?? "",
+      FALLBACK.reportRetentionMonths,
+    ),
   };
 
   cache = { value, loadedAt: Date.now() };

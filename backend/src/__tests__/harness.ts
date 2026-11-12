@@ -266,6 +266,11 @@ export async function seedIsolationFixtures(): Promise<{
       { key: "STALE_REMINDER_REPEAT_DAYS", value: "7" },
       { key: "RFQ_REMINDER_LEAD_HOURS", value: "24" },
       { key: "RFQ_REMINDER_MIN_WINDOW_HOURS", value: "4" },
+      { key: "ALERT_RFQ_SLA_HOURS", value: "48" },
+      { key: "ALERT_QUOTATION_EXPIRY_DAYS", value: "3" },
+      { key: "ALERT_BOOKING_LEAD_DAYS", value: "7" },
+      { key: "ALERT_EMAILS_ENABLED", value: "false" },
+      { key: "REPORT_RETENTION_MONTHS", value: "84" },
     ],
   });
 
@@ -510,7 +515,7 @@ export async function callRaw(
 export async function internalToken(
   userId: string,
   email: string,
-  role: "admin_user" | "sales_user",
+  role: "admin_user" | "sales_user" | "management_viewer",
 ): Promise<string> {
   const { signAuthToken } = await import("../utils/jwt");
   return signAuthToken({ sub: userId, email, role, vendorId: null });

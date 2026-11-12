@@ -29,6 +29,13 @@ export default defineConfig({
     env: {
       DATABASE_URL: testDatabaseUrl,
       NODE_ENV: "test",
+      // `.env` is loaded above, so a developer who switched to Google for a
+      // live check would otherwise change what the suite asserts: a snapshot
+      // records the provider name and the "unreachable geocoder" paths would
+      // start calling a real API. Every test that needs a provider installs
+      // its own; the ambient one is always the stub.
+      GEO_PROVIDER: "stub",
+      GOOGLE_MAPS_SERVER_API_KEY: "",
       // Test runs upload real files. Pointing them at a scratch directory keeps
       // them out of the development ./uploads folder; the harness removes it
       // after the run.

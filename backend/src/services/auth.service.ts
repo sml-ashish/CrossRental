@@ -13,9 +13,9 @@ import { sendTemplate } from "./email.service";
  *
  * - vendor_user: email + password, first use via an emailed activation link
  *   where they choose a password.
- * - admin_user / sales_user: email, then a 6-digit one-time code sent by
- *   email. 10-minute expiry, single use, rate limited. These accounts never
- *   hold a password hash at all.
+ * - admin_user / sales_user / management_viewer: email, then a 6-digit
+ *   one-time code sent by email. 10-minute expiry, single use, rate limited.
+ *   These accounts never hold a password hash at all.
  *
  * Every failure path returns the same generic message so the login screen
  * cannot be used to discover which email addresses are registered.
@@ -307,7 +307,11 @@ export async function requestLoginOtp(email: string, ipAddress?: string): Promis
   const normalised = email.trim().toLowerCase();
 
   const user = await prisma.user.findFirst({
-    where: { email: normalised, role: { in: ["admin_user", "sales_user"] }, isActive: true },
+    where: {
+      email: normalised,
+      role: { in: ["admin_user", "sales_user", "management_viewer"] },
+      isActive: true,
+    },
     select: { id: true, email: true, fullName: true, vendorId: true },
   });
 
@@ -350,11 +354,52 @@ export async function requestLoginOtp(email: string, ipAddress?: string): Promis
   return code;
 }
 
+/**
+ * P5 SSO: exchange a verified provider identity for a portal session.
+ *
+ * A provider proves the email; the portal still decides whether that email
+ * belongs to an active SML user. Vendor accounts are deliberately excluded —
+ * SSO is for internal users only, and a vendor must keep using the password
+ * flow that their own contact controls.
+ */
+export async function signInWithSso(email: string): Promise<AuthResult> {
+  const normalised = email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({
+    where: { email: normalised },
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      role: true,
+      vendorId: true,
+      isActive: true,
+    },
+  });
+
+  if (!user || !user.isActive) {
+    throw AppError.forbidden("That account cannot sign in with SSO");
+  }
+  if (
+    user.role !== "admin_user" &&
+    user.role !== "sales_user" &&
+    user.role !== "management_viewer"
+  ) {
+    throw AppError.forbidden("That account cannot sign in with SSO");
+  }
+
+  await touchLogin(user.id);
+  return toAuthResult(user);
+}
+
 export async function verifyLoginOtp(email: string, code: string): Promise<AuthResult> {
   const normalised = email.trim().toLowerCase();
 
   const user = await prisma.user.findFirst({
-    where: { email: normalised, role: { in: ["admin_user", "sales_user"] }, isActive: true },
+    where: {
+      email: normalised,
+      role: { in: ["admin_user", "sales_user", "management_viewer"] },
+      isActive: true,
+    },
     select: {
       id: true,
       email: true,

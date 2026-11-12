@@ -7,7 +7,11 @@
 
 import { createContext, use } from "react";
 
-export type UserRole = "vendor_user" | "sales_user" | "admin_user";
+export type UserRole =
+  | "vendor_user"
+  | "sales_user"
+  | "admin_user"
+  | "management_viewer";
 
 export interface AuthUser {
   id: string;
@@ -27,8 +31,9 @@ export interface AuthResponse {
 /** Where each role lands after signing in. Mirrors the backend's RBAC map. */
 export const ROLE_HOME: Record<UserRole, string> = {
   vendor_user: "/app/dashboard",
-  sales_user: "/app/rfqs",
-  admin_user: "/app/approvals",
+  sales_user: "/app/sales",
+  admin_user: "/app/admin",
+  management_viewer: "/app/management",
 };
 
 export function isVendor(role: UserRole | undefined): boolean {
@@ -36,7 +41,11 @@ export function isVendor(role: UserRole | undefined): boolean {
 }
 
 export function isInternal(role: UserRole | undefined): boolean {
-  return role === "sales_user" || role === "admin_user";
+  return (
+    role === "sales_user" ||
+    role === "admin_user" ||
+    role === "management_viewer"
+  );
 }
 
 export function roleLabel(role: UserRole): string {
@@ -45,6 +54,8 @@ export function roleLabel(role: UserRole): string {
       return "Administrator";
     case "sales_user":
       return "SML Sales";
+    case "management_viewer":
+      return "Management Viewer";
     default:
       return "Vendor";
   }

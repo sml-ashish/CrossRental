@@ -36,7 +36,13 @@ Per-km cost assumptions, recommendation parameters, RFQ templates and term defau
 | Top vendors by participation | Quotes submitted per vendor |
 | Vendor win rate | Awarded / submitted per vendor |
 
-Views at enquiry, line, vendor, region and crane-category level. Export to Excel or CSV. Customer names and budgets appear only in internal reports.
+Views at enquiry, line, vendor and crane-category level. Export to Excel or CSV. Customer names and budgets appear only in internal reports.
+
+**Owner change 2026-11-06:** the internal-vs-vendor split was removed from
+Reports — the "Internal / vendor" summary tile and the "Fulfilled internally" /
+"Fulfilled by vendors" columns in the Enquiry, Region and Category views,
+including the CSV. The management dashboard keeps its own internal-sourcing
+metrics, and the line view still carries per-line `Source`.
 
 ## SSO
 Add SSO for internal users. Management Viewer is read-only.

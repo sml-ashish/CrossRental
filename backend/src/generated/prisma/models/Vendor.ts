@@ -760,6 +760,7 @@ export type VendorWhereInput = {
   cranes?: Prisma.CraneListRelationFilter
   rfqRecipients?: Prisma.RfqVendorRecipientListRelationFilter
   quotations?: Prisma.QuotationListRelationFilter
+  inboundReplies?: Prisma.InboundReplyListRelationFilter
 }
 
 export type VendorOrderByWithRelationInput = {
@@ -846,6 +847,7 @@ export type VendorOrderByWithRelationInput = {
   cranes?: Prisma.CraneOrderByRelationAggregateInput
   rfqRecipients?: Prisma.RfqVendorRecipientOrderByRelationAggregateInput
   quotations?: Prisma.QuotationOrderByRelationAggregateInput
+  inboundReplies?: Prisma.InboundReplyOrderByRelationAggregateInput
 }
 
 export type VendorWhereUniqueInput = Prisma.AtLeast<{
@@ -935,6 +937,7 @@ export type VendorWhereUniqueInput = Prisma.AtLeast<{
   cranes?: Prisma.CraneListRelationFilter
   rfqRecipients?: Prisma.RfqVendorRecipientListRelationFilter
   quotations?: Prisma.QuotationListRelationFilter
+  inboundReplies?: Prisma.InboundReplyListRelationFilter
 }, "id" | "sapVendorCode" | "pan" | "gstn">
 
 export type VendorOrderByWithAggregationInput = {
@@ -1174,6 +1177,7 @@ export type VendorCreateInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateInput = {
@@ -1257,6 +1261,7 @@ export type VendorUncheckedCreateInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUpdateInput = {
@@ -1340,6 +1345,7 @@ export type VendorUpdateInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateInput = {
@@ -1423,6 +1429,7 @@ export type VendorUncheckedUpdateInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateManyInput = {
@@ -1952,10 +1959,6 @@ export type VendorUpdateOneRequiredWithoutOperatingRegionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutOperatingRegionsInput, Prisma.VendorUpdateWithoutOperatingRegionsInput>, Prisma.VendorUncheckedUpdateWithoutOperatingRegionsInput>
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type NullableEnumNatureOfCompanyFieldUpdateOperationsInput = {
   set?: $Enums.NatureOfCompany | null
 }
@@ -2208,6 +2211,22 @@ export type VendorUpdateOneRequiredWithoutQuotationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutQuotationsInput, Prisma.VendorUpdateWithoutQuotationsInput>, Prisma.VendorUncheckedUpdateWithoutQuotationsInput>
 }
 
+export type VendorCreateNestedOneWithoutInboundRepliesInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutInboundRepliesInput, Prisma.VendorUncheckedCreateWithoutInboundRepliesInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutInboundRepliesInput
+  connect?: Prisma.VendorWhereUniqueInput
+}
+
+export type VendorUpdateOneWithoutInboundRepliesNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorCreateWithoutInboundRepliesInput, Prisma.VendorUncheckedCreateWithoutInboundRepliesInput>
+  connectOrCreate?: Prisma.VendorCreateOrConnectWithoutInboundRepliesInput
+  upsert?: Prisma.VendorUpsertWithoutInboundRepliesInput
+  disconnect?: Prisma.VendorWhereInput | boolean
+  delete?: Prisma.VendorWhereInput | boolean
+  connect?: Prisma.VendorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VendorUpdateToOneWithWhereWithoutInboundRepliesInput, Prisma.VendorUpdateWithoutInboundRepliesInput>, Prisma.VendorUncheckedUpdateWithoutInboundRepliesInput>
+}
+
 export type VendorCreateWithoutAddressStateInput = {
   id?: string
   sapVendorCode?: string | null
@@ -2288,6 +2307,7 @@ export type VendorCreateWithoutAddressStateInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutAddressStateInput = {
@@ -2370,6 +2390,7 @@ export type VendorUncheckedCreateWithoutAddressStateInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutAddressStateInput = {
@@ -2555,6 +2576,7 @@ export type VendorCreateWithoutOperatingRegionsInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutOperatingRegionsInput = {
@@ -2637,6 +2659,7 @@ export type VendorUncheckedCreateWithoutOperatingRegionsInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutOperatingRegionsInput = {
@@ -2735,6 +2758,7 @@ export type VendorUpdateWithoutOperatingRegionsInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutOperatingRegionsInput = {
@@ -2817,6 +2841,7 @@ export type VendorUncheckedUpdateWithoutOperatingRegionsInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutContactsInput = {
@@ -2899,6 +2924,7 @@ export type VendorCreateWithoutContactsInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutContactsInput = {
@@ -2981,6 +3007,7 @@ export type VendorUncheckedCreateWithoutContactsInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutContactsInput = {
@@ -3079,6 +3106,7 @@ export type VendorUpdateWithoutContactsInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutContactsInput = {
@@ -3161,6 +3189,7 @@ export type VendorUncheckedUpdateWithoutContactsInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutDocumentsInput = {
@@ -3243,6 +3272,7 @@ export type VendorCreateWithoutDocumentsInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutDocumentsInput = {
@@ -3325,6 +3355,7 @@ export type VendorUncheckedCreateWithoutDocumentsInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutDocumentsInput = {
@@ -3423,6 +3454,7 @@ export type VendorUpdateWithoutDocumentsInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutDocumentsInput = {
@@ -3505,6 +3537,7 @@ export type VendorUncheckedUpdateWithoutDocumentsInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutInvitationsInput = {
@@ -3587,6 +3620,7 @@ export type VendorCreateWithoutInvitationsInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutInvitationsInput = {
@@ -3669,6 +3703,7 @@ export type VendorUncheckedCreateWithoutInvitationsInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutInvitationsInput = {
@@ -3767,6 +3802,7 @@ export type VendorUpdateWithoutInvitationsInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutInvitationsInput = {
@@ -3849,6 +3885,7 @@ export type VendorUncheckedUpdateWithoutInvitationsInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutDecisionsInput = {
@@ -3931,6 +3968,7 @@ export type VendorCreateWithoutDecisionsInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutDecisionsInput = {
@@ -4013,6 +4051,7 @@ export type VendorUncheckedCreateWithoutDecisionsInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutDecisionsInput = {
@@ -4111,6 +4150,7 @@ export type VendorUpdateWithoutDecisionsInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutDecisionsInput = {
@@ -4193,6 +4233,7 @@ export type VendorUncheckedUpdateWithoutDecisionsInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutUsersInput = {
@@ -4275,6 +4316,7 @@ export type VendorCreateWithoutUsersInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutUsersInput = {
@@ -4357,6 +4399,7 @@ export type VendorUncheckedCreateWithoutUsersInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutUsersInput = {
@@ -4444,6 +4487,7 @@ export type VendorCreateWithoutApprovedByInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutApprovedByInput = {
@@ -4526,6 +4570,7 @@ export type VendorUncheckedCreateWithoutApprovedByInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutApprovedByInput = {
@@ -4618,6 +4663,7 @@ export type VendorCreateWithoutSuspendedByInput = {
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutSuspendedByInput = {
@@ -4700,6 +4746,7 @@ export type VendorUncheckedCreateWithoutSuspendedByInput = {
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutSuspendedByInput = {
@@ -4803,6 +4850,7 @@ export type VendorUpdateWithoutUsersInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutUsersInput = {
@@ -4885,6 +4933,7 @@ export type VendorUncheckedUpdateWithoutUsersInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUpsertWithWhereUniqueWithoutApprovedByInput = {
@@ -4999,6 +5048,7 @@ export type VendorCreateWithoutCranesInput = {
   invitations?: Prisma.VendorInvitationCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutCranesInput = {
@@ -5081,6 +5131,7 @@ export type VendorUncheckedCreateWithoutCranesInput = {
   invitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutCranesInput = {
@@ -5179,6 +5230,7 @@ export type VendorUpdateWithoutCranesInput = {
   invitations?: Prisma.VendorInvitationUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutCranesInput = {
@@ -5261,6 +5313,7 @@ export type VendorUncheckedUpdateWithoutCranesInput = {
   invitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutRfqRecipientsInput = {
@@ -5343,6 +5396,7 @@ export type VendorCreateWithoutRfqRecipientsInput = {
   invitations?: Prisma.VendorInvitationCreateNestedManyWithoutVendorInput
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutRfqRecipientsInput = {
@@ -5425,6 +5479,7 @@ export type VendorUncheckedCreateWithoutRfqRecipientsInput = {
   invitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutVendorInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutRfqRecipientsInput = {
@@ -5523,6 +5578,7 @@ export type VendorUpdateWithoutRfqRecipientsInput = {
   invitations?: Prisma.VendorInvitationUpdateManyWithoutVendorNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutRfqRecipientsInput = {
@@ -5605,6 +5661,7 @@ export type VendorUncheckedUpdateWithoutRfqRecipientsInput = {
   invitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutVendorNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateWithoutQuotationsInput = {
@@ -5687,6 +5744,7 @@ export type VendorCreateWithoutQuotationsInput = {
   invitations?: Prisma.VendorInvitationCreateNestedManyWithoutVendorInput
   cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutVendorInput
 }
 
 export type VendorUncheckedCreateWithoutQuotationsInput = {
@@ -5769,6 +5827,7 @@ export type VendorUncheckedCreateWithoutQuotationsInput = {
   invitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutVendorInput
   cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorCreateOrConnectWithoutQuotationsInput = {
@@ -5867,6 +5926,7 @@ export type VendorUpdateWithoutQuotationsInput = {
   invitations?: Prisma.VendorInvitationUpdateManyWithoutVendorNestedInput
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutQuotationsInput = {
@@ -5949,6 +6009,355 @@ export type VendorUncheckedUpdateWithoutQuotationsInput = {
   invitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutVendorNestedInput
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorCreateWithoutInboundRepliesInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  addressState?: Prisma.StateCreateNestedOneWithoutVendorsWithAddressInput
+  approvedBy?: Prisma.UserCreateNestedOneWithoutApprovedVendorsInput
+  suspendedBy?: Prisma.UserCreateNestedOneWithoutSuspendedVendorsInput
+  operatingRegions?: Prisma.StateVendorRegionCreateNestedManyWithoutVendorInput
+  contacts?: Prisma.VendorContactCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
+  decisions?: Prisma.VendorDecisionCreateNestedManyWithoutVendorInput
+  users?: Prisma.UserCreateNestedManyWithoutVendorInput
+  invitations?: Prisma.VendorInvitationCreateNestedManyWithoutVendorInput
+  cranes?: Prisma.CraneCreateNestedManyWithoutVendorInput
+  rfqRecipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutVendorInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutVendorInput
+}
+
+export type VendorUncheckedCreateWithoutInboundRepliesInput = {
+  id?: string
+  sapVendorCode?: string | null
+  name?: string | null
+  natureOfCompany?: $Enums.NatureOfCompany | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  district?: string | null
+  stateCode?: string | null
+  pincode?: string | null
+  telephone?: string | null
+  fax?: string | null
+  email?: string | null
+  weeklyOffDays?: string | null
+  companySize?: string | null
+  pan?: string | null
+  tan?: string | null
+  gstRegistered?: boolean | null
+  gstRegistrationType?: $Enums.GstRegistrationType | null
+  gstn?: string | null
+  gstr1FilingFrequency?: $Enums.GstFilingFrequency | null
+  cin?: string | null
+  govtRegistrationType?: string | null
+  govtRegistrationNo?: string | null
+  msmeRegistered?: boolean | null
+  msmeCategory?: $Enums.MsmeCategory | null
+  msmeRegNo?: string | null
+  msmeExemptionDate?: Date | string | null
+  tdsLowerDeduction?: boolean | null
+  tdsCertificateNo?: string | null
+  tdsSection?: string | null
+  tdsRatePercent?: number | null
+  tdsValidFrom?: Date | string | null
+  tdsValidTo?: Date | string | null
+  bankAccountHolderName?: string | null
+  bankName?: string | null
+  bankBranch?: string | null
+  bankAccountType?: $Enums.BankAccountType | null
+  bankAccountNoEnc?: string | null
+  bankAccountNoLast4?: string | null
+  bankIfscEnc?: string | null
+  bankMicr?: string | null
+  bankIban?: string | null
+  bankSwift?: string | null
+  codeOfConductAccepted?: boolean | null
+  declarationName?: string | null
+  declarationDesignation?: string | null
+  declarationDate?: Date | string | null
+  fleetSummary?: string | null
+  communicationNotes?: string | null
+  onboardingStatus?: $Enums.OnboardingStatus
+  approvedById?: string | null
+  approvedAt?: Date | string | null
+  adminRemarks?: string | null
+  suspendedAt?: Date | string | null
+  suspendedById?: string | null
+  suspendReason?: string | null
+  facilityStatus?: $Enums.FacilityStatus | null
+  manpowerStatus?: $Enums.ManpowerStatus | null
+  improvementRequirement?: string | null
+  improvementPeriod?: string | null
+  vendorOrigin?: string | null
+  vendorType?: string | null
+  purchaseOrg?: string | null
+  paymentTerm?: string | null
+  withholdingTaxType?: string | null
+  legalForm?: string | null
+  totalFleetSize?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  operatingRegions?: Prisma.StateVendorRegionUncheckedCreateNestedManyWithoutVendorInput
+  contacts?: Prisma.VendorContactUncheckedCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentUncheckedCreateNestedManyWithoutVendorInput
+  decisions?: Prisma.VendorDecisionUncheckedCreateNestedManyWithoutVendorInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutVendorInput
+  invitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutVendorInput
+  cranes?: Prisma.CraneUncheckedCreateNestedManyWithoutVendorInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutVendorInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorCreateOrConnectWithoutInboundRepliesInput = {
+  where: Prisma.VendorWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorCreateWithoutInboundRepliesInput, Prisma.VendorUncheckedCreateWithoutInboundRepliesInput>
+}
+
+export type VendorUpsertWithoutInboundRepliesInput = {
+  update: Prisma.XOR<Prisma.VendorUpdateWithoutInboundRepliesInput, Prisma.VendorUncheckedUpdateWithoutInboundRepliesInput>
+  create: Prisma.XOR<Prisma.VendorCreateWithoutInboundRepliesInput, Prisma.VendorUncheckedCreateWithoutInboundRepliesInput>
+  where?: Prisma.VendorWhereInput
+}
+
+export type VendorUpdateToOneWithWhereWithoutInboundRepliesInput = {
+  where?: Prisma.VendorWhereInput
+  data: Prisma.XOR<Prisma.VendorUpdateWithoutInboundRepliesInput, Prisma.VendorUncheckedUpdateWithoutInboundRepliesInput>
+}
+
+export type VendorUpdateWithoutInboundRepliesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressState?: Prisma.StateUpdateOneWithoutVendorsWithAddressNestedInput
+  approvedBy?: Prisma.UserUpdateOneWithoutApprovedVendorsNestedInput
+  suspendedBy?: Prisma.UserUpdateOneWithoutSuspendedVendorsNestedInput
+  operatingRegions?: Prisma.StateVendorRegionUpdateManyWithoutVendorNestedInput
+  contacts?: Prisma.VendorContactUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
+  decisions?: Prisma.VendorDecisionUpdateManyWithoutVendorNestedInput
+  users?: Prisma.UserUpdateManyWithoutVendorNestedInput
+  invitations?: Prisma.VendorInvitationUpdateManyWithoutVendorNestedInput
+  cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorUncheckedUpdateWithoutInboundRepliesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sapVendorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  natureOfCompany?: Prisma.NullableEnumNatureOfCompanyFieldUpdateOperationsInput | $Enums.NatureOfCompany | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stateCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fax?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weeklyOffDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companySize?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  gstRegistrationType?: Prisma.NullableEnumGstRegistrationTypeFieldUpdateOperationsInput | $Enums.GstRegistrationType | null
+  gstn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gstr1FilingFrequency?: Prisma.NullableEnumGstFilingFrequencyFieldUpdateOperationsInput | $Enums.GstFilingFrequency | null
+  cin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  govtRegistrationNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeRegistered?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  msmeCategory?: Prisma.NullableEnumMsmeCategoryFieldUpdateOperationsInput | $Enums.MsmeCategory | null
+  msmeRegNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  msmeExemptionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsLowerDeduction?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  tdsCertificateNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsSection?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tdsRatePercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tdsValidFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tdsValidTo?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccountHolderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountType?: Prisma.NullableEnumBankAccountTypeFieldUpdateOperationsInput | $Enums.BankAccountType | null
+  bankAccountNoEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNoLast4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIfscEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankMicr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankSwift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  codeOfConductAccepted?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  declarationName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDesignation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  declarationDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fleetSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  communicationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingStatus?: Prisma.EnumOnboardingStatusFieldUpdateOperationsInput | $Enums.OnboardingStatus
+  approvedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  adminRemarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facilityStatus?: Prisma.NullableEnumFacilityStatusFieldUpdateOperationsInput | $Enums.FacilityStatus | null
+  manpowerStatus?: Prisma.NullableEnumManpowerStatusFieldUpdateOperationsInput | $Enums.ManpowerStatus | null
+  improvementRequirement?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  improvementPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vendorType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseOrg?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  withholdingTaxType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  legalForm?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  totalFleetSize?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatingRegions?: Prisma.StateVendorRegionUncheckedUpdateManyWithoutVendorNestedInput
+  contacts?: Prisma.VendorContactUncheckedUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUncheckedUpdateManyWithoutVendorNestedInput
+  decisions?: Prisma.VendorDecisionUncheckedUpdateManyWithoutVendorNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutVendorNestedInput
+  invitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutVendorNestedInput
+  cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
+  rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorCreateManyAddressStateInput = {
@@ -6104,6 +6513,7 @@ export type VendorUpdateWithoutAddressStateInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutAddressStateInput = {
@@ -6186,6 +6596,7 @@ export type VendorUncheckedUpdateWithoutAddressStateInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateManyWithoutAddressStateInput = {
@@ -6487,6 +6898,7 @@ export type VendorUpdateWithoutApprovedByInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutApprovedByInput = {
@@ -6569,6 +6981,7 @@ export type VendorUncheckedUpdateWithoutApprovedByInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateManyWithoutApprovedByInput = {
@@ -6724,6 +7137,7 @@ export type VendorUpdateWithoutSuspendedByInput = {
   cranes?: Prisma.CraneUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateWithoutSuspendedByInput = {
@@ -6806,6 +7220,7 @@ export type VendorUncheckedUpdateWithoutSuspendedByInput = {
   cranes?: Prisma.CraneUncheckedUpdateManyWithoutVendorNestedInput
   rfqRecipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutVendorNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutVendorNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorUncheckedUpdateManyWithoutSuspendedByInput = {
@@ -6896,6 +7311,7 @@ export type VendorCountOutputType = {
   cranes: number
   rfqRecipients: number
   quotations: number
+  inboundReplies: number
 }
 
 export type VendorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6908,6 +7324,7 @@ export type VendorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   cranes?: boolean | VendorCountOutputTypeCountCranesArgs
   rfqRecipients?: boolean | VendorCountOutputTypeCountRfqRecipientsArgs
   quotations?: boolean | VendorCountOutputTypeCountQuotationsArgs
+  inboundReplies?: boolean | VendorCountOutputTypeCountInboundRepliesArgs
 }
 
 /**
@@ -6981,6 +7398,13 @@ export type VendorCountOutputTypeCountRfqRecipientsArgs<ExtArgs extends runtime.
  */
 export type VendorCountOutputTypeCountQuotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.QuotationWhereInput
+}
+
+/**
+ * VendorCountOutputType without action
+ */
+export type VendorCountOutputTypeCountInboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InboundReplyWhereInput
 }
 
 
@@ -7068,6 +7492,7 @@ export type VendorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   cranes?: boolean | Prisma.Vendor$cranesArgs<ExtArgs>
   rfqRecipients?: boolean | Prisma.Vendor$rfqRecipientsArgs<ExtArgs>
   quotations?: boolean | Prisma.Vendor$quotationsArgs<ExtArgs>
+  inboundReplies?: boolean | Prisma.Vendor$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vendor"]>
 
@@ -7313,6 +7738,7 @@ export type VendorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   cranes?: boolean | Prisma.Vendor$cranesArgs<ExtArgs>
   rfqRecipients?: boolean | Prisma.Vendor$rfqRecipientsArgs<ExtArgs>
   quotations?: boolean | Prisma.Vendor$quotationsArgs<ExtArgs>
+  inboundReplies?: boolean | Prisma.Vendor$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.VendorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VendorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -7341,6 +7767,7 @@ export type $VendorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     cranes: Prisma.$CranePayload<ExtArgs>[]
     rfqRecipients: Prisma.$RfqVendorRecipientPayload<ExtArgs>[]
     quotations: Prisma.$QuotationPayload<ExtArgs>[]
+    inboundReplies: Prisma.$InboundReplyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -7820,6 +8247,7 @@ export interface Prisma__VendorClient<T, Null = never, ExtArgs extends runtime.T
   cranes<T extends Prisma.Vendor$cranesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$cranesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CranePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   rfqRecipients<T extends Prisma.Vendor$rfqRecipientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$rfqRecipientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqVendorRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   quotations<T extends Prisma.Vendor$quotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$quotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inboundReplies<T extends Prisma.Vendor$inboundRepliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vendor$inboundRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8591,6 +9019,30 @@ export type Vendor$quotationsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.QuotationScalarFieldEnum | Prisma.QuotationScalarFieldEnum[]
+}
+
+/**
+ * Vendor.inboundReplies
+ */
+export type Vendor$inboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InboundReply
+   */
+  select?: Prisma.InboundReplySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InboundReply
+   */
+  omit?: Prisma.InboundReplyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InboundReplyInclude<ExtArgs> | null
+  where?: Prisma.InboundReplyWhereInput
+  orderBy?: Prisma.InboundReplyOrderByWithRelationInput | Prisma.InboundReplyOrderByWithRelationInput[]
+  cursor?: Prisma.InboundReplyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InboundReplyScalarFieldEnum | Prisma.InboundReplyScalarFieldEnum[]
 }
 
 /**

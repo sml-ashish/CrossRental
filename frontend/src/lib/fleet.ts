@@ -303,19 +303,126 @@ export function uploadLoadChart(craneId: string, file: File): Promise<{ crane: C
 }
 
 /**
+ * The fields a pasted Google Maps link can fill (brief 6.3).
+ *
+ * Nullable because a link rarely knows everything: the pin and the place may be
+ * there while the pincode is not. The form applies only the values that came
+ * back, so a missing field is left as the vendor typed it.
+ */
+export interface LocationSuggestion {
+  latitude: number | null;
+  longitude: number | null;
+  currentLocation: string | null;
+  stateCode: string | null;
+  stateName: string | null;
+  pincode: string | null;
+  source: "maps_link" | "place_text" | "none";
+  note: string | null;
+}
+
+/**
+ * Asks the backend to read a Google Maps link. A preview only — the crane is
+ * saved by the normal create/update call after the vendor reviews the values.
+ */
+export function previewLocationFromLink(
+  link: string,
+): Promise<{ location: LocationSuggestion }> {
+  return api("/cranes/location-preview", { method: "POST", body: { link } });
+}
+
+/**
+ * Bulk upload (sales and admin only, brief D1).
+ *
+ * One vendor per file: the vendor is chosen in the portal and sent alongside the
+ * sheet, so the workbook itself has no vendor column and cannot be pointed at
+ * someone else's fleet.
+ */
+export interface BulkRowResult {
+  /** Excel row number, so a report can point at the line to fix. */
+  row: number;
+  serial: string | null;
+  /** `valid` is what `imported` would become — the dry-run wording. */
+  status: "imported" | "valid" | "skipped" | "failed";
+  message: string | null;
+  warnings: string[];
+}
+
+export interface BulkImportResult {
+  dryRun: boolean;
+  summary: {
+    total: number;
+    imported: number;
+    /** Rows that would import in a dry run; 0 once the import has run. */
+    valid: number;
+    skipped: number;
+    failed: number;
+    unlocated: number;
+  };
+  rows: BulkRowResult[];
+}
+
+/**
+ * Validates the sheet and returns the per-row report without writing anything.
+ * The screen shows this as a preview so a broken file is caught before it
+ * half-imports.
+ */
+export function previewBulkCranes(vendorId: string, file: File): Promise<BulkImportResult> {
+  return apiUpload(
+    `/cranes/bulk?vendorId=${encodeURIComponent(vendorId)}&dryRun=true`,
+    file,
+    { method: "POST", fields: { vendorId } },
+  );
+}
+
+/** Writes the valid rows and mails the vendor one summary notification. */
+export function importBulkCranes(vendorId: string, file: File): Promise<BulkImportResult> {
+  return apiUpload(`/cranes/bulk?dryRun=false`, file, {
+    method: "POST",
+    fields: { vendorId },
+  });
+}
+
+/**
+ * Downloads the import template through the authenticated API.
+ *
+ * Same object-URL dance as the load chart: a plain link would arrive without the
+ * bearer token.
+ */
+export async function downloadBulkCraneTemplate(): Promise<void> {
+  const base = import.meta.env.VITE_API_BASE_URL ?? "/api";
+  const response = await fetch(`${base}/cranes/bulk/template`, {
+    headers: { Authorization: `Bearer ${getStoredToken() ?? ""}` },
+  });
+  if (!response.ok) throw new Error("The template could not be downloaded.");
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "crossrentel-crane-upload.xlsx";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
  * Downloads the chart through the authenticated API.
  *
  * A plain link would not carry the bearer token, so the bytes are fetched here
  * and handed to the browser as an object URL.
  */
-export async function downloadLoadChart(crane: Crane): Promise<void> {
+async function fetchLoadChartBlob(craneId: string): Promise<Blob> {
   const base = import.meta.env.VITE_API_BASE_URL ?? "/api";
-  const response = await fetch(`${base}/cranes/${crane.id}/load-chart`, {
+  const response = await fetch(`${base}/cranes/${craneId}/load-chart`, {
     headers: { Authorization: `Bearer ${getStoredToken() ?? ""}` },
   });
   if (!response.ok) throw new Error("The load chart could not be downloaded.");
+  return response.blob();
+}
 
-  const blob = await response.blob();
+export async function downloadLoadChart(crane: Crane): Promise<void> {
+  const blob = await fetchLoadChartBlob(crane.id);
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -324,4 +431,36 @@ export async function downloadLoadChart(crane: Crane): Promise<void> {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Opens the chart in a new tab, for the read-only places (the RFQ candidate
+ * picker) where a sales user wants to look at it rather than file it away.
+ *
+ * The tab is claimed synchronously so a popup blocker still sees a user
+ * gesture; the bytes arrive afterwards through the bearer-token fetch and are
+ * handed over as an object URL. If the browser refuses the tab, the chart
+ * downloads instead — the user still gets the file.
+ */
+export async function openLoadChart(craneId: string): Promise<void> {
+  const tab = window.open("", "_blank");
+  try {
+    const blob = await fetchLoadChartBlob(craneId);
+    const url = URL.createObjectURL(blob);
+    if (tab) {
+      tab.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      return;
+    }
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "load-chart";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    tab?.close();
+    throw error;
+  }
 }

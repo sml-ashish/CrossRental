@@ -39,7 +39,7 @@ Phase P0 checks the built portal against these items.
 ## Roles
 | Capability | Sales (CR team) | Vendor | Admin | Mgmt Viewer (P5) |
 |---|---|---|---|---|
-| Enquiries, sourcing workspace | Own (all with a setting) | No | View all | View all, read-only |
+| Enquiries, line items | Own (all with a setting) | No | View all | View all, read-only |
 | Create enquiry, RFQ, shortlist, compare, finalise | Yes | No | Yes / award override | No |
 | Customer name, address, budget | Yes | Never | Yes | Read-only |
 | Own fleet, RFQ inbox, quotes | No | Own only | View all | No |

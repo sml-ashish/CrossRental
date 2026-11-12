@@ -12,7 +12,12 @@ import {
 } from "@/lib/rfqs";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader, Panel } from "@/components/ui/page-header";
+import { SearchInput, Toolbar } from "@/components/ui/toolbar";
+import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth";
 import { VendorRfqIndexPage } from "@/routes/app/vendor-rfqs";
 
@@ -74,37 +79,46 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">RFQs</h1>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Crane enquiries sent to vendors, and how each one is progressing.
-          </p>
-        </div>
-        {canCreate ? (
-          <Link to="/app/rfqs/new" className="btn-primary px-4 py-2 text-sm">
-            <Plus className="size-4" aria-hidden />
-            Create RFQ
-          </Link>
-        ) : null}
-      </header>
+      <PageHeader
+        title="RFQs"
+        description="Crane enquiries sent to vendors against an enquiry line, and how each one is progressing."
+        actions={
+          canCreate ? (
+            <Link to="/app/rfqs/new" className="btn-primary">
+              <Plus className="size-4" aria-hidden />
+              Raise RFQ
+            </Link>
+          ) : null
+        }
+      />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setStatus(tab.value)}
-            className={
-              status === tab.value
-                ? "rounded-full bg-brand-600 px-3 py-1.5 text-xs font-medium text-white"
-                : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-slate-300"
-            }
-          >
-            {tab.label}
-          </button>
-        ))}
-        <label className="ml-auto flex items-center gap-2 text-xs text-slate-600">
+      <Toolbar>
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+            Status
+          </p>
+          <div className="mt-1 flex flex-wrap gap-1" role="tablist" aria-label="RFQ status">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={status === tab.value}
+                onClick={() => setStatus(tab.value)}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                  status === tab.value
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="flex items-center gap-2 text-xs text-slate-600">
           <input
             type="checkbox"
             checked={awaitingOnly}
@@ -113,7 +127,7 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
           />
           Awaiting a response only
         </label>
-      </div>
+      </Toolbar>
 
       <form
         className="flex gap-2"
@@ -122,26 +136,20 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
           setSearch(searchInput);
         }}
       >
-        <div className="relative flex-1">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
-            aria-hidden
-          />
-          <input
-            className="field-input pl-9"
-            placeholder="Search by RFQ number, enquiry number or site"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            aria-label="Search RFQs"
-          />
-        </div>
-        <button type="submit" className="btn-secondary px-4 text-sm">
+        <SearchInput
+          value={searchInput}
+          onChange={setSearchInput}
+          placeholder="Search by RFQ number, enquiry number or site"
+          label="Search RFQs"
+          className="flex-1"
+        />
+        <button type="submit" className="btn-secondary">
           Search
         </button>
         {search ? (
           <button
             type="button"
-            className="btn-secondary px-4 text-sm"
+            className="btn-secondary"
             onClick={() => {
               setSearch("");
               setSearchInput("");
@@ -168,32 +176,38 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
       ) : rfqs.error ? (
         <Alert title="Could not load the RFQ list">{(rfqs.error as Error).message}</Alert>
       ) : rows.length === 0 ? (
-        <div className="card p-8 text-center text-sm text-slate-500">
-          {deliveryFailed
-            ? "No RFQs have a failed delivery."
-            : "No RFQs here. Create one to start sourcing a crane for an enquiry."}
+        <div className="card">
+          <EmptyState
+            icon={<Search className="size-4" aria-hidden />}
+            title={deliveryFailed ? "No failed deliveries" : "No RFQs in this view"}
+            description={
+              deliveryFailed
+                ? "Every email sent from this queue reached the vendor."
+                : "Create an RFQ to start sourcing a crane for an enquiry."
+            }
+          />
         </div>
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full min-w-[64rem] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+        <Panel bodyClassName="">
+          <Table>
+            <THead>
               <tr>
-                <th className="px-4 py-2.5 font-medium">RFQ</th>
-                <th className="px-4 py-2.5 font-medium">Requirement</th>
-                <th className="px-4 py-2.5 font-medium">Site</th>
-                <th className="px-4 py-2.5 font-medium">Deployment</th>
-                <th className="px-4 py-2.5 font-medium">Deadline</th>
-                <th className="px-4 py-2.5 font-medium">Recipients</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
+                <TH>RFQ</TH>
+                <TH>Requirement</TH>
+                <TH>Site</TH>
+                <TH>Deployment</TH>
+                <TH>Deadline</TH>
+                <TH>Recipients</TH>
+                <TH>Status</TH>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+            </THead>
+            <TBody>
               {rows.map((row) => (
                 <RfqRow key={row.id} rfq={row} />
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TBody>
+          </Table>
+        </Panel>
       )}
     </div>
   );
@@ -203,8 +217,8 @@ function RfqRow({ rfq }: { rfq: RfqListRow }) {
   const countdown = deadlineCountdown(rfq.submissionDeadline, rfq.status);
 
   return (
-    <tr className="align-top hover:bg-slate-50/60">
-      <td className="px-4 py-3">
+    <TR className="align-top">
+      <TD>
         <Link
           to="/app/rfqs/$rfqId"
           params={{ rfqId: rfq.id }}
@@ -212,67 +226,67 @@ function RfqRow({ rfq }: { rfq: RfqListRow }) {
         >
           {rfq.rfqNumber}
         </Link>
-        <p className="mt-0.5 font-mono text-xs text-slate-500">
+        <p className="mt-0.5 font-mono text-[11px] text-slate-500">
           {rfq.enquiryNo}/{rfq.lineNo}
         </p>
-      </td>
-      <td className="px-4 py-3">
+      </TD>
+      <TD>
         <p className="text-slate-900">{rfq.craneTypeRef?.name ?? rfq.craneType}</p>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 text-[11px] text-slate-500">
           {rfq.capacityT} t · qty {rfq.quantity}
         </p>
-      </td>
-      <td className="px-4 py-3">
-        <p className="text-slate-700">{rfq.siteLocation}</p>
-        <p className="mt-0.5 text-xs text-slate-500">
+      </TD>
+      <TD>
+        <p>{rfq.siteLocation}</p>
+        <p className="mt-0.5 text-[11px] text-slate-500">
           {rfq.siteState?.name ?? rfq.siteStateCode}
           {rfq.siteLocationUnverified ? (
             <span className="ml-1.5 text-amber-600">location unverified</span>
           ) : null}
         </p>
-      </td>
-      <td className="px-4 py-3 text-xs text-slate-600">
+      </TD>
+      <TD className="text-xs">
         <p>{formatCalendarDate(rfq.requiredStartDate)}</p>
-        <p className="text-slate-500">
+        <p className="text-[11px] text-slate-500">
           {rfq.durationValue} {rfq.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}
         </p>
-      </td>
-      <td className="px-4 py-3 text-xs">
-        <p className="text-slate-700">{formatDate(rfq.submissionDeadline)}</p>
+      </TD>
+      <TD className="text-xs">
+        <p>{formatDate(rfq.submissionDeadline)}</p>
         <p
           className={
             countdown.tone === "overdue"
-              ? "mt-0.5 font-medium text-red-600"
+              ? "mt-0.5 text-[11px] font-medium text-red-600"
               : countdown.tone === "soon"
-                ? "mt-0.5 font-medium text-amber-600"
-                : "mt-0.5 text-slate-500"
+                ? "mt-0.5 text-[11px] font-medium text-amber-600"
+                : "mt-0.5 text-[11px] text-slate-500"
           }
         >
           {countdown.label}
         </p>
-      </td>
-      <td className="px-4 py-3">
-        <p className="text-xs text-slate-700">
+      </TD>
+      <TD>
+        <p className="text-xs">
           {rfq.quotedCount} of {rfq.recipientCount} quoted
         </p>
         {rfq.failedCount > 0 ? (
-          <p className="mt-0.5 text-xs font-medium text-red-600">
+          <p className="mt-0.5 text-[11px] font-medium text-red-600">
             {rfq.failedCount} failed delivery
           </p>
         ) : null}
         {rfq.pendingCount > 0 ? (
-          <p className="mt-0.5 text-xs text-amber-600">{rfq.pendingCount} pending</p>
+          <p className="mt-0.5 text-[11px] text-amber-600">{rfq.pendingCount} pending</p>
         ) : null}
-      </td>
-      <td className="px-4 py-3">
+      </TD>
+      <TD>
         <StatusBadge status={rfq.status} />
         {rfq.rollupStatus ? (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-[11px] text-slate-500">
             {ROLLUPE_STATUS_LABELS[rfq.rollupStatus]}
           </p>
         ) : null}
-      </td>
-    </tr>
+      </TD>
+    </TR>
   );
 }
 

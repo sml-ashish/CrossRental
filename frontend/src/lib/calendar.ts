@@ -57,6 +57,8 @@ export interface CalendarFilters {
   vendorId?: string;
   region?: string;
   location?: string;
+  /** Narrows the range to one crane (its detail screen, or the vendor view). */
+  craneId?: string;
 }
 
 export function getBookingCalendar(filters: CalendarFilters): Promise<{ calendar: CalendarView }> {
@@ -68,7 +70,26 @@ export function getBookingCalendar(filters: CalendarFilters): Promise<{ calendar
   if (filters.vendorId) params.set("vendorId", filters.vendorId);
   if (filters.region) params.set("region", filters.region);
   if (filters.location) params.set("location", filters.location);
+  if (filters.craneId) params.set("craneId", filters.craneId);
   return api(`/reservations/calendar?${params.toString()}`);
+}
+
+/**
+ * The signed-in vendor's own calendar.
+ *
+ * A separate path from the internal one on purpose: the backend takes the
+ * vendor from the token and ignores any `vendorId` in the query, so this client
+ * cannot be used to look at another vendor's fleet even if a filter were passed
+ * by mistake. The response shape is the same, so the screens share their types.
+ */
+export function getVendorBookingCalendar(
+  filters: Pick<CalendarFilters, "from" | "to" | "craneId">,
+): Promise<{ calendar: CalendarView }> {
+  const params = new URLSearchParams();
+  params.set("from", filters.from);
+  params.set("to", filters.to);
+  if (filters.craneId) params.set("craneId", filters.craneId);
+  return api(`/vendors/me/booking-calendar?${params.toString()}`);
 }
 
 /** The badge tone for a day's state, shared with the calendar screen. */

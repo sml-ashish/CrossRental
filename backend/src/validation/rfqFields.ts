@@ -158,21 +158,31 @@ const smlContactFields = {
     }),
 };
 
-const baseRfqFields = {
-  /** The SAP line-item snapshot (brief 5.4): text for now, a feed later. */
-  enquiryNo: trimmed(60).min(1, "Enter the enquiry number"),
-  lineNo: trimmed(60).min(1, "Enter the line number"),
-  /**
-   * The native enquiry line this RFQ was raised from (P1). Null for RFQs typed
-   * by hand or fed from SAP; set by `createRfqFromLine`. It is the anchor the
-   * line-item trail hangs off, so it is copied verbatim, never inferred.
-   */
+/**
+ * The line an RFQ belongs to (P1).
+ *
+ * An RFQ is raised **against one enquiry line item**, never the enquiry header:
+ * that is what makes quantity, capacity and duration unambiguous. The native
+ * `enquiryLineId` is the anchor, and when it is present the service derives
+ * `enquiryNo`/`lineNo` from the line so the three cannot disagree.
+ *
+ * `enquiryNo`/`lineNo` survive only for the parked SAP feed, which will arrive
+ * with its own reference text before a native line exists. The UI has no path
+ * that creates an RFQ this way; the refinement below still demands the pair so
+ * that legacy callers cannot create a completely unanchored RFQ.
+ */
+const enquiryIdentityFields = {
   enquiryLineId: z
     .string()
     .uuid("That is not a valid enquiry line reference")
     .optional()
     .nullable(),
+  /** The SAP line-item snapshot (brief 5.4): text for now, a feed later. */
+  enquiryNo: trimmed(60).optional(),
+  lineNo: trimmed(60).optional(),
+};
 
+const baseRfqFields = {
   craneType: trimmed(50).min(1, "Choose the crane type"),
   capacityT: z.coerce
     .number({ message: "Enter the required capacity in tonnes" })
@@ -240,14 +250,42 @@ const baseRfqFields = {
  * The deadline is mandatory and future-dated. The site pin is optional here
  * because the site is geocoded on save; supplying one means the sales user has
  * already confirmed it, which wins over the lookup.
+ *
+ * `enquiryLineId` is the supported path. The legacy `enquiryNo`/`lineNo` pair is
+ * only accepted when no line is given, and the service overwrites both from the
+ * line whenever one is — so an RFQ can never be filed against a line it does not
+ * belong to.
  */
+function requireLineOrLegacyIdentity(
+  value: { enquiryLineId?: string | null; enquiryNo?: string; lineNo?: string },
+  ctx: z.RefinementCtx,
+): void {
+  if (value.enquiryLineId) return;
+  if (!value.enquiryNo) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["enquiryNo"],
+      message: "Choose the enquiry line this RFQ is for",
+    });
+  }
+  if (!value.lineNo) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["lineNo"],
+      message: "Choose the enquiry line this RFQ is for",
+    });
+  }
+}
+
 export const createRfqSchema = z
   .object({
+    ...enquiryIdentityFields,
     ...baseRfqFields,
     submissionDeadline: submissionDeadlineField,
     ...sitePinFields,
   })
-  .superRefine(requirePairedPin);
+  .superRefine(requirePairedPin)
+  .superRefine(requireLineOrLegacyIdentity);
 
 export type CreateRfqInput = z.infer<typeof createRfqSchema>;
 
@@ -259,6 +297,10 @@ export type CreateRfqInput = z.infer<typeof createRfqSchema>;
  * and the form is the only place a sales user would notice a missing field.
  * The deadline may be moved here as well as through the dedicated extend action;
  * a *later* deadline is what `extendDeadline` is for, with its notification.
+ *
+ * The enquiry line is deliberately absent: an RFQ does not move between lines
+ * after it is created, and the stored `enquiryNo`/`lineNo` are a snapshot the
+ * edit form cannot rewrite.
  */
 export const updateRfqSchema = z
   .object({
@@ -283,6 +325,11 @@ export const sendRfqSchema = z.object({
   vendorIds: z
     .array(z.string().uuid("That is not a valid vendor reference"))
     .min(1, "Choose at least one vendor"),
+  /** P6: email, WhatsApp, or both. Defaults to email for older clients. */
+  channels: z
+    .array(z.enum(["EMAIL", "WHATSAPP"]))
+    .min(1, "Choose at least one channel")
+    .default(["EMAIL"]),
 });
 
 export type SendRfqInput = z.infer<typeof sendRfqSchema>;
@@ -375,3 +422,16 @@ export const listApprovedVendorsQuerySchema = z.object({
 export type ListApprovedVendorsQuery = z.infer<
   typeof listApprovedVendorsQuerySchema
 >;
+
+/**
+ * Which recommendation view the candidate picker asked for.
+ *
+ * `technical` (the default) is the brief 6.9 list: crane type and capacity
+ * match, nearest first. `distance` keeps the type but drops the tonnage filter,
+ * so sales can see what is physically closest when nothing matches exactly.
+ */
+export const candidateQuerySchema = z.object({
+  mode: z.enum(["technical", "distance"]).default("technical"),
+});
+
+export type CandidateQuery = z.infer<typeof candidateQuerySchema>;

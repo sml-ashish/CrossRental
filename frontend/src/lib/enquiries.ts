@@ -1,15 +1,13 @@
 import { api } from "@/lib/api";
-import type { RecommendationResult, SnapshotSummary } from "@/lib/recommendations";
-import type { RfqStatus, RfqRollupStatus } from "@/lib/rfqs";
+import type { RfqRollupStatus } from "@/lib/rfqs";
 
 /**
  * Client for the native enquiry endpoints (P1).
  *
- * The customer block and the internal block — customer name/address, rental
- * budget, internal notes, PO/SAP reference and the Sales Partner's name — are
- * shown on the internal screens but never leave the server when an RFQ is
- * raised: `createRfqFromLine` takes only a deadline and the backend prefills the
- * RFQ from the vendor-safe subset. There is deliberately no way to send those
+ * The customer block — customer name/address and the rental budget — is shown
+ * on the internal screens but never leaves the server when an RFQ is raised:
+ * `createRfqFromLine` takes only a deadline and the backend prefills the RFQ
+ * from the vendor-safe subset. There is deliberately no way to send those
  * fields from here.
  */
 
@@ -98,7 +96,6 @@ export interface EnquiryLine {
   requiredWindJibM: number | null;
   configurationNotes: string | null;
   requiredStartDate: string | null;
-  startDateTbc: boolean;
   durationValue: number | null;
   durationUnit: DurationUnit | null;
   workingDaysPerMonth: number | null;
@@ -123,9 +120,6 @@ export interface EnquiryLine {
   ppeScope: string | null;
   rowScope: string | null;
   rentalBudget: string | null;
-  rentalBudgetValue: number | null;
-  internalNotes: string | null;
-  poSapReference: string | null;
   trailStatus: EnquiryLineTrailStatus;
   selectedSource: string | null;
   closureStatus: string | null;
@@ -146,10 +140,8 @@ export interface EnquirySummary {
 export interface Enquiry {
   id: string;
   enquiryNo: string;
-  externalReference: string | null;
   enquiryDate: string;
   source: EnquirySource;
-  salesPartnerName: string | null;
   crOwnerId: string;
   crOwner: { id: string; email: string; fullName: string | null } | null;
   customerName: string;
@@ -159,10 +151,7 @@ export interface Enquiry {
   siteStateName: string | null;
   sitePincode: string | null;
   region: string | null;
-  businessVertical: string | null;
-  crossRentalFlag: boolean;
   overallStatus: EnquiryOverallStatus;
-  notes: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -177,77 +166,35 @@ export interface EnquiryListRow extends Enquiry {
   summary: EnquirySummary;
 }
 
-// --- workspace -------------------------------------------------------------
+// --- line detail -----------------------------------------------------------
 
-export interface WorkspaceRfq {
-  rfqId: string;
-  rfqNumber: string;
-  status: RfqStatus;
-  sentAt: string | null;
-  submissionDeadline: string;
-  recipientCount: number;
-  quotationCount: number;
-}
-
-export interface WorkspaceQuotation {
-  quotationId: string;
-  rfqId: string;
-  vendorId: string;
-  vendorName: string;
-  craneId: string;
-  craneDescription: string;
-  rentalRate: number;
-  rateBasis: string;
-  mobilisationCharges: number;
-  demobilisationCharges: number;
-  taxBasis: string;
-  totalQuotedValue: number;
-  validityDate: string;
-  availabilityConfirmed: boolean;
-  status: string;
-  submittedAt: string;
-}
-
-export interface LineWorkspace {
+/**
+ * One line on its own. This is what the line editor and the comparison screen
+ * need; it replaced the old sourcing-workspace payload, which bundled
+ * recommendations and quote history the rest of the app never asked for.
+ */
+export interface LineDetail {
   line: EnquiryLine;
-  enquiry: {
-    id: string;
-    enquiryNo: string;
-    siteLocation: string;
-    siteStateName: string | null;
-    businessVertical: string | null;
-  };
-  /** P2: the latest evaluation, if the line can be evaluated at all. */
-  recommendations: RecommendationResult | null;
-  /** P2: every snapshot written for this line, newest first. */
-  snapshots: SnapshotSummary[];
-  rfqs: WorkspaceRfq[];
-  quotations: WorkspaceQuotation[];
 }
 
-/** The RFQ status a raised RFQ reports back on the workspace card. */
+/** The RFQ status a raised RFQ reports back on its own detail screen. */
 export type { RfqRollupStatus };
 
 // --- form shapes -----------------------------------------------------------
 
 /**
- * Header strings while editing. The customer block and the internal block are
- * here because this is the internal form; they are dropped by the backend when
- * an RFQ is raised, not by the client.
+ * Header strings while editing. The customer block is here because this is the
+ * internal form; it is dropped by the backend when an RFQ is raised, not by the
+ * client.
  */
 export interface EnquiryForm {
-  externalReference: string;
   enquiryDate: string;
-  salesPartnerName: string;
   customerName: string;
   customerAddress: string;
   siteLocation: string;
   siteStateCode: string;
   sitePincode: string;
   region: string;
-  businessVertical: string;
-  crossRentalFlag: boolean;
-  notes: string;
 }
 
 export interface EnquiryLineForm {
@@ -266,7 +213,6 @@ export interface EnquiryLineForm {
   requiredWindJibM: string;
   configurationNotes: string;
   requiredStartDate: string;
-  startDateTbc: boolean;
   durationValue: string;
   durationUnit: DurationUnit;
   workingDaysPerMonth: string;
@@ -291,24 +237,16 @@ export interface EnquiryLineForm {
   ppeScope: string;
   rowScope: string;
   rentalBudget: string;
-  rentalBudgetValue: string;
-  internalNotes: string;
-  poSapReference: string;
 }
 
 export const EMPTY_ENQUIRY_FORM: EnquiryForm = {
-  externalReference: "",
   enquiryDate: "",
-  salesPartnerName: "",
   customerName: "",
   customerAddress: "",
   siteLocation: "",
   siteStateCode: "",
   sitePincode: "",
   region: "",
-  businessVertical: "",
-  crossRentalFlag: true,
-  notes: "",
 };
 
 export function emptyLine(): EnquiryLineForm {
@@ -328,7 +266,6 @@ export function emptyLine(): EnquiryLineForm {
     requiredWindJibM: "",
     configurationNotes: "",
     requiredStartDate: "",
-    startDateTbc: false,
     durationValue: "",
     durationUnit: "DAYS",
     workingDaysPerMonth: "",
@@ -353,9 +290,6 @@ export function emptyLine(): EnquiryLineForm {
     ppeScope: "",
     rowScope: "",
     rentalBudget: "",
-    rentalBudgetValue: "",
-    internalNotes: "",
-    poSapReference: "",
   };
 }
 
@@ -378,7 +312,6 @@ export function lineToForm(line: EnquiryLine): EnquiryLineForm {
     requiredWindJibM: numberish(line.requiredWindJibM),
     configurationNotes: text(line.configurationNotes),
     requiredStartDate: line.requiredStartDate ? line.requiredStartDate.slice(0, 10) : "",
-    startDateTbc: line.startDateTbc,
     durationValue: numberish(line.durationValue),
     durationUnit: line.durationUnit ?? "DAYS",
     workingDaysPerMonth: numberish(line.workingDaysPerMonth),
@@ -403,9 +336,6 @@ export function lineToForm(line: EnquiryLine): EnquiryLineForm {
     ppeScope: text(line.ppeScope),
     rowScope: text(line.rowScope),
     rentalBudget: text(line.rentalBudget),
-    rentalBudgetValue: numberish(line.rentalBudgetValue),
-    internalNotes: text(line.internalNotes),
-    poSapReference: text(line.poSapReference),
   };
 }
 
@@ -437,7 +367,6 @@ function toLinePayload(form: EnquiryLineForm) {
     requiredWindJibM: numberOrNull(form.requiredWindJibM),
     configurationNotes: blankToNull(form.configurationNotes),
     requiredStartDate: calendarDate(form.requiredStartDate),
-    startDateTbc: form.startDateTbc,
     durationValue: numberOrNull(form.durationValue),
     durationUnit: form.durationValue.trim() === "" ? null : form.durationUnit,
     workingDaysPerMonth: numberOrNull(form.workingDaysPerMonth),
@@ -462,43 +391,30 @@ function toLinePayload(form: EnquiryLineForm) {
     ppeScope: blankToNull(form.ppeScope),
     rowScope: blankToNull(form.rowScope),
     rentalBudget: blankToNull(form.rentalBudget),
-    rentalBudgetValue: numberOrNull(form.rentalBudgetValue),
-    internalNotes: blankToNull(form.internalNotes),
-    poSapReference: blankToNull(form.poSapReference),
   };
 }
 
 function toHeaderPayload(form: EnquiryForm) {
   return {
-    externalReference: blankToNull(form.externalReference),
     enquiryDate: form.enquiryDate ? calendarDate(form.enquiryDate) : undefined,
-    salesPartnerName: blankToNull(form.salesPartnerName),
     customerName: form.customerName.trim(),
     customerAddress: form.customerAddress.trim(),
     siteLocation: form.siteLocation.trim(),
     siteStateCode: form.siteStateCode,
     sitePincode: blankToNull(form.sitePincode),
     region: blankToNull(form.region),
-    businessVertical: blankToNull(form.businessVertical),
-    crossRentalFlag: form.crossRentalFlag,
-    notes: blankToNull(form.notes),
   };
 }
 
 export function enquiryToForm(enquiry: Enquiry): EnquiryForm {
   return {
-    externalReference: enquiry.externalReference ?? "",
     enquiryDate: enquiry.enquiryDate ? enquiry.enquiryDate.slice(0, 10) : "",
-    salesPartnerName: enquiry.salesPartnerName ?? "",
     customerName: enquiry.customerName,
     customerAddress: enquiry.customerAddress,
     siteLocation: enquiry.siteLocation,
     siteStateCode: enquiry.siteStateCode,
     sitePincode: enquiry.sitePincode ?? "",
     region: enquiry.region ?? "",
-    businessVertical: enquiry.businessVertical ?? "",
-    crossRentalFlag: enquiry.crossRentalFlag,
-    notes: enquiry.notes ?? "",
   };
 }
 
@@ -507,7 +423,6 @@ export function enquiryToForm(enquiry: Enquiry): EnquiryForm {
 export interface ListEnquiriesFilters {
   status?: EnquiryOverallStatus;
   search?: string;
-  businessVertical?: string;
   stateCode?: string;
 }
 
@@ -517,10 +432,38 @@ export function listEnquiries(
   const params = new URLSearchParams();
   if (filters.status) params.set("status", filters.status);
   if (filters.search) params.set("search", filters.search);
-  if (filters.businessVertical) params.set("businessVertical", filters.businessVertical);
   if (filters.stateCode) params.set("stateCode", filters.stateCode);
   const query = params.toString();
   return api(`/enquiries${query ? `?${query}` : ""}`);
+}
+
+/**
+ * A line an RFQ can be raised against. The RFQ creation screen is line-driven,
+ * so this is the picker's row rather than the full line.
+ */
+export interface RaisableLine {
+  id: string;
+  enquiryId: string;
+  enquiryNo: string;
+  lineNo: number;
+  craneTypeCode: string | null;
+  craneTypeName: string | null;
+  capacityT: number | null;
+  capacityRule: CapacityRule;
+  quantity: number;
+  requiredStartDate: string | null;
+  startDateTbc: boolean;
+  siteLocation: string;
+  siteStateName: string | null;
+  sitePincode: string | null;
+  trailStatus: EnquiryLineTrailStatus;
+  /** How many RFQs this line already carries, so a re-tender is visible. */
+  rfqCount: number;
+}
+
+export function listRaisableLines(search = ""): Promise<{ lines: RaisableLine[] }> {
+  const query = search ? `?search=${encodeURIComponent(search)}` : "";
+  return api(`/enquiries/lines${query}`);
 }
 
 export function getEnquiry(enquiryId: string): Promise<{ enquiry: EnquiryDetail }> {
@@ -568,17 +511,6 @@ export function cancelLine(lineId: string, reason: string): Promise<{ line: Enqu
   return api(`/enquiries/lines/${lineId}/cancel`, { method: "POST", body: { reason } });
 }
 
-export function recordInternalCheck(
-  lineId: string,
-  outcome: "CHECKED_NOT_AVAILABLE" | "FULFILLED_INTERNALLY",
-  notes: string | null,
-): Promise<{ line: EnquiryLine }> {
-  return api(`/enquiries/lines/${lineId}/internal-check`, {
-    method: "POST",
-    body: { outcome, notes },
-  });
-}
-
 /** Raise an RFQ from a line. Only the deadline is sent; the rest is prefilled. */
 export function createRfqFromLine(
   lineId: string,
@@ -590,8 +522,8 @@ export function createRfqFromLine(
   });
 }
 
-export function getLineWorkspace(lineId: string): Promise<{ workspace: LineWorkspace }> {
-  return api(`/enquiries/lines/${lineId}/workspace`);
+export function getLine(lineId: string): Promise<LineDetail> {
+  return api(`/enquiries/lines/${lineId}`);
 }
 
 export function formatDate(value: string | null): string {

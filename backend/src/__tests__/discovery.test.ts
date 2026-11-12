@@ -125,6 +125,86 @@ describe("manual vendor discovery (P4, BPD 6.8)", () => {
     expect(res.body.groups[0].nearestKm).toBeLessThan(res.body.groups[1].nearestKm);
   });
 
+  it("reuses a road distance across searches at a three-decimal coordinate", async () => {
+    // The cache key is a `numeric` column and the search pins are floats. A
+    // value like 23.023 has no exact binary form, so a number-keyed lookup
+    // silently missed every time and each search re-billed the provider. This
+    // pins the cache to a coordinate that exposes that.
+    const { setGeoProvider } = await import("../lib/geo");
+    let calls = 0;
+    setGeoProvider({
+      name: "counting-road",
+      isAuthoritative: true,
+      async geocode() {
+        return { ok: false as const, reason: "unavailable" };
+      },
+      async roadDistance() {
+        calls += 1;
+        return { ok: true as const, km: 88.8, method: "road" as const, provider: "counting-road" };
+      },
+    });
+
+    try {
+      await appPrisma.crane.update({
+        where: { id: ctx.a.craneId },
+        data: { latitude: 23.023, longitude: 72.571 },
+      });
+      await appPrisma.crane.update({
+        where: { id: ctx.b.craneId },
+        data: { latitude: 23.041, longitude: 72.591 },
+      });
+
+      const query = "craneType=CRAWLER&siteLat=22.2976944&siteLng=73.203784";
+      const first = await search(query, ctx.salesToken);
+      expect(first.status, JSON.stringify(first.body)).toBe(200);
+      const afterFirst = calls;
+      expect(afterFirst).toBeGreaterThan(0);
+
+      const second = await search(query, ctx.salesToken);
+      expect(second.body.groups[0].nearestKm).toBe(88.8);
+      expect(calls).toBe(afterFirst);
+    } finally {
+      setGeoProvider(null);
+    }
+  });
+
+  it("geocodes a typed job-site address into a ranking pin", async () => {
+    // The configured provider is replaced with a fixed answer so the ranking is
+    // deterministic; this tests the address path, not the geocoder itself.
+    const { setGeoProvider } = await import("../lib/geo");
+    setGeoProvider({
+      name: "test-geocoder",
+      isAuthoritative: true,
+      async geocode() {
+        return { ok: true, point: { lat: 22.5, lng: 72.5 }, provider: "test-geocoder" };
+      },
+      async roadDistance() {
+        return { ok: true, km: 10, method: "road", provider: "test-geocoder" };
+      },
+    });
+
+    try {
+      await appPrisma.crane.update({
+        where: { id: ctx.a.craneId },
+        data: { latitude: 28.6, longitude: 77.2 },
+      });
+
+      const res = await search(
+        "craneType=CRAWLER&siteLocation=Vadodara&sitePincode=390001",
+        ctx.salesToken,
+      );
+      expect(res.status, JSON.stringify(res.body)).toBe(200);
+      expect(res.body.distancesAvailable).toBe(true);
+      expect(res.body.site).toEqual({ latitude: 22.5, longitude: 72.5 });
+      expect(res.body.groups.map((g: { vendorName: string }) => g.vendorName)).toEqual([
+        "Isolation Vendor B",
+        "Isolation Vendor A",
+      ]);
+    } finally {
+      setGeoProvider(null);
+    }
+  });
+
   it("filters by capacity, availability, company size, fleet size and year", async () => {
     await appPrisma.vendor.update({
       where: { id: ctx.a.vendorId },
@@ -309,7 +389,7 @@ describe("communication history (P4, BPD 6.21)", () => {
     expect(invitation).toBeTruthy();
     expect(invitation.businessEvent).toBe("RFQ dispatched");
     expect(invitation.channel).toBe("EMAIL");
-    expect(res.body.history.inboundCaptured).toBe(false);
+    expect(res.body.history.inboundCaptured).toBe(true);
   });
 
   it("scopes to a single RFQ", async () => {

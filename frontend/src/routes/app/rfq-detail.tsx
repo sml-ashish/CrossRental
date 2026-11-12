@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, MapPin, Send } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Send } from "lucide-react";
 import {
   ROLLUPE_STATUS_LABELS,
   awardQuotation,
@@ -16,12 +16,17 @@ import {
   sendRfq,
   type CandidateCrane,
   type CandidateGroup,
+  type CandidateMode,
+  type MessageChannel,
   type ReceivedQuotation,
 } from "@/lib/rfqs";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
 import { Field, ReadOnlyValue, Section, TextArea, TextInput } from "@/components/ui/form";
 import { Spinner } from "@/components/ui/spinner";
+import { Segmented } from "@/components/ui/toolbar";
 import {
   DeliveryBadge,
   deadlineCountdown,
@@ -29,6 +34,8 @@ import {
   formatDate,
   formatDateTime,
 } from "@/routes/app/rfqs";
+import { loadRfqReplies } from "@/lib/replies";
+import { openLoadChart } from "@/lib/fleet";
 import { useAuth } from "@/lib/auth";
 import { VendorRfqDetailPage } from "@/routes/app/vendor-rfq-detail";
 
@@ -83,42 +90,59 @@ function InternalRfqDetailPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-mono text-xl font-semibold text-slate-900">
-              {rfq?.rfqNumber ?? "RFQ"}
-            </h1>
+      <PageHeader
+        title={rfq?.rfqNumber ?? "RFQ"}
+        mono
+        description={
+          <>
+            Enquiry {rfq?.enquiryNo}/{rfq?.lineNo} · created by{" "}
+            {rfq?.createdBy?.fullName ?? rfq?.createdBy?.email ?? "—"}
+            {rfq?.enquiryLineId ? (
+              <>
+                {" · "}
+                <Link
+                  to="/app/enquiries/lines/$lineId/edit"
+                  params={{ lineId: rfq.enquiryLineId }}
+                  className="font-medium text-slate-700 underline-offset-2 hover:underline"
+                >
+                  Open line item
+                </Link>
+              </>
+            ) : null}
+          </>
+        }
+        meta={
+          <>
             {rfq ? <StatusBadge status={rfq.status} /> : null}
             {rfq?.rollupStatus ? (
               <Badge tone="blue">{ROLLUPE_STATUS_LABELS[rfq.rollupStatus]}</Badge>
             ) : null}
-          </div>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Enquiry {rfq?.enquiryNo}/{rfq?.lineNo} · created by{" "}
-            {rfq?.createdBy?.fullName ?? rfq?.createdBy?.email ?? "—"}
-          </p>
-        </div>
-        {rfq ? (
-          <div className="text-right">
-            <p className="text-xs font-medium text-slate-500">Submission deadline</p>
-            <p className="text-sm text-slate-900">{formatDateTime(rfq.submissionDeadline)}</p>
-            {countdown ? (
-              <p
-                className={
-                  countdown.tone === "overdue"
-                    ? "text-xs font-medium text-red-600"
-                    : countdown.tone === "soon"
-                      ? "text-xs font-medium text-amber-600"
-                      : "text-xs text-slate-500"
-                }
-              >
-                {countdown.label}
+          </>
+        }
+        actions={
+          rfq ? (
+            <div className="text-right">
+              <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                Submission deadline
               </p>
-            ) : null}
-          </div>
-        ) : null}
-      </header>
+              <p className="text-sm text-slate-900">{formatDateTime(rfq.submissionDeadline)}</p>
+              {countdown ? (
+                <p
+                  className={
+                    countdown.tone === "overdue"
+                      ? "text-xs font-medium text-red-600"
+                      : countdown.tone === "soon"
+                        ? "text-xs font-medium text-amber-600"
+                        : "text-xs text-slate-500"
+                  }
+                >
+                  {countdown.label}
+                </p>
+              ) : null}
+            </div>
+          ) : null
+        }
+      />
 
       {detail.isLoading ? (
         <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -241,6 +265,7 @@ function InternalRfqDetailPage() {
           ) : null}
 
           <RecipientsSection rfqId={rfqId} recipients={rfq.recipients} onDone={invalidate} />
+          <InboundRepliesSection rfqId={rfqId} />
           <QuotationsSection
             rfqId={rfqId}
             quotations={rfq.quotations}
@@ -496,13 +521,15 @@ function CandidatePickerSection({
 }) {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<string[]>([]);
+  const [mode, setMode] = useState<CandidateMode>("technical");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [showAllVendors, setShowAllVendors] = useState(false);
+  const [channels, setChannels] = useState<MessageChannel[]>(["EMAIL"]);
   const [outcome, setOutcome] = useState<string | null>(null);
 
   const candidates = useQuery({
-    queryKey: ["rfq-candidates", rfqId],
-    queryFn: () => getCandidates(rfqId),
+    queryKey: ["rfq-candidates", rfqId, mode],
+    queryFn: () => getCandidates(rfqId, mode),
     enabled: !disabled,
   });
 
@@ -513,7 +540,7 @@ function CandidatePickerSection({
   });
 
   const send = useMutation({
-    mutationFn: () => sendRfq(rfqId, selected),
+    mutationFn: () => sendRfq(rfqId, selected, channels),
     onSuccess: (result) => {
       const { sent, failed } = result.result;
       setOutcome(
@@ -546,7 +573,22 @@ function CandidatePickerSection({
       description={
         candidates.data
           ? candidates.data.candidates.capacityRule
-          : "Matching vendor cranes, nearest to the job site first."
+          : mode === "technical"
+            ? "Cranes matching the RFQ's type and capacity, smallest adequate first."
+            : "Cranes of this type at any capacity, nearest first."
+      }
+      actions={
+        disabled ? undefined : (
+          <Segmented
+            value={mode}
+            onChange={setMode}
+            label="Recommendation view"
+            options={[
+              { value: "technical", label: "Technical" },
+              { value: "distance", label: "Distance based" },
+            ]}
+          />
+        )
       }
     >
       {candidates.isLoading ? (
@@ -575,8 +617,9 @@ function CandidatePickerSection({
 
           {candidates.data.candidates.distancesAvailable && pickerVendors.length === 0 && unverified.length === 0 ? (
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
-              No approved vendor has a matching crane right now. Check the crane type and
-              capacity, or send to approved vendors without a matching crane.
+              {mode === "distance"
+                ? "No approved vendor has a crane of this type right now. Try the technical view, or send to approved vendors without a matching crane."
+                : "No approved vendor has a matching crane right now. Check the crane type and capacity, or send to approved vendors without a matching crane."}
             </div>
           ) : null}
 
@@ -584,6 +627,7 @@ function CandidatePickerSection({
             <VendorGroupCard
               key={group.vendorId}
               group={group}
+              mode={mode}
               checked={selected.includes(group.vendorId)}
               alreadySent={alreadySent.includes(group.vendorId)}
               expanded={expanded[group.vendorId] ?? false}
@@ -603,9 +647,9 @@ function CandidatePickerSection({
                 <div>
                   <p className="text-sm font-medium text-slate-800">Location unverified</p>
                   <p className="text-xs text-slate-500">
-                    Matching cranes whose location has no pin, so they cannot be ranked by
-                    distance. They are listed here rather than dropped — an unlocated crane
-                    can still do the job.
+                    {mode === "distance" ? "Cranes" : "Matching cranes"} whose location has no
+                    pin, so they cannot be ranked by distance. They are listed here rather than
+                    dropped — an unlocated crane can still do the job.
                   </p>
                 </div>
               </div>
@@ -689,12 +733,52 @@ function CandidatePickerSection({
         </Alert>
       ) : null}
 
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <p className="text-xs font-medium text-slate-700">Send through</p>
+        <div className="mt-2 flex flex-wrap gap-4">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              className="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              checked={channels.includes("EMAIL")}
+              onChange={() =>
+                setChannels((previous) =>
+                  previous.includes("EMAIL")
+                    ? previous.filter((channel) => channel !== "EMAIL")
+                    : [...previous, "EMAIL"],
+                )
+              }
+            />
+            Email
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              className="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              checked={channels.includes("WHATSAPP")}
+              onChange={() =>
+                setChannels((previous) =>
+                  previous.includes("WHATSAPP")
+                    ? previous.filter((channel) => channel !== "WHATSAPP")
+                    : [...previous, "WHATSAPP"],
+                )
+              }
+            />
+            WhatsApp
+          </label>
+        </div>
+        <p className="mt-1.5 text-xs text-slate-500">
+          Email goes to the vendor's RFQ contacts. WhatsApp uses the approved template
+          and the contact mobile on file; it is refused if the provider is not configured.
+        </p>
+      </div>
+
       <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
         <button
           type="button"
           className="btn-primary px-5 py-2.5 text-sm"
           onClick={() => send.mutate()}
-          disabled={send.isPending || selected.length === 0}
+          disabled={send.isPending || selected.length === 0 || channels.length === 0}
         >
           {send.isPending ? <Spinner /> : <Send className="size-4" aria-hidden />}
           {send.isPending
@@ -704,7 +788,9 @@ function CandidatePickerSection({
         <p className="text-xs text-slate-500">
           {selected.length === 0
             ? "Select at least one vendor above."
-            : "Emails go to each vendor's own active portal users."}
+            : channels.length === 0
+              ? "Choose at least one channel."
+              : "Every selected vendor is attempted on every selected channel."}
         </p>
       </div>
     </Section>
@@ -713,6 +799,7 @@ function CandidatePickerSection({
 
 function VendorGroupCard({
   group,
+  mode,
   checked,
   alreadySent,
   expanded,
@@ -720,6 +807,7 @@ function VendorGroupCard({
   onSelect,
 }: {
   group: CandidateGroup;
+  mode: CandidateMode;
   checked: boolean;
   alreadySent: boolean;
   expanded: boolean;
@@ -744,7 +832,8 @@ function VendorGroupCard({
             ) : null}
           </p>
           <p className="text-xs text-slate-500">
-            {group.cranes.length} matching crane{group.cranes.length === 1 ? "" : "s"} ·{" "}
+            {group.cranes.length} {mode === "distance" ? "crane" : "matching crane"}
+            {group.cranes.length === 1 ? "" : "s"} ·{" "}
             {formatDistance(group.nearestKm, group.distanceApproximate)}
           </p>
         </div>
@@ -784,11 +873,29 @@ function VendorGroupCard({
 
 /** The advisories that change a sales user's reading of a candidate (brief 6.9). */
 function CraneChips({ crane }: { crane: CandidateCrane }) {
+  const [openingChart, setOpeningChart] = useState(false);
+  const [chartError, setChartError] = useState<string | null>(null);
+
+  async function viewChart() {
+    setOpeningChart(true);
+    setChartError(null);
+    try {
+      await openLoadChart(crane.craneId);
+    } catch {
+      setChartError("The load chart could not be opened.");
+    } finally {
+      setOpeningChart(false);
+    }
+  }
+
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
       <Badge tone={crane.currentStatus === "AVAILABLE" ? "emerald" : "amber"}>
         {crane.currentStatus.replaceAll("_", " ")}
       </Badge>
+      {crane.belowRequiredCapacity ? (
+        <Badge tone="red">below required capacity</Badge>
+      ) : null}
       <Badge tone="neutral">
         {formatDistance(crane.distanceKm, crane.distanceApproximate)}
       </Badge>
@@ -799,11 +906,20 @@ function CraneChips({ crane }: { crane: CandidateCrane }) {
       {crane.stale ? (
         <Badge tone="orange">stale · {crane.daysSinceUpdate} days</Badge>
       ) : null}
+      <Badge tone="neutral">updated {formatDate(crane.lastUpdatedAt)}</Badge>
       {crane.loadChartFileName ? (
-        <Badge tone="neutral">
-          <MapPin className="size-3" aria-hidden /> load chart
-        </Badge>
+        <button
+          type="button"
+          onClick={() => void viewChart()}
+          disabled={openingChart}
+          title={crane.loadChartFileName}
+          className="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 hover:border-brand-300 hover:bg-brand-100 disabled:opacity-60"
+        >
+          <FileText className="size-3" aria-hidden />
+          {openingChart ? "opening…" : "view load chart"}
+        </button>
       ) : null}
+      {chartError ? <span className="text-xs text-red-600">{chartError}</span> : null}
     </div>
   );
 }
@@ -823,6 +939,9 @@ function RecipientsSection({
     emails: string[];
     emailDeliveryStatus: string;
     emailDeliveryError: string | null;
+    whatsappPhones: string[];
+    whatsappDeliveryStatus: string | null;
+    whatsappDeliveryError: string | null;
     firstViewedAt: string | null;
     responseStatus: string;
     respondedAt: string | null;
@@ -880,23 +999,24 @@ function RecipientsSection({
         </div>
       ) : null}
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[48rem] text-left text-sm">
-          <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+      <div>
+        <Table className="min-w-[48rem]">
+          <THead>
             <tr>
-              <th className="px-3 py-2 font-medium">Vendor</th>
-              <th className="px-3 py-2 font-medium">Email</th>
-              <th className="px-3 py-2 font-medium">Delivery</th>
-              <th className="px-3 py-2 font-medium">Response</th>
-              <th className="px-3 py-2 font-medium">First viewed</th>
-              <th className="px-3 py-2 font-medium">Reminders</th>
-              <th className="px-3 py-2" />
+              <TH>Vendor</TH>
+              <TH>Email</TH>
+              <TH>WhatsApp</TH>
+              <TH>Delivery</TH>
+              <TH>Response</TH>
+              <TH>First viewed</TH>
+              <TH>Reminders</TH>
+              <TH />
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
+          </THead>
+          <TBody>
             {recipients.map((recipient) => (
-              <tr key={recipient.recipientId} className="align-top">
-                <td className="px-3 py-2.5">
+              <TR key={recipient.recipientId} className="align-top">
+                <TD>
                   <Link
                     to="/app/vendors/$vendorId"
                     params={{ vendorId: recipient.vendorId }}
@@ -904,17 +1024,36 @@ function RecipientsSection({
                   >
                     {recipient.vendorName}
                   </Link>
-                </td>
-                <td className="px-3 py-2.5 text-xs text-slate-600">
+                </TD>
+                <TD className="text-xs text-slate-600">
                   {recipient.emails.join(", ")}
                   {recipient.emailDeliveryError ? (
                     <p className="mt-0.5 text-red-600">{recipient.emailDeliveryError}</p>
                   ) : null}
-                </td>
-                <td className="px-3 py-2.5">
-                  <DeliveryBadge status={recipient.emailDeliveryStatus} />
-                </td>
-                <td className="px-3 py-2.5">
+                </TD>
+                <TD className="text-xs text-slate-600">
+                  {recipient.whatsappPhones.length > 0
+                    ? recipient.whatsappPhones.join(", ")
+                    : "—"}
+                  {recipient.whatsappDeliveryError ? (
+                    <p className="mt-0.5 text-red-600">{recipient.whatsappDeliveryError}</p>
+                  ) : null}
+                </TD>
+                <TD>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase tracking-wide text-slate-400">Email</span>
+                    <DeliveryBadge status={recipient.emailDeliveryStatus} />
+                    {recipient.whatsappDeliveryStatus ? (
+                      <>
+                        <span className="mt-0.5 text-[10px] uppercase tracking-wide text-slate-400">
+                          WhatsApp
+                        </span>
+                        <DeliveryBadge status={recipient.whatsappDeliveryStatus} />
+                      </>
+                    ) : null}
+                  </div>
+                </TD>
+                <TD>
                   <StatusBadge status={recipient.responseStatus} />
                   {recipient.responseStatus === "DECLINED" ? (
                     <div className="mt-1 text-xs text-slate-500">
@@ -929,17 +1068,17 @@ function RecipientsSection({
                       {formatDate(recipient.respondedAt)}
                     </p>
                   ) : null}
-                </td>
-                <td className="px-3 py-2.5 text-xs text-slate-600">
+                </TD>
+                <TD className="text-xs text-slate-600">
                   {recipient.firstViewedAt ? formatDate(recipient.firstViewedAt) : "Not opened"}
-                </td>
-                <td className="px-3 py-2.5 text-xs text-slate-600">
+                </TD>
+                <TD className="text-xs text-slate-600">
                   {recipient.reminderCount}
                   {recipient.lastReminderAt ? (
                     <p className="text-slate-500">{formatDate(recipient.lastReminderAt)}</p>
                   ) : null}
-                </td>
-                <td className="px-3 py-2.5 text-right">
+                </TD>
+                <TD align="right">
                   {recipient.responseStatus === "PENDING" ? (
                     <button
                       type="button"
@@ -954,12 +1093,108 @@ function RecipientsSection({
                       Remind
                     </button>
                   ) : null}
-                </td>
-              </tr>
+                </TD>
+              </TR>
             ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
       </div>
+    </Section>
+  );
+}
+
+function InboundRepliesSection({ rfqId }: { rfqId: string }) {
+  const replies = useQuery({
+    queryKey: ["rfq-replies", rfqId],
+    queryFn: () => loadRfqReplies(rfqId, "ALL"),
+  });
+
+  const pending = replies.data?.replies.filter((reply) => reply.status === "PENDING").length ?? 0;
+
+  return (
+    <Section
+      title="Inbound replies"
+      description="Every email and WhatsApp reply for this RFQ is shown here as it arrives."
+    >
+      {replies.isLoading ? (
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <Spinner /> Loading replies
+        </div>
+      ) : replies.error ? (
+        <Alert tone="error">{(replies.error as Error).message}</Alert>
+      ) : (replies.data?.replies.length ?? 0) === 0 ? (
+        <p className="text-sm text-slate-500">
+          No replies yet. Email and WhatsApp answers from the invited vendors appear here
+          once they are matched to this RFQ.
+        </p>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone={pending > 0 ? "amber" : "neutral"}>{pending} pending</Badge>
+            <span className="text-xs text-slate-500">
+              {replies.data?.replies.length} repl
+              {(replies.data?.replies.length ?? 0) === 1 ? "y" : "ies"} in this conversation
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {replies.data?.replies.map((reply) => (
+              <article key={reply.id} className="overflow-hidden rounded-lg border border-slate-200">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-800">
+                      {reply.vendor?.name ?? reply.fromAddress}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {reply.subject ?? "No subject"} ·{" "}
+                      {reply.channel === "WHATSAPP" ? "WhatsApp" : "Email"} ·{" "}
+                      {new Date(reply.receivedAt).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                  <StatusBadge status={reply.status} />
+                </div>
+                <div className="space-y-3 px-4 py-3">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-slate-800">
+                    {reply.bodyText}
+                  </pre>
+                  <dl className="grid gap-3 border-t border-slate-100 pt-3 sm:grid-cols-3">
+                    <ReadOnlyValue
+                      label="Quoted rate"
+                      value={
+                        reply.parsedRentalRate === null
+                          ? "—"
+                          : `${reply.parsedRentalRate.toLocaleString("en-IN")} ${
+                              reply.parsedRateBasis?.replaceAll("_", " ").toLowerCase() ?? ""
+                            }`
+                      }
+                    />
+                    <ReadOnlyValue
+                      label="Validity"
+                      value={
+                        reply.parsedValidityDate
+                          ? new Date(reply.parsedValidityDate).toLocaleDateString("en-IN")
+                          : "—"
+                      }
+                    />
+                    <ReadOnlyValue
+                      label="Crane"
+                      value={reply.crane?.serialRegistrationNo ?? "Not matched"}
+                    />
+                  </dl>
+                  {reply.parseNote ? (
+                    <p className="text-xs text-amber-700">{reply.parseNote}</p>
+                  ) : null}
+                  {reply.convertedQuotationId ? (
+                    <p className="text-xs text-emerald-700">
+                      Converted to quotation {reply.convertedQuotationId.slice(0, 8)}.
+                    </p>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
     </Section>
   );
 }
@@ -1012,58 +1247,68 @@ function QuotationsSection({
           No quotations yet. They appear here as vendors submit them.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[62rem] text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+        <div>
+          <Table className="min-w-[62rem]">
+            <THead>
               <tr>
-                <th className="px-3 py-2 font-medium">Vendor</th>
-                <th className="px-3 py-2 font-medium">Crane</th>
-                <th className="px-3 py-2 font-medium">Rate</th>
-                <th className="px-3 py-2 font-medium">Mobilisation</th>
-                <th className="px-3 py-2 font-medium">Demob.</th>
-                <th className="px-3 py-2 font-medium">Tax</th>
-                <th className="px-3 py-2 font-medium">Total</th>
-                <th className="px-3 py-2 font-medium">Distance</th>
-                <th className="px-3 py-2 font-medium">Advisories</th>
-                <th className="px-3 py-2 font-medium">Outcome</th>
+                <TH>Vendor</TH>
+                <TH>Source</TH>
+                <TH>Crane</TH>
+                <TH align="right">Rate</TH>
+                <TH align="right">Mobilisation</TH>
+                <TH align="right">Demob.</TH>
+                <TH>Tax</TH>
+                <TH align="right">Total</TH>
+                <TH>Distance</TH>
+                <TH>Advisories</TH>
+                <TH>Outcome</TH>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+            </THead>
+            <TBody>
               {quotations.map((quotation) => (
-                <tr key={quotation.quotationId} className="align-top">
-                  <td className="px-3 py-2.5">
+                <TR key={quotation.quotationId} className="align-top">
+                  <TD>
                     <p className="font-medium text-slate-800">{quotation.vendorName}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[11px] text-slate-500">
                       v{quotation.version}
                       {!quotation.isLatest ? " · superseded" : ""} ·{" "}
                       {formatDate(quotation.submittedAt)}
                     </p>
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-slate-700">
-                    {quotation.craneDescription}
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-slate-700">
+                  </TD>
+                  <TD>
+                    <Badge tone="neutral">
+                      {quotation.source === "PORTAL"
+                        ? "Portal"
+                        : quotation.source === "WHATSAPP"
+                          ? "WhatsApp"
+                          : quotation.source === "EMAIL"
+                            ? "Email"
+                            : "Manual"}
+                    </Badge>
+                  </TD>
+                  <TD className="text-xs text-slate-700">{quotation.craneDescription}</TD>
+                  <TD align="right" className="text-xs text-slate-700 tabular-nums">
                     {quotation.rentalRate.toLocaleString("en-IN")}{" "}
                     <span className="text-slate-500">
                       {quotation.rateBasis.replaceAll("_", " ").toLowerCase()}
                     </span>
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-slate-700">
+                  </TD>
+                  <TD align="right" className="text-xs text-slate-700 tabular-nums">
                     {quotation.mobilisationCharges.toLocaleString("en-IN")}
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-slate-700">
+                  </TD>
+                  <TD align="right" className="text-xs text-slate-700 tabular-nums">
                     {quotation.demobilisationCharges.toLocaleString("en-IN")}
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-slate-700">
+                  </TD>
+                  <TD className="text-xs text-slate-700">
                     {quotation.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"}
-                  </td>
-                  <td className="px-3 py-2.5 text-sm font-semibold text-slate-900">
+                  </TD>
+                  <TD align="right" className="text-sm font-semibold text-slate-900 tabular-nums">
                     {quotation.totalQuotedValue.toLocaleString("en-IN")}
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-slate-600">
+                  </TD>
+                  <TD className="text-xs text-slate-600">
                     {formatDistance(quotation.distanceToSiteKm, quotation.distanceApproximate)}
-                  </td>
-                  <td className="px-3 py-2.5 text-xs">
+                  </TD>
+                  <TD className="text-xs">
                     {quotation.warnings.length === 0 ? (
                       <span className="text-slate-400">—</span>
                     ) : (
@@ -1073,8 +1318,8 @@ function QuotationsSection({
                         ))}
                       </ul>
                     )}
-                  </td>
-                  <td className="px-3 py-2.5">
+                  </TD>
+                  <TD>
                     <StatusBadge status={quotation.status} />
                     {canAward && !closed ? (
                       <AwardControl
@@ -1095,11 +1340,11 @@ function QuotationsSection({
                         }}
                       />
                     ) : null}
-                  </td>
-                </tr>
+                  </TD>
+                </TR>
               ))}
-            </tbody>
-          </table>
+            </TBody>
+          </Table>
         </div>
       )}
     </Section>

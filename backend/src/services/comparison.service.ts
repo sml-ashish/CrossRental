@@ -92,9 +92,6 @@ export interface ComparisonResult {
   };
   /** Internal only: the free-text budget note. */
   rentalBudget: string | null;
-  /** Internal only: the budget as a number, for a like-for-like comparison. */
-  rentalBudgetValue: number | null;
-  poSapReference: string | null;
   rankRule: QuoteRankRule;
   quantity: number;
   awardedCount: number;
@@ -145,12 +142,9 @@ export async function compareQuotationsForLine(
       capacityT: true,
       capacityRule: true,
       requiredStartDate: true,
-      startDateTbc: true,
       durationValue: true,
       durationUnit: true,
       rentalBudget: true,
-      rentalBudgetValue: true,
-      poSapReference: true,
       craneAgeCriteriaYears: true,
       enquiry: {
         select: {
@@ -289,14 +283,12 @@ export async function compareQuotationsForLine(
       capacityRule: line.capacityRule,
       quantity: line.quantity,
       requiredStartDate: line.requiredStartDate?.toISOString() ?? null,
-      startDateTbc: line.startDateTbc,
+      startDateTbc: line.requiredStartDate === null,
       durationValue: num(line.durationValue),
       durationUnit: line.durationUnit,
       craneAgeCriteriaYears: line.craneAgeCriteriaYears,
     },
     rentalBudget: line.rentalBudget,
-    rentalBudgetValue: num(line.rentalBudgetValue),
-    poSapReference: line.poSapReference,
     rankRule: settings.quoteRankRule,
     quantity: line.quantity,
     awardedCount,

@@ -31,6 +31,7 @@ import {
 } from "@/lib/fleet";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { Checkbox, Field, ReadOnlyValue, Section, Select, TextArea, TextInput } from "@/components/ui/form";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -115,21 +116,24 @@ export function VendorRfqDetailPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="font-mono text-xl font-semibold text-slate-900">{rfq.rfqNumber}</h1>
-          <p className="mt-0.5 text-sm text-slate-500">
+      <PageHeader
+        title={rfq.rfqNumber}
+        mono
+        description={
+          <>
             {rfq.enquiryNo}
             {rfq.lineNo ? ` · line ${rfq.lineNo}` : ""}
-          </p>
-        </div>
-        <DeadlineBanner
-          deadline={rfq.submissionDeadline}
-          locked={rfq.locked}
-          canRespond={response.canRespond}
-          responseStatus={response.responseStatus}
-        />
-      </header>
+          </>
+        }
+        actions={
+          <DeadlineBanner
+            deadline={rfq.submissionDeadline}
+            locked={rfq.locked}
+            canRespond={response.canRespond}
+            responseStatus={response.responseStatus}
+          />
+        }
+      />
 
       <RequirementCard rfq={rfq} />
 

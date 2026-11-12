@@ -1,5 +1,6 @@
 import { AppLayout } from "@/routes/app/layout";
 import { VendorProfilePage } from "@/routes/app/vendor-profile";
+import { EmptyState } from "@/components/ui/empty-state";
 
 /**
  * Placeholder for a milestone that has not been built yet.
@@ -9,11 +10,11 @@ import { VendorProfilePage } from "@/routes/app/vendor-profile";
  */
 export function ComingSoon({ feature, milestone }: { feature: string; milestone: string }) {
   return (
-    <div className="card p-8 text-center">
-      <h1 className="text-lg font-semibold text-slate-900">{feature}</h1>
-      <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-        This screen is not built yet. It is scheduled for {milestone}.
-      </p>
+    <div className="card">
+      <EmptyState
+        title={feature}
+        description={`This screen is not built yet. It is scheduled for ${milestone}.`}
+      />
     </div>
   );
 }

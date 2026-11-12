@@ -107,6 +107,7 @@ export interface OnboardingInviteState extends OnboardingState {
     companyName: string | null;
     contactName: string | null;
     email: string | null;
+    contactNumber: string | null;
     expiresAt: string;
   };
 }
@@ -178,7 +179,12 @@ const EMPTY_FORM: OnboardingForm = {
  */
 export function initialForm(
   draft: Partial<OnboardingForm> | null,
-  prefill?: { companyName: string | null; contactName: string | null; email: string | null },
+  prefill?: {
+    companyName: string | null;
+    contactName: string | null;
+    email: string | null;
+    contactNumber?: string | null;
+  },
 ): OnboardingForm {
   const merged: OnboardingForm = { ...EMPTY_FORM, ...(draft ?? {}) };
 
@@ -196,13 +202,17 @@ export function initialForm(
       merged.contacts = [
         {
           name: prefill.contactName,
-          mobile: "",
+          mobile: prefill.contactNumber ?? "",
           telephone: "",
           email: prefill.email ?? "",
           isPrimary: true,
           receivesRfqs: false,
         },
       ];
+    } else if (prefill.contactNumber && merged.contacts[0] && !merged.contacts[0].mobile) {
+      // The number SML captured at invitation time is the company's first point
+      // of contact; fill it only where the vendor has not already typed one.
+      merged.contacts[0] = { ...merged.contacts[0], mobile: prefill.contactNumber };
     }
   }
 
@@ -515,11 +525,78 @@ export function resendActivation(vendorId: string) {
   });
 }
 
-export function inviteVendor(body: { email: string; companyName?: string; contactName?: string }) {
-  return api<{ invitationId: string; token: string; expiresAt: string }>("/vendors/invitations", {
+export function inviteVendor(body: { name: string; email: string; contactNumber: string }) {
+  return api<{
+    invitationId: string;
+    token: string;
+    expiresAt: string;
+    emailSent: boolean;
+  }>("/vendors/invitations", {
     method: "POST",
     body,
   });
+}
+
+// --- bulk invitations ------------------------------------------------------
+
+export interface InviteRowResult {
+  /** Excel row number, so the report points at the line to fix. */
+  row: number;
+  name: string | null;
+  email: string | null;
+  /** `valid` is what `imported` would become — the dry-run wording. */
+  status: "imported" | "valid" | "skipped" | "failed";
+  message: string | null;
+  warnings: string[];
+}
+
+export interface InviteImportResult {
+  dryRun: boolean;
+  summary: {
+    total: number;
+    imported: number;
+    /** Rows that would import in a dry run; 0 once the import has run. */
+    valid: number;
+    skipped: number;
+    failed: number;
+    /** Imported rows whose invitation email did not go out. */
+    emailFailed: number;
+  };
+  rows: InviteRowResult[];
+}
+
+/** Validates the sheet and returns the per-row report without sending anything. */
+export function previewBulkInvitations(file: File): Promise<InviteImportResult> {
+  return apiUpload("/vendors/invitations/bulk?dryRun=true", file, { method: "POST" });
+}
+
+/** Creates and emails one invitation per valid row. */
+export function importBulkInvitations(file: File): Promise<InviteImportResult> {
+  return apiUpload("/vendors/invitations/bulk?dryRun=false", file, { method: "POST" });
+}
+
+/**
+ * Downloads the invitation template through the authenticated API.
+ *
+ * A plain link would arrive without the bearer token, so the bytes are fetched
+ * here and handed to the browser as an object URL.
+ */
+export async function downloadInviteTemplate(): Promise<void> {
+  const base = import.meta.env.VITE_API_BASE_URL ?? "/api";
+  const response = await fetch(`${base}/vendors/invitations/bulk/template`, {
+    headers: { Authorization: `Bearer ${getStoredToken() ?? ""}` },
+  });
+  if (!response.ok) throw new Error("The template could not be downloaded.");
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "crossrentel-vendor-invitations.xlsx";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 export const DOCUMENT_LABELS: Record<string, string> = {

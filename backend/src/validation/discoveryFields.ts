@@ -76,9 +76,15 @@ export const discoveryQuerySchema = z.object({
     .union([z.literal("true"), z.literal("false"), z.boolean()])
     .optional()
     .transform((v) => v === true || v === "true"),
-  /** An optional site pin; when both are present the list is distance-ranked. */
+  /**
+   * An optional site pin; when both are present the list is distance-ranked.
+   * A site address is for when the user knows the place but not the
+   * coordinate: the service geocodes it through the configured provider.
+   */
   siteLat: optionalNumber("Site latitude"),
   siteLng: optionalNumber("Site longitude"),
+  siteLocation: optionalText(200),
+  sitePincode: optionalText(10),
 });
 
 export type DiscoveryQuery = z.infer<typeof discoveryQuerySchema>;

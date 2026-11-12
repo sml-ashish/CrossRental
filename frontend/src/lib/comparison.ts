@@ -83,8 +83,6 @@ export interface ComparisonResult {
     craneAgeCriteriaYears: number | null;
   };
   rentalBudget: string | null;
-  rentalBudgetValue: number | null;
-  poSapReference: string | null;
   rankRule: "TOTAL_ESTIMATED_COST";
   quantity: number;
   awardedCount: number;

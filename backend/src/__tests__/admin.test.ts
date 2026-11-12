@@ -58,6 +58,9 @@ describe("admin dashboard (P0 B1)", () => {
       cranesStale: 0,
       cranesUnverified: 0,
       cranesLapsed: 0,
+      fleetPendingValidation: 0,
+      unmatchedQuotationResponses: 0,
+      failedEmails: 0,
     });
   });
 
@@ -123,6 +126,9 @@ describe("admin dashboard (P0 B1)", () => {
       cranesStale: 1,
       cranesUnverified: 1,
       cranesLapsed: 1,
+      fleetPendingValidation: 0,
+      unmatchedQuotationResponses: 0,
+      failedEmails: 0,
     });
     expect(res.body.dashboard.thresholds.staleFlagDays).toBe(60);
   });

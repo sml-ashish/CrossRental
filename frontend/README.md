@@ -1,4 +1,4 @@
-# Frontend — Crane Discovery & Vendor Portal
+# Frontend — crossrentel
 
 React 19 + Vite 6 + Tailwind CSS 4. TypeScript strict.
 
@@ -111,11 +111,11 @@ Fleet routes:
 | `/app/dashboard`            | vendor | The vendor dashboard (brief 7.5): counters plus the rows behind them |
 | `/app/fleet`                | vendor | The fleet list: filters, search, and the per-crane quick actions |
 | `/app/fleet/new`            | vendor, admin, sales | Add a crane. `?duplicate=<craneId>` prefills from an existing one; an internal user passes `?vendorId=` to add on a vendor's behalf |
-| `/app/fleet/$craneId/edit`  | vendor, admin, sales | Edit a crane. The same screen as add. An on-behalf edit is badged and emails the vendor |
+| `/app/fleet/$craneId/edit`  | vendor, admin, sales | Edit a crane. The same screen as add. An on-behalf edit is badged internally |
 
 An internal user reaching `/app/fleet/new` or `.../edit` writes on the vendor's
 behalf (brief D1). The form shows it is on their behalf, and the backend stamps
-`updatedOnBehalf` and emails `fleet_updated_on_behalf`.
+`updatedOnBehalf` on the audit trail. The vendor is not notified.
 
 ### The fleet screens
 

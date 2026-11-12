@@ -73,6 +73,7 @@ export const ModelName = {
   EnquirySequence: 'EnquirySequence',
   AuditLog: 'AuditLog',
   EmailLog: 'EmailLog',
+  InboundReply: 'InboundReply',
   DistanceCache: 'DistanceCache',
   AppSetting: 'AppSetting',
   RfqSequence: 'RfqSequence',
@@ -100,7 +101,8 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const StateScalarFieldEnum = {
   code: 'code',
   name: 'name',
-  isUnionTerritory: 'isUnionTerritory'
+  isUnionTerritory: 'isUnionTerritory',
+  region: 'region'
 } as const
 
 export type StateScalarFieldEnum = (typeof StateScalarFieldEnum)[keyof typeof StateScalarFieldEnum]
@@ -237,6 +239,7 @@ export const VendorInvitationScalarFieldEnum = {
   email: 'email',
   companyName: 'companyName',
   contactName: 'contactName',
+  contactNumber: 'contactNumber',
   createdById: 'createdById',
   expiresAt: 'expiresAt',
   vendorId: 'vendorId',
@@ -392,7 +395,8 @@ export const RfqScalarFieldEnum = {
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  sentAt: 'sentAt'
+  sentAt: 'sentAt',
+  channels: 'channels'
 } as const
 
 export type RfqScalarFieldEnum = (typeof RfqScalarFieldEnum)[keyof typeof RfqScalarFieldEnum]
@@ -440,6 +444,10 @@ export const RfqVendorRecipientScalarFieldEnum = {
   emails: 'emails',
   emailDeliveryStatus: 'emailDeliveryStatus',
   emailDeliveryError: 'emailDeliveryError',
+  whatsappPhones: 'whatsappPhones',
+  whatsappDeliveryStatus: 'whatsappDeliveryStatus',
+  whatsappDeliveryError: 'whatsappDeliveryError',
+  whatsappMessageIds: 'whatsappMessageIds',
   firstViewedAt: 'firstViewedAt',
   responseStatus: 'responseStatus',
   respondedAt: 'respondedAt',
@@ -510,10 +518,8 @@ export type QuotationAttachmentScalarFieldEnum = (typeof QuotationAttachmentScal
 export const EnquiryScalarFieldEnum = {
   id: 'id',
   enquiryNo: 'enquiryNo',
-  externalReference: 'externalReference',
   enquiryDate: 'enquiryDate',
   source: 'source',
-  salesPartnerName: 'salesPartnerName',
   crOwnerId: 'crOwnerId',
   customerName: 'customerName',
   customerAddress: 'customerAddress',
@@ -524,10 +530,7 @@ export const EnquiryScalarFieldEnum = {
   siteLatitude: 'siteLatitude',
   siteLongitude: 'siteLongitude',
   siteCoordinateSource: 'siteCoordinateSource',
-  businessVertical: 'businessVertical',
-  crossRentalFlag: 'crossRentalFlag',
   overallStatus: 'overallStatus',
-  notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -555,7 +558,6 @@ export const EnquiryLineItemScalarFieldEnum = {
   requiredWindJibM: 'requiredWindJibM',
   configurationNotes: 'configurationNotes',
   requiredStartDate: 'requiredStartDate',
-  startDateTbc: 'startDateTbc',
   durationValue: 'durationValue',
   durationUnit: 'durationUnit',
   workingDaysPerMonth: 'workingDaysPerMonth',
@@ -580,9 +582,6 @@ export const EnquiryLineItemScalarFieldEnum = {
   ppeScope: 'ppeScope',
   rowScope: 'rowScope',
   rentalBudget: 'rentalBudget',
-  rentalBudgetValue: 'rentalBudgetValue',
-  internalNotes: 'internalNotes',
-  poSapReference: 'poSapReference',
   trailStatus: 'trailStatus',
   selectedSource: 'selectedSource',
   closureStatus: 'closureStatus',
@@ -630,12 +629,55 @@ export const EmailLogScalarFieldEnum = {
   subject: 'subject',
   status: 'status',
   error: 'error',
+  channel: 'channel',
+  direction: 'direction',
+  fromAddress: 'fromAddress',
+  bodyText: 'bodyText',
+  bodyHtml: 'bodyHtml',
+  providerMessageId: 'providerMessageId',
   entity: 'entity',
   entityId: 'entityId',
   createdAt: 'createdAt'
 } as const
 
 export type EmailLogScalarFieldEnum = (typeof EmailLogScalarFieldEnum)[keyof typeof EmailLogScalarFieldEnum]
+
+
+export const InboundReplyScalarFieldEnum = {
+  id: 'id',
+  messageLogId: 'messageLogId',
+  channel: 'channel',
+  fromAddress: 'fromAddress',
+  subject: 'subject',
+  bodyText: 'bodyText',
+  receivedAt: 'receivedAt',
+  vendorId: 'vendorId',
+  rfqId: 'rfqId',
+  enquiryLineId: 'enquiryLineId',
+  matchedBy: 'matchedBy',
+  parseNote: 'parseNote',
+  parsedRentalRate: 'parsedRentalRate',
+  parsedRateBasis: 'parsedRateBasis',
+  parsedMobilisation: 'parsedMobilisation',
+  parsedDemobilisation: 'parsedDemobilisation',
+  parsedAvailability: 'parsedAvailability',
+  parsedAvailableFrom: 'parsedAvailableFrom',
+  parsedValidityDate: 'parsedValidityDate',
+  parsedCraneRef: 'parsedCraneRef',
+  parsedRemarks: 'parsedRemarks',
+  parsedAcceptsTerms: 'parsedAcceptsTerms',
+  craneId: 'craneId',
+  attachments: 'attachments',
+  status: 'status',
+  convertedQuotationId: 'convertedQuotationId',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InboundReplyScalarFieldEnum = (typeof InboundReplyScalarFieldEnum)[keyof typeof InboundReplyScalarFieldEnum]
 
 
 export const DistanceCacheScalarFieldEnum = {

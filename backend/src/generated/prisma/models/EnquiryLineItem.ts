@@ -18,7 +18,6 @@ import type * as Prisma from "../internal/prismaNamespace"
  *  * One requirement line on an enquiry, derived from the Cross Rental Enquiry
  *  * Template (P1 section 2). All 31 template rows are represented, including the
  *  * five scope terms the first draft of the field list missed.
- *  *
  *  * `rentalBudget`, `internalNotes` and `poSapReference` are internal only, as is
  *  * the customer block on the header: none of them is ever copied into an RFQ.
  */
@@ -45,7 +44,6 @@ export type EnquiryLineItemAvgAggregateOutputType = {
   durationValue: runtime.Decimal | null
   workingDaysPerMonth: number | null
   craneAgeCriteriaYears: number | null
-  rentalBudgetValue: runtime.Decimal | null
 }
 
 export type EnquiryLineItemSumAggregateOutputType = {
@@ -61,7 +59,6 @@ export type EnquiryLineItemSumAggregateOutputType = {
   durationValue: runtime.Decimal | null
   workingDaysPerMonth: number | null
   craneAgeCriteriaYears: number | null
-  rentalBudgetValue: runtime.Decimal | null
 }
 
 export type EnquiryLineItemMinAggregateOutputType = {
@@ -83,7 +80,6 @@ export type EnquiryLineItemMinAggregateOutputType = {
   requiredWindJibM: runtime.Decimal | null
   configurationNotes: string | null
   requiredStartDate: Date | null
-  startDateTbc: boolean | null
   durationValue: runtime.Decimal | null
   durationUnit: $Enums.DurationUnit | null
   workingDaysPerMonth: number | null
@@ -108,9 +104,6 @@ export type EnquiryLineItemMinAggregateOutputType = {
   ppeScope: string | null
   rowScope: string | null
   rentalBudget: string | null
-  rentalBudgetValue: runtime.Decimal | null
-  internalNotes: string | null
-  poSapReference: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus | null
   selectedSource: $Enums.OwnershipType | null
   closureStatus: string | null
@@ -139,7 +132,6 @@ export type EnquiryLineItemMaxAggregateOutputType = {
   requiredWindJibM: runtime.Decimal | null
   configurationNotes: string | null
   requiredStartDate: Date | null
-  startDateTbc: boolean | null
   durationValue: runtime.Decimal | null
   durationUnit: $Enums.DurationUnit | null
   workingDaysPerMonth: number | null
@@ -164,9 +156,6 @@ export type EnquiryLineItemMaxAggregateOutputType = {
   ppeScope: string | null
   rowScope: string | null
   rentalBudget: string | null
-  rentalBudgetValue: runtime.Decimal | null
-  internalNotes: string | null
-  poSapReference: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus | null
   selectedSource: $Enums.OwnershipType | null
   closureStatus: string | null
@@ -195,7 +184,6 @@ export type EnquiryLineItemCountAggregateOutputType = {
   requiredWindJibM: number
   configurationNotes: number
   requiredStartDate: number
-  startDateTbc: number
   durationValue: number
   durationUnit: number
   workingDaysPerMonth: number
@@ -220,9 +208,6 @@ export type EnquiryLineItemCountAggregateOutputType = {
   ppeScope: number
   rowScope: number
   rentalBudget: number
-  rentalBudgetValue: number
-  internalNotes: number
-  poSapReference: number
   trailStatus: number
   selectedSource: number
   closureStatus: number
@@ -247,7 +232,6 @@ export type EnquiryLineItemAvgAggregateInputType = {
   durationValue?: true
   workingDaysPerMonth?: true
   craneAgeCriteriaYears?: true
-  rentalBudgetValue?: true
 }
 
 export type EnquiryLineItemSumAggregateInputType = {
@@ -263,7 +247,6 @@ export type EnquiryLineItemSumAggregateInputType = {
   durationValue?: true
   workingDaysPerMonth?: true
   craneAgeCriteriaYears?: true
-  rentalBudgetValue?: true
 }
 
 export type EnquiryLineItemMinAggregateInputType = {
@@ -285,7 +268,6 @@ export type EnquiryLineItemMinAggregateInputType = {
   requiredWindJibM?: true
   configurationNotes?: true
   requiredStartDate?: true
-  startDateTbc?: true
   durationValue?: true
   durationUnit?: true
   workingDaysPerMonth?: true
@@ -310,9 +292,6 @@ export type EnquiryLineItemMinAggregateInputType = {
   ppeScope?: true
   rowScope?: true
   rentalBudget?: true
-  rentalBudgetValue?: true
-  internalNotes?: true
-  poSapReference?: true
   trailStatus?: true
   selectedSource?: true
   closureStatus?: true
@@ -341,7 +320,6 @@ export type EnquiryLineItemMaxAggregateInputType = {
   requiredWindJibM?: true
   configurationNotes?: true
   requiredStartDate?: true
-  startDateTbc?: true
   durationValue?: true
   durationUnit?: true
   workingDaysPerMonth?: true
@@ -366,9 +344,6 @@ export type EnquiryLineItemMaxAggregateInputType = {
   ppeScope?: true
   rowScope?: true
   rentalBudget?: true
-  rentalBudgetValue?: true
-  internalNotes?: true
-  poSapReference?: true
   trailStatus?: true
   selectedSource?: true
   closureStatus?: true
@@ -397,7 +372,6 @@ export type EnquiryLineItemCountAggregateInputType = {
   requiredWindJibM?: true
   configurationNotes?: true
   requiredStartDate?: true
-  startDateTbc?: true
   durationValue?: true
   durationUnit?: true
   workingDaysPerMonth?: true
@@ -422,9 +396,6 @@ export type EnquiryLineItemCountAggregateInputType = {
   ppeScope?: true
   rowScope?: true
   rentalBudget?: true
-  rentalBudgetValue?: true
-  internalNotes?: true
-  poSapReference?: true
   trailStatus?: true
   selectedSource?: true
   closureStatus?: true
@@ -540,7 +511,6 @@ export type EnquiryLineItemGroupByOutputType = {
   requiredWindJibM: runtime.Decimal | null
   configurationNotes: string | null
   requiredStartDate: Date | null
-  startDateTbc: boolean
   durationValue: runtime.Decimal | null
   durationUnit: $Enums.DurationUnit | null
   workingDaysPerMonth: number | null
@@ -565,9 +535,6 @@ export type EnquiryLineItemGroupByOutputType = {
   ppeScope: string | null
   rowScope: string | null
   rentalBudget: string | null
-  rentalBudgetValue: runtime.Decimal | null
-  internalNotes: string | null
-  poSapReference: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus
   selectedSource: $Enums.OwnershipType | null
   closureStatus: string | null
@@ -619,7 +586,6 @@ export type EnquiryLineItemWhereInput = {
   requiredWindJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
-  startDateTbc?: Prisma.BoolFilter<"EnquiryLineItem"> | boolean
   durationValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
@@ -644,9 +610,6 @@ export type EnquiryLineItemWhereInput = {
   ppeScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  rentalBudgetValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  poSapReference?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.EnumOwnershipTypeNullableFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
@@ -659,6 +622,7 @@ export type EnquiryLineItemWhereInput = {
   rfqs?: Prisma.RfqListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
   recommendations?: Prisma.RecommendationSnapshotListRelationFilter
+  inboundReplies?: Prisma.InboundReplyListRelationFilter
 }
 
 export type EnquiryLineItemOrderByWithRelationInput = {
@@ -680,7 +644,6 @@ export type EnquiryLineItemOrderByWithRelationInput = {
   requiredWindJibM?: Prisma.SortOrderInput | Prisma.SortOrder
   configurationNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
-  startDateTbc?: Prisma.SortOrder
   durationValue?: Prisma.SortOrderInput | Prisma.SortOrder
   durationUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -705,9 +668,6 @@ export type EnquiryLineItemOrderByWithRelationInput = {
   ppeScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rowScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rentalBudget?: Prisma.SortOrderInput | Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrderInput | Prisma.SortOrder
-  internalNotes?: Prisma.SortOrderInput | Prisma.SortOrder
-  poSapReference?: Prisma.SortOrderInput | Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   selectedSource?: Prisma.SortOrderInput | Prisma.SortOrder
   closureStatus?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -720,6 +680,7 @@ export type EnquiryLineItemOrderByWithRelationInput = {
   rfqs?: Prisma.RfqOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
   recommendations?: Prisma.RecommendationSnapshotOrderByRelationAggregateInput
+  inboundReplies?: Prisma.InboundReplyOrderByRelationAggregateInput
 }
 
 export type EnquiryLineItemWhereUniqueInput = Prisma.AtLeast<{
@@ -745,7 +706,6 @@ export type EnquiryLineItemWhereUniqueInput = Prisma.AtLeast<{
   requiredWindJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
-  startDateTbc?: Prisma.BoolFilter<"EnquiryLineItem"> | boolean
   durationValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
@@ -770,9 +730,6 @@ export type EnquiryLineItemWhereUniqueInput = Prisma.AtLeast<{
   ppeScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  rentalBudgetValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  poSapReference?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.EnumOwnershipTypeNullableFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
@@ -785,6 +742,7 @@ export type EnquiryLineItemWhereUniqueInput = Prisma.AtLeast<{
   rfqs?: Prisma.RfqListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
   recommendations?: Prisma.RecommendationSnapshotListRelationFilter
+  inboundReplies?: Prisma.InboundReplyListRelationFilter
 }, "id" | "enquiryId_lineNo">
 
 export type EnquiryLineItemOrderByWithAggregationInput = {
@@ -806,7 +764,6 @@ export type EnquiryLineItemOrderByWithAggregationInput = {
   requiredWindJibM?: Prisma.SortOrderInput | Prisma.SortOrder
   configurationNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
-  startDateTbc?: Prisma.SortOrder
   durationValue?: Prisma.SortOrderInput | Prisma.SortOrder
   durationUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -831,9 +788,6 @@ export type EnquiryLineItemOrderByWithAggregationInput = {
   ppeScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rowScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rentalBudget?: Prisma.SortOrderInput | Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrderInput | Prisma.SortOrder
-  internalNotes?: Prisma.SortOrderInput | Prisma.SortOrder
-  poSapReference?: Prisma.SortOrderInput | Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   selectedSource?: Prisma.SortOrderInput | Prisma.SortOrder
   closureStatus?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -870,7 +824,6 @@ export type EnquiryLineItemScalarWhereWithAggregatesInput = {
   requiredWindJibM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"EnquiryLineItem"> | Date | string | null
-  startDateTbc?: Prisma.BoolWithAggregatesFilter<"EnquiryLineItem"> | boolean
   durationValue?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableWithAggregatesFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableWithAggregatesFilter<"EnquiryLineItem"> | number | null
@@ -895,9 +848,6 @@ export type EnquiryLineItemScalarWhereWithAggregatesInput = {
   ppeScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  rentalBudgetValue?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  poSapReference?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusWithAggregatesFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.EnumOwnershipTypeNullableWithAggregatesFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
@@ -924,7 +874,6 @@ export type EnquiryLineItemCreateInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -949,9 +898,6 @@ export type EnquiryLineItemCreateInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -964,6 +910,7 @@ export type EnquiryLineItemCreateInput = {
   rfqs?: Prisma.RfqCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUncheckedCreateInput = {
@@ -985,7 +932,6 @@ export type EnquiryLineItemUncheckedCreateInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -1010,9 +956,6 @@ export type EnquiryLineItemUncheckedCreateInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -1023,6 +966,7 @@ export type EnquiryLineItemUncheckedCreateInput = {
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUpdateInput = {
@@ -1042,7 +986,6 @@ export type EnquiryLineItemUpdateInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1067,9 +1010,6 @@ export type EnquiryLineItemUpdateInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1082,6 +1022,7 @@ export type EnquiryLineItemUpdateInput = {
   rfqs?: Prisma.RfqUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateInput = {
@@ -1103,7 +1044,6 @@ export type EnquiryLineItemUncheckedUpdateInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1128,9 +1068,6 @@ export type EnquiryLineItemUncheckedUpdateInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1141,6 +1078,7 @@ export type EnquiryLineItemUncheckedUpdateInput = {
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemCreateManyInput = {
@@ -1162,7 +1100,6 @@ export type EnquiryLineItemCreateManyInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -1187,9 +1124,6 @@ export type EnquiryLineItemCreateManyInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -1216,7 +1150,6 @@ export type EnquiryLineItemUpdateManyMutationInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1241,9 +1174,6 @@ export type EnquiryLineItemUpdateManyMutationInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1272,7 +1202,6 @@ export type EnquiryLineItemUncheckedUpdateManyInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1297,9 +1226,6 @@ export type EnquiryLineItemUncheckedUpdateManyInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1348,7 +1274,6 @@ export type EnquiryLineItemCountOrderByAggregateInput = {
   requiredWindJibM?: Prisma.SortOrder
   configurationNotes?: Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrder
-  startDateTbc?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   durationUnit?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
@@ -1373,9 +1298,6 @@ export type EnquiryLineItemCountOrderByAggregateInput = {
   ppeScope?: Prisma.SortOrder
   rowScope?: Prisma.SortOrder
   rentalBudget?: Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrder
-  internalNotes?: Prisma.SortOrder
-  poSapReference?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   selectedSource?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
@@ -1398,7 +1320,6 @@ export type EnquiryLineItemAvgOrderByAggregateInput = {
   durationValue?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrder
 }
 
 export type EnquiryLineItemMaxOrderByAggregateInput = {
@@ -1420,7 +1341,6 @@ export type EnquiryLineItemMaxOrderByAggregateInput = {
   requiredWindJibM?: Prisma.SortOrder
   configurationNotes?: Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrder
-  startDateTbc?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   durationUnit?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
@@ -1445,9 +1365,6 @@ export type EnquiryLineItemMaxOrderByAggregateInput = {
   ppeScope?: Prisma.SortOrder
   rowScope?: Prisma.SortOrder
   rentalBudget?: Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrder
-  internalNotes?: Prisma.SortOrder
-  poSapReference?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   selectedSource?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
@@ -1476,7 +1393,6 @@ export type EnquiryLineItemMinOrderByAggregateInput = {
   requiredWindJibM?: Prisma.SortOrder
   configurationNotes?: Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrder
-  startDateTbc?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   durationUnit?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
@@ -1501,9 +1417,6 @@ export type EnquiryLineItemMinOrderByAggregateInput = {
   ppeScope?: Prisma.SortOrder
   rowScope?: Prisma.SortOrder
   rentalBudget?: Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrder
-  internalNotes?: Prisma.SortOrder
-  poSapReference?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   selectedSource?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
@@ -1526,7 +1439,6 @@ export type EnquiryLineItemSumOrderByAggregateInput = {
   durationValue?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
-  rentalBudgetValue?: Prisma.SortOrder
 }
 
 export type EnquiryLineItemScalarRelationFilter = {
@@ -1662,6 +1574,22 @@ export type NullableEnumOwnershipTypeFieldUpdateOperationsInput = {
   set?: $Enums.OwnershipType | null
 }
 
+export type EnquiryLineItemCreateNestedOneWithoutInboundRepliesInput = {
+  create?: Prisma.XOR<Prisma.EnquiryLineItemCreateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput>
+  connectOrCreate?: Prisma.EnquiryLineItemCreateOrConnectWithoutInboundRepliesInput
+  connect?: Prisma.EnquiryLineItemWhereUniqueInput
+}
+
+export type EnquiryLineItemUpdateOneWithoutInboundRepliesNestedInput = {
+  create?: Prisma.XOR<Prisma.EnquiryLineItemCreateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput>
+  connectOrCreate?: Prisma.EnquiryLineItemCreateOrConnectWithoutInboundRepliesInput
+  upsert?: Prisma.EnquiryLineItemUpsertWithoutInboundRepliesInput
+  disconnect?: Prisma.EnquiryLineItemWhereInput | boolean
+  delete?: Prisma.EnquiryLineItemWhereInput | boolean
+  connect?: Prisma.EnquiryLineItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EnquiryLineItemUpdateToOneWithWhereWithoutInboundRepliesInput, Prisma.EnquiryLineItemUpdateWithoutInboundRepliesInput>, Prisma.EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput>
+}
+
 export type EnquiryLineItemCreateNestedOneWithoutRecommendationsInput = {
   create?: Prisma.XOR<Prisma.EnquiryLineItemCreateWithoutRecommendationsInput, Prisma.EnquiryLineItemUncheckedCreateWithoutRecommendationsInput>
   connectOrCreate?: Prisma.EnquiryLineItemCreateOrConnectWithoutRecommendationsInput
@@ -1693,7 +1621,6 @@ export type EnquiryLineItemCreateWithoutCraneTypeInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -1718,9 +1645,6 @@ export type EnquiryLineItemCreateWithoutCraneTypeInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -1732,6 +1656,7 @@ export type EnquiryLineItemCreateWithoutCraneTypeInput = {
   rfqs?: Prisma.RfqCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUncheckedCreateWithoutCraneTypeInput = {
@@ -1752,7 +1677,6 @@ export type EnquiryLineItemUncheckedCreateWithoutCraneTypeInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -1777,9 +1701,6 @@ export type EnquiryLineItemUncheckedCreateWithoutCraneTypeInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -1790,6 +1711,7 @@ export type EnquiryLineItemUncheckedCreateWithoutCraneTypeInput = {
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemCreateOrConnectWithoutCraneTypeInput = {
@@ -1840,7 +1762,6 @@ export type EnquiryLineItemScalarWhereInput = {
   requiredWindJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
-  startDateTbc?: Prisma.BoolFilter<"EnquiryLineItem"> | boolean
   durationValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
@@ -1865,9 +1786,6 @@ export type EnquiryLineItemScalarWhereInput = {
   ppeScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  rentalBudgetValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  poSapReference?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.EnumOwnershipTypeNullableFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
@@ -1894,7 +1812,6 @@ export type EnquiryLineItemCreateWithoutRfqsInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -1919,9 +1836,6 @@ export type EnquiryLineItemCreateWithoutRfqsInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -1933,6 +1847,7 @@ export type EnquiryLineItemCreateWithoutRfqsInput = {
   craneType?: Prisma.CraneTypeCreateNestedOneWithoutEnquiryLinesInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUncheckedCreateWithoutRfqsInput = {
@@ -1954,7 +1869,6 @@ export type EnquiryLineItemUncheckedCreateWithoutRfqsInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -1979,9 +1893,6 @@ export type EnquiryLineItemUncheckedCreateWithoutRfqsInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -1991,6 +1902,7 @@ export type EnquiryLineItemUncheckedCreateWithoutRfqsInput = {
   updatedAt?: Date | string
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemCreateOrConnectWithoutRfqsInput = {
@@ -2026,7 +1938,6 @@ export type EnquiryLineItemUpdateWithoutRfqsInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2051,9 +1962,6 @@ export type EnquiryLineItemUpdateWithoutRfqsInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2065,6 +1973,7 @@ export type EnquiryLineItemUpdateWithoutRfqsInput = {
   craneType?: Prisma.CraneTypeUpdateOneWithoutEnquiryLinesNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
@@ -2086,7 +1995,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2111,9 +2019,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2123,6 +2028,7 @@ export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemCreateWithoutReservationsInput = {
@@ -2142,7 +2048,6 @@ export type EnquiryLineItemCreateWithoutReservationsInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2167,9 +2072,6 @@ export type EnquiryLineItemCreateWithoutReservationsInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2181,6 +2083,7 @@ export type EnquiryLineItemCreateWithoutReservationsInput = {
   craneType?: Prisma.CraneTypeCreateNestedOneWithoutEnquiryLinesInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUncheckedCreateWithoutReservationsInput = {
@@ -2202,7 +2105,6 @@ export type EnquiryLineItemUncheckedCreateWithoutReservationsInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2227,9 +2129,6 @@ export type EnquiryLineItemUncheckedCreateWithoutReservationsInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2239,6 +2138,7 @@ export type EnquiryLineItemUncheckedCreateWithoutReservationsInput = {
   updatedAt?: Date | string
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemCreateOrConnectWithoutReservationsInput = {
@@ -2274,7 +2174,6 @@ export type EnquiryLineItemUpdateWithoutReservationsInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2299,9 +2198,6 @@ export type EnquiryLineItemUpdateWithoutReservationsInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2313,6 +2209,7 @@ export type EnquiryLineItemUpdateWithoutReservationsInput = {
   craneType?: Prisma.CraneTypeUpdateOneWithoutEnquiryLinesNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
@@ -2334,7 +2231,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2359,9 +2255,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2371,6 +2264,7 @@ export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemCreateWithoutEnquiryInput = {
@@ -2390,7 +2284,6 @@ export type EnquiryLineItemCreateWithoutEnquiryInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2415,9 +2308,6 @@ export type EnquiryLineItemCreateWithoutEnquiryInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2429,6 +2319,7 @@ export type EnquiryLineItemCreateWithoutEnquiryInput = {
   rfqs?: Prisma.RfqCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUncheckedCreateWithoutEnquiryInput = {
@@ -2449,7 +2340,6 @@ export type EnquiryLineItemUncheckedCreateWithoutEnquiryInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2474,9 +2364,6 @@ export type EnquiryLineItemUncheckedCreateWithoutEnquiryInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2487,6 +2374,7 @@ export type EnquiryLineItemUncheckedCreateWithoutEnquiryInput = {
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutEnquiryLineInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemCreateOrConnectWithoutEnquiryInput = {
@@ -2515,7 +2403,7 @@ export type EnquiryLineItemUpdateManyWithWhereWithoutEnquiryInput = {
   data: Prisma.XOR<Prisma.EnquiryLineItemUpdateManyMutationInput, Prisma.EnquiryLineItemUncheckedUpdateManyWithoutEnquiryInput>
 }
 
-export type EnquiryLineItemCreateWithoutRecommendationsInput = {
+export type EnquiryLineItemCreateWithoutInboundRepliesInput = {
   id?: string
   lineNo: number
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2532,7 +2420,6 @@ export type EnquiryLineItemCreateWithoutRecommendationsInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2557,9 +2444,6 @@ export type EnquiryLineItemCreateWithoutRecommendationsInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2571,6 +2455,243 @@ export type EnquiryLineItemCreateWithoutRecommendationsInput = {
   craneType?: Prisma.CraneTypeCreateNestedOneWithoutEnquiryLinesInput
   rfqs?: Prisma.RfqCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutEnquiryLineInput
+  recommendations?: Prisma.RecommendationSnapshotCreateNestedManyWithoutEnquiryLineInput
+}
+
+export type EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput = {
+  id?: string
+  enquiryId: string
+  lineNo: number
+  craneTypeCode?: string | null
+  capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  quantity?: number
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  configurationNotes?: string | null
+  requiredStartDate?: Date | string | null
+  durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  durationUnit?: $Enums.DurationUnit | null
+  workingDaysPerMonth?: number | null
+  mobilisationTerms?: string | null
+  demobilisationTerms?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  supportCraneScope?: string | null
+  steelMatsGroundPrepScope?: string | null
+  ehsHrCompliance?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  craneAgeCriteriaYears?: number | null
+  otherTerms?: string | null
+  additionalManpowerScope?: string | null
+  intraSiteMovementScope?: string | null
+  prereleaseTerms?: string | null
+  ppeScope?: string | null
+  rowScope?: string | null
+  rentalBudget?: string | null
+  trailStatus?: $Enums.EnquiryLineTrailStatus
+  selectedSource?: $Enums.OwnershipType | null
+  closureStatus?: string | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutEnquiryLineInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutEnquiryLineInput
+  recommendations?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutEnquiryLineInput
+}
+
+export type EnquiryLineItemCreateOrConnectWithoutInboundRepliesInput = {
+  where: Prisma.EnquiryLineItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.EnquiryLineItemCreateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput>
+}
+
+export type EnquiryLineItemUpsertWithoutInboundRepliesInput = {
+  update: Prisma.XOR<Prisma.EnquiryLineItemUpdateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput>
+  create: Prisma.XOR<Prisma.EnquiryLineItemCreateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput>
+  where?: Prisma.EnquiryLineItemWhereInput
+}
+
+export type EnquiryLineItemUpdateToOneWithWhereWithoutInboundRepliesInput = {
+  where?: Prisma.EnquiryLineItemWhereInput
+  data: Prisma.XOR<Prisma.EnquiryLineItemUpdateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput>
+}
+
+export type EnquiryLineItemUpdateWithoutInboundRepliesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
+  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
+  closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  enquiry?: Prisma.EnquiryUpdateOneRequiredWithoutLinesNestedInput
+  craneType?: Prisma.CraneTypeUpdateOneWithoutEnquiryLinesNestedInput
+  rfqs?: Prisma.RfqUpdateManyWithoutEnquiryLineNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutEnquiryLineNestedInput
+  recommendations?: Prisma.RecommendationSnapshotUpdateManyWithoutEnquiryLineNestedInput
+}
+
+export type EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
+  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
+  closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rfqs?: Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  recommendations?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutEnquiryLineNestedInput
+}
+
+export type EnquiryLineItemCreateWithoutRecommendationsInput = {
+  id?: string
+  lineNo: number
+  capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  quantity?: number
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  configurationNotes?: string | null
+  requiredStartDate?: Date | string | null
+  durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  durationUnit?: $Enums.DurationUnit | null
+  workingDaysPerMonth?: number | null
+  mobilisationTerms?: string | null
+  demobilisationTerms?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  supportCraneScope?: string | null
+  steelMatsGroundPrepScope?: string | null
+  ehsHrCompliance?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  craneAgeCriteriaYears?: number | null
+  otherTerms?: string | null
+  additionalManpowerScope?: string | null
+  intraSiteMovementScope?: string | null
+  prereleaseTerms?: string | null
+  ppeScope?: string | null
+  rowScope?: string | null
+  rentalBudget?: string | null
+  trailStatus?: $Enums.EnquiryLineTrailStatus
+  selectedSource?: $Enums.OwnershipType | null
+  closureStatus?: string | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  enquiry: Prisma.EnquiryCreateNestedOneWithoutLinesInput
+  craneType?: Prisma.CraneTypeCreateNestedOneWithoutEnquiryLinesInput
+  rfqs?: Prisma.RfqCreateNestedManyWithoutEnquiryLineInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemUncheckedCreateWithoutRecommendationsInput = {
@@ -2592,7 +2713,6 @@ export type EnquiryLineItemUncheckedCreateWithoutRecommendationsInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2617,9 +2737,6 @@ export type EnquiryLineItemUncheckedCreateWithoutRecommendationsInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2629,6 +2746,7 @@ export type EnquiryLineItemUncheckedCreateWithoutRecommendationsInput = {
   updatedAt?: Date | string
   rfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutEnquiryLineInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutEnquiryLineInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutEnquiryLineInput
 }
 
 export type EnquiryLineItemCreateOrConnectWithoutRecommendationsInput = {
@@ -2664,7 +2782,6 @@ export type EnquiryLineItemUpdateWithoutRecommendationsInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2689,9 +2806,6 @@ export type EnquiryLineItemUpdateWithoutRecommendationsInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2703,6 +2817,7 @@ export type EnquiryLineItemUpdateWithoutRecommendationsInput = {
   craneType?: Prisma.CraneTypeUpdateOneWithoutEnquiryLinesNestedInput
   rfqs?: Prisma.RfqUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateWithoutRecommendationsInput = {
@@ -2724,7 +2839,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutRecommendationsInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2749,9 +2863,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutRecommendationsInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2761,6 +2872,7 @@ export type EnquiryLineItemUncheckedUpdateWithoutRecommendationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemCreateManyCraneTypeInput = {
@@ -2781,7 +2893,6 @@ export type EnquiryLineItemCreateManyCraneTypeInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -2806,9 +2917,6 @@ export type EnquiryLineItemCreateManyCraneTypeInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -2835,7 +2943,6 @@ export type EnquiryLineItemUpdateWithoutCraneTypeInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2860,9 +2967,6 @@ export type EnquiryLineItemUpdateWithoutCraneTypeInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2874,6 +2978,7 @@ export type EnquiryLineItemUpdateWithoutCraneTypeInput = {
   rfqs?: Prisma.RfqUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateWithoutCraneTypeInput = {
@@ -2894,7 +2999,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutCraneTypeInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2919,9 +3023,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutCraneTypeInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2932,6 +3033,7 @@ export type EnquiryLineItemUncheckedUpdateWithoutCraneTypeInput = {
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeInput = {
@@ -2952,7 +3054,6 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -2977,9 +3078,6 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3007,7 +3105,6 @@ export type EnquiryLineItemCreateManyEnquiryInput = {
   requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: string | null
   requiredStartDate?: Date | string | null
-  startDateTbc?: boolean
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
@@ -3032,9 +3129,6 @@ export type EnquiryLineItemCreateManyEnquiryInput = {
   ppeScope?: string | null
   rowScope?: string | null
   rentalBudget?: string | null
-  rentalBudgetValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: string | null
-  poSapReference?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
@@ -3061,7 +3155,6 @@ export type EnquiryLineItemUpdateWithoutEnquiryInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3086,9 +3179,6 @@ export type EnquiryLineItemUpdateWithoutEnquiryInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3100,6 +3190,7 @@ export type EnquiryLineItemUpdateWithoutEnquiryInput = {
   rfqs?: Prisma.RfqUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateWithoutEnquiryInput = {
@@ -3120,7 +3211,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutEnquiryInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3145,9 +3235,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutEnquiryInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3158,6 +3245,7 @@ export type EnquiryLineItemUncheckedUpdateWithoutEnquiryInput = {
   rfqs?: Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutEnquiryLineNestedInput
   recommendations?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutEnquiryLineNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutEnquiryLineNestedInput
 }
 
 export type EnquiryLineItemUncheckedUpdateManyWithoutEnquiryInput = {
@@ -3178,7 +3266,6 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutEnquiryInput = {
   requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -3203,9 +3290,6 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutEnquiryInput = {
   ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudgetValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  internalNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  poSapReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3224,12 +3308,14 @@ export type EnquiryLineItemCountOutputType = {
   rfqs: number
   reservations: number
   recommendations: number
+  inboundReplies: number
 }
 
 export type EnquiryLineItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rfqs?: boolean | EnquiryLineItemCountOutputTypeCountRfqsArgs
   reservations?: boolean | EnquiryLineItemCountOutputTypeCountReservationsArgs
   recommendations?: boolean | EnquiryLineItemCountOutputTypeCountRecommendationsArgs
+  inboundReplies?: boolean | EnquiryLineItemCountOutputTypeCountInboundRepliesArgs
 }
 
 /**
@@ -3263,6 +3349,13 @@ export type EnquiryLineItemCountOutputTypeCountRecommendationsArgs<ExtArgs exten
   where?: Prisma.RecommendationSnapshotWhereInput
 }
 
+/**
+ * EnquiryLineItemCountOutputType without action
+ */
+export type EnquiryLineItemCountOutputTypeCountInboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InboundReplyWhereInput
+}
+
 
 export type EnquiryLineItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3283,7 +3376,6 @@ export type EnquiryLineItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   requiredWindJibM?: boolean
   configurationNotes?: boolean
   requiredStartDate?: boolean
-  startDateTbc?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
@@ -3308,9 +3400,6 @@ export type EnquiryLineItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   ppeScope?: boolean
   rowScope?: boolean
   rentalBudget?: boolean
-  rentalBudgetValue?: boolean
-  internalNotes?: boolean
-  poSapReference?: boolean
   trailStatus?: boolean
   selectedSource?: boolean
   closureStatus?: boolean
@@ -3323,6 +3412,7 @@ export type EnquiryLineItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   rfqs?: boolean | Prisma.EnquiryLineItem$rfqsArgs<ExtArgs>
   reservations?: boolean | Prisma.EnquiryLineItem$reservationsArgs<ExtArgs>
   recommendations?: boolean | Prisma.EnquiryLineItem$recommendationsArgs<ExtArgs>
+  inboundReplies?: boolean | Prisma.EnquiryLineItem$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.EnquiryLineItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["enquiryLineItem"]>
 
@@ -3345,7 +3435,6 @@ export type EnquiryLineItemSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   requiredWindJibM?: boolean
   configurationNotes?: boolean
   requiredStartDate?: boolean
-  startDateTbc?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
@@ -3370,9 +3459,6 @@ export type EnquiryLineItemSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   ppeScope?: boolean
   rowScope?: boolean
   rentalBudget?: boolean
-  rentalBudgetValue?: boolean
-  internalNotes?: boolean
-  poSapReference?: boolean
   trailStatus?: boolean
   selectedSource?: boolean
   closureStatus?: boolean
@@ -3403,7 +3489,6 @@ export type EnquiryLineItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   requiredWindJibM?: boolean
   configurationNotes?: boolean
   requiredStartDate?: boolean
-  startDateTbc?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
@@ -3428,9 +3513,6 @@ export type EnquiryLineItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   ppeScope?: boolean
   rowScope?: boolean
   rentalBudget?: boolean
-  rentalBudgetValue?: boolean
-  internalNotes?: boolean
-  poSapReference?: boolean
   trailStatus?: boolean
   selectedSource?: boolean
   closureStatus?: boolean
@@ -3461,7 +3543,6 @@ export type EnquiryLineItemSelectScalar = {
   requiredWindJibM?: boolean
   configurationNotes?: boolean
   requiredStartDate?: boolean
-  startDateTbc?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
@@ -3486,9 +3567,6 @@ export type EnquiryLineItemSelectScalar = {
   ppeScope?: boolean
   rowScope?: boolean
   rentalBudget?: boolean
-  rentalBudgetValue?: boolean
-  internalNotes?: boolean
-  poSapReference?: boolean
   trailStatus?: boolean
   selectedSource?: boolean
   closureStatus?: boolean
@@ -3498,13 +3576,14 @@ export type EnquiryLineItemSelectScalar = {
   updatedAt?: boolean
 }
 
-export type EnquiryLineItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryId" | "lineNo" | "craneTypeCode" | "capacityT" | "capacityRule" | "capacityNote" | "quantity" | "applicationDescription" | "loadDescription" | "liftLoadT" | "workingRadiusM" | "requiredMainBoomM" | "requiredFixedJibM" | "requiredLuffingJibM" | "requiredWindJibM" | "configurationNotes" | "requiredStartDate" | "startDateTbc" | "durationValue" | "durationUnit" | "workingDaysPerMonth" | "mobilisationTerms" | "demobilisationTerms" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "accommodationConveyance" | "paymentTerms" | "supportCraneScope" | "steelMatsGroundPrepScope" | "ehsHrCompliance" | "insuranceTerms" | "extensionClause" | "craneAgeCriteriaYears" | "otherTerms" | "additionalManpowerScope" | "intraSiteMovementScope" | "prereleaseTerms" | "ppeScope" | "rowScope" | "rentalBudget" | "rentalBudgetValue" | "internalNotes" | "poSapReference" | "trailStatus" | "selectedSource" | "closureStatus" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiryLineItem"]>
+export type EnquiryLineItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryId" | "lineNo" | "craneTypeCode" | "capacityT" | "capacityRule" | "capacityNote" | "quantity" | "applicationDescription" | "loadDescription" | "liftLoadT" | "workingRadiusM" | "requiredMainBoomM" | "requiredFixedJibM" | "requiredLuffingJibM" | "requiredWindJibM" | "configurationNotes" | "requiredStartDate" | "durationValue" | "durationUnit" | "workingDaysPerMonth" | "mobilisationTerms" | "demobilisationTerms" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "accommodationConveyance" | "paymentTerms" | "supportCraneScope" | "steelMatsGroundPrepScope" | "ehsHrCompliance" | "insuranceTerms" | "extensionClause" | "craneAgeCriteriaYears" | "otherTerms" | "additionalManpowerScope" | "intraSiteMovementScope" | "prereleaseTerms" | "ppeScope" | "rowScope" | "rentalBudget" | "trailStatus" | "selectedSource" | "closureStatus" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiryLineItem"]>
 export type EnquiryLineItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enquiry?: boolean | Prisma.EnquiryDefaultArgs<ExtArgs>
   craneType?: boolean | Prisma.EnquiryLineItem$craneTypeArgs<ExtArgs>
   rfqs?: boolean | Prisma.EnquiryLineItem$rfqsArgs<ExtArgs>
   reservations?: boolean | Prisma.EnquiryLineItem$reservationsArgs<ExtArgs>
   recommendations?: boolean | Prisma.EnquiryLineItem$recommendationsArgs<ExtArgs>
+  inboundReplies?: boolean | Prisma.EnquiryLineItem$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.EnquiryLineItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EnquiryLineItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3524,6 +3603,7 @@ export type $EnquiryLineItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     rfqs: Prisma.$RfqPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
     recommendations: Prisma.$RecommendationSnapshotPayload<ExtArgs>[]
+    inboundReplies: Prisma.$InboundReplyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3547,7 +3627,6 @@ export type $EnquiryLineItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     requiredWindJibM: runtime.Decimal | null
     configurationNotes: string | null
     requiredStartDate: Date | null
-    startDateTbc: boolean
     durationValue: runtime.Decimal | null
     durationUnit: $Enums.DurationUnit | null
     workingDaysPerMonth: number | null
@@ -3572,9 +3651,6 @@ export type $EnquiryLineItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     ppeScope: string | null
     rowScope: string | null
     rentalBudget: string | null
-    rentalBudgetValue: runtime.Decimal | null
-    internalNotes: string | null
-    poSapReference: string | null
     trailStatus: $Enums.EnquiryLineTrailStatus
     /**
      * SML or vendor, when a source is finalised (P3).
@@ -3984,6 +4060,7 @@ export interface Prisma__EnquiryLineItemClient<T, Null = never, ExtArgs extends 
   rfqs<T extends Prisma.EnquiryLineItem$rfqsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnquiryLineItem$rfqsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.EnquiryLineItem$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnquiryLineItem$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recommendations<T extends Prisma.EnquiryLineItem$recommendationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnquiryLineItem$recommendationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecommendationSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inboundReplies<T extends Prisma.EnquiryLineItem$inboundRepliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EnquiryLineItem$inboundRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4031,7 +4108,6 @@ export interface EnquiryLineItemFieldRefs {
   readonly requiredWindJibM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
   readonly configurationNotes: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly requiredStartDate: Prisma.FieldRef<"EnquiryLineItem", 'DateTime'>
-  readonly startDateTbc: Prisma.FieldRef<"EnquiryLineItem", 'Boolean'>
   readonly durationValue: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
   readonly durationUnit: Prisma.FieldRef<"EnquiryLineItem", 'DurationUnit'>
   readonly workingDaysPerMonth: Prisma.FieldRef<"EnquiryLineItem", 'Int'>
@@ -4056,9 +4132,6 @@ export interface EnquiryLineItemFieldRefs {
   readonly ppeScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly rowScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly rentalBudget: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly rentalBudgetValue: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly internalNotes: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly poSapReference: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly trailStatus: Prisma.FieldRef<"EnquiryLineItem", 'EnquiryLineTrailStatus'>
   readonly selectedSource: Prisma.FieldRef<"EnquiryLineItem", 'OwnershipType'>
   readonly closureStatus: Prisma.FieldRef<"EnquiryLineItem", 'String'>
@@ -4555,6 +4628,30 @@ export type EnquiryLineItem$recommendationsArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.RecommendationSnapshotScalarFieldEnum | Prisma.RecommendationSnapshotScalarFieldEnum[]
+}
+
+/**
+ * EnquiryLineItem.inboundReplies
+ */
+export type EnquiryLineItem$inboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InboundReply
+   */
+  select?: Prisma.InboundReplySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InboundReply
+   */
+  omit?: Prisma.InboundReplyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InboundReplyInclude<ExtArgs> | null
+  where?: Prisma.InboundReplyWhereInput
+  orderBy?: Prisma.InboundReplyOrderByWithRelationInput | Prisma.InboundReplyOrderByWithRelationInput[]
+  cursor?: Prisma.InboundReplyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InboundReplyScalarFieldEnum | Prisma.InboundReplyScalarFieldEnum[]
 }
 
 /**

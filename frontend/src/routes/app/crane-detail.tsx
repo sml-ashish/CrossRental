@@ -1,13 +1,14 @@
+import { useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
 import { getCraneProfile } from "@/lib/craneProfile";
-import { CRANE_STATUS_LABELS, type CraneStatus } from "@/lib/fleet";
+import { CRANE_STATUS_LABELS, openLoadChart, type CraneStatus } from "@/lib/fleet";
 import { DAY_STATE_LABELS, DAY_STATE_TONES, type CalendarDayState } from "@/lib/calendar";
 import { formatDate } from "@/lib/enquiries";
 import { formatInr } from "@/lib/quotations";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { ReadOnlyValue, Section } from "@/components/ui/form";
 
@@ -27,6 +28,20 @@ export function CraneDetailPage() {
     queryKey: ["crane-profile", craneId],
     queryFn: () => getCraneProfile(craneId),
   });
+  const [openingChart, setOpeningChart] = useState(false);
+  const [chartError, setChartError] = useState<string | null>(null);
+
+  async function viewChart() {
+    setOpeningChart(true);
+    setChartError(null);
+    try {
+      await openLoadChart(craneId);
+    } catch {
+      setChartError("The load chart could not be opened.");
+    } finally {
+      setOpeningChart(false);
+    }
+  }
 
   if (profile.isPending) {
     return (
@@ -45,40 +60,39 @@ export function CraneDetailPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <Link
-          to="/app/discovery"
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Discovery
-        </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="font-mono text-xl font-semibold text-slate-900">
-            {crane.serialRegistrationNo}
-          </h1>
-          <StatusBadge status={crane.currentStatus} />
-          <Badge tone={crane.ownershipType === "SML" ? "purple" : "neutral"}>
-            {crane.ownershipType === "SML" ? "SML owned" : "Vendor owned"}
-          </Badge>
-          {!crane.isActive ? <Badge tone="neutral">Deactivated</Badge> : null}
-          {crane.approvalStatus === "PENDING" ? <Badge tone="amber">Awaiting approval</Badge> : null}
-        </div>
-        <p className="mt-0.5 text-sm text-slate-500">
-          {crane.vendorName ? (
-            <Link
-              to="/app/vendors/$vendorId"
-              params={{ vendorId: crane.vendorId }}
-              className="text-brand-700 hover:underline"
-            >
-              {crane.vendorName}
-            </Link>
-          ) : (
-            "The vendor"
-          )}{" "}
-          · {crane.typeOfCrane?.name ?? crane.typeOfCraneCode} · {crane.capacityT} t
-        </p>
-      </div>
+      <PageHeader
+        back={{ to: "/app/discovery", label: "Discovery" }}
+        title={crane.serialRegistrationNo}
+        mono
+        description={
+          <>
+            {crane.vendorName ? (
+              <Link
+                to="/app/vendors/$vendorId"
+                params={{ vendorId: crane.vendorId }}
+                className="text-brand-700 hover:underline"
+              >
+                {crane.vendorName}
+              </Link>
+            ) : (
+              "The vendor"
+            )}{" "}
+            · {crane.typeOfCrane?.name ?? crane.typeOfCraneCode} · {crane.capacityT} t
+          </>
+        }
+        meta={
+          <>
+            <StatusBadge status={crane.currentStatus} />
+            <Badge tone={crane.ownershipType === "SML" ? "purple" : "neutral"}>
+              {crane.ownershipType === "SML" ? "SML owned" : "Vendor owned"}
+            </Badge>
+            {!crane.isActive ? <Badge tone="neutral">Deactivated</Badge> : null}
+            {crane.approvalStatus === "PENDING" ? (
+              <Badge tone="amber">Awaiting approval</Badge>
+            ) : null}
+          </>
+        }
+      />
 
       {maintenanceFlags.length > 0 ? (
         <Alert tone="info" title="Flags">
@@ -130,6 +144,26 @@ export function CraneDetailPage() {
             label="Location source"
             value={crane.coordinateSource ?? ""}
           />
+          <div className="min-w-0">
+            <dt className="text-xs font-medium text-slate-500">Load chart</dt>
+            <dd className="mt-0.5 text-sm text-slate-900">
+              {crane.loadChart ? (
+                <button
+                  type="button"
+                  onClick={() => void viewChart()}
+                  disabled={openingChart}
+                  className="text-brand-700 underline-offset-2 hover:underline disabled:opacity-60"
+                >
+                  {openingChart ? "Opening…" : crane.loadChart.fileName}
+                </button>
+              ) : (
+                <span className="text-slate-500">None on file</span>
+              )}
+              {chartError ? (
+                <span className="ml-2 text-xs text-red-600">{chartError}</span>
+              ) : null}
+            </dd>
+          </div>
         </dl>
       </Section>
 

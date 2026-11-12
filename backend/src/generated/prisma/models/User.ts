@@ -275,6 +275,7 @@ export type UserWhereInput = {
   ownedEnquiries?: Prisma.EnquiryListRelationFilter
   createdEnquiries?: Prisma.EnquiryListRelationFilter
   recommendationSnapshots?: Prisma.RecommendationSnapshotListRelationFilter
+  inboundRepliesReviewed?: Prisma.InboundReplyListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -306,6 +307,7 @@ export type UserOrderByWithRelationInput = {
   ownedEnquiries?: Prisma.EnquiryOrderByRelationAggregateInput
   createdEnquiries?: Prisma.EnquiryOrderByRelationAggregateInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotOrderByRelationAggregateInput
+  inboundRepliesReviewed?: Prisma.InboundReplyOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -340,6 +342,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   ownedEnquiries?: Prisma.EnquiryListRelationFilter
   createdEnquiries?: Prisma.EnquiryListRelationFilter
   recommendationSnapshots?: Prisma.RecommendationSnapshotListRelationFilter
+  inboundRepliesReviewed?: Prisma.InboundReplyListRelationFilter
 }, "id" | "email" | "activationToken" | "resetToken">
 
 export type UserOrderByWithAggregationInput = {
@@ -412,6 +415,7 @@ export type UserCreateInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -442,6 +446,7 @@ export type UserUncheckedCreateInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUpdateInput = {
@@ -472,6 +477,7 @@ export type UserUpdateInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -502,6 +508,7 @@ export type UserUncheckedUpdateInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -845,6 +852,22 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.UserUpdateWithoutAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutAuditLogsInput>
 }
 
+export type UserCreateNestedOneWithoutInboundRepliesReviewedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInboundRepliesReviewedInput, Prisma.UserUncheckedCreateWithoutInboundRepliesReviewedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInboundRepliesReviewedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutInboundRepliesReviewedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInboundRepliesReviewedInput, Prisma.UserUncheckedCreateWithoutInboundRepliesReviewedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInboundRepliesReviewedInput
+  upsert?: Prisma.UserUpsertWithoutInboundRepliesReviewedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInboundRepliesReviewedInput, Prisma.UserUpdateWithoutInboundRepliesReviewedInput>, Prisma.UserUncheckedUpdateWithoutInboundRepliesReviewedInput>
+}
+
 export type UserCreateNestedOneWithoutRecommendationSnapshotsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRecommendationSnapshotsInput, Prisma.UserUncheckedCreateWithoutRecommendationSnapshotsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRecommendationSnapshotsInput
@@ -888,6 +911,7 @@ export type UserCreateWithoutApprovedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutApprovedVendorsInput = {
@@ -917,6 +941,7 @@ export type UserUncheckedCreateWithoutApprovedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutApprovedVendorsInput = {
@@ -951,6 +976,7 @@ export type UserCreateWithoutSuspendedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutSuspendedVendorsInput = {
@@ -980,6 +1006,7 @@ export type UserUncheckedCreateWithoutSuspendedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutSuspendedVendorsInput = {
@@ -1014,6 +1041,7 @@ export type UserCreateWithoutVendorInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutVendorInput = {
@@ -1043,6 +1071,7 @@ export type UserUncheckedCreateWithoutVendorInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutVendorInput = {
@@ -1093,6 +1122,7 @@ export type UserUpdateWithoutApprovedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApprovedVendorsInput = {
@@ -1122,6 +1152,7 @@ export type UserUncheckedUpdateWithoutApprovedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUpsertWithoutSuspendedVendorsInput = {
@@ -1162,6 +1193,7 @@ export type UserUpdateWithoutSuspendedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSuspendedVendorsInput = {
@@ -1191,6 +1223,7 @@ export type UserUncheckedUpdateWithoutSuspendedVendorsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutVendorInput = {
@@ -1257,6 +1290,7 @@ export type UserCreateWithoutSentInvitationsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutSentInvitationsInput = {
@@ -1286,6 +1320,7 @@ export type UserUncheckedCreateWithoutSentInvitationsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutSentInvitationsInput = {
@@ -1331,6 +1366,7 @@ export type UserUpdateWithoutSentInvitationsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentInvitationsInput = {
@@ -1360,6 +1396,7 @@ export type UserUncheckedUpdateWithoutSentInvitationsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutVendorDecisionsInput = {
@@ -1389,6 +1426,7 @@ export type UserCreateWithoutVendorDecisionsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutVendorDecisionsInput = {
@@ -1418,6 +1456,7 @@ export type UserUncheckedCreateWithoutVendorDecisionsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutVendorDecisionsInput = {
@@ -1463,6 +1502,7 @@ export type UserUpdateWithoutVendorDecisionsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVendorDecisionsInput = {
@@ -1492,6 +1532,7 @@ export type UserUncheckedUpdateWithoutVendorDecisionsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutOtpsInput = {
@@ -1521,6 +1562,7 @@ export type UserCreateWithoutOtpsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutOtpsInput = {
@@ -1550,6 +1592,7 @@ export type UserUncheckedCreateWithoutOtpsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutOtpsInput = {
@@ -1595,6 +1638,7 @@ export type UserUpdateWithoutOtpsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOtpsInput = {
@@ -1624,6 +1668,7 @@ export type UserUncheckedUpdateWithoutOtpsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutCreatedRfqsInput = {
@@ -1653,6 +1698,7 @@ export type UserCreateWithoutCreatedRfqsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedRfqsInput = {
@@ -1682,6 +1728,7 @@ export type UserUncheckedCreateWithoutCreatedRfqsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedRfqsInput = {
@@ -1727,6 +1774,7 @@ export type UserUpdateWithoutCreatedRfqsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedRfqsInput = {
@@ -1756,6 +1804,7 @@ export type UserUncheckedUpdateWithoutCreatedRfqsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutReservationsCreatedInput = {
@@ -1785,6 +1834,7 @@ export type UserCreateWithoutReservationsCreatedInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutReservationsCreatedInput = {
@@ -1814,6 +1864,7 @@ export type UserUncheckedCreateWithoutReservationsCreatedInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutReservationsCreatedInput = {
@@ -1848,6 +1899,7 @@ export type UserCreateWithoutReservationsReleasedInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutReservationsReleasedInput = {
@@ -1877,6 +1929,7 @@ export type UserUncheckedCreateWithoutReservationsReleasedInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutReservationsReleasedInput = {
@@ -1922,6 +1975,7 @@ export type UserUpdateWithoutReservationsCreatedInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReservationsCreatedInput = {
@@ -1951,6 +2005,7 @@ export type UserUncheckedUpdateWithoutReservationsCreatedInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUpsertWithoutReservationsReleasedInput = {
@@ -1991,6 +2046,7 @@ export type UserUpdateWithoutReservationsReleasedInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReservationsReleasedInput = {
@@ -2020,6 +2076,7 @@ export type UserUncheckedUpdateWithoutReservationsReleasedInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutOwnedEnquiriesInput = {
@@ -2049,6 +2106,7 @@ export type UserCreateWithoutOwnedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationCreateNestedManyWithoutReleasedByInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutOwnedEnquiriesInput = {
@@ -2078,6 +2136,7 @@ export type UserUncheckedCreateWithoutOwnedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationUncheckedCreateNestedManyWithoutReleasedByInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutOwnedEnquiriesInput = {
@@ -2112,6 +2171,7 @@ export type UserCreateWithoutCreatedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationCreateNestedManyWithoutReleasedByInput
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEnquiriesInput = {
@@ -2141,6 +2201,7 @@ export type UserUncheckedCreateWithoutCreatedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationUncheckedCreateNestedManyWithoutReleasedByInput
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEnquiriesInput = {
@@ -2186,6 +2247,7 @@ export type UserUpdateWithoutOwnedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationUpdateManyWithoutReleasedByNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedEnquiriesInput = {
@@ -2215,6 +2277,7 @@ export type UserUncheckedUpdateWithoutOwnedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationUncheckedUpdateManyWithoutReleasedByNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUpsertWithoutCreatedEnquiriesInput = {
@@ -2255,6 +2318,7 @@ export type UserUpdateWithoutCreatedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationUpdateManyWithoutReleasedByNestedInput
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEnquiriesInput = {
@@ -2284,6 +2348,7 @@ export type UserUncheckedUpdateWithoutCreatedEnquiriesInput = {
   reservationsReleased?: Prisma.ReservationUncheckedUpdateManyWithoutReleasedByNestedInput
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -2313,6 +2378,7 @@ export type UserCreateWithoutAuditLogsInput = {
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -2342,6 +2408,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -2387,6 +2454,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -2411,6 +2479,143 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   vendorDecisions?: Prisma.VendorDecisionUncheckedUpdateManyWithoutDecidedByNestedInput
   otps?: Prisma.LoginOtpUncheckedUpdateManyWithoutUserNestedInput
   createdRfqs?: Prisma.RfqUncheckedUpdateManyWithoutCreatedByNestedInput
+  reservationsCreated?: Prisma.ReservationUncheckedUpdateManyWithoutCreatedByNestedInput
+  reservationsReleased?: Prisma.ReservationUncheckedUpdateManyWithoutReleasedByNestedInput
+  ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
+  createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
+  recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
+}
+
+export type UserCreateWithoutInboundRepliesReviewedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  fullName?: string | null
+  role: $Enums.UserRole
+  isActive?: boolean
+  activationToken?: string | null
+  activationTokenExpiresAt?: Date | string | null
+  activatedAt?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpiresAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  vendor?: Prisma.VendorCreateNestedOneWithoutUsersInput
+  approvedVendors?: Prisma.VendorCreateNestedManyWithoutApprovedByInput
+  suspendedVendors?: Prisma.VendorCreateNestedManyWithoutSuspendedByInput
+  sentInvitations?: Prisma.VendorInvitationCreateNestedManyWithoutCreatedByInput
+  vendorDecisions?: Prisma.VendorDecisionCreateNestedManyWithoutDecidedByInput
+  otps?: Prisma.LoginOtpCreateNestedManyWithoutUserInput
+  createdRfqs?: Prisma.RfqCreateNestedManyWithoutCreatedByInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  reservationsCreated?: Prisma.ReservationCreateNestedManyWithoutCreatedByInput
+  reservationsReleased?: Prisma.ReservationCreateNestedManyWithoutReleasedByInput
+  ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
+  createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
+  recommendationSnapshots?: Prisma.RecommendationSnapshotCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutInboundRepliesReviewedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  fullName?: string | null
+  role: $Enums.UserRole
+  vendorId?: string | null
+  isActive?: boolean
+  activationToken?: string | null
+  activationTokenExpiresAt?: Date | string | null
+  activatedAt?: Date | string | null
+  resetToken?: string | null
+  resetTokenExpiresAt?: Date | string | null
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  approvedVendors?: Prisma.VendorUncheckedCreateNestedManyWithoutApprovedByInput
+  suspendedVendors?: Prisma.VendorUncheckedCreateNestedManyWithoutSuspendedByInput
+  sentInvitations?: Prisma.VendorInvitationUncheckedCreateNestedManyWithoutCreatedByInput
+  vendorDecisions?: Prisma.VendorDecisionUncheckedCreateNestedManyWithoutDecidedByInput
+  otps?: Prisma.LoginOtpUncheckedCreateNestedManyWithoutUserInput
+  createdRfqs?: Prisma.RfqUncheckedCreateNestedManyWithoutCreatedByInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  reservationsCreated?: Prisma.ReservationUncheckedCreateNestedManyWithoutCreatedByInput
+  reservationsReleased?: Prisma.ReservationUncheckedCreateNestedManyWithoutReleasedByInput
+  ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
+  createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
+  recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutInboundRepliesReviewedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInboundRepliesReviewedInput, Prisma.UserUncheckedCreateWithoutInboundRepliesReviewedInput>
+}
+
+export type UserUpsertWithoutInboundRepliesReviewedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInboundRepliesReviewedInput, Prisma.UserUncheckedUpdateWithoutInboundRepliesReviewedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInboundRepliesReviewedInput, Prisma.UserUncheckedCreateWithoutInboundRepliesReviewedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInboundRepliesReviewedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInboundRepliesReviewedInput, Prisma.UserUncheckedUpdateWithoutInboundRepliesReviewedInput>
+}
+
+export type UserUpdateWithoutInboundRepliesReviewedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  activationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activationTokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vendor?: Prisma.VendorUpdateOneWithoutUsersNestedInput
+  approvedVendors?: Prisma.VendorUpdateManyWithoutApprovedByNestedInput
+  suspendedVendors?: Prisma.VendorUpdateManyWithoutSuspendedByNestedInput
+  sentInvitations?: Prisma.VendorInvitationUpdateManyWithoutCreatedByNestedInput
+  vendorDecisions?: Prisma.VendorDecisionUpdateManyWithoutDecidedByNestedInput
+  otps?: Prisma.LoginOtpUpdateManyWithoutUserNestedInput
+  createdRfqs?: Prisma.RfqUpdateManyWithoutCreatedByNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  reservationsCreated?: Prisma.ReservationUpdateManyWithoutCreatedByNestedInput
+  reservationsReleased?: Prisma.ReservationUpdateManyWithoutReleasedByNestedInput
+  ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
+  createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
+  recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInboundRepliesReviewedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  vendorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  activationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activationTokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  activatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedVendors?: Prisma.VendorUncheckedUpdateManyWithoutApprovedByNestedInput
+  suspendedVendors?: Prisma.VendorUncheckedUpdateManyWithoutSuspendedByNestedInput
+  sentInvitations?: Prisma.VendorInvitationUncheckedUpdateManyWithoutCreatedByNestedInput
+  vendorDecisions?: Prisma.VendorDecisionUncheckedUpdateManyWithoutDecidedByNestedInput
+  otps?: Prisma.LoginOtpUncheckedUpdateManyWithoutUserNestedInput
+  createdRfqs?: Prisma.RfqUncheckedUpdateManyWithoutCreatedByNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   reservationsCreated?: Prisma.ReservationUncheckedUpdateManyWithoutCreatedByNestedInput
   reservationsReleased?: Prisma.ReservationUncheckedUpdateManyWithoutReleasedByNestedInput
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
@@ -2445,6 +2650,7 @@ export type UserCreateWithoutRecommendationSnapshotsInput = {
   reservationsReleased?: Prisma.ReservationCreateNestedManyWithoutReleasedByInput
   ownedEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutRecommendationSnapshotsInput = {
@@ -2474,6 +2680,7 @@ export type UserUncheckedCreateWithoutRecommendationSnapshotsInput = {
   reservationsReleased?: Prisma.ReservationUncheckedCreateNestedManyWithoutReleasedByInput
   ownedEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCrOwnerInput
   createdEnquiries?: Prisma.EnquiryUncheckedCreateNestedManyWithoutCreatedByInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutRecommendationSnapshotsInput = {
@@ -2519,6 +2726,7 @@ export type UserUpdateWithoutRecommendationSnapshotsInput = {
   reservationsReleased?: Prisma.ReservationUpdateManyWithoutReleasedByNestedInput
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecommendationSnapshotsInput = {
@@ -2548,6 +2756,7 @@ export type UserUncheckedUpdateWithoutRecommendationSnapshotsInput = {
   reservationsReleased?: Prisma.ReservationUncheckedUpdateManyWithoutReleasedByNestedInput
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateManyVendorInput = {
@@ -2594,6 +2803,7 @@ export type UserUpdateWithoutVendorInput = {
   ownedEnquiries?: Prisma.EnquiryUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVendorInput = {
@@ -2623,6 +2833,7 @@ export type UserUncheckedUpdateWithoutVendorInput = {
   ownedEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCrOwnerNestedInput
   createdEnquiries?: Prisma.EnquiryUncheckedUpdateManyWithoutCreatedByNestedInput
   recommendationSnapshots?: Prisma.RecommendationSnapshotUncheckedUpdateManyWithoutCreatedByNestedInput
+  inboundRepliesReviewed?: Prisma.InboundReplyUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutVendorInput = {
@@ -2660,6 +2871,7 @@ export type UserCountOutputType = {
   ownedEnquiries: number
   createdEnquiries: number
   recommendationSnapshots: number
+  inboundRepliesReviewed: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2675,6 +2887,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   ownedEnquiries?: boolean | UserCountOutputTypeCountOwnedEnquiriesArgs
   createdEnquiries?: boolean | UserCountOutputTypeCountCreatedEnquiriesArgs
   recommendationSnapshots?: boolean | UserCountOutputTypeCountRecommendationSnapshotsArgs
+  inboundRepliesReviewed?: boolean | UserCountOutputTypeCountInboundRepliesReviewedArgs
 }
 
 /**
@@ -2771,6 +2984,13 @@ export type UserCountOutputTypeCountRecommendationSnapshotsArgs<ExtArgs extends 
   where?: Prisma.RecommendationSnapshotWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInboundRepliesReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InboundReplyWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2801,6 +3021,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   ownedEnquiries?: boolean | Prisma.User$ownedEnquiriesArgs<ExtArgs>
   createdEnquiries?: boolean | Prisma.User$createdEnquiriesArgs<ExtArgs>
   recommendationSnapshots?: boolean | Prisma.User$recommendationSnapshotsArgs<ExtArgs>
+  inboundRepliesReviewed?: boolean | Prisma.User$inboundRepliesReviewedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2875,6 +3096,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   ownedEnquiries?: boolean | Prisma.User$ownedEnquiriesArgs<ExtArgs>
   createdEnquiries?: boolean | Prisma.User$createdEnquiriesArgs<ExtArgs>
   recommendationSnapshots?: boolean | Prisma.User$recommendationSnapshotsArgs<ExtArgs>
+  inboundRepliesReviewed?: boolean | Prisma.User$inboundRepliesReviewedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2900,6 +3122,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     ownedEnquiries: Prisma.$EnquiryPayload<ExtArgs>[]
     createdEnquiries: Prisma.$EnquiryPayload<ExtArgs>[]
     recommendationSnapshots: Prisma.$RecommendationSnapshotPayload<ExtArgs>[]
+    inboundRepliesReviewed: Prisma.$InboundReplyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3324,6 +3547,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   ownedEnquiries<T extends Prisma.User$ownedEnquiriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedEnquiriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnquiryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdEnquiries<T extends Prisma.User$createdEnquiriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdEnquiriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnquiryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recommendationSnapshots<T extends Prisma.User$recommendationSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recommendationSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecommendationSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inboundRepliesReviewed<T extends Prisma.User$inboundRepliesReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$inboundRepliesReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4073,6 +4297,30 @@ export type User$recommendationSnapshotsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.RecommendationSnapshotScalarFieldEnum | Prisma.RecommendationSnapshotScalarFieldEnum[]
+}
+
+/**
+ * User.inboundRepliesReviewed
+ */
+export type User$inboundRepliesReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InboundReply
+   */
+  select?: Prisma.InboundReplySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InboundReply
+   */
+  omit?: Prisma.InboundReplyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InboundReplyInclude<ExtArgs> | null
+  where?: Prisma.InboundReplyWhereInput
+  orderBy?: Prisma.InboundReplyOrderByWithRelationInput | Prisma.InboundReplyOrderByWithRelationInput[]
+  cursor?: Prisma.InboundReplyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InboundReplyScalarFieldEnum | Prisma.InboundReplyScalarFieldEnum[]
 }
 
 /**

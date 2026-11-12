@@ -1,4 +1,5 @@
 import { Router } from "express";
+import * as inbound from "../controllers/inbound.controller";
 import * as rfq from "../controllers/rfq.controller";
 import { requireAuth, requireCapability } from "../middleware/auth";
 import { apiLimiter } from "../middleware/rateLimiter";
@@ -68,6 +69,17 @@ router.get(
   "/:rfqId/candidates",
   requireCapability("rfq:track"),
   rfq.candidates,
+);
+
+/**
+ * Replies belonging to this RFQ, shown where the conversation lives. Validation
+ * stays in the admin reply queue so sales can read the conversation without a
+ * second conversion surface.
+ */
+router.get(
+  "/:rfqId/replies",
+  requireCapability("rfq:track"),
+  inbound.listForRfq,
 );
 
 // --- actions that change state and/or send mail ---

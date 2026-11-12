@@ -28,6 +28,9 @@ export interface DiscoveryFilters {
   availability?: DiscoveryAvailability;
   siteLat?: number;
   siteLng?: number;
+  /** Free-text job site, geocoded by the backend when no pin is supplied. */
+  siteLocation?: string;
+  sitePincode?: string;
 }
 
 export interface DiscoveryCrane {

@@ -17,6 +17,7 @@ import {
   internalCheckSchema,
   rfqFromLineSchema,
   listEnquiriesQuerySchema,
+  listRaisableLinesQuerySchema,
   type CreateEnquiryInput,
   type UpdateEnquiryInput,
   type AddLineInput,
@@ -25,6 +26,7 @@ import {
   type InternalCheckInput,
   type RfqFromLineInput,
   type ListEnquiriesQuery,
+  type ListRaisableLinesQuery,
 } from "../validation/enquiryFields";
 import {
   CapacityRule,
@@ -42,11 +44,10 @@ import {
  * function with its own source and needs no new code path. Nothing here talks
  * to SAP.
  *
- * **The customer block is internal.** `customerName`, `customerAddress`,
- * `rentalBudget`, `internalNotes`, `poSapReference` and `salesPartnerName` are
- * never copied into an RFQ. `createRfqFromLine` builds the RFQ payload from the
- * vendor-safe subset by construction (it never references those fields), and a
- * test asserts the created RFQ carries none of them.
+ * **The customer block is internal.** `customerName`, `customerAddress` and
+ * `rentalBudget` are never copied into an RFQ. `createRfqFromLine` builds the
+ * RFQ payload from the vendor-safe subset by construction (it never references
+ * those fields), and a test asserts the created RFQ carries none of them.
  *
  * **Status is event driven.** The trail lives in `enquiryTrail.service.ts`;
  * this file calls it at the trigger points and never lets a caller set a status
@@ -77,10 +78,8 @@ function num(value: unknown): number | null {
 const ENQUIRY_SELECT = {
   id: true,
   enquiryNo: true,
-  externalReference: true,
   enquiryDate: true,
   source: true,
-  salesPartnerName: true,
   crOwnerId: true,
   customerName: true,
   customerAddress: true,
@@ -88,10 +87,7 @@ const ENQUIRY_SELECT = {
   siteStateCode: true,
   sitePincode: true,
   region: true,
-  businessVertical: true,
-  crossRentalFlag: true,
   overallStatus: true,
-  notes: true,
   createdAt: true,
   updatedAt: true,
   crOwner: { select: { id: true, email: true, fullName: true } },
@@ -117,7 +113,6 @@ const LINE_SELECT = {
   requiredWindJibM: true,
   configurationNotes: true,
   requiredStartDate: true,
-  startDateTbc: true,
   durationValue: true,
   durationUnit: true,
   workingDaysPerMonth: true,
@@ -142,9 +137,6 @@ const LINE_SELECT = {
   ppeScope: true,
   rowScope: true,
   rentalBudget: true,
-  rentalBudgetValue: true,
-  internalNotes: true,
-  poSapReference: true,
   trailStatus: true,
   selectedSource: true,
   closureStatus: true,
@@ -170,7 +162,6 @@ export function toLineView(row: LineRow) {
     requiredLuffingJibM: num(row.requiredLuffingJibM),
     requiredWindJibM: num(row.requiredWindJibM),
     durationValue: num(row.durationValue),
-    rentalBudgetValue: num(row.rentalBudgetValue),
     craneTypeName: (row.craneType as { name: string } | null)?.name ?? null,
   };
 }
@@ -203,17 +194,12 @@ async function assertCraneType(code: string | null): Promise<void> {
 /** The header columns, shared by create and update so they cannot drift. */
 function headerData(input: CreateEnquiryInput | UpdateEnquiryInput) {
   return {
-    externalReference: input.externalReference,
-    salesPartnerName: input.salesPartnerName,
     customerName: input.customerName,
     customerAddress: input.customerAddress,
     siteLocation: input.siteLocation,
     siteStateCode: input.siteStateCode,
     sitePincode: input.sitePincode,
     region: input.region,
-    businessVertical: input.businessVertical,
-    crossRentalFlag: input.crossRentalFlag,
-    notes: input.notes,
   };
 }
 
@@ -350,7 +336,6 @@ export async function listEnquiries(rawQuery: unknown, actor: Actor) {
     where: {
       ...(query.status ? { overallStatus: query.status } : {}),
       ...(query.region ? { region: query.region } : {}),
-      ...(query.businessVertical ? { businessVertical: query.businessVertical } : {}),
       ...(query.stateCode ? { siteStateCode: query.stateCode } : {}),
       ...(query.from || query.to
         ? {
@@ -365,7 +350,6 @@ export async function listEnquiries(rawQuery: unknown, actor: Actor) {
             OR: [
               { enquiryNo: { contains: query.search, mode: "insensitive" as const } },
               { customerName: { contains: query.search, mode: "insensitive" as const } },
-              { externalReference: { contains: query.search, mode: "insensitive" as const } },
             ],
           }
         : {}),
@@ -385,6 +369,101 @@ export async function listEnquiries(rawQuery: unknown, actor: Actor) {
       summary: stageCountsOf(lines),
     };
   });
+}
+
+/**
+ * The lines an RFQ can still be raised against.
+ *
+ * The RFQ creation screen is line-driven, so it needs a list of lines rather
+ * than a free-form enquiry/line pair. A line is raisable when it still has a
+ * crane type and capacity (otherwise `createRfqFromLine` refuses it) and has not
+ * been cancelled or fulfilled internally. The customer block is deliberately not
+ * selected: this list is only used to choose a line, and there is no reason to
+ * carry the customer's name into a second screen.
+ */
+export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
+  assertInternal(actor);
+  const query: ListRaisableLinesQuery = listRaisableLinesQuerySchema.parse(
+    rawQuery ?? {},
+  );
+
+  const rows = await prisma.enquiryLineItem.findMany({
+    where: {
+      cancelledAt: null,
+      trailStatus: {
+        in: [
+          EnquiryLineTrailStatus.NEW,
+          EnquiryLineTrailStatus.AVAILABILITY_CHECK,
+          EnquiryLineTrailStatus.VENDOR_SHORTLISTED,
+          EnquiryLineTrailStatus.RFQ_SENT,
+          EnquiryLineTrailStatus.AWAITING_QUOTES,
+          EnquiryLineTrailStatus.QUOTES_RECEIVED,
+          EnquiryLineTrailStatus.UNDER_EVALUATION,
+        ],
+      },
+      craneTypeCode: { not: null },
+      capacityT: { not: null },
+      ...(query.search
+        ? {
+            OR: [
+              {
+                enquiry: {
+                  enquiryNo: { contains: query.search, mode: "insensitive" as const },
+                },
+              },
+              {
+                craneType: {
+                  name: { contains: query.search, mode: "insensitive" as const },
+                },
+              },
+              { craneTypeCode: { contains: query.search, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    },
+    select: {
+      id: true,
+      enquiryId: true,
+      lineNo: true,
+      craneTypeCode: true,
+      capacityT: true,
+      capacityRule: true,
+      quantity: true,
+      requiredStartDate: true,
+      trailStatus: true,
+      craneType: { select: { name: true } },
+      enquiry: {
+        select: {
+          enquiryNo: true,
+          siteLocation: true,
+          sitePincode: true,
+          siteState: { select: { name: true } },
+        },
+      },
+      _count: { select: { rfqs: true } },
+    },
+    orderBy: [{ createdAt: "desc" }, { lineNo: "asc" }],
+    take: 200,
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    enquiryId: row.enquiryId,
+    enquiryNo: row.enquiry.enquiryNo,
+    lineNo: row.lineNo,
+    craneTypeCode: row.craneTypeCode,
+    craneTypeName: row.craneType?.name ?? null,
+    capacityT: num(row.capacityT),
+    capacityRule: row.capacityRule,
+    quantity: row.quantity,
+    requiredStartDate: row.requiredStartDate,
+    startDateTbc: row.requiredStartDate === null,
+    siteLocation: row.enquiry.siteLocation,
+    siteStateName: row.enquiry.siteState?.name ?? null,
+    sitePincode: row.enquiry.sitePincode,
+    trailStatus: row.trailStatus,
+    rfqCount: row._count.rfqs,
+  }));
 }
 
 export async function getEnquiryDetail(enquiryId: string, actor: Actor) {
@@ -554,10 +633,9 @@ function requiredJib(line: {
  * Raise an RFQ from an enquiry line (P1 section 2).
  *
  * Prefills from the line and the enquiry header's **vendor-safe subset**: the
- * customer name/address, the rental budget, the internal notes, the PO/SAP
- * reference and the Sales Partner's name are never read here, so they cannot
- * leak into the RFQ. The RFQ is a snapshot; later edits to the line do not
- * rewrite it.
+ * customer name/address and the rental budget are never read here, so they
+ * cannot leak into the RFQ. The RFQ is a snapshot; later edits to the line do
+ * not rewrite it.
  */
 export async function createRfqFromLine(lineId: string, raw: unknown, actor: Actor) {
   assertInternal(actor);
@@ -588,8 +666,6 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
 
   const rfq = await createRfq(
     {
-      enquiryNo: line.enquiry.enquiryNo,
-      lineNo: String(line.lineNo),
       enquiryLineId: line.id,
       craneType: line.craneTypeCode,
       capacityT: num(line.capacityT),
@@ -600,7 +676,9 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
       loadDescription: line.loadDescription,
       mainBoomM: num(line.requiredMainBoomM) ?? undefined,
       jibLengthM: jib ?? undefined,
-      startDateTbc: line.startDateTbc,
+      // A line without a start date means "to be confirmed"; the template's
+      // free-text TBC is represented by the absence of a date.
+      startDateTbc: line.requiredStartDate === null,
       workingDaysPerMonth: line.workingDaysPerMonth ?? undefined,
       siteLocation: line.enquiry.siteLocation,
       siteStateCode: line.enquiry.siteStateCode,
@@ -643,123 +721,20 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
   return rfq;
 }
 
-// --- workspace ------------------------------------------------------------
+// --- one line --------------------------------------------------------------
 
 /**
- * The line-item sourcing workspace (BPD 6.5, P1 section 5). Vendor
- * recommendations, RFQ history and quotations; the SML section is absent
- * because SML has no crane fleet in this platform (internal fulfilment is a
- * manual outcome on the line). Comparison and final selection arrive in P2/P3.
+ * One line item on its own. The line editor needs it to prefill the form;
+ * nothing else about the line's sourcing history is returned here.
  */
-export async function getLineWorkspace(lineId: string, actor: Actor) {
+export async function getLine(lineId: string, actor: Actor) {
   assertInternal(actor);
   const line = await prisma.enquiryLineItem.findUnique({
     where: { id: lineId },
-    select: {
-      ...LINE_SELECT,
-      enquiry: {
-        select: {
-          id: true,
-          enquiryNo: true,
-          siteLocation: true,
-          siteStateCode: true,
-          sitePincode: true,
-          businessVertical: true,
-          siteState: { select: { name: true } },
-        },
-      },
-    },
+    select: LINE_SELECT,
   });
   if (!line) throw AppError.notFound("That enquiry line does not exist");
-
-  // P2: the recommendation engine snapshots the vendor set (and the empty SML
-  // set) on first look and returns the latest stored snapshot thereafter. The
-  // job site is pinned through the provider interface at evaluation time.
-  const recommendations = await getOrEvaluateLatest(lineId, actor);
-  const snapshots = await listSnapshots(lineId);
-
-  const rfqs = await prisma.rfq.findMany({
-    where: { enquiryLineId: lineId },
-    select: {
-      id: true,
-      rfqNumber: true,
-      status: true,
-      sentAt: true,
-      submissionDeadline: true,
-      _count: { select: { recipients: true, quotations: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  const quotations = await prisma.quotation.findMany({
-    where: { rfq: { enquiryLineId: lineId }, isLatest: true },
-    select: {
-      id: true,
-      rfqId: true,
-      vendorId: true,
-      craneId: true,
-      rentalRate: true,
-      rateBasis: true,
-      mobilisationCharges: true,
-      demobilisationCharges: true,
-      totalQuotedValue: true,
-      taxBasis: true,
-      validityDate: true,
-      availabilityConfirmed: true,
-      status: true,
-      submittedAt: true,
-      vendor: { select: { name: true } },
-      crane: {
-        select: {
-          make: true,
-          model: true,
-          capacityT: true,
-          typeOfCrane: { select: { name: true } },
-        },
-      },
-    },
-    orderBy: { submittedAt: "desc" },
-  });
-
-  return {
-    line: toLineView(line as unknown as LineRow),
-    enquiry: {
-      id: line.enquiry.id,
-      enquiryNo: line.enquiry.enquiryNo,
-      siteLocation: line.enquiry.siteLocation,
-      siteStateName: line.enquiry.siteState?.name ?? null,
-      businessVertical: line.enquiry.businessVertical,
-    },
-    recommendations,
-    snapshots,
-    rfqs: rfqs.map((r) => ({
-      rfqId: r.id,
-      rfqNumber: r.rfqNumber,
-      status: r.status,
-      sentAt: r.sentAt,
-      submissionDeadline: r.submissionDeadline,
-      recipientCount: r._count.recipients,
-      quotationCount: r._count.quotations,
-    })),
-    quotations: quotations.map((q) => ({
-      quotationId: q.id,
-      rfqId: q.rfqId,
-      vendorId: q.vendorId,
-      vendorName: q.vendor.name,
-      craneId: q.craneId,
-      craneDescription: `${q.crane.typeOfCrane.name} ${num(q.crane.capacityT)}t ${q.crane.make} ${q.crane.model}`,
-      rentalRate: num(q.rentalRate) ?? 0,
-      rateBasis: q.rateBasis,
-      mobilisationCharges: num(q.mobilisationCharges) ?? 0,
-      demobilisationCharges: num(q.demobilisationCharges) ?? 0,
-      taxBasis: q.taxBasis,
-      totalQuotedValue: num(q.totalQuotedValue) ?? 0,
-      validityDate: q.validityDate,
-      availabilityConfirmed: q.availabilityConfirmed,
-      status: q.status,
-      submittedAt: q.submittedAt,
-    })),
-  };
+  return { line: toLineView(line as unknown as LineRow) };
 }
 
 export type { CreateEnquiryInput };

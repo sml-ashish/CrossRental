@@ -11,7 +11,11 @@ import { env } from "../config/env";
  * need one either.
  */
 
-export type PortalRole = "vendor_user" | "admin_user" | "sales_user";
+export type PortalRole =
+  | "vendor_user"
+  | "admin_user"
+  | "sales_user"
+  | "management_viewer";
 
 export interface AuthTokenPayload {
   sub: string;

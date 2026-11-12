@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Search } from "lucide-react";
+import { AlertTriangle, Inbox } from "lucide-react";
 import {
   VENDOR_RESPONSE_LABELS,
   formatInr,
@@ -11,6 +11,10 @@ import {
 } from "@/lib/quotations";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
+import { Segmented, SearchInput, Toolbar } from "@/components/ui/toolbar";
 import { Spinner } from "@/components/ui/spinner";
 import { deadlineCountdown, formatCalendarDate, formatDateTime } from "@/routes/app/rfqs";
 
@@ -54,66 +58,64 @@ export function VendorRfqIndexPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-xl font-semibold text-slate-900">My RFQs</h1>
-        <p className="mt-0.5 text-sm text-slate-500">
-          Enquiries SML has sent you, and what you have quoted back.
-        </p>
-      </header>
+      <PageHeader
+        title="My RFQs"
+        description="Enquiries SML has sent you, and what you have quoted back."
+        meta={
+          rfqs.data ? (
+            <span className="text-xs text-slate-500">
+              {rows.length} RFQ{rows.length === 1 ? "" : "s"} in this view
+            </span>
+          ) : null
+        }
+      />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {RESPONSE_TABS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => setTab(option.value)}
-            className={
-              tab === option.value
-                ? "rounded-full bg-brand-600 px-3 py-1.5 text-xs font-medium text-white"
-                : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-slate-300"
-            }
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      <form
-        className="flex gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setSearch(searchInput);
-        }}
-      >
-        <div className="relative flex-1">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
-            aria-hidden
-          />
-          <input
-            className="field-input pl-9"
-            placeholder="Search by RFQ number, enquiry number or site"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            aria-label="Search my RFQs"
-          />
+      <Toolbar>
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+            Response
+          </p>
+          <div className="mt-1">
+            <Segmented
+              value={tab}
+              onChange={setTab}
+              label="Response status"
+              options={RESPONSE_TABS}
+            />
+          </div>
         </div>
-        <button type="submit" className="btn-secondary px-4 text-sm">
-          Search
-        </button>
-        {search ? (
-          <button
-            type="button"
-            className="btn-secondary px-4 text-sm"
-            onClick={() => {
-              setSearch("");
-              setSearchInput("");
-            }}
-          >
-            Clear
+
+        <form
+          className="flex gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSearch(searchInput);
+          }}
+        >
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="RFQ number, enquiry number or site"
+            label="Search my RFQs"
+            className="w-64"
+          />
+          <button type="submit" className="btn-secondary py-[7px]">
+            Search
           </button>
-        ) : null}
-      </form>
+          {search ? (
+            <button
+              type="button"
+              className="btn-secondary py-[7px]"
+              onClick={() => {
+                setSearch("");
+                setSearchInput("");
+              }}
+            >
+              Clear
+            </button>
+          ) : null}
+        </form>
+      </Toolbar>
 
       {rfqs.isLoading ? (
         <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -122,31 +124,37 @@ export function VendorRfqIndexPage() {
       ) : rfqs.error ? (
         <Alert title="Could not load your RFQs">{(rfqs.error as Error).message}</Alert>
       ) : rows.length === 0 ? (
-        <div className="card p-8 text-center text-sm text-slate-500">
-          {tab === "PENDING"
-            ? "Nothing is waiting on a quote from you right now."
-            : "No RFQs here."}
+        <div className="card">
+          <EmptyState
+            icon={<Inbox className="size-4" aria-hidden />}
+            title={tab === "PENDING" ? "Nothing waiting on a quote" : "No RFQs in this view"}
+            description={
+              tab === "PENDING"
+                ? "New enquiries appear here the moment SML sends one to your company."
+                : "Try another response status or clear the search."
+            }
+          />
         </div>
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full min-w-[60rem] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+        <div className="card overflow-hidden">
+          <Table className="min-w-[60rem]">
+            <THead>
               <tr>
-                <th className="px-4 py-2.5 font-medium">RFQ</th>
-                <th className="px-4 py-2.5 font-medium">Requirement</th>
-                <th className="px-4 py-2.5 font-medium">Site</th>
-                <th className="px-4 py-2.5 font-medium">Deployment</th>
-                <th className="px-4 py-2.5 font-medium">Deadline</th>
-                <th className="px-4 py-2.5 font-medium">Your quote</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
+                <TH>RFQ</TH>
+                <TH>Requirement</TH>
+                <TH>Site</TH>
+                <TH>Deployment</TH>
+                <TH>Deadline</TH>
+                <TH>Your quote</TH>
+                <TH>Status</TH>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+            </THead>
+            <TBody>
               {rows.map((row) => (
                 <VendorInboxRow key={row.recipientId} row={row} />
               ))}
-            </tbody>
-          </table>
+            </TBody>
+          </Table>
         </div>
       )}
     </div>
@@ -161,8 +169,8 @@ function VendorInboxRow({ row }: { row: VendorInboxRow }) {
   const countdown = deadlineCountdown(row.submissionDeadline, "SENT");
 
   return (
-    <tr className="align-top hover:bg-slate-50/60">
-      <td className="px-4 py-3">
+    <TR className="align-top">
+      <TD>
         <Link
           to="/app/rfqs/$rfqId"
           params={{ rfqId: row.rfqId }}
@@ -171,24 +179,24 @@ function VendorInboxRow({ row }: { row: VendorInboxRow }) {
           {row.unread ? <span className="mr-1 text-brand-600" aria-label="Unread">●</span> : null}
           {row.rfqNumber}
         </Link>
-      </td>
-      <td className="px-4 py-3">
+      </TD>
+      <TD>
         <p className="text-slate-900">{row.craneTypeName}</p>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 text-[11px] text-slate-500">
           {row.capacityT} t · qty {row.quantity}
         </p>
-      </td>
-      <td className="px-4 py-3">
+      </TD>
+      <TD>
         <p className="text-slate-700">{row.siteLocation}</p>
-        <p className="mt-0.5 text-xs text-slate-500">{row.siteStateName}</p>
-      </td>
-      <td className="px-4 py-3 text-xs text-slate-600">
+        <p className="mt-0.5 text-[11px] text-slate-500">{row.siteStateName}</p>
+      </TD>
+      <TD className="text-xs text-slate-600">
         <p>{formatCalendarDate(row.requiredStartDate)}</p>
         <p className="text-slate-500">
           {row.durationValue} {row.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}
         </p>
-      </td>
-      <td className="px-4 py-3 text-xs">
+      </TD>
+      <TD className="text-xs">
         <p className="text-slate-700">{formatDateTime(row.submissionDeadline)}</p>
         <p
           className={
@@ -201,8 +209,8 @@ function VendorInboxRow({ row }: { row: VendorInboxRow }) {
         >
           {countdown.label}
         </p>
-      </td>
-      <td className="px-4 py-3 text-xs">
+      </TD>
+      <TD className="text-xs">
         {row.quotationCount > 0 ? (
           <>
             <p className="font-medium text-slate-900">
@@ -215,8 +223,8 @@ function VendorInboxRow({ row }: { row: VendorInboxRow }) {
         ) : (
           <p className="text-slate-400">Not quoted</p>
         )}
-      </td>
-      <td className="px-4 py-3">
+      </TD>
+      <TD>
         <Badge tone={responseTone(row.responseStatus)}>
           {VENDOR_RESPONSE_LABELS[row.responseStatus]}
         </Badge>
@@ -226,8 +234,8 @@ function VendorInboxRow({ row }: { row: VendorInboxRow }) {
             Deadline passed
           </p>
         ) : null}
-      </td>
-    </tr>
+      </TD>
+    </TR>
   );
 }
 

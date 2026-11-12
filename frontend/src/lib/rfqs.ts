@@ -18,6 +18,8 @@ export type RfqStatus = "DRAFT" | "SENT" | "CLOSED" | "CANCELLED";
 export type RfqRollupStatus = "SENT" | "AWAITING_QUOTES" | "QUOTES_RECEIVED";
 export type EmailDeliveryStatus = "QUEUED" | "SENT" | "FAILED";
 export type ResponseStatus = "PENDING" | "QUOTED" | "DECLINED" | "EXPIRED";
+export type MessageChannel = "EMAIL" | "WHATSAPP";
+export type QuoteSource = "PORTAL" | "EMAIL" | "WHATSAPP" | "MANUAL";
 export type DurationUnit = "DAYS" | "MONTHS";
 export type DistanceMethod = "road" | "straight_line" | null;
 
@@ -58,6 +60,8 @@ export interface Rfq {
   rfqNumber: string;
   enquiryNo: string;
   lineNo: string;
+  /** The native enquiry line this RFQ was raised against, when it has one. */
+  enquiryLineId: string | null;
   craneType: string;
   craneTypeRef: { name: string } | null;
   capacityT: number;
@@ -108,6 +112,8 @@ export interface Rfq {
   createdAt: string;
   updatedAt: string;
   sentAt: string | null;
+  /** P6: the channels the RFQ was last dispatched through. */
+  channels: MessageChannel[];
   createdBy: { id: string; email: string; fullName: string | null } | null;
 }
 
@@ -116,6 +122,7 @@ export interface RfqListRecipient {
   recipientId: string;
   vendorName: string;
   emailDeliveryStatus: EmailDeliveryStatus;
+  whatsappDeliveryStatus: EmailDeliveryStatus | null;
   responseStatus: ResponseStatus;
 }
 
@@ -135,6 +142,9 @@ export interface RfqRecipient {
   emails: string[];
   emailDeliveryStatus: EmailDeliveryStatus;
   emailDeliveryError: string | null;
+  whatsappPhones: string[];
+  whatsappDeliveryStatus: EmailDeliveryStatus | null;
+  whatsappDeliveryError: string | null;
   firstViewedAt: string | null;
   responseStatus: ResponseStatus;
   respondedAt: string | null;
@@ -170,6 +180,8 @@ export interface ReceivedQuotation {
    * caller would branch on.
    */
   warnings: Array<{ code: string; message: string }>;
+  /** P6: how this quotation was captured. */
+  source: QuoteSource;
   status: string;
   submittedAt: string;
 }
@@ -182,6 +194,15 @@ export interface RfqDetail extends Rfq {
 
 // --- candidate picker (brief 6.9) ----------------------------------------
 
+/**
+ * The two recommendation views on an RFQ.
+ *
+ * `technical` matches crane type and capacity, nearest first. `distance` keeps
+ * the type but drops the tonnage filter, so the nearest cranes show even when
+ * they are short on capacity.
+ */
+export type CandidateMode = "technical" | "distance";
+
 export interface CandidateCrane {
   craneId: string;
   vendorId: string;
@@ -189,6 +210,8 @@ export interface CandidateCrane {
   typeOfCraneCode: string;
   typeOfCraneName: string;
   capacityT: number;
+  /** Lighter than the RFQ asks for — only reachable in distance mode. */
+  belowRequiredCapacity: boolean;
   make: string;
   model: string;
   yom: number | null;
@@ -203,6 +226,8 @@ export interface CandidateCrane {
   locationUnverified: boolean;
   stale: boolean;
   daysSinceUpdate: number;
+  /** When the crane's details were last edited (ISO). */
+  lastUpdatedAt: string;
   distanceKm: number | null;
   distanceMethod: string | null;
   distanceApproximate: boolean;
@@ -218,6 +243,8 @@ export interface CandidateGroup {
 }
 
 export interface CandidateList {
+  /** Which ranking produced this list. */
+  mode: CandidateMode;
   site: {
     siteLocation: string;
     stateCode: string;
@@ -247,8 +274,6 @@ export interface ApprovedVendor {
 
 /** Strings while editing; `rfqToForm` and `toRfqPayload` are the only conversions. */
 export interface RfqForm {
-  enquiryNo: string;
-  lineNo: string;
   craneType: string;
   capacityT: string;
   capacityRule: "AT_LEAST" | "EXACT";
@@ -290,8 +315,6 @@ export interface RfqForm {
 }
 
 export const EMPTY_RFQ_FORM: RfqForm = {
-  enquiryNo: "",
-  lineNo: "",
   craneType: "",
   capacityT: "",
   capacityRule: "AT_LEAST",
@@ -356,8 +379,6 @@ function toCalendarDate(iso: string | null): string {
 
 export function rfqToForm(rfq: Rfq): RfqForm {
   return {
-    enquiryNo: rfq.enquiryNo,
-    lineNo: rfq.lineNo,
     craneType: rfq.craneType,
     capacityT: String(rfq.capacityT),
     capacityRule: rfq.capacityRule,
@@ -437,8 +458,6 @@ function calendarDate(value: string): Date {
  */
 function toRfqPayload(form: RfqForm) {
   return {
-    enquiryNo: form.enquiryNo.trim(),
-    lineNo: form.lineNo.trim(),
     craneType: form.craneType,
     capacityT: Number(form.capacityT),
     capacityRule: form.capacityRule,
@@ -503,16 +522,15 @@ export function getRfq(rfqId: string): Promise<{ rfq: RfqDetail }> {
   return api(`/rfqs/${rfqId}`);
 }
 
-export function createRfq(form: RfqForm): Promise<{ rfq: Rfq }> {
-  return api("/rfqs", { method: "POST", body: toRfqPayload(form) });
-}
-
 export function updateRfq(rfqId: string, form: RfqForm): Promise<{ rfq: Rfq }> {
   return api(`/rfqs/${rfqId}`, { method: "PUT", body: toRfqPayload(form) });
 }
 
-export function getCandidates(rfqId: string): Promise<{ candidates: CandidateList }> {
-  return api(`/rfqs/${rfqId}/candidates`);
+export function getCandidates(
+  rfqId: string,
+  mode: CandidateMode = "technical",
+): Promise<{ candidates: CandidateList }> {
+  return api(`/rfqs/${rfqId}/candidates?mode=${mode}`);
 }
 
 export function listApprovedVendors(search = ""): Promise<{ vendors: ApprovedVendor[] }> {
@@ -523,11 +541,21 @@ export function listApprovedVendors(search = ""): Promise<{ vendors: ApprovedVen
 export interface SendResult {
   sent: number;
   failed: number;
-  results: Array<{ vendorId: string; status: EmailDeliveryStatus; error?: string }>;
+  results: Array<{
+    vendorId: string;
+    status: EmailDeliveryStatus;
+    emailStatus: EmailDeliveryStatus | null;
+    whatsappStatus: EmailDeliveryStatus | null;
+    error?: string;
+  }>;
 }
 
-export function sendRfq(rfqId: string, vendorIds: string[]): Promise<{ result: SendResult }> {
-  return api(`/rfqs/${rfqId}/send`, { method: "POST", body: { vendorIds } });
+export function sendRfq(
+  rfqId: string,
+  vendorIds: string[],
+  channels: MessageChannel[] = ["EMAIL"],
+): Promise<{ result: SendResult }> {
+  return api(`/rfqs/${rfqId}/send`, { method: "POST", body: { vendorIds, channels } });
 }
 
 export function confirmSitePin(

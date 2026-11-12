@@ -19,7 +19,7 @@ const layout = (title: string, body: string, cta?: { label: string; url: string 
   <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden">
     <div style="background:linear-gradient(to bottom,#FA5A54,#F1221C,#D91B16);padding:20px 28px">
       <div style="color:#ffffff;font-size:15px;font-weight:700;letter-spacing:-0.02em">Sanghvi Movers Limited</div>
-      <div style="color:#ffe1e0;font-size:12px;margin-top:2px">Crane Discovery &amp; Vendor Portal</div>
+      <div style="color:#ffe1e0;font-size:12px;margin-top:2px">crossrentel &middot; Crane sourcing &amp; vendor network</div>
     </div>
     <div style="padding:28px">
       <h1 style="margin:0 0 16px;font-size:18px;color:#0f172a;letter-spacing:-0.02em">${title}</h1>
@@ -164,27 +164,6 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
          If nothing has changed, use <strong>Confirm still accurate</strong> — it takes one tap.
        </p>`,
       { label: "Update crane", url: "{{craneUrl}}" },
-    ),
-  },
-  {
-    key: "fleet_updated_on_behalf",
-    subject: "Your crane details were updated on your behalf",
-    bodyHtml: layout(
-      "Fleet updated on your behalf",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         An SML user updated your crane details for you. The change is recorded against
-         your crane and is shown in the portal.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#334155">
-         {{craneLabel}}<br/>
-         <span style="color:#64748b">Updated by {{actorName}}</span>
-       </div>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         If anything looks wrong, open the crane in the portal and edit it — that clears
-         the "updated on your behalf" mark.
-       </p>`,
-      { label: "View crane", url: "{{craneUrl}}" },
     ),
   },
   {
@@ -393,6 +372,21 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
          password to remember.
        </p>`,
       { label: "Sign in", url: "{{loginUrl}}" },
+    ),
+  },
+  {
+    key: "internal_alert_digest",
+    subject: "SML Crane Portal — {{alertCount}} item{{alertCount}} need attention",
+    bodyHtml: layout(
+      "Alerts needing attention",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         {{alertCount}} item{{alertCount}} on the portal need attention today.
+       </p>
+       <ul style="margin:0 0 16px;padding-left:20px;font-size:13px;color:#334155;line-height:1.8">
+         {{alertItems}}
+       </ul>`,
+      { label: "Open the portal", url: "{{portalUrl}}" },
     ),
   },
 ];

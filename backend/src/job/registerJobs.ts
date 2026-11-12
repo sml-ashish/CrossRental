@@ -2,6 +2,8 @@ import { registerJob } from "./scheduler";
 import { expireOverdueRecipients, runAutomaticRfqReminders } from "../services/rfq.service";
 import { sendStaleReminders } from "../services/staleFleet.service";
 import { completeOverdueReservations } from "../services/reservations.service";
+import { sendAlertDigest } from "../services/alert.service";
+import { isImapConfigured, pollInboundMailbox } from "../services/imap.service";
 
 /**
  * The milestone plan's "callable functions become scheduled jobs" step.
@@ -58,6 +60,37 @@ export function registerDefaultJobs(): void {
       const expired = await expireOverdueRecipients();
       if (expired > 0) {
         console.log(`[scheduler] rfq-expiry — ${expired} recipients expired`);
+      }
+    },
+  });
+
+  // P5: one daily digest of the alert list the dashboards show. Only sends when
+  // there is at least one item, and respects ALERT_EMAILS_ENABLED.
+  registerJob({
+    name: "internal-alert-digest",
+    expression: "23 6 * * *",
+    run: async () => {
+      const run = await sendAlertDigest();
+      if (run.sent > 0) {
+        console.log(
+          `[scheduler] internal-alert-digest — ${run.alerts} alerts emailed to ${run.sent} users`,
+        );
+      }
+    },
+  });
+
+  // P6: poll the shared mailbox for vendor replies. Disabled unless IMAP_POLL_ENABLED
+  // is on and credentials are present, so local/test runs make no network call.
+  registerJob({
+    name: "inbound-email-poll",
+    expression: "*/5 * * * *",
+    run: async () => {
+      if (!isImapConfigured()) return;
+      const run = await pollInboundMailbox();
+      if (run.processed > 0 || run.failed > 0) {
+        console.log(
+          `[scheduler] inbound-email-poll — ${run.processed} ingested, ${run.failed} failed`,
+        );
       }
     },
   });

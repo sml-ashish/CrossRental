@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Project: SML Crane Discovery & Vendor Repository Platform (cross-rental sourcing).
+Project: crossrentel — SML's crane sourcing & vendor network (cross-rental sourcing).
 The **vendor portal is already built**. This repo work is the rest of the platform, phase by phase.
 
 ## How to work
@@ -19,6 +19,6 @@ The **vendor portal is already built**. This repo work is the rest of the platfo
 - Extend existing entities and services (Vendor, Crane, Reservation, RFQ, Quotation, `award_quotation`). Do not create parallel ones.
 - Never show vendors: other vendors' data, the end customer's name or address, the rental budget, or the Sales Partner's name. Enforce on the server and test it.
 - SAP integration is parked. Do not build it. Do not build inspection or GO / NO-GO. Do not build vendor performance analysis.
-- Geocoding provider is on hold: use the interface and stub only.
+- Geocoding/mapping: Google Maps behind the `GeoProvider` seam (`GEO_PROVIDER=google`); keep `stub` for development and tests, and `disabled` as the production default until a key is configured.
 - Use dummy data. Keep secrets in configuration. Never log PAN or bank details.
 - Do not choose the stack or hosting beyond what is above.

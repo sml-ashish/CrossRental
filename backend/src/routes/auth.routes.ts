@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as auth from "../controllers/auth.controller";
+import * as sso from "../controllers/sso.controller";
 import { requireAuth } from "../middleware/auth";
 import {
   activationLimiter,
@@ -27,6 +28,11 @@ router.post("/login", loginLimiter, auth.login);
 // Internal (admin / sales): email, then a 6-digit code.
 router.post("/otp/request", otpRequestLimiter, auth.requestOtp);
 router.post("/otp/verify", otpVerifyLimiter, auth.verifyOtp);
+
+// SSO for internal users (P5). OTP remains the fallback.
+router.get("/sso/status", apiLimiter, sso.status);
+router.get("/sso/start", apiLimiter, sso.start);
+router.post("/sso/callback", otpVerifyLimiter, sso.callback);
 
 // Password reset (vendor).
 router.post("/forgot-password", resetLimiter, auth.forgotPassword);

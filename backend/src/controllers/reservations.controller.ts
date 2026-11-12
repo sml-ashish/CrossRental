@@ -35,6 +35,15 @@ export const calendar = asyncHandler(async (req: Request, res: Response) => {
   res.json({ calendar: view });
 });
 
+/**
+ * A vendor's own calendar. The service fixes the vendor from the token, so the
+ * caller cannot widen the scope with a `vendorId` query parameter.
+ */
+export const vendorCalendar = asyncHandler(async (req: Request, res: Response) => {
+  const view = await reservations.vendorBookingCalendar(req.query, actorOf(req));
+  res.json({ calendar: view });
+});
+
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const created = await reservations.createBlockedReservation(req.body, actorOf(req));
   res.status(201).json({ reservation: created });

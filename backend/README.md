@@ -1,4 +1,4 @@
-# Backend — Crane Discovery & Vendor Portal API
+# Backend — crossrentel API
 
 Express 4 + Prisma 7 + PostgreSQL. TypeScript throughout, strict mode.
 
@@ -167,6 +167,16 @@ candidate picker but cannot maintain one.
 | `POST`   | `/cranes/:craneId/load-chart` | PDF/JPG/PNG via `uploadSingle`. |
 | `GET`    | `/cranes/:craneId/load-chart` | Binary, authenticated. |
 | `PATCH`  | `/cranes/:craneId/approval`   | `vendor:approve` only. The brief allows the review UI to wait. |
+| `GET`    | `/cranes/bulk/template`       | The `.xlsx` import template, with dropdowns for crane types and states. `fleet:edit_all`. |
+| `POST`   | `/cranes/bulk`                | Multipart `file` (`.xlsx`) plus `vendorId`. `?dryRun=true` returns the per-row report without writing. `fleet:edit_all`. |
+
+Bulk upload is the sales/admin path for loading a vendor's fleet, not a vendor
+feature. It is deliberately a thin loop over `createCrane` — the same schema,
+duplicate rule and geocoding as the single-crane form — so the two cannot drift.
+Two limits are specific to it: at most 250 rows per file (refused up front) and
+5 MB (the spreadsheet uploader, separate from the PDF/JPEG/PNG one). A duplicate
+serial is skipped and reported, never used to update the existing crane; a failed
+row does not stop the valid ones. The vendor gets one summary email per import.
 
 The rules worth knowing before changing any of this:
 
@@ -203,7 +213,7 @@ two audiences under one set of rules.
 | `GET`    | `/rfqs/:rfqId`            | `rfq:track`            | Detail: recipients, snapshots, quotations. |
 | `PUT`    | `/rfqs/:rfqId`            | `rfq:create`           | Drafts only. 409 once sent. |
 | `PATCH`  | `/rfqs/:rfqId/site-pin`   | `rfq:create`           | Confirms or corrects the job-site pin. |
-| `GET`    | `/rfqs/:rfqId/candidates` | `rfq:track`            | The picker: grouped by vendor, nearest first. |
+| `GET`    | `/rfqs/:rfqId/candidates` | `rfq:track`            | The picker, grouped by vendor. `?mode=technical` (default: type + capacity, smallest adequate capacity first, then nearest) or `?mode=distance` (same type, any capacity, nearest first). |
 | `POST`   | `/rfqs/:rfqId/send`       | `rfq:dispatch`         | Body is vendor IDs. Re-checks approval and active users. |
 | `PATCH`  | `/rfqs/:rfqId/deadline`   | `rfq:extend_deadline`  | Must be later than the current one. Notifies `PENDING` recipients. |
 | `POST`   | `/rfqs/:rfqId/cancel`     | `rfq:cancel`           | Requires a reason. |
@@ -450,7 +460,10 @@ the CR team (`sales_user`), and every service entry point re-checks the role.
 | `GET`  | `/enquiries/:enquiryId` | `enquiry:view` | Header, lines and a stage-count summary. |
 | `PUT`  | `/enquiries/:enquiryId` | `enquiry:manage` | Full header edit. |
 | `POST` | `/enquiries/:enquiryId/lines` | `enquiry:manage` | Add a line; `lineNo` is assigned. |
-| `GET`  | `/enquiries/lines/:lineId/workspace` | `enquiry:view` | Vendor recommendations, RFQ history and quotations for the line. No SML section — SML has no fleet here. |
+| `GET`  | `/enquiries/lines/:lineId` | `enquiry:view` | One line item, for the editor and the comparison screen. |
+| `GET`  | `/enquiries/lines/:lineId/recommendations` | `enquiry:view` | The P2 recommendation engine's latest result plus its snapshot history (API only; no screen). |
+| `POST` | `/enquiries/lines/:lineId/recommendations/refresh` | `enquiry:manage` | Re-runs the engine, keeping earlier snapshots. |
+| `GET`  | `/enquiries/lines/:lineId/comparison` | `enquiry:view` | The line's comparable quotations, ranked. |
 | `PUT`  | `/enquiries/lines/:lineId` | `enquiry:manage` | Full line edit. |
 | `POST` | `/enquiries/lines/:lineId/cancel` | `enquiry:manage` | Body `{ reason }`. The line becomes final; nothing revives it. |
 | `POST` | `/enquiries/lines/:lineId/internal-check` | `enquiry:manage` | Body `{ outcome: CHECKED_NOT_AVAILABLE \| FULFILLED_INTERNALLY, notes? }` — the manual CR availability check. |
@@ -554,8 +567,8 @@ Suites:
 - `enquiry.test.ts` — P1. Native intake with every template field, the derived
   roll-up (internal fulfilment, partial, all-cancelled closes the enquiry, a
   cancelled line never revives), the RFQ-from-line vendor-safe copy (customer,
-  budget, notes, PO and Sales Partner are absent by string), vendor
-  recommendations in the workspace, the full trail journey (RFQ Sent → Quotes
+  budget, notes, PO and Sales Partner are absent by string), the line read and
+  its vendor recommendations, the full trail journey (RFQ Sent → Quotes
   Received → Booked) and that a vendor is refused the whole surface.
 - `admin.test.ts`, `settings.test.ts`, `reservations.test.ts` — the P0 admin
   surface, the master-list settings and the dated reservations.

@@ -20,6 +20,10 @@ import communicationRoutes from "./routes/communication.routes";
 import vendorQuotationRoutes from "./routes/vendorQuotation.routes";
 import vendorDashboardRoutes from "./routes/vendorDashboard.routes";
 import adminRoutes from "./routes/admin.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
+import managementRoutes from "./routes/management.routes";
+import reportRoutes from "./routes/report.routes";
+import whatsappRoutes from "./routes/whatsapp.routes";
 import { startScheduler, stopScheduler } from "./job/scheduler";
 import { registerDefaultJobs } from "./job/registerJobs";
 
@@ -44,6 +48,10 @@ export function createApp() {
       allowedHeaders: ["Content-Type", "Authorization"],
     }),
   );
+
+  // The WhatsApp webhook needs the exact bytes Meta signed. Mount it before
+  // the JSON parser, which would otherwise consume and re-serialise the body.
+  app.use("/api/whatsapp", whatsappRoutes);
 
   // Uploads go through multer's memory storage, but RFQ forms can carry a
   // base64 attachment fallback, so the JSON limit is generous.
@@ -75,6 +83,9 @@ export function createApp() {
   app.use("/api/vendor/rfqs", vendorQuotationRoutes);
   app.use("/api/vendor/dashboard", vendorDashboardRoutes);
   app.use("/api/admin", adminRoutes);
+  app.use("/api/dashboard", dashboardRoutes);
+  app.use("/api/management", managementRoutes);
+  app.use("/api/reports", reportRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

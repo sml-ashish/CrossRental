@@ -33,8 +33,9 @@ import { INTERNAL_USERS, VENDOR_PASSWORD, VENDOR_USERS } from "./fixtures";
  * - a snapshot is viewable later even after the cranes move;
  * - the calendar shows reservations and releasing one frees the crane.
  *
- * Distances run on the geocoding stub (open item 13), so they are synthetic and
- * labelled straight-line. Every value here is fabricated (working rule 3).
+ * The suite forces the geocoding stub (vitest.config.mts), so these distances
+ * are synthetic and labelled straight-line whatever the developer's `.env` says;
+ * the live provider is Google. Every value here is fabricated (working rule 3).
  */
 
 const { sentMail } = vi.hoisted(() => ({
@@ -336,5 +337,86 @@ describe("booking calendar (P2)", () => {
     const url = `/api/reservations/calendar?from=${isoDate(0)}&to=${isoDate(6)}`;
     const res = await call(app, "GET", url, { token: ctx.vendorTokenA });
     expect(res.status).toBe(403);
+  });
+});
+
+/**
+ * The vendor's own calendar. The same day states as the internal screen, but the
+ * vendor is taken from the token — the point of these tests is that no query
+ * parameter can widen that scope, and that a booking on someone else's crane is
+ * not even named.
+ */
+describe("vendor booking calendar", () => {
+  const url = (extra = "") =>
+    `/api/vendors/me/booking-calendar?from=${isoDate(0)}&to=${isoDate(6)}${extra}`;
+
+  it("shows the vendor their own cranes and nobody else's", async () => {
+    const res = await call(app, "GET", url(), { token: ctx.vendorTokenA });
+
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const cranes = res.body.calendar.cranes as Array<{ craneId: string; vendorId: string }>;
+    expect(cranes.length).toBeGreaterThan(0);
+    expect(cranes.every((crane) => crane.vendorId === ctx.a.vendorId)).toBe(true);
+    expect(cranes.some((crane) => crane.craneId === ctx.a.craneId)).toBe(true);
+    expect(cranes.some((crane) => crane.craneId === ctx.b.craneId)).toBe(false);
+  });
+
+  it("cannot be widened with a vendorId or craneId in the query", async () => {
+    const byVendor = await call(app, "GET", url(`&vendorId=${ctx.b.vendorId}`), {
+      token: ctx.vendorTokenA,
+    });
+    expect(byVendor.status).toBe(200);
+    const cranes = byVendor.body.calendar.cranes as Array<{ craneId: string }>;
+    expect(cranes.every((crane) => crane.craneId !== ctx.b.craneId)).toBe(true);
+
+    const byCrane = await call(app, "GET", url(`&craneId=${ctx.b.craneId}`), {
+      token: ctx.vendorTokenA,
+    });
+    expect(byCrane.status).toBe(200);
+    expect(byCrane.body.calendar.cranes).toHaveLength(0);
+  });
+
+  it("shows a booking on the vendor's own crane", async () => {
+    const created = await call(app, "POST", "/api/reservations", {
+      token: ctx.adminToken,
+      body: {
+        craneId: ctx.a.craneId,
+        startDate: isoDate(0),
+        endDate: isoDate(2),
+        reason: "Hire confirmed",
+      },
+    });
+    expect(created.status, JSON.stringify(created.body)).toBe(201);
+
+    const res = await call(app, "GET", url(), { token: ctx.vendorTokenA });
+    const row = (res.body.calendar.cranes as Array<{ craneId: string; days: Array<{ state: string }> }>).find(
+      (crane) => crane.craneId === ctx.a.craneId,
+    );
+    expect(row).toBeTruthy();
+    expect(row!.days[0]!.state).toBe("BLOCKED");
+  });
+
+  it("does not expose a booking on another vendor's crane", async () => {
+    await call(app, "POST", "/api/reservations", {
+      token: ctx.adminToken,
+      body: {
+        craneId: ctx.b.craneId,
+        startDate: isoDate(0),
+        endDate: isoDate(2),
+        reason: "Hire confirmed",
+      },
+    });
+
+    const res = await call(app, "GET", url(), { token: ctx.vendorTokenA });
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(res.body)).not.toContain(ctx.b.craneId);
+  });
+
+  it("keeps internal users and anonymous callers out", async () => {
+    const admin = await call(app, "GET", url(), { token: ctx.adminToken });
+    expect(admin.status).toBe(403);
+
+    const anonymous = await call(app, "GET", url());
+    expect(anonymous.status).toBe(401);
   });
 });

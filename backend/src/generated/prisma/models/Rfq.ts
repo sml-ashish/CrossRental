@@ -214,6 +214,7 @@ export type RfqCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   sentAt: number
+  channels: number
   _all: number
 }
 
@@ -406,6 +407,7 @@ export type RfqCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   sentAt?: true
+  channels?: true
   _all?: true
 }
 
@@ -549,6 +551,7 @@ export type RfqGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   sentAt: Date | null
+  channels: $Enums.MessageChannel[]
   _count: RfqCountAggregateOutputType | null
   _avg: RfqAvgAggregateOutputType | null
   _sum: RfqSumAggregateOutputType | null
@@ -628,6 +631,7 @@ export type RfqWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   sentAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
+  channels?: Prisma.EnumMessageChannelNullableListFilter<"Rfq">
   craneTypeRef?: Prisma.XOR<Prisma.CraneTypeScalarRelationFilter, Prisma.CraneTypeWhereInput>
   siteState?: Prisma.XOR<Prisma.StateScalarRelationFilter, Prisma.StateWhereInput>
   enquiryLine?: Prisma.XOR<Prisma.EnquiryLineItemNullableScalarRelationFilter, Prisma.EnquiryLineItemWhereInput> | null
@@ -636,6 +640,7 @@ export type RfqWhereInput = {
   quotations?: Prisma.QuotationListRelationFilter
   attachments?: Prisma.RfqAttachmentListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  inboundReplies?: Prisma.InboundReplyListRelationFilter
 }
 
 export type RfqOrderByWithRelationInput = {
@@ -692,6 +697,7 @@ export type RfqOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  channels?: Prisma.SortOrder
   craneTypeRef?: Prisma.CraneTypeOrderByWithRelationInput
   siteState?: Prisma.StateOrderByWithRelationInput
   enquiryLine?: Prisma.EnquiryLineItemOrderByWithRelationInput
@@ -700,6 +706,7 @@ export type RfqOrderByWithRelationInput = {
   quotations?: Prisma.QuotationOrderByRelationAggregateInput
   attachments?: Prisma.RfqAttachmentOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
+  inboundReplies?: Prisma.InboundReplyOrderByRelationAggregateInput
 }
 
 export type RfqWhereUniqueInput = Prisma.AtLeast<{
@@ -759,6 +766,7 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   sentAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
+  channels?: Prisma.EnumMessageChannelNullableListFilter<"Rfq">
   craneTypeRef?: Prisma.XOR<Prisma.CraneTypeScalarRelationFilter, Prisma.CraneTypeWhereInput>
   siteState?: Prisma.XOR<Prisma.StateScalarRelationFilter, Prisma.StateWhereInput>
   enquiryLine?: Prisma.XOR<Prisma.EnquiryLineItemNullableScalarRelationFilter, Prisma.EnquiryLineItemWhereInput> | null
@@ -767,6 +775,7 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   quotations?: Prisma.QuotationListRelationFilter
   attachments?: Prisma.RfqAttachmentListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  inboundReplies?: Prisma.InboundReplyListRelationFilter
 }, "id" | "rfqNumber">
 
 export type RfqOrderByWithAggregationInput = {
@@ -823,6 +832,7 @@ export type RfqOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  channels?: Prisma.SortOrder
   _count?: Prisma.RfqCountOrderByAggregateInput
   _avg?: Prisma.RfqAvgOrderByAggregateInput
   _max?: Prisma.RfqMaxOrderByAggregateInput
@@ -887,6 +897,7 @@ export type RfqScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Rfq"> | Date | string
   sentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Rfq"> | Date | string | null
+  channels?: Prisma.EnumMessageChannelNullableListFilter<"Rfq">
 }
 
 export type RfqCreateInput = {
@@ -939,6 +950,7 @@ export type RfqCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
@@ -947,6 +959,7 @@ export type RfqCreateInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateInput = {
@@ -1003,10 +1016,12 @@ export type RfqUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUpdateInput = {
@@ -1059,6 +1074,7 @@ export type RfqUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
@@ -1067,6 +1083,7 @@ export type RfqUpdateInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateInput = {
@@ -1123,10 +1140,12 @@ export type RfqUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateManyInput = {
@@ -1183,6 +1202,7 @@ export type RfqCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqUpdateManyMutationInput = {
@@ -1235,6 +1255,7 @@ export type RfqUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqUncheckedUpdateManyInput = {
@@ -1291,6 +1312,7 @@ export type RfqUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqListRelationFilter = {
@@ -1301,6 +1323,14 @@ export type RfqListRelationFilter = {
 
 export type RfqOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type EnumMessageChannelNullableListFilter<$PrismaModel = never> = {
+  equals?: $Enums.MessageChannel[] | Prisma.ListEnumMessageChannelFieldRefInput<$PrismaModel> | null
+  has?: $Enums.MessageChannel | Prisma.EnumMessageChannelFieldRefInput<$PrismaModel> | null
+  hasEvery?: $Enums.MessageChannel[] | Prisma.ListEnumMessageChannelFieldRefInput<$PrismaModel>
+  hasSome?: $Enums.MessageChannel[] | Prisma.ListEnumMessageChannelFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type RfqCountOrderByAggregateInput = {
@@ -1357,6 +1387,7 @@ export type RfqCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
+  channels?: Prisma.SortOrder
 }
 
 export type RfqAvgOrderByAggregateInput = {
@@ -1629,6 +1660,10 @@ export type RfqUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.RfqScalarWhereInput | Prisma.RfqScalarWhereInput[]
 }
 
+export type RfqCreatechannelsInput = {
+  set: $Enums.MessageChannel[]
+}
+
 export type EnumCapacityRuleFieldUpdateOperationsInput = {
   set?: $Enums.CapacityRule
 }
@@ -1643,6 +1678,11 @@ export type EnumRfqStatusFieldUpdateOperationsInput = {
 
 export type NullableEnumRfqRollupStatusFieldUpdateOperationsInput = {
   set?: $Enums.RfqRollupStatus | null
+}
+
+export type RfqUpdatechannelsInput = {
+  set?: $Enums.MessageChannel[]
+  push?: $Enums.MessageChannel | $Enums.MessageChannel[]
 }
 
 export type RfqCreateNestedOneWithoutAttachmentsInput = {
@@ -1745,6 +1785,22 @@ export type RfqUncheckedUpdateManyWithoutEnquiryLineNestedInput = {
   deleteMany?: Prisma.RfqScalarWhereInput | Prisma.RfqScalarWhereInput[]
 }
 
+export type RfqCreateNestedOneWithoutInboundRepliesInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutInboundRepliesInput, Prisma.RfqUncheckedCreateWithoutInboundRepliesInput>
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutInboundRepliesInput
+  connect?: Prisma.RfqWhereUniqueInput
+}
+
+export type RfqUpdateOneWithoutInboundRepliesNestedInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutInboundRepliesInput, Prisma.RfqUncheckedCreateWithoutInboundRepliesInput>
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutInboundRepliesInput
+  upsert?: Prisma.RfqUpsertWithoutInboundRepliesInput
+  disconnect?: Prisma.RfqWhereInput | boolean
+  delete?: Prisma.RfqWhereInput | boolean
+  connect?: Prisma.RfqWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RfqUpdateToOneWithWhereWithoutInboundRepliesInput, Prisma.RfqUpdateWithoutInboundRepliesInput>, Prisma.RfqUncheckedUpdateWithoutInboundRepliesInput>
+}
+
 export type RfqCreateWithoutSiteStateInput = {
   id?: string
   rfqNumber: string
@@ -1795,6 +1851,7 @@ export type RfqCreateWithoutSiteStateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
@@ -1802,6 +1859,7 @@ export type RfqCreateWithoutSiteStateInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutSiteStateInput = {
@@ -1857,10 +1915,12 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutSiteStateInput = {
@@ -1946,6 +2006,7 @@ export type RfqScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Rfq"> | Date | string
   sentAt?: Prisma.DateTimeNullableFilter<"Rfq"> | Date | string | null
+  channels?: Prisma.EnumMessageChannelNullableListFilter<"Rfq">
 }
 
 export type RfqCreateWithoutCraneTypeRefInput = {
@@ -1998,6 +2059,7 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
@@ -2005,6 +2067,7 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
@@ -2060,10 +2123,12 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutCraneTypeRefInput = {
@@ -2142,6 +2207,7 @@ export type RfqCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
@@ -2149,6 +2215,7 @@ export type RfqCreateWithoutCreatedByInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutCreatedByInput = {
@@ -2204,10 +2271,12 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutCreatedByInput = {
@@ -2286,6 +2355,7 @@ export type RfqCreateWithoutAttachmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
@@ -2293,6 +2363,7 @@ export type RfqCreateWithoutAttachmentsInput = {
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutAttachmentsInput = {
@@ -2349,9 +2420,11 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutAttachmentsInput = {
@@ -2420,6 +2493,7 @@ export type RfqUpdateWithoutAttachmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
@@ -2427,6 +2501,7 @@ export type RfqUpdateWithoutAttachmentsInput = {
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutAttachmentsInput = {
@@ -2483,9 +2558,11 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutReservationsInput = {
@@ -2538,6 +2615,7 @@ export type RfqCreateWithoutReservationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
@@ -2545,6 +2623,7 @@ export type RfqCreateWithoutReservationsInput = {
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutReservationsInput = {
@@ -2601,9 +2680,11 @@ export type RfqUncheckedCreateWithoutReservationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutReservationsInput = {
@@ -2672,6 +2753,7 @@ export type RfqUpdateWithoutReservationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
@@ -2679,6 +2761,7 @@ export type RfqUpdateWithoutReservationsInput = {
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutReservationsInput = {
@@ -2735,9 +2818,11 @@ export type RfqUncheckedUpdateWithoutReservationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutRecipientsInput = {
@@ -2790,6 +2875,7 @@ export type RfqCreateWithoutRecipientsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
@@ -2797,6 +2883,7 @@ export type RfqCreateWithoutRecipientsInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutRecipientsInput = {
@@ -2853,9 +2940,11 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutRecipientsInput = {
@@ -2924,6 +3013,7 @@ export type RfqUpdateWithoutRecipientsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
@@ -2931,6 +3021,7 @@ export type RfqUpdateWithoutRecipientsInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutRecipientsInput = {
@@ -2987,9 +3078,11 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutQuotationsInput = {
@@ -3042,6 +3135,7 @@ export type RfqCreateWithoutQuotationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
@@ -3049,6 +3143,7 @@ export type RfqCreateWithoutQuotationsInput = {
   recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutQuotationsInput = {
@@ -3105,9 +3200,11 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutQuotationsInput = {
@@ -3176,6 +3273,7 @@ export type RfqUpdateWithoutQuotationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
@@ -3183,6 +3281,7 @@ export type RfqUpdateWithoutQuotationsInput = {
   recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutQuotationsInput = {
@@ -3239,9 +3338,11 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutEnquiryLineInput = {
@@ -3294,6 +3395,7 @@ export type RfqCreateWithoutEnquiryLineInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
   siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
@@ -3301,6 +3403,7 @@ export type RfqCreateWithoutEnquiryLineInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutEnquiryLineInput = {
@@ -3356,10 +3459,12 @@ export type RfqUncheckedCreateWithoutEnquiryLineInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutEnquiryLineInput = {
@@ -3386,6 +3491,266 @@ export type RfqUpdateWithWhereUniqueWithoutEnquiryLineInput = {
 export type RfqUpdateManyWithWhereWithoutEnquiryLineInput = {
   where: Prisma.RfqScalarWhereInput
   data: Prisma.XOR<Prisma.RfqUpdateManyMutationInput, Prisma.RfqUncheckedUpdateManyWithoutEnquiryLineInput>
+}
+
+export type RfqCreateWithoutInboundRepliesInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
+  craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
+  siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
+  recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+}
+
+export type RfqUncheckedCreateWithoutInboundRepliesInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  craneType: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  siteStateCode: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  enquiryLineId?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
+  recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+}
+
+export type RfqCreateOrConnectWithoutInboundRepliesInput = {
+  where: Prisma.RfqWhereUniqueInput
+  create: Prisma.XOR<Prisma.RfqCreateWithoutInboundRepliesInput, Prisma.RfqUncheckedCreateWithoutInboundRepliesInput>
+}
+
+export type RfqUpsertWithoutInboundRepliesInput = {
+  update: Prisma.XOR<Prisma.RfqUpdateWithoutInboundRepliesInput, Prisma.RfqUncheckedUpdateWithoutInboundRepliesInput>
+  create: Prisma.XOR<Prisma.RfqCreateWithoutInboundRepliesInput, Prisma.RfqUncheckedCreateWithoutInboundRepliesInput>
+  where?: Prisma.RfqWhereInput
+}
+
+export type RfqUpdateToOneWithWhereWithoutInboundRepliesInput = {
+  where?: Prisma.RfqWhereInput
+  data: Prisma.XOR<Prisma.RfqUpdateWithoutInboundRepliesInput, Prisma.RfqUncheckedUpdateWithoutInboundRepliesInput>
+}
+
+export type RfqUpdateWithoutInboundRepliesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
+  craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
+  siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
+  recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateWithoutInboundRepliesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
+  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateManySiteStateInput = {
@@ -3441,6 +3806,7 @@ export type RfqCreateManySiteStateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqUpdateWithoutSiteStateInput = {
@@ -3493,6 +3859,7 @@ export type RfqUpdateWithoutSiteStateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
@@ -3500,6 +3867,7 @@ export type RfqUpdateWithoutSiteStateInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutSiteStateInput = {
@@ -3555,10 +3923,12 @@ export type RfqUncheckedUpdateWithoutSiteStateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
@@ -3614,6 +3984,7 @@ export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqCreateManyCraneTypeRefInput = {
@@ -3669,6 +4040,7 @@ export type RfqCreateManyCraneTypeRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqUpdateWithoutCraneTypeRefInput = {
@@ -3721,6 +4093,7 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
@@ -3728,6 +4101,7 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
@@ -3783,10 +4157,12 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
@@ -3842,6 +4218,7 @@ export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqCreateManyCreatedByInput = {
@@ -3897,6 +4274,7 @@ export type RfqCreateManyCreatedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqUpdateWithoutCreatedByInput = {
@@ -3949,6 +4327,7 @@ export type RfqUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
@@ -3956,6 +4335,7 @@ export type RfqUpdateWithoutCreatedByInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutCreatedByInput = {
@@ -4011,10 +4391,12 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
@@ -4070,6 +4452,7 @@ export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqCreateManyEnquiryLineInput = {
@@ -4125,6 +4508,7 @@ export type RfqCreateManyEnquiryLineInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
 }
 
 export type RfqUpdateWithoutEnquiryLineInput = {
@@ -4177,6 +4561,7 @@ export type RfqUpdateWithoutEnquiryLineInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
   siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
@@ -4184,6 +4569,7 @@ export type RfqUpdateWithoutEnquiryLineInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
@@ -4239,10 +4625,12 @@ export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
   recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutEnquiryLineInput = {
@@ -4298,6 +4686,7 @@ export type RfqUncheckedUpdateManyWithoutEnquiryLineInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
 }
 
 
@@ -4310,6 +4699,7 @@ export type RfqCountOutputType = {
   quotations: number
   attachments: number
   reservations: number
+  inboundReplies: number
 }
 
 export type RfqCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4317,6 +4707,7 @@ export type RfqCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.In
   quotations?: boolean | RfqCountOutputTypeCountQuotationsArgs
   attachments?: boolean | RfqCountOutputTypeCountAttachmentsArgs
   reservations?: boolean | RfqCountOutputTypeCountReservationsArgs
+  inboundReplies?: boolean | RfqCountOutputTypeCountInboundRepliesArgs
 }
 
 /**
@@ -4355,6 +4746,13 @@ export type RfqCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime.Types
  */
 export type RfqCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ReservationWhereInput
+}
+
+/**
+ * RfqCountOutputType without action
+ */
+export type RfqCountOutputTypeCountInboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InboundReplyWhereInput
 }
 
 
@@ -4412,6 +4810,7 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
+  channels?: boolean
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
   enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
@@ -4420,6 +4819,7 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   quotations?: boolean | Prisma.Rfq$quotationsArgs<ExtArgs>
   attachments?: boolean | Prisma.Rfq$attachmentsArgs<ExtArgs>
   reservations?: boolean | Prisma.Rfq$reservationsArgs<ExtArgs>
+  inboundReplies?: boolean | Prisma.Rfq$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.RfqCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rfq"]>
 
@@ -4477,6 +4877,7 @@ export type RfqSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
+  channels?: boolean
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
   enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
@@ -4537,6 +4938,7 @@ export type RfqSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
+  channels?: boolean
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
   enquiryLine?: boolean | Prisma.Rfq$enquiryLineArgs<ExtArgs>
@@ -4597,9 +4999,10 @@ export type RfqSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   sentAt?: boolean
+  channels?: boolean
 }
 
-export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt", ExtArgs["result"]["rfq"]>
+export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt" | "channels", ExtArgs["result"]["rfq"]>
 export type RfqInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
@@ -4609,6 +5012,7 @@ export type RfqInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   quotations?: boolean | Prisma.Rfq$quotationsArgs<ExtArgs>
   attachments?: boolean | Prisma.Rfq$attachmentsArgs<ExtArgs>
   reservations?: boolean | Prisma.Rfq$reservationsArgs<ExtArgs>
+  inboundReplies?: boolean | Prisma.Rfq$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.RfqCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RfqIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4635,6 +5039,7 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     quotations: Prisma.$QuotationPayload<ExtArgs>[]
     attachments: Prisma.$RfqAttachmentPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
+    inboundReplies: Prisma.$InboundReplyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4652,7 +5057,8 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     jibLengthM: runtime.Decimal | null
     startDateTbc: boolean
     /**
-     * * Used to convert months into days when RATE_DAY_BASIS is working days.
+     * *
+     *    * Used to convert months into days when RATE_DAY_BASIS is working days.
      */
     workingDaysPerMonth: number | null
     siteLocation: string
@@ -4693,6 +5099,7 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     createdAt: Date
     updatedAt: Date
     sentAt: Date | null
+    channels: $Enums.MessageChannel[]
   }, ExtArgs["result"]["rfq"]>
   composites: {}
 }
@@ -5095,6 +5502,7 @@ export interface Prisma__RfqClient<T, Null = never, ExtArgs extends runtime.Type
   quotations<T extends Prisma.Rfq$quotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$quotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attachments<T extends Prisma.Rfq$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.Rfq$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inboundReplies<T extends Prisma.Rfq$inboundRepliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$inboundRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5177,6 +5585,7 @@ export interface RfqFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Rfq", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Rfq", 'DateTime'>
   readonly sentAt: Prisma.FieldRef<"Rfq", 'DateTime'>
+  readonly channels: Prisma.FieldRef<"Rfq", 'MessageChannel[]'>
 }
     
 
@@ -5690,6 +6099,30 @@ export type Rfq$reservationsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
+}
+
+/**
+ * Rfq.inboundReplies
+ */
+export type Rfq$inboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InboundReply
+   */
+  select?: Prisma.InboundReplySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InboundReply
+   */
+  omit?: Prisma.InboundReplyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InboundReplyInclude<ExtArgs> | null
+  where?: Prisma.InboundReplyWhereInput
+  orderBy?: Prisma.InboundReplyOrderByWithRelationInput | Prisma.InboundReplyOrderByWithRelationInput[]
+  cursor?: Prisma.InboundReplyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InboundReplyScalarFieldEnum | Prisma.InboundReplyScalarFieldEnum[]
 }
 
 /**

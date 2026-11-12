@@ -37,7 +37,9 @@ import {
   CraneStatus,
   DistanceMethod,
   QuotationStatus,
+  QuoteSource,
   RateBasis,
+  TaxBasisOfQuotation,
   ResponseStatus,
   RfqRollupStatus,
   RfqStatus,
@@ -1224,13 +1226,182 @@ export async function submitQuotation(
 }
 
 /**
+ * P6: creates a quotation from an email or WhatsApp reply.
+ *
+ * The vendor never sees this path, so the ownership checks that protect the
+ * portal submission are re-applied here rather than trusting the parser. The
+ * caller decides whether the reply had enough fields to be converted; this
+ * function only refuses a quotation that would be invalid (missing crane,
+ * unavailable crane, unanswered availability).
+ *
+ * A later reply for the same crane becomes a new version, exactly like a portal
+ * revision, so the comparison screen keeps reading the latest row and the older
+ * price stays in history.
+ */
+export interface InboundQuotationInput {
+  rfqId: string;
+  vendorId: string;
+  craneId: string;
+  rentalRate: number;
+  rateBasis: RateBasis;
+  mobilisationCharges?: number;
+  demobilisationCharges?: number;
+  taxBasis?: TaxBasisOfQuotation;
+  availabilityConfirmed: boolean;
+  availableFrom?: Date | null;
+  validityDate: Date;
+  acceptsCommercialTerms: boolean;
+  deviationText?: string | null;
+  remarks?: string | null;
+  source: QuoteSource;
+  attachments?: Array<{
+    fileRef: string;
+    fileName: string;
+    mimeType: string | null;
+    sizeBytes: number | null;
+  }>;
+}
+
+export async function createQuotationFromReply(
+  input: InboundQuotationInput,
+  actor: Actor | null,
+): Promise<{ quotationId: string; version: number; totalQuotedValue: number }> {
+  const recipient = await prisma.rfqVendorRecipient.findUnique({
+    where: { rfqId_vendorId: { rfqId: input.rfqId, vendorId: input.vendorId } },
+    select: RECIPIENT_SELECT,
+  });
+  if (!recipient) {
+    throw AppError.badRequest("That vendor was not sent this RFQ");
+  }
+
+  const crane = await prisma.crane.findFirst({
+    where: { id: input.craneId, vendorId: input.vendorId },
+    select: CRANE_SELECT,
+  });
+  if (!crane) throw AppError.badRequest("That crane is not in the vendor's fleet");
+
+  await assertCraneQuotable(crane, recipient.rfq);
+  assertAvailability(recipient.rfq, input);
+
+  const latest = await prisma.quotation.aggregate({
+    where: { rfqId: input.rfqId, vendorId: input.vendorId, craneId: input.craneId },
+    _max: { version: true },
+  });
+  const version = (latest._max.version ?? 0) + 1;
+
+  const { total, note } = calculateTotal({
+    rentalRate: input.rentalRate,
+    rateBasis: input.rateBasis,
+    durationValue: Number(recipient.rfq.durationValue),
+    durationUnit: recipient.rfq.durationUnit,
+    mobilisationCharges: input.mobilisationCharges ?? 0,
+    demobilisationCharges: input.demobilisationCharges ?? 0,
+    dayBasis: await dayBasisFor(recipient.rfq),
+  });
+
+  const warnings = computeWarnings(recipient.rfq, crane);
+  const distance = await distanceToSite(recipient.rfq, crane);
+
+  const quotation = await prisma.$transaction(async (tx) => {
+    if (version > 1) {
+      await tx.quotation.updateMany({
+        where: {
+          rfqId: input.rfqId,
+          vendorId: input.vendorId,
+          craneId: input.craneId,
+          isLatest: true,
+        },
+        data: { isLatest: false },
+      });
+    }
+
+    return tx.quotation.create({
+      data: {
+        rfqId: input.rfqId,
+        vendorId: input.vendorId,
+        craneId: input.craneId,
+        version,
+        isLatest: true,
+        rentalRate: input.rentalRate,
+        rateBasis: input.rateBasis,
+        mobilisationCharges: input.mobilisationCharges ?? 0,
+        demobilisationCharges: input.demobilisationCharges ?? 0,
+        taxBasis: input.taxBasis ?? TaxBasisOfQuotation.EXCLUSIVE_OF_GST,
+        totalQuotedValue: total,
+        calculationNote: note,
+        availabilityConfirmed: input.availabilityConfirmed,
+        availableFrom: input.availableFrom ?? null,
+        validityDate: startOfUtcDay(input.validityDate),
+        acceptsCommercialTerms: input.acceptsCommercialTerms,
+        deviationText: input.deviationText ?? null,
+        remarks: input.remarks ?? null,
+        warnings: warnings as unknown as Prisma.InputJsonValue,
+        craneLocationSnapshot: craneSnapshot(crane) as unknown as Prisma.InputJsonValue,
+        distanceToSiteKm: distance?.km ?? null,
+        distanceMethod: (distance?.method as DistanceMethod | undefined) ?? null,
+        source: input.source,
+        ...(input.attachments?.length
+          ? {
+              attachments: {
+                create: input.attachments.map((attachment) => ({
+                  kind: AttachmentKind.OTHER,
+                  fileRef: attachment.fileRef,
+                  fileName: attachment.fileName,
+                  mimeType: attachment.mimeType,
+                  sizeBytes: attachment.sizeBytes,
+                })),
+              },
+            }
+          : {}),
+      },
+      select: { id: true, version: true },
+    });
+  });
+
+  await markResponded(recipient.id, actor);
+  await rollUpToQuotesReceived(input.rfqId);
+  if (recipient.rfq.enquiryLineId) {
+    await onQuotesReceived(recipient.rfq.enquiryLineId, null);
+  }
+  await notifyCreatorOfQuotation(
+    recipient.rfq,
+    recipient,
+    quotation.version,
+    crane,
+    total,
+    distance,
+    warnings,
+  ).catch((error) => console.error("[quotation] inbound creator notification failed", error));
+
+  await recordAudit({
+    entity: "quotation",
+    entityId: quotation.id,
+    action: "inbound_capture",
+    newValue: {
+      rfqNumber: recipient.rfq.rfqNumber,
+      craneId: crane.id,
+      version: quotation.version,
+      totalQuotedValue: total,
+      source: input.source,
+    },
+    actor: actor ? auditActor(actor) : null,
+  });
+
+  return {
+    quotationId: quotation.id,
+    version: quotation.version,
+    totalQuotedValue: total,
+  };
+}
+
+/**
  * Marks the recipient as having responded.
  *
  * `QUOTED` is kept even if every quotation is later withdrawn, because the vendor
  * did answer and the tracking screen needs to distinguish "declined", "quoted then
  * withdrew" and "never replied" — three different conversations with a customer.
  */
-async function markResponded(recipientId: string, actor: Actor): Promise<void> {
+async function markResponded(recipientId: string, _actor: Actor | null): Promise<void> {
   await prisma.rfqVendorRecipient.update({
     where: { id: recipientId },
     data: {

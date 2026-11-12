@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useParams } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
 import {
   getLineComparison,
   markQuotation,
@@ -9,18 +8,15 @@ import {
   type ComparisonResult,
   type QuoteMarkStatus,
 } from "@/lib/comparison";
-import {
-  formatDate,
-  getLineWorkspace,
-  lineToForm,
-  updateLine,
-} from "@/lib/enquiries";
+import { formatDate } from "@/lib/enquiries";
 import { awardQuotation, formatDistance } from "@/lib/rfqs";
 import { loadMasterLists } from "@/lib/settings";
 import { formatInr } from "@/lib/quotations";
-import { ApiError } from "@/lib/api";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader, Panel } from "@/components/ui/page-header";
+import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
 import { Spinner } from "@/components/ui/spinner";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/form";
 
@@ -63,21 +59,16 @@ function responseTime(hours: number | null): string {
 
 export function LineComparisonPage() {
   const params = useParams({ strict: false }) as { lineId: string };
-  const queryClient = useQueryClient();
 
   const comparison = useQuery({
     queryKey: ["line-comparison", params.lineId],
     queryFn: () => getLineComparison(params.lineId),
   });
   const masterLists = useQuery({ queryKey: ["master-lists"], queryFn: loadMasterLists });
-  const workspace = useQuery({
-    queryKey: ["line-workspace", params.lineId],
-    queryFn: () => getLineWorkspace(params.lineId),
-  });
+  const queryClient = useQueryClient();
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ["line-comparison", params.lineId] });
-    void queryClient.invalidateQueries({ queryKey: ["line-workspace", params.lineId] });
   };
 
   if (comparison.isPending) {
@@ -94,126 +85,108 @@ export function LineComparisonPage() {
   const data = comparison.data.comparison;
   const markCodes = masterLists.data?.QUOTATION_MARK_REASON_CODES ?? [];
   const awardCodes = masterLists.data?.AWARD_REASON_CODES ?? [];
-  const line = workspace.data?.workspace.line ?? null;
 
   return (
     <div className="space-y-5">
-      <div>
-        <Link
-          to="/app/enquiries/lines/$lineId"
-          params={{ lineId: params.lineId }}
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Line {data.lineNo}
-        </Link>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-semibold text-slate-900">Compare quotes</h1>
-          {data.fullyAwarded ? (
+      <PageHeader
+        back={{ to: `/app/enquiries/${data.enquiryId}`, label: data.enquiryNo }}
+        title="Compare quotes"
+        description={
+          <>
+            {data.enquiryNo} · line {data.lineNo} ·{" "}
+            {data.requirement.craneTypeName ?? data.requirement.craneTypeCode ?? "No type"}{" "}
+            {data.requirement.capacityT !== null ? `${data.requirement.capacityT} t ` : ""}
+            {data.requirement.capacityRule === "EXACT" ? "(exact)" : "(at least)"} ×{" "}
+            {data.requirement.quantity} ·{" "}
+            {data.requirement.startDateTbc
+              ? "start TBC"
+              : `required ${formatDate(data.requirement.requiredStartDate)}`}{" "}
+            for {durationText(data.requirement.durationValue, data.requirement.durationUnit)}
+            <br />
+            {data.siteLocation}
+            {data.siteStateName ? `, ${data.siteStateName}` : ""}
+          </>
+        }
+        meta={
+          data.fullyAwarded ? (
             <Badge tone="emerald">Fully awarded</Badge>
           ) : (
             <Badge tone="amber">
               {data.awardedCount} of {data.quantity} awarded
             </Badge>
-          )}
-        </div>
-        <p className="mt-0.5 text-sm text-slate-500">
-          {data.enquiryNo} · line {data.lineNo} ·{" "}
-          {data.requirement.craneTypeName ?? data.requirement.craneTypeCode ?? "No type"}{" "}
-          {data.requirement.capacityT !== null ? `${data.requirement.capacityT} t ` : ""}
-          {data.requirement.capacityRule === "EXACT" ? "(exact)" : "(at least)"} ×{" "}
-          {data.requirement.quantity} ·{" "}
-          {data.requirement.startDateTbc
-            ? "start TBC"
-            : `required ${formatDate(data.requirement.requiredStartDate)}`}{" "}
-          for {durationText(data.requirement.durationValue, data.requirement.durationUnit)}
-        </p>
-        <p className="mt-0.5 text-sm text-slate-500">
-          {data.siteLocation}
-          {data.siteStateName ? `, ${data.siteStateName}` : ""}
-        </p>
-      </div>
+          )
+        }
+      />
 
-      <section className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900">Internal reference</h2>
-        <p className="mt-0.5 text-xs text-slate-500">
-          Rental budget and PO/SAP reference are internal only and never part of an RFQ or a
-          vendor's view.
-        </p>
-        <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <Panel
+        title="Internal reference"
+        description="The rental budget is internal only and never part of an RFQ or a vendor's view."
+      >
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <dt className="text-xs font-medium text-slate-500">Rental budget</dt>
-            <dd className="mt-0.5 text-sm text-slate-900">
-              {data.rentalBudget ?? "—"}
-              {data.rentalBudgetValue !== null ? ` (${formatInr(data.rentalBudgetValue)})` : ""}
-            </dd>
+            <dd className="mt-0.5 text-sm text-slate-900">{data.rentalBudget ?? "—"}</dd>
           </div>
           <div className="sm:col-span-2">
             <dt className="text-xs font-medium text-slate-500">Ranking rule</dt>
             <dd className="mt-0.5 text-sm text-slate-900">{RANK_RULE_LABELS[data.rankRule]}</dd>
           </div>
         </dl>
-        {line ? (
-          <div className="mt-4 max-w-sm">
-            <PoReferenceForm lineId={params.lineId} line={line} onSaved={invalidate} />
-          </div>
-        ) : null}
-      </section>
+      </Panel>
 
       {data.quotations.length === 0 ? (
-        <section className="card p-5">
-          <p className="text-sm text-slate-500">No live quotations to compare yet.</p>
-        </section>
+        <div className="card">
+          <EmptyState
+            title="No live quotations to compare"
+            description="Quotations appear here as vendors respond to the RFQs raised from this line."
+          />
+        </div>
       ) : (
-        <section className="card p-5">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Quotations ({data.quotations.length})
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Latest version of each live quotation. The vendor sees marks as still Submitted.
-          </p>
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-sm">
-              <thead className="text-left text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="py-2 pr-3 font-medium">Vendor / crane</th>
-                  <th className="py-2 pr-3 font-medium">Rental</th>
-                  <th className="py-2 pr-3 font-medium">Mob. / demob.</th>
-                  <th className="py-2 pr-3 font-medium">Total</th>
-                  <th className="py-2 pr-3 font-medium">Distance</th>
-                  <th className="py-2 pr-3 font-medium">Age / avail.</th>
-                  <th className="py-2 pr-3 font-medium">Validity</th>
-                  <th className="py-2 pr-3 font-medium">Response</th>
-                  <th className="py-2 pr-3 font-medium">State</th>
-                  <th className="py-2 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {data.quotations.map((q) => (
-                  <QuotationRow
-                    key={q.quotationId}
-                    quotation={q}
-                    markCodes={markCodes}
-                    awardCodes={awardCodes}
-                    startDateTbc={data.requirement.startDateTbc}
-                    defaultStartDate={
-                      data.requirement.requiredStartDate
-                        ? data.requirement.requiredStartDate.slice(0, 10)
-                        : new Date().toISOString().slice(0, 10)
-                    }
-                    fullyAwarded={data.fullyAwarded}
-                    onChanged={invalidate}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-3 text-xs text-slate-500">
+        <Panel
+          title={`Quotations (${data.quotations.length})`}
+          description="Latest version of each live quotation. The vendor sees marks as still Submitted."
+          bodyClassName=""
+        >
+          <Table className="min-w-[1100px]">
+            <THead>
+              <tr>
+                <TH>Vendor / crane</TH>
+                <TH>Rental</TH>
+                <TH>Mob. / demob.</TH>
+                <TH>Total</TH>
+                <TH>Distance</TH>
+                <TH>Age / avail.</TH>
+                <TH>Validity</TH>
+                <TH>Response</TH>
+                <TH>State</TH>
+                <TH>Action</TH>
+              </tr>
+            </THead>
+            <TBody>
+              {data.quotations.map((q) => (
+                <QuotationRow
+                  key={q.quotationId}
+                  quotation={q}
+                  markCodes={markCodes}
+                  awardCodes={awardCodes}
+                  startDateTbc={data.requirement.startDateTbc}
+                  defaultStartDate={
+                    data.requirement.requiredStartDate
+                      ? data.requirement.requiredStartDate.slice(0, 10)
+                      : new Date().toISOString().slice(0, 10)
+                  }
+                  fullyAwarded={data.fullyAwarded}
+                  onChanged={invalidate}
+                />
+              ))}
+            </TBody>
+          </Table>
+          <p className="border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
             A final selection reserves the crane and emails the vendor. Other quotations are
             marked Not Awarded only when the line's quantity is met; until then the award is
             partial and they stay open.
           </p>
-        </section>
+        </Panel>
       )}
     </div>
   );
@@ -242,8 +215,8 @@ function QuotationRow({
   const canAct = quotation.status !== "SELECTED" && quotation.status !== "NOT_AWARDED";
 
   return (
-    <tr className="align-top">
-      <td className="py-3 pr-3">
+    <TR className="align-top">
+      <TD>
         <p className="font-medium text-slate-800">{quotation.vendorName ?? "Vendor"}</p>
         <p className="text-xs text-slate-500">{quotation.crane.label}</p>
         <p className="text-xs text-slate-500">
@@ -268,23 +241,23 @@ function QuotationRow({
         {quotation.remarks ? (
           <p className="mt-1 text-xs text-slate-500">{quotation.remarks}</p>
         ) : null}
-      </td>
-      <td className="py-3 pr-3 text-slate-700">
+      </TD>
+      <TD>
         {formatInr(quotation.rentalRate)}
         <p className="text-xs text-slate-500">{quotation.rateBasis}</p>
         <p className="text-xs text-slate-500">{quotation.taxBasis}</p>
-      </td>
-      <td className="py-3 pr-3 text-slate-700">
+      </TD>
+      <TD>
         {formatInr(quotation.mobilisationCharges)}
         <p className="text-xs text-slate-500">{formatInr(quotation.demobilisationCharges)}</p>
-      </td>
-      <td className="py-3 pr-3 font-medium text-slate-900">
+      </TD>
+      <TD className="font-medium text-slate-900">
         {formatInr(quotation.totalEstimatedCost)}
-      </td>
-      <td className="py-3 pr-3 text-slate-700">
+      </TD>
+      <TD>
         {formatDistance(quotation.distanceToSiteKm, quotation.distanceMethod === "straight_line")}
-      </td>
-      <td className="py-3 pr-3 text-slate-700">
+      </TD>
+      <TD>
         {quotation.craneAgeYears !== null ? `${quotation.craneAgeYears.toFixed(1)} yr` : "—"}
         <p className="text-xs text-slate-500">
           {quotation.availabilityConfirmed
@@ -293,10 +266,10 @@ function QuotationRow({
               : "availability confirmed"
             : "availability not confirmed"}
         </p>
-      </td>
-      <td className="py-3 pr-3 text-slate-700">{formatDate(quotation.validityDate)}</td>
-      <td className="py-3 pr-3 text-slate-700">{responseTime(quotation.responseTimeHours)}</td>
-      <td className="py-3 pr-3">
+      </TD>
+      <TD>{formatDate(quotation.validityDate)}</TD>
+      <TD>{responseTime(quotation.responseTimeHours)}</TD>
+      <TD>
         <StatusBadge status={quotation.status} />
         {quotation.markReasonCode || quotation.markReasonText ? (
           <p className="mt-1 text-xs text-slate-500">
@@ -308,8 +281,8 @@ function QuotationRow({
         {quotation.markedAt ? (
           <p className="text-xs text-slate-400">{formatDate(quotation.markedAt)}</p>
         ) : null}
-      </td>
-      <td className="py-3">
+      </TD>
+      <TD>
         {canAct ? (
           <div className="flex flex-col gap-1.5">
             <button
@@ -360,8 +333,8 @@ function QuotationRow({
             }}
           />
         ) : null}
-      </td>
-    </tr>
+      </TD>
+    </TR>
   );
 }
 
@@ -531,57 +504,6 @@ function AwardControl({
       >
         {award.isPending ? <Spinner /> : null}
         Confirm award
-      </button>
-    </div>
-  );
-}
-
-function PoReferenceForm({
-  lineId,
-  line,
-  onSaved,
-}: {
-  lineId: string;
-  line: Parameters<typeof lineToForm>[0];
-  onSaved: () => void;
-}) {
-  const [value, setValue] = useState(line.poSapReference ?? "");
-  const [message, setMessage] = useState<string | null>(null);
-
-  const save = useMutation({
-    mutationFn: () => updateLine(lineId, { ...lineToForm(line), poSapReference: value }),
-    onSuccess: () => {
-      setMessage("PO / SAP reference saved.");
-      onSaved();
-    },
-  });
-
-  return (
-    <div className="space-y-2">
-      <Field
-        label="PO / SAP reference"
-        htmlFor="po-sap-reference"
-        hint="Recorded on the line once the hire is confirmed."
-      >
-        <TextInput id="po-sap-reference" value={value} onChange={setValue} />
-      </Field>
-      {message ? <p className="text-xs text-emerald-700">{message}</p> : null}
-      {save.isError ? (
-        <p className="text-xs text-red-600">
-          {save.error instanceof ApiError ? save.error.message : "Could not save the reference."}
-        </p>
-      ) : null}
-      <button
-        type="button"
-        className="btn-secondary px-3 py-1.5 text-xs"
-        disabled={save.isPending}
-        onClick={() => {
-          setMessage(null);
-          save.mutate();
-        }}
-      >
-        {save.isPending ? <Spinner /> : null}
-        Save reference
       </button>
     </div>
   );

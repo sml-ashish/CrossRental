@@ -25,6 +25,7 @@ import {
   shortText,
   stateCodeList,
 } from "../validation/vendorFields";
+import { inviteVendorSchema } from "../validation/inviteFields";
 import type { AuthedRequest } from "../middleware/auth";
 
 /**
@@ -286,34 +287,92 @@ export function onboardingWarnings(input: OnboardingInput): string[] {
 // Invitation
 // ---------------------------------------------------------------------------
 
-export interface InviteInput {
-  email?: string | null;
-  companyName?: string | null;
-  contactName?: string | null;
+export interface InviteResult {
+  invitationId: string;
+  token: string;
+  expiresAt: Date;
+  /** False when the invitation row was created but the email did not go out. */
+  emailSent: boolean;
+}
+
+/**
+ * The duplicate guards, shared by the single invite and the bulk upload.
+ *
+ * Both paths must refuse the same things for the same reasons: an email that
+ * already has an account, and an email that already has a live invitation.
+ * Keeping the check here means the bulk report and the single form can never
+ * disagree about what "already invited" means.
+ */
+export async function assertInvitable(email: string): Promise<void> {
+  const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  if (existingUser) {
+    throw AppError.conflict("An account already exists for that email address.");
+  }
+
+  // Do not stack invitations on one address; the vendor would then have two
+  // live links and no way to tell which is current.
+  const live = await prisma.vendorInvitation.findFirst({
+    where: { email, revokedAt: null, submittedAt: null, expiresAt: { gt: new Date() } },
+    select: { id: true },
+  });
+  if (live) {
+    throw AppError.conflict("An invitation for that email address is already outstanding.");
+  }
+}
+
+/**
+ * Sends the invitation email for an already-created row.
+ *
+ * A mail failure never throws. The row already exists and the token is only
+ * known now — it is stored hashed — so discarding it would leave the admin with
+ * an invitation nobody can open. The caller gets `false` and shows the link for
+ * the sender to pass on by another channel. The bulk import uses the same rule
+ * per row, so one undeliverable address does not abort the rest of the sheet.
+ */
+async function sendInvitationEmail(
+  invitation: { id: string; email: string | null; expiresAt: Date },
+  token: string,
+  actor: AuthedRequest["user"],
+): Promise<boolean> {
+  if (!invitation.email) return false;
+
+  let sent = false;
+  try {
+    const result = await sendTemplate({
+      to: invitation.email,
+      template: "vendor_invitation",
+      // Placeholder names must match services/emailTemplates.ts exactly; an
+      // unmatched name is left in the body as literal {{...}}.
+      vars: {
+        onboardingUrl: portalUrl(`/onboarding/start?token=${encodeURIComponent(token)}`),
+      },
+      entity: "vendor_invitation",
+      entityId: invitation.id,
+    });
+    sent = result.sent;
+  } catch (err) {
+    // A missing template or an unexpected mailer error is still not a reason to
+    // lose the link; the invitation row and the token are already in hand.
+    console.error("[invite] invitation email failed", err);
+  }
+
+  await recordAudit({
+    entity: "vendor_invitation",
+    entityId: invitation.id,
+    action: sent ? "invite_sent" : "invite_email_failed",
+    newValue: { email: invitation.email, emailSent: sent },
+    actor,
+  });
+
+  return sent;
 }
 
 export async function inviteVendor(
-  input: InviteInput,
+  raw: unknown,
   actor: AuthedRequest["user"],
-): Promise<{ invitationId: string; token: string; expiresAt: Date }> {
-  const email = input.email?.trim().toLowerCase() || null;
-
-  if (email) {
-    const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-    if (existingUser) {
-      throw AppError.conflict("An account already exists for that email address.");
-    }
-
-    // Do not stack invitations on one address; the vendor would then have two
-    // live links and no way to tell which is current.
-    const live = await prisma.vendorInvitation.findFirst({
-      where: { email, revokedAt: null, submittedAt: null, expiresAt: { gt: new Date() } },
-      select: { id: true },
-    });
-    if (live) {
-      throw AppError.conflict("An invitation for that email address is already outstanding.");
-    }
-  }
+): Promise<InviteResult> {
+  const input = inviteVendorSchema.parse(raw);
+  await assertInvitable(input.email);
 
   const token = randomToken(32);
   const expiresAt = new Date(Date.now() + env.onboarding.invitationTtlDays * 24 * 60 * 60 * 1000);
@@ -321,51 +380,18 @@ export async function inviteVendor(
   const invitation = await prisma.vendorInvitation.create({
     data: {
       tokenHash: hashToken(token),
-      email,
-      companyName: input.companyName?.trim() || null,
-      contactName: input.contactName?.trim() || null,
+      email: input.email,
+      companyName: input.name,
+      contactNumber: input.contactNumber,
       createdById: actor.id,
       expiresAt,
     },
-    select: { id: true, expiresAt: true },
+    select: { id: true, email: true, expiresAt: true },
   });
 
-  if (!email) {
-    // Nothing to send to. The admin can copy the link out of the queue instead.
-    return { invitationId: invitation.id, token, expiresAt: invitation.expiresAt };
-  }
+  const emailSent = await sendInvitationEmail(invitation, token, actor);
 
-  const result = await sendTemplate({
-    to: email,
-    template: "vendor_invitation",
-    // Placeholder names must match services/emailTemplates.ts exactly; an
-    // unmatched name is left in the body as literal {{...}}.
-    vars: {
-      onboardingUrl: portalUrl(`/onboarding/start?token=${encodeURIComponent(token)}`),
-    },
-    entity: "vendor_invitation",
-    entityId: invitation.id,
-  });
-
-  if (!result.sent) {
-    // The invitation row is kept so the admin can resend or copy the link, but
-    // they need to know the mail did not go out.
-    throw new AppError(
-      "The invitation was created but the email could not be sent. Copy the link from the queue instead.",
-      502,
-      "INVITATION_EMAIL_FAILED",
-    );
-  }
-
-  await recordAudit({
-    entity: "vendor_invitation",
-    entityId: invitation.id,
-    action: "invite_sent",
-    newValue: { email, companyName: input.companyName ?? null },
-    actor,
-  });
-
-  return { invitationId: invitation.id, token, expiresAt: invitation.expiresAt };
+  return { invitationId: invitation.id, token, expiresAt: invitation.expiresAt, emailSent };
 }
 
 // ---------------------------------------------------------------------------
@@ -383,6 +409,7 @@ export interface OnboardingView {
     companyName: string | null;
     contactName: string | null;
     email: string | null;
+    contactNumber: string | null;
     expiresAt: string;
   };
   draft: Record<string, unknown> | null;
@@ -488,6 +515,7 @@ export async function loadByToken(token: string): Promise<OnboardingView> {
       companyName: invitation.companyName,
       contactName: invitation.contactName,
       email: invitation.email,
+      contactNumber: invitation.contactNumber,
       expiresAt: invitation.expiresAt.toISOString(),
     },
     draft: vendor ? shapeDraft(vendor) : null,

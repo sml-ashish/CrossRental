@@ -374,6 +374,35 @@ export async function bookingCalendar(
 ): Promise<CalendarView> {
   assertInternal(actor);
   const query: CalendarQuery = calendarQuerySchema.parse(raw ?? {});
+  return buildCalendarView(query, query.vendorId ?? null);
+}
+
+/**
+ * The vendor's own booking calendar: the same read as the internal screen, with
+ * the vendor fixed before the query is built.
+ *
+ * `scopeVendorId` comes from the token, not the request, and it overrides any
+ * `vendorId` the caller might pass. That is the whole isolation rule for this
+ * endpoint — a vendor asking for another vendor's id still gets their own cranes,
+ * because the filter is not theirs to choose. No reservation, quotation or
+ * enquiry detail is exposed here: the vendor sees the day state of their own
+ * cranes and nothing about who the crane is committed to.
+ */
+export async function vendorBookingCalendar(
+  raw: unknown,
+  actor: ReservationActor,
+): Promise<CalendarView> {
+  if (actor.role !== "vendor_user" || !actor.vendorId) {
+    throw AppError.forbidden("This calendar is for vendor users");
+  }
+  const query: CalendarQuery = calendarQuerySchema.parse(raw ?? {});
+  return buildCalendarView(query, actor.vendorId);
+}
+
+async function buildCalendarView(
+  query: CalendarQuery,
+  scopeVendorId: string | null,
+): Promise<CalendarView> {
   const today = toUtcMidnight(new Date());
   const todayKey = today.toISOString().slice(0, 10);
 
@@ -392,7 +421,10 @@ export async function bookingCalendar(
       ...(query.ownershipType ? { ownershipType: query.ownershipType } : {}),
       ...(query.craneType ? { typeOfCraneCode: query.craneType } : {}),
       ...(query.craneId ? { id: query.craneId } : {}),
-      ...(query.vendorId ? { vendorId: query.vendorId } : {}),
+      // A forced scope (the vendor's own id) always wins over a requested one.
+      ...(scopeVendorId ?? query.vendorId
+        ? { vendorId: scopeVendorId ?? query.vendorId }
+        : {}),
       ...(query.region ? { stateCode: query.region } : {}),
       ...(query.location
         ? { currentLocation: { contains: query.location, mode: "insensitive" } }

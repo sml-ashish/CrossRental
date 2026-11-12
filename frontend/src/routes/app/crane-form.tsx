@@ -9,12 +9,15 @@ import {
   EMPTY_CRANE_FORM,
   fetchReferenceData,
   getCrane,
+  previewLocationFromLink,
   updateCrane,
   VENDOR_STATUSES,
   CRANE_STATUS_LABELS,
   type CraneForm,
+  type LocationSuggestion,
 } from "@/lib/fleet";
 import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Field, Section, Select, TextArea, TextInput } from "@/components/ui/form";
 
@@ -197,15 +200,15 @@ export function CraneFormPage() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-lg font-semibold text-slate-900">
-          {isEdit ? "Edit crane" : duplicateOf ? "Add a similar crane" : "Add a crane"}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Fields marked <span className="text-red-600">*</span> are required. The serial or registration
-          number must be the one on the crane&apos;s registration certificate.
-        </p>
-      </header>
+      <PageHeader
+        title={isEdit ? "Edit crane" : duplicateOf ? "Add a similar crane" : "Add a crane"}
+        description={
+          <>
+            Fields marked <span className="text-red-600">*</span> are required. The serial or
+            registration number must be the one on the crane&apos;s registration certificate.
+          </>
+        }
+      />
 
       {formError ? <Alert tone="error">{formError}</Alert> : null}
 
@@ -365,6 +368,15 @@ export function CraneFormPage() {
               set("latitude", lat);
               set("longitude", lng);
             }}
+            onSuggestion={(suggestion) => {
+              // Only overwrite what the link actually resolved. A missing piece
+              // is left as the vendor typed it, not blanked out.
+              if (suggestion.currentLocation) set("currentLocation", suggestion.currentLocation);
+              if (suggestion.stateCode) set("stateCode", suggestion.stateCode);
+              if (suggestion.pincode) set("pincode", suggestion.pincode);
+              if (suggestion.latitude !== null) set("latitude", String(suggestion.latitude));
+              if (suggestion.longitude !== null) set("longitude", String(suggestion.longitude));
+            }}
           />
         </Section>
 
@@ -489,31 +501,87 @@ function withAvailableFrom(form: CraneForm, availableFrom: string) {
 }
 
 /**
- * Map pin placeholder (brief 6.3).
+ * Map pin and "fill from link" (brief 6.3).
  *
  * Brief open item 1 puts the map provider on hold, so this deliberately renders
- * no map, no tiles and no third-party script. It takes the two coordinates and
- * explains that the pin will be editable once a provider is chosen — and lets
- * the vendor type them, which is a real fallback rather than a dead end.
+ * no map, no tiles and no third-party script. Instead the vendor can paste the
+ * Google Maps share link for the crane's location and the backend fills what
+ * the link knows — location, state, pincode and pin. The coordinates remain
+ * editable by hand, which is the fallback when a link is short or broken.
  */
 function MapPin({
   latitude,
   longitude,
   error,
   onChange,
+  onSuggestion,
 }: {
   latitude: string;
   longitude: string;
   error?: string;
   onChange: (latitude: string, longitude: string) => void;
+  onSuggestion: (suggestion: LocationSuggestion) => void;
 }) {
+  const [link, setLink] = useState("");
+  const [note, setNote] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const fill = useMutation({
+    mutationFn: () => previewLocationFromLink(link.trim()),
+    onSuccess: ({ location }) => {
+      onSuggestion(location);
+      setFailed(false);
+      setNote(location.note ?? "That link did not contain a location.");
+    },
+    onError: (err: unknown) => {
+      setFailed(true);
+      setNote(err instanceof Error ? err.message : "That link could not be read.");
+    },
+  });
+
   return (
     <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
       <p className="text-sm font-medium text-slate-800">Map pin</p>
       <p className="mt-1 text-xs text-slate-500">
-        An interactive map is not connected yet — the map provider decision is on hold. We have placed this
-        crane on the map automatically where possible; enter the coordinates here to correct it.
+        An interactive map is not connected yet — the map provider decision is on hold. Paste the
+        Google Maps share link for this crane and we will fill the location, state, pincode and pin
+        where the link knows them. You can still enter or correct the coordinates by hand.
       </p>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+        <Field
+          label="Google Maps link"
+          htmlFor="googleMapsLink"
+          hint="Open the crane's location in Google Maps, choose Share, and paste the link here."
+        >
+          <TextInput
+            id="googleMapsLink"
+            value={link}
+            onChange={(value) => {
+              setLink(value);
+              // The previous result belongs to the previous link.
+              setNote(null);
+              setFailed(false);
+            }}
+            placeholder="https://maps.app.goo.gl/…"
+          />
+        </Field>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => fill.mutate()}
+          disabled={fill.isPending || link.trim() === ""}
+        >
+          {fill.isPending ? "Reading…" : "Fill from link"}
+        </button>
+      </div>
+
+      {note ? (
+        <div className="mt-3">
+          <Alert tone={failed ? "error" : "info"}>{note}</Alert>
+        </div>
+      ) : null}
+
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <Field label="Latitude" htmlFor="latitude" error={error} hint="Between 6 and 38.">
           <TextInput id="latitude" value={latitude} onChange={(v) => onChange(v, longitude)} inputMode="decimal" invalid={Boolean(error)} />
