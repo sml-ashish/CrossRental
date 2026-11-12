@@ -16,6 +16,7 @@ const router = Router();
 router.use(apiLimiter, requireAuth);
 
 router.get("/cranes", requireCapability("fleet:view_all"), discovery.search);
+router.get("/calendar", requireCapability("fleet:view_all"), discovery.calendar);
 router.get("/facets", requireCapability("fleet:view_all"), discovery.facets);
 
 export default router;

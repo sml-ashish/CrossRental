@@ -378,4 +378,133 @@ export function MonthCalendar({
   );
 }
 
+/**
+ * The detail for one day, rendered under its week.
+ *
+ * Shared by the booking calendar and discovery's calendar tab so the same day
+ * reads the same way on both screens. `renderCrane` lets the caller turn a
+ * crane's label into a link without this component knowing about routes.
+ */
+export function DayAgenda({
+  date,
+  entries,
+  month,
+  renderCrane,
+  includeFree = false,
+}: {
+  date: string;
+  entries: DayEntry[];
+  month: string;
+  renderCrane?: (crane: CalendarCrane, label: string) => React.ReactNode;
+  /**
+   * List the free cranes as their own group. The booking calendar leaves them
+   * out — busy days are the point there — but discovery's calendar is a view of
+   * a filtered set, so its agenda has to show every crane in that set.
+   */
+  includeFree?: boolean;
+}) {
+  const busy = entries.filter((entry) => entry.state !== "FREE");
+  const free = entries.length - busy.length;
+  const isToday = date === todayKey();
+  const inMonth = date.startsWith(month);
+
+  const groups: Array<{ state: CalendarDayState; items: DayEntry[] }> = (
+    ["HIRED", "RESERVED", "BLOCKED", "UNAVAILABLE"] as const
+  )
+    .map((state) => ({
+      state: state as CalendarDayState,
+      items: busy.filter((entry) => entry.state === state),
+    }))
+    .filter((group) => group.items.length > 0);
+  if (includeFree && free > 0) {
+    groups.push({ state: "FREE", items: entries.filter((entry) => entry.state === "FREE") });
+  }
+
+  return (
+    <div className="px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+            {inMonth ? weekdayName(date) : "Nothing scheduled"}
+          </p>
+          <div className="mt-0.5 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-slate-900">
+              {inMonth ? fullDate(date) : shortDate(date)}
+            </h2>
+            {isToday ? (
+              <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
+                Today
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex items-center divide-x divide-slate-200">
+          <AgendaStat label="Busy" value={busy.length} />
+          <AgendaStat label="Free" value={free} />
+          <AgendaStat label="Cranes" value={entries.length} />
+        </div>
+      </div>
+
+      <div className="mt-3">
+        {!inMonth ? (
+          <p className="py-4 text-center text-xs text-slate-500">
+            This day is outside the month on screen.
+          </p>
+        ) : entries.length === 0 ? (
+          <p className="py-4 text-center text-xs text-slate-500">
+            No crane is scheduled on this day.
+          </p>
+        ) : groups.length === 0 ? (
+          <p className="py-4 text-center text-xs text-slate-500">
+            Every crane is free on this day.
+          </p>
+        ) : (
+          <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+            {groups.map((group) => {
+              const tone = STATE_STYLES[group.state];
+              return (
+                <div key={group.state}>
+                  <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                    <span className={cn("size-1.5 rounded-full", tone.dot)} aria-hidden />
+                    {DAY_STATE_LABELS[group.state]}
+                    <span className="text-slate-400">· {group.items.length}</span>
+                  </p>
+                  <ul className="mt-1.5 space-y-1">
+                    {group.items.map((entry) => (
+                      <li
+                        key={entry.crane.craneId}
+                        className="flex items-baseline justify-between gap-3 rounded-md border border-slate-200/70 bg-white px-2 py-1"
+                      >
+                        <span className="shrink-0 text-xs font-medium text-slate-900">
+                          {renderCrane
+                            ? renderCrane(entry.crane, shortLabel(entry.crane.craneLabel))
+                            : shortLabel(entry.crane.craneLabel)}
+                        </span>
+                        <span className="truncate text-right text-[11px] text-slate-500">
+                          {entry.crane.capacityT} t ·{" "}
+                          {entry.crane.ownershipType === "SML" ? "SML" : entry.crane.vendorName}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AgendaStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="px-3 text-center first:pl-0 last:pr-0">
+      <p className="text-sm font-semibold text-slate-900 tabular-nums">{value}</p>
+      <p className="text-[10px] font-medium tracking-[0.08em] text-slate-500 uppercase">{label}</p>
+    </div>
+  );
+}
+
 export const CALENDAR_STATE_LABELS = DAY_STATE_LABELS;

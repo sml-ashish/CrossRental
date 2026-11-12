@@ -22,6 +22,11 @@ export const search = asyncHandler(async (req: Request, res: Response) => {
   res.json(await discovery.searchCranes(query, actorOf(req)));
 });
 
+export const calendar = asyncHandler(async (req: Request, res: Response) => {
+  const query = req.query as Record<string, string | undefined>;
+  res.json(await discovery.discoveryCalendar(query, actorOf(req)));
+});
+
 export const facets = asyncHandler(async (_req: Request, res: Response) => {
   res.json(await discovery.discoveryFacets());
 });

@@ -11,7 +11,9 @@ import {
 } from "@/lib/discovery";
 import { formatDistance } from "@/lib/rfqs";
 import { formatDate } from "@/lib/enquiries";
+import { formatCalendarDate } from "@/routes/app/rfqs";
 import { CraneMap } from "@/components/crane-map";
+import { DiscoveryCalendar } from "@/components/discovery-calendar";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -30,7 +32,7 @@ import { Field, Select, TextInput } from "@/components/ui/form";
  * for crane density; a job-site address turns the list into a distance ranking.
  */
 
-type ViewMode = "grouped" | "flat" | "map";
+type ViewMode = "grouped" | "flat" | "map" | "calendar";
 
 interface FilterState {
   craneType: string;
@@ -44,8 +46,9 @@ interface FilterState {
   fleetSizeMin: string;
   yomFrom: string;
   yomTo: string;
-  ownershipType: "" | "SML" | "VENDOR";
   availability: DiscoveryAvailability | "";
+  availableFrom: string;
+  availableTo: string;
   siteLocation: string;
   sitePincode: string;
 }
@@ -62,11 +65,27 @@ const EMPTY_FILTERS: FilterState = {
   fleetSizeMin: "",
   yomFrom: "",
   yomTo: "",
-  ownershipType: "",
   availability: "",
+  availableFrom: "",
+  availableTo: "",
   siteLocation: "",
   sitePincode: "",
 };
+
+/**
+ * The hire window is a pair, not two independent filters.
+ *
+ * One date alone has no period to test a booking against, and a reversed range
+ * would silently match nothing, so the form refuses both before searching. The
+ * backend applies the same rule.
+ */
+function windowError(filters: FilterState): string | null {
+  const { availableFrom, availableTo } = filters;
+  if (!availableFrom && !availableTo) return null;
+  if (!availableFrom || !availableTo) return "Give both dates";
+  if (availableTo < availableFrom) return "Available to must be on or after available from";
+  return null;
+}
 
 function toQuery(filters: FilterState): DiscoveryFilters {
   const query: DiscoveryFilters = {};
@@ -81,8 +100,11 @@ function toQuery(filters: FilterState): DiscoveryFilters {
   if (filters.fleetSizeMin) query.fleetSizeMin = filters.fleetSizeMin;
   if (filters.yomFrom) query.yomFrom = filters.yomFrom;
   if (filters.yomTo) query.yomTo = filters.yomTo;
-  if (filters.ownershipType) query.ownershipType = filters.ownershipType;
   if (filters.availability) query.availability = filters.availability;
+  if (filters.availableFrom && filters.availableTo) {
+    query.availableFrom = filters.availableFrom;
+    query.availableTo = filters.availableTo;
+  }
   if (filters.siteLocation.trim()) query.siteLocation = filters.siteLocation.trim();
   if (filters.sitePincode.trim()) query.sitePincode = filters.sitePincode.trim();
   return query;
@@ -94,13 +116,24 @@ export function DiscoveryPage() {
   const [view, setView] = useState<ViewMode>("grouped");
 
   const facets = useQuery({ queryKey: ["discovery", "facets"], queryFn: discoveryFacets });
+
+  // The applied filters as the API sees them. Memoised on `committed` so the
+  // calendar tab gets a stable object: otherwise every render would hand it a
+  // fresh value and clear its selected day.
+  const committedQuery = useMemo(() => toQuery(committed), [committed]);
   const results = useQuery({
-    queryKey: ["discovery", "search", committed],
-    queryFn: () => searchDiscovery(toQuery(committed)),
+    queryKey: ["discovery", "search", committedQuery],
+    queryFn: () => searchDiscovery(committedQuery),
   });
 
   const set = <K extends keyof FilterState>(key: K, value: FilterState[K]) =>
     setFilters((prev) => ({ ...prev, [key]: value }));
+
+  // Shown under the window fields and blocks the search, so an incomplete pair
+  // never reaches the API as a half-applied filter.
+  const windowIssue = windowError(filters);
+  const windowFromError = windowIssue && !filters.availableFrom ? windowIssue : null;
+  const windowToError = windowIssue && filters.availableFrom ? windowIssue : null;
 
   return (
     <div className="space-y-5">
@@ -130,6 +163,7 @@ export function DiscoveryPage() {
               { value: "grouped", label: "By vendor" },
               { value: "flat", label: "Flat list" },
               { value: "map", label: "Map and heat map" },
+              { value: "calendar", label: "Calendar" },
             ]}
           />
         </div>
@@ -259,18 +293,6 @@ export function DiscoveryPage() {
               placeholder="e.g. 2024"
             />
           </Field>
-          <Field label="Ownership" htmlFor="d-ownership">
-            <Select
-              id="d-ownership"
-              value={filters.ownershipType}
-              onChange={(v) => set("ownershipType", v as FilterState["ownershipType"])}
-              placeholder="Any"
-              options={(facets.data?.ownershipTypes ?? ["VENDOR"]).map((o) => ({
-                value: o,
-                label: o === "SML" ? "SML" : "Vendor",
-              }))}
-            />
-          </Field>
           <Field label="Availability" htmlFor="d-availability">
             <Select
               id="d-availability"
@@ -284,6 +306,27 @@ export function DiscoveryPage() {
               ]}
             />
           </Field>
+          <Field
+            label="Available from"
+            htmlFor="d-available-from"
+            error={windowFromError}
+            hint="Both dates are needed. Matches cranes free for that whole window."
+          >
+            <TextInput
+              id="d-available-from"
+              type="date"
+              value={filters.availableFrom}
+              onChange={(v) => set("availableFrom", v)}
+            />
+          </Field>
+          <Field label="Available to" htmlFor="d-available-to" error={windowToError}>
+            <TextInput
+              id="d-available-to"
+              type="date"
+              value={filters.availableTo}
+              onChange={(v) => set("availableTo", v)}
+            />
+          </Field>
         </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
@@ -291,6 +334,7 @@ export function DiscoveryPage() {
               type="button"
               className="btn-primary"
               onClick={() => setCommitted(filters)}
+              disabled={windowIssue !== null}
             >
               <Search className="size-4" aria-hidden />
               Search
@@ -324,7 +368,13 @@ export function DiscoveryPage() {
         <Results
           data={results.data}
           view={view}
+          filters={committedQuery}
           siteUnresolved={committed.siteLocation.trim() !== "" && results.data.site === null}
+          window={
+            committed.availableFrom && committed.availableTo
+              ? { from: committed.availableFrom, to: committed.availableTo }
+              : null
+          }
         />
       )}
     </div>
@@ -336,11 +386,15 @@ type ResultData = Awaited<ReturnType<typeof searchDiscovery>>;
 function Results({
   data,
   view,
+  filters,
   siteUnresolved,
+  window,
 }: {
   data: ResultData;
   view: ViewMode;
+  filters: DiscoveryFilters;
   siteUnresolved: boolean;
+  window: { from: string; to: string } | null;
 }) {
   // Memoised on `data`: React Query keeps the same object when the payload is
   // unchanged, so opening the map does not rebuild every marker and the heat
@@ -364,19 +418,28 @@ function Results({
         <p className="text-sm text-slate-600">
           <span className="font-semibold text-slate-900 tabular-nums">{data.totalMatched}</span>{" "}
           crane{data.totalMatched === 1 ? "" : "s"} matched
+          {window ? (
+            <>
+              {" "}
+              · free {formatCalendarDate(window.from)} – {formatCalendarDate(window.to)}
+            </>
+          ) : null}
         </p>
         <p className="text-xs text-slate-500">
-          {data.distancesAvailable
-            ? routed
-              ? "Sorted by road distance from the job site"
-              : "Straight-line distances; no routed distance was available"
-            : "Give a job site address to sort by road distance"}
+          {view === "calendar"
+            ? "Day states come from reservations; the crane's own status fills the rest"
+            : data.distancesAvailable
+              ? routed
+                ? "Sorted by road distance from the job site"
+                : "Straight-line distances; no routed distance was available"
+              : "Give a job site address to sort by road distance"}
         </p>
       </div>
 
       {view === "grouped" ? <GroupedView data={data} /> : null}
       {view === "flat" ? <FlatView data={data} /> : null}
       {view === "map" ? <CraneMap cranes={cranes} site={data.site} /> : null}
+      {view === "calendar" ? <DiscoveryCalendar filters={filters} /> : null}
     </>
   );
 }

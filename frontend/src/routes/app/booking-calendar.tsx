@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Select, TextInput } from "@/components/ui/form";
 import {
+  DayAgenda,
   MonthCalendar,
   STATE_STYLES,
   currentMonth,
@@ -15,13 +16,9 @@ import {
   monthGrid,
   monthLabel,
   monthStats,
-  fullDate,
-  shortDate,
   shortLabel,
   shiftMonth,
   todayKey,
-  weekdayName,
-  type DayEntry,
   type MonthStats,
 } from "@/components/month-calendar";
 import {
@@ -351,109 +348,6 @@ function StatsStrip({ stats }: { stats: MonthStats }) {
         </div>
       ))}
     </section>
-  );
-}
-
-function DayAgenda({
-  date,
-  entries,
-  month,
-}: {
-  date: string;
-  entries: DayEntry[];
-  month: string;
-}) {
-  const busy = entries.filter((entry) => entry.state !== "FREE");
-  const free = entries.length - busy.length;
-  const isToday = date === todayKey();
-  const inMonth = date.startsWith(month);
-
-  const groups = (["HIRED", "RESERVED", "BLOCKED", "UNAVAILABLE"] as const)
-    .map((state) => ({ state, items: busy.filter((entry) => entry.state === state) }))
-    .filter((group) => group.items.length > 0);
-
-  return (
-    <div className="px-4 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-            {inMonth ? weekdayName(date) : "Nothing scheduled"}
-          </p>
-          <div className="mt-0.5 flex items-center gap-2">
-            <h2 className="text-base font-semibold text-slate-900">
-              {inMonth ? fullDate(date) : shortDate(date)}
-            </h2>
-            {isToday ? (
-              <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
-                Today
-              </span>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="flex items-center divide-x divide-slate-200">
-          <AgendaStat label="Busy" value={busy.length} />
-          <AgendaStat label="Free" value={free} />
-          <AgendaStat label="Cranes" value={entries.length} />
-        </div>
-      </div>
-
-      <div className="mt-3">
-        {!inMonth ? (
-          <p className="py-4 text-center text-xs text-slate-500">
-            This day is outside the month on screen.
-          </p>
-        ) : entries.length === 0 ? (
-          <p className="py-4 text-center text-xs text-slate-500">
-            No crane is scheduled on this day.
-          </p>
-        ) : busy.length === 0 ? (
-          <p className="py-4 text-center text-xs text-slate-500">
-            Every crane is free on this day.
-          </p>
-        ) : (
-          <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
-            {groups.map((group) => {
-              const tone = STATE_STYLES[group.state];
-              return (
-                <div key={group.state}>
-                  <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-                    <span className={cn("size-1.5 rounded-full", tone.dot)} aria-hidden />
-                    {STATE_LABELS[group.state]}
-                    <span className="text-slate-400">· {group.items.length}</span>
-                  </p>
-                  <ul className="mt-1.5 space-y-1">
-                    {group.items.map((entry) => (
-                      <li
-                        key={entry.crane.craneId}
-                        className="flex items-baseline justify-between gap-3 rounded-md border border-slate-200/70 bg-white px-2 py-1"
-                      >
-                        <span className="shrink-0 text-xs font-medium text-slate-900">
-                          {shortLabel(entry.crane.craneLabel)}
-                        </span>
-                        <span className="truncate text-right text-[11px] text-slate-500">
-                          {entry.crane.capacityT} t ·{" "}
-                          {entry.crane.ownershipType === "SML" ? "SML" : entry.crane.vendorName}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function AgendaStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="px-3 text-center first:pl-0 last:pr-0">
-      <p className="text-sm font-semibold text-slate-900 tabular-nums">{value}</p>
-      <p className="text-[10px] font-medium tracking-[0.08em] text-slate-500 uppercase">{label}</p>
-    </div>
   );
 }
 

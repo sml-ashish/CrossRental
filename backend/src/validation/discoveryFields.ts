@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { CapacityRule, CraneStatus, OwnershipType } from "../generated/prisma/client";
+import { CapacityRule, CraneStatus } from "../generated/prisma/client";
+import { isCalendarDate, parseCalendarDate } from "../lib/dates";
 
 /**
  * Manual vendor discovery filters (BPD 6.8 / 5.9). The search is standalone —
@@ -50,6 +51,30 @@ const optionalInt = (label: string, min: number, max: number) =>
     .refine((n) => n === undefined || Number.isInteger(n), `${label} must be a whole number`)
     .refine((n) => n === undefined || (n >= min && n <= max), `${label} must be between ${min} and ${max}`);
 
+/**
+ * A calendar day (`YYYY-MM-DD`) as UTC midnight, the same anchor the fleet form
+ * and the booking calendar use. A bare month, a locale format or 31 February is
+ * rejected rather than rolled into a day the user never asked for.
+ */
+const optionalCalendarDate = (label: string) =>
+  z
+    .union([z.string(), z.null()])
+    .optional()
+    .transform((v, ctx): Date | undefined => {
+      if (v === undefined || v === null || String(v).trim() === "") return undefined;
+      const text = String(v).trim();
+      if (!isCalendarDate(text)) {
+        ctx.addIssue({ code: "custom", message: `${label} must be a YYYY-MM-DD date` });
+        return undefined;
+      }
+      const parsed = parseCalendarDate(text);
+      if (!parsed) {
+        ctx.addIssue({ code: "custom", message: `${label} is not a real date` });
+        return undefined;
+      }
+      return parsed;
+    });
+
 /** Filter values the discovery screen understands for a crane's availability. */
 export const AVAILABILITY_VALUES = [
   CraneStatus.AVAILABLE,
@@ -58,33 +83,59 @@ export const AVAILABILITY_VALUES = [
   "ALL",
 ] as const;
 
-export const discoveryQuerySchema = z.object({
-  craneType: optionalText(50),
-  capacityT: optionalPositive("Capacity"),
-  capacityRule: z.nativeEnum(CapacityRule).optional(),
-  location: trimmed(120).optional(),
-  region: trimmed(10).optional(),
-  vendorName: trimmed(200).optional(),
-  vendorRegion: trimmed(10).optional(),
-  companySize: optionalText(60),
-  fleetSizeMin: optionalInt("Fleet size", 0, 100_000),
-  yomFrom: optionalInt("Year of manufacture", 1950, 2100),
-  yomTo: optionalInt("Year of manufacture", 1950, 2100),
-  ownershipType: z.nativeEnum(OwnershipType).optional(),
-  availability: z.enum(AVAILABILITY_VALUES).optional(),
-  includeInactive: z
-    .union([z.literal("true"), z.literal("false"), z.boolean()])
-    .optional()
-    .transform((v) => v === true || v === "true"),
-  /**
-   * An optional site pin; when both are present the list is distance-ranked.
-   * A site address is for when the user knows the place but not the
-   * coordinate: the service geocodes it through the configured provider.
-   */
-  siteLat: optionalNumber("Site latitude"),
-  siteLng: optionalNumber("Site longitude"),
-  siteLocation: optionalText(200),
-  sitePincode: optionalText(10),
-});
+export const discoveryQuerySchema = z
+  .object({
+    craneType: optionalText(50),
+    capacityT: optionalPositive("Capacity"),
+    capacityRule: z.nativeEnum(CapacityRule).optional(),
+    location: trimmed(120).optional(),
+    region: trimmed(10).optional(),
+    vendorName: trimmed(200).optional(),
+    vendorRegion: trimmed(10).optional(),
+    companySize: optionalText(60),
+    fleetSizeMin: optionalInt("Fleet size", 0, 100_000),
+    yomFrom: optionalInt("Year of manufacture", 1950, 2100),
+    yomTo: optionalInt("Year of manufacture", 1950, 2100),
+    availability: z.enum(AVAILABILITY_VALUES).optional(),
+    /**
+     * The hire window the user needs a crane for, as two calendar days.
+     *
+     * This is not a range over a crane's `availableFrom` date: "available from
+     * the 5th to the 12th" means the crane has to be free for that whole period.
+     * The service therefore combines the crane's own release date with its
+     * active reservations. Both ends are required together — one date alone has
+     * no window to test against — and the pair is ordered.
+     */
+    availableFrom: optionalCalendarDate("Available from"),
+    availableTo: optionalCalendarDate("Available to"),
+    includeInactive: z
+      .union([z.literal("true"), z.literal("false"), z.boolean()])
+      .optional()
+      .transform((v) => v === true || v === "true"),
+    /**
+     * An optional site pin; when both are present the list is distance-ranked.
+     * A site address is for when the user knows the place but not the
+     * coordinate: the service geocodes it through the configured provider.
+     */
+    siteLat: optionalNumber("Site latitude"),
+    siteLng: optionalNumber("Site longitude"),
+    siteLocation: optionalText(200),
+    sitePincode: optionalText(10),
+  })
+  .refine((query) => Boolean(query.availableFrom) === Boolean(query.availableTo), {
+    message: "Give both an available-from and an available-to date",
+    path: ["availableTo"],
+  })
+  .refine(
+    (query) =>
+      !query.availableFrom ||
+      !query.availableTo ||
+      query.availableTo.getTime() >= query.availableFrom.getTime(),
+    {
+      message: "Available to must be on or after available from",
+      path: ["availableTo"],
+    },
+  );
+
 
 export type DiscoveryQuery = z.infer<typeof discoveryQuerySchema>;

@@ -399,9 +399,26 @@ export async function vendorBookingCalendar(
   return buildCalendarView(query, actor.vendorId);
 }
 
+/**
+ * The same calendar for an explicit set of cranes.
+ *
+ * Discovery's calendar tab has already worked out which cranes match its
+ * filters. Re-applying those filters here would put the rules in two places
+ * that could drift apart, so the caller passes ids instead: the day-state logic
+ * stays in one function and the calendar cannot widen the search it illustrates.
+ */
+export async function calendarForCranes(
+  craneIds: string[],
+  from: Date,
+  to: Date,
+): Promise<CalendarView> {
+  return buildCalendarView({ from, to }, null, craneIds);
+}
+
 async function buildCalendarView(
   query: CalendarQuery,
   scopeVendorId: string | null,
+  onlyCraneIds?: string[],
 ): Promise<CalendarView> {
   const today = toUtcMidnight(new Date());
   const todayKey = today.toISOString().slice(0, 10);
@@ -418,6 +435,7 @@ async function buildCalendarView(
   const cranes = await prisma.crane.findMany({
     where: {
       isActive: true,
+      ...(onlyCraneIds ? { id: { in: onlyCraneIds } } : {}),
       ...(query.ownershipType ? { ownershipType: query.ownershipType } : {}),
       ...(query.craneType ? { typeOfCraneCode: query.craneType } : {}),
       ...(query.craneId ? { id: query.craneId } : {}),

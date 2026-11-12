@@ -157,7 +157,6 @@ export function EnquiryIndexPage() {
                 <TH>Enquiry</TH>
                 <TH>Customer</TH>
                 <TH>Site</TH>
-                <TH align="right">Lines</TH>
                 <TH>Status</TH>
                 <TH align="right">Date</TH>
               </tr>
@@ -165,7 +164,7 @@ export function EnquiryIndexPage() {
             <TBody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={5}>
                     <EmptyState
                       icon={<Inbox className="size-4" aria-hidden />}
                       title="No enquiries in this view"
@@ -193,9 +192,6 @@ export function EnquiryIndexPage() {
                     <TD className="text-slate-600">
                       {row.siteLocation}
                       {row.siteStateName ? `, ${row.siteStateName}` : ""}
-                    </TD>
-                    <TD align="right" className="tabular-nums">
-                      {row.lineCount}
                     </TD>
                     <TD>
                       <Badge tone={enquiryStatusTone(row.overallStatus)}>

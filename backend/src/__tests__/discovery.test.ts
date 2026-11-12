@@ -92,6 +92,7 @@ async function signInVendor(email: string): Promise<string> {
 }
 
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000);
+const dayString = (date: Date) => date.toISOString().slice(0, 10);
 
 function search(query: string, token: string) {
   return call(app, "GET", `/api/discovery/cranes${query ? `?${query}` : ""}`, { token });
@@ -236,10 +237,8 @@ describe("manual vendor discovery (P4, BPD 6.8)", () => {
       "Isolation Vendor A",
     ]);
 
-    // Year and ownership.
+    // Year.
     expect((await search("yomFrom=2023", ctx.salesToken)).body.totalMatched).toBe(0);
-    expect((await search("ownershipType=SML", ctx.salesToken)).body.totalMatched).toBe(0);
-    expect((await search("ownershipType=VENDOR", ctx.salesToken)).body.totalMatched).toBe(2);
   });
 
   it("filters by vendor name and free-text location", async () => {
@@ -249,6 +248,172 @@ describe("manual vendor discovery (P4, BPD 6.8)", () => {
     ]);
     // Both yards are named "<X> Yard".
     expect((await search("location=Yard", ctx.salesToken)).body.totalMatched).toBe(2);
+  });
+
+  it("matches cranes free for the available-from/to window", async () => {
+    const from = dayString(inDays(5));
+    const to = dayString(inDays(10));
+    const query = `availableFrom=${from}&availableTo=${to}`;
+
+    // Both fixtures are Available and unbooked, so both serve the window.
+    expect((await search(query, ctx.salesToken)).body.totalMatched).toBe(2);
+
+    // Engaged until after the window opens: cannot serve it.
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { currentStatus: "ENGAGED", availableFrom: inDays(8) },
+    });
+    const late = await search(query, ctx.salesToken);
+    expect(late.status, JSON.stringify(late.body)).toBe(200);
+    expect(late.body.totalMatched).toBe(1);
+    expect(late.body.groups[0].vendorName).toBe("Isolation Vendor B");
+
+    // Engaged but free before the window opens: admitted.
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { availableFrom: inDays(1) },
+    });
+    expect((await search(query, ctx.salesToken)).body.totalMatched).toBe(2);
+
+    // An ACTIVE booking touching the window disqualifies the crane even though
+    // its stored status still says Available.
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.b.craneId,
+        type: "BOOKED",
+        status: "ACTIVE",
+        startDate: inDays(9),
+        endDate: inDays(12),
+      },
+    });
+    const booked = await search(query, ctx.salesToken);
+    expect(booked.body.totalMatched).toBe(1);
+    expect(booked.body.groups[0].vendorName).toBe("Isolation Vendor A");
+
+    // A booking that ends before the window opens is not a clash.
+    await appPrisma.reservation.deleteMany({ where: { craneId: ctx.b.craneId } });
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.b.craneId,
+        type: "BOOKED",
+        status: "ACTIVE",
+        startDate: inDays(1),
+        endDate: inDays(4),
+      },
+    });
+    expect((await search(query, ctx.salesToken)).body.totalMatched).toBe(2);
+  });
+
+  it("admits an under-maintenance crane only when it is ready before the window", async () => {
+    const query = `availableFrom=${dayString(inDays(5))}&availableTo=${dayString(inDays(10))}`;
+
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: {
+        currentStatus: "UNDER_MAINTENANCE",
+        availableFrom: null,
+        expectedReadyDate: inDays(9),
+      },
+    });
+    expect((await search(query, ctx.salesToken)).body.totalMatched).toBe(1);
+
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { expectedReadyDate: inDays(1) },
+    });
+    expect((await search(query, ctx.salesToken)).body.totalMatched).toBe(2);
+  });
+
+  it("requires an ordered pair of window dates", async () => {
+    const from = dayString(inDays(5));
+    const to = dayString(inDays(10));
+
+    // One date alone has no period to test a booking against.
+    expect((await search(`availableFrom=${from}`, ctx.salesToken)).status).toBe(400);
+    expect((await search(`availableTo=${to}`, ctx.salesToken)).status).toBe(400);
+    expect((await search(`availableFrom=${to}&availableTo=${from}`, ctx.salesToken)).status).toBe(
+      400,
+    );
+    // 31 February is rejected, not rolled into March.
+    expect((await search(`availableFrom=2026-02-31&availableTo=${to}`, ctx.salesToken)).status).toBe(
+      400,
+    );
+  });
+
+  function calendar(query: string, token: string) {
+    return call(app, "GET", `/api/discovery/calendar${query ? `?${query}` : ""}`, { token });
+  }
+
+  it("draws the filtered cranes on a calendar, with reservations winning the day", async () => {
+    const from = dayString(inDays(0));
+    const to = dayString(inDays(6));
+    const bookingStart = dayString(inDays(2));
+    const bookingEnd = dayString(inDays(4));
+
+    await appPrisma.reservation.create({
+      data: {
+        craneId: ctx.a.craneId,
+        type: "BOOKED",
+        status: "ACTIVE",
+        startDate: new Date(`${bookingStart}T00:00:00.000Z`),
+        endDate: new Date(`${bookingEnd}T00:00:00.000Z`),
+      },
+    });
+
+    const res = await calendar(`from=${from}&to=${to}`, ctx.salesToken);
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect(res.body.totalMatched).toBe(2);
+    expect(res.body.calendar.days).toHaveLength(7);
+
+    const crane = (id: string) =>
+      res.body.calendar.cranes.find((c: { craneId: string }) => c.craneId === id);
+    const stateOn = (row: { days: Array<{ date: string; state: string }> }, date: string) =>
+      row.days.find((day) => day.date === date)?.state;
+
+    // A future booking reads RESERVED; the crane is free again after it ends.
+    expect(stateOn(crane(ctx.a.craneId), bookingStart)).toBe("RESERVED");
+    expect(stateOn(crane(ctx.a.craneId), bookingEnd)).toBe("RESERVED");
+    expect(stateOn(crane(ctx.a.craneId), dayString(inDays(5)))).toBe("FREE");
+    // The other crane has no booking and stays free.
+    expect(stateOn(crane(ctx.b.craneId), bookingStart)).toBe("FREE");
+  });
+
+  it("applies the discovery filters to the calendar", async () => {
+    const from = dayString(inDays(0));
+    const to = dayString(inDays(6));
+
+    // Vendor name narrows the set, exactly as it does on the list.
+    const byVendor = await calendar(`vendorName=Vendor+A&from=${from}&to=${to}`, ctx.salesToken);
+    expect(byVendor.status, JSON.stringify(byVendor.body)).toBe(200);
+    expect(byVendor.body.totalMatched).toBe(1);
+    expect(byVendor.body.calendar.cranes[0].vendorName).toBe("Isolation Vendor A");
+
+    // The hire window narrows it too: a crane engaged past the window is out.
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { currentStatus: "ENGAGED", availableFrom: inDays(8) },
+    });
+    const windowed = await calendar(
+      `availableFrom=${dayString(inDays(1))}&availableTo=${dayString(inDays(3))}&from=${from}&to=${to}`,
+      ctx.salesToken,
+    );
+    expect(windowed.status, JSON.stringify(windowed.body)).toBe(200);
+    expect(windowed.body.totalMatched).toBe(1);
+    expect(windowed.body.calendar.cranes[0].vendorName).toBe("Isolation Vendor B");
+  });
+
+  it("rejects a calendar range longer than the booking calendar allows", async () => {
+    const from = dayString(inDays(0));
+    const to = dayString(inDays(120));
+    expect((await calendar(`from=${from}&to=${to}`, ctx.salesToken)).status).toBe(400);
+    // A missing range is not a silent all-time calendar.
+    expect((await calendar("", ctx.salesToken)).status).toBe(400);
+  });
+
+  it("refuses a vendor the discovery calendar", async () => {
+    const from = dayString(inDays(0));
+    const to = dayString(inDays(6));
+    expect((await calendar(`from=${from}&to=${to}`, ctx.vendorTokenA)).status).toBe(403);
   });
 
   it("returns filter facets", async () => {

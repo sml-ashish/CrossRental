@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { CalendarView } from "@/lib/calendar";
 
 /**
  * Client for manual vendor discovery (P4, BPD 6.8 / 5.9).
@@ -24,8 +25,14 @@ export interface DiscoveryFilters {
   fleetSizeMin?: string;
   yomFrom?: string;
   yomTo?: string;
-  ownershipType?: "SML" | "VENDOR";
   availability?: DiscoveryAvailability;
+  /**
+   * The hire window, as two `YYYY-MM-DD` days. Sent together or not at all: the
+   * backend refuses one date on its own, and a crane has to be free for the
+   * whole period, not merely free on the start date.
+   */
+  availableFrom?: string;
+  availableTo?: string;
   siteLat?: number;
   siteLng?: number;
   /** Free-text job site, geocoded by the backend when no pin is supplied. */
@@ -90,7 +97,6 @@ export interface DiscoveryFacets {
   craneTypes: Array<{ code: string; name: string }>;
   states: Array<{ code: string; name: string }>;
   companySizes: string[];
-  ownershipTypes: Array<"VENDOR" | "SML">;
   availability: DiscoveryAvailability[];
 }
 
@@ -107,4 +113,34 @@ export function searchDiscovery(filters: DiscoveryFilters): Promise<DiscoveryRes
 
 export function discoveryFacets(): Promise<DiscoveryFacets> {
   return api("/discovery/facets");
+}
+
+/**
+ * The calendar tab's range on top of the same discovery filters.
+ *
+ * The server applies `discoveryWhere` before drawing the grid, so the calendar
+ * shows exactly the cranes the list would — the range only decides which days
+ * are painted.
+ */
+export interface DiscoveryCalendarFilters extends DiscoveryFilters {
+  /** `YYYY-MM-DD`, inclusive. The server caps the span at 92 days. */
+  from: string;
+  to: string;
+}
+
+export interface DiscoveryCalendarResult {
+  calendar: CalendarView;
+  totalMatched: number;
+}
+
+export function searchDiscoveryCalendar(
+  filters: DiscoveryCalendarFilters,
+): Promise<DiscoveryCalendarResult> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== null && String(value) !== "") {
+      params.set(key, String(value));
+    }
+  }
+  return api(`/discovery/calendar?${params.toString()}`);
 }

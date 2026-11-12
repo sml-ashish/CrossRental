@@ -6,13 +6,19 @@ import { getSettings } from "../utils/settings";
 import {
   CraneApprovalStatus,
   CraneStatus,
-  OwnershipType,
+  ReservationStatus,
+  type Prisma,
   type UserRole,
 } from "../generated/prisma/client";
 import {
   discoveryQuerySchema,
   type DiscoveryQuery,
 } from "../validation/discoveryFields";
+import {
+  calendarQuerySchema,
+  type CalendarQuery,
+} from "../validation/reservationFields";
+import { calendarForCranes, type CalendarView } from "./reservations.service";
 
 /**
  * Manual vendor discovery (BPD 6.8 / 5.9): find cranes without an enquiry.
@@ -174,6 +180,105 @@ type DiscoveryRow = {
   };
 };
 
+/**
+ * The crane-level filter shared by the list and the calendar tab.
+ *
+ * Both views must show the same cranes, so they must be filtered by the same
+ * rules. Keeping the rules here — rather than letting the calendar re-apply a
+ * second copy — is what stops the two screens from disagreeing about what
+ * "matches the filters" means. The hire window is part of it: a crane that
+ * cannot serve the window does not belong on either screen.
+ */
+function discoveryWhere(query: DiscoveryQuery): Prisma.CraneWhereInput {
+  const availability =
+    query.availability && query.availability !== "ALL" ? query.availability : null;
+  const capacityRule = query.capacityRule ?? "AT_LEAST";
+  const capacity = query.capacityT;
+
+  // A hire window is stricter than a status browse: the crane has to be free at
+  // the start and stay free to the end. The crane's own release date says when
+  // a busy crane comes back, and an ACTIVE reservation that touches the window
+  // disqualifies it — the same overlap rule the database enforces between two
+  // reservations. Under Maintenance is admitted only when its expected-ready
+  // date is known and falls before the window opens; a crane with no date is
+  // not a commitment anybody can make.
+  const window =
+    query.availableFrom && query.availableTo
+      ? { from: query.availableFrom, to: query.availableTo }
+      : null;
+
+  return {
+    ...(query.includeInactive ? {} : { isActive: true }),
+    approvalStatus: CraneApprovalStatus.APPROVED,
+    ...(query.craneType ? { typeOfCraneCode: query.craneType } : {}),
+    ...(capacity !== undefined
+      ? { capacityT: capacityRule === "EXACT" ? { equals: capacity } : { gte: capacity } }
+      : {}),
+    ...(query.region ? { stateCode: query.region } : {}),
+    ...(availability ? { currentStatus: availability } : {}),
+    ...(window
+      ? {
+          AND: [
+            {
+              OR: [
+                { currentStatus: CraneStatus.AVAILABLE },
+                {
+                  currentStatus: CraneStatus.ENGAGED,
+                  availableFrom: { lte: window.from },
+                },
+                {
+                  currentStatus: CraneStatus.UNDER_MAINTENANCE,
+                  expectedReadyDate: { lte: window.from },
+                },
+              ],
+            },
+            {
+              reservations: {
+                none: {
+                  status: ReservationStatus.ACTIVE,
+                  startDate: { lte: window.to },
+                  endDate: { gte: window.from },
+                },
+              },
+            },
+          ],
+        }
+      : {}),
+    ...(query.yomFrom !== undefined || query.yomTo !== undefined
+      ? {
+          yom: {
+            ...(query.yomFrom !== undefined ? { gte: query.yomFrom } : {}),
+            ...(query.yomTo !== undefined ? { lte: query.yomTo } : {}),
+          },
+        }
+      : {}),
+    ...(query.location
+      ? {
+          OR: [
+            { currentLocation: { contains: query.location, mode: "insensitive" } },
+            { state: { name: { contains: query.location, mode: "insensitive" } } },
+            { make: { contains: query.location, mode: "insensitive" } },
+            { model: { contains: query.location, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    vendor: {
+      onboardingStatus: "APPROVED",
+      suspendedAt: null,
+      ...(query.vendorName
+        ? { name: { contains: query.vendorName, mode: "insensitive" } }
+        : {}),
+      ...(query.vendorRegion
+        ? { operatingRegions: { some: { stateCode: query.vendorRegion } } }
+        : {}),
+      ...(query.companySize ? { companySize: query.companySize } : {}),
+      ...(query.fleetSizeMin !== undefined
+        ? { totalFleetSize: { gte: query.fleetSizeMin } }
+        : {}),
+    },
+  };
+}
+
 export async function searchCranes(
   rawQuery: unknown,
   actor: DiscoveryActor,
@@ -184,55 +289,9 @@ export async function searchCranes(
   const query: DiscoveryQuery = parsed.data;
 
   const settings = await getSettings();
-  const availability =
-    query.availability && query.availability !== "ALL" ? query.availability : null;
-  const capacityRule = query.capacityRule ?? "AT_LEAST";
-  const capacity = query.capacityT;
 
   const rows = (await prisma.crane.findMany({
-    where: {
-      ...(query.includeInactive ? {} : { isActive: true }),
-      approvalStatus: CraneApprovalStatus.APPROVED,
-      ...(query.craneType ? { typeOfCraneCode: query.craneType } : {}),
-      ...(capacity !== undefined
-        ? { capacityT: capacityRule === "EXACT" ? { equals: capacity } : { gte: capacity } }
-        : {}),
-      ...(query.region ? { stateCode: query.region } : {}),
-      ...(query.ownershipType ? { ownershipType: query.ownershipType } : {}),
-      ...(availability ? { currentStatus: availability } : {}),
-      ...(query.yomFrom !== undefined || query.yomTo !== undefined
-        ? {
-            yom: {
-              ...(query.yomFrom !== undefined ? { gte: query.yomFrom } : {}),
-              ...(query.yomTo !== undefined ? { lte: query.yomTo } : {}),
-            },
-          }
-        : {}),
-      ...(query.location
-        ? {
-            OR: [
-              { currentLocation: { contains: query.location, mode: "insensitive" } },
-              { state: { name: { contains: query.location, mode: "insensitive" } } },
-              { make: { contains: query.location, mode: "insensitive" } },
-              { model: { contains: query.location, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-      vendor: {
-        onboardingStatus: "APPROVED",
-        suspendedAt: null,
-        ...(query.vendorName
-          ? { name: { contains: query.vendorName, mode: "insensitive" } }
-          : {}),
-        ...(query.vendorRegion
-          ? { operatingRegions: { some: { stateCode: query.vendorRegion } } }
-          : {}),
-        ...(query.companySize ? { companySize: query.companySize } : {}),
-        ...(query.fleetSizeMin !== undefined
-          ? { totalFleetSize: { gte: query.fleetSizeMin } }
-          : {}),
-      },
-    },
+    where: discoveryWhere(query),
     select: DISCOVERY_SELECT,
   })) as unknown as DiscoveryRow[];
 
@@ -370,6 +429,48 @@ export async function searchCranes(
   };
 }
 
+export interface DiscoveryCalendarResult {
+  calendar: CalendarView;
+  totalMatched: number;
+}
+
+/**
+ * The discovery results as a calendar (P4, BPD 6.8).
+ *
+ * The list answers "which cranes match"; the calendar answers "when are they
+ * busy". Both apply the same filter (`discoveryWhere`), so switching tabs
+ * cannot change which cranes are in scope — only how they are drawn. Day states
+ * come from the booking calendar's own read: a reservation wins over the
+ * crane's stored status, and `availableFrom` is not used to paint days. The
+ * hire window still narrows the set, it just does not colour the grid.
+ */
+export async function discoveryCalendar(
+  raw: unknown,
+  actor: DiscoveryActor,
+): Promise<DiscoveryCalendarResult> {
+  assertInternal(actor);
+  const parsed = discoveryQuerySchema.safeParse(raw ?? {});
+  if (!parsed.success) throw parsed.error;
+  const query: DiscoveryQuery = parsed.data;
+
+  // The same bounded range the booking calendar accepts, so a month grid here
+  // and a month grid there can never be asked for different-sized windows.
+  const range: CalendarQuery = calendarQuerySchema.parse(raw ?? {});
+
+  const rows = await prisma.crane.findMany({
+    where: discoveryWhere(query),
+    select: { id: true },
+  });
+
+  const calendar = await calendarForCranes(
+    rows.map((row) => row.id),
+    range.from,
+    range.to,
+  );
+
+  return { calendar, totalMatched: calendar.cranes.length };
+}
+
 /** Filter options for the discovery form, read from the live data. */
 export async function discoveryFacets() {
   const [craneTypes, states, sizes] = await Promise.all([
@@ -392,7 +493,6 @@ export async function discoveryFacets() {
     companySizes: sizes
       .map((row) => row.companySize)
       .filter((size): size is string => Boolean(size)),
-    ownershipTypes: [OwnershipType.VENDOR, OwnershipType.SML],
     availability: ["AVAILABLE", "ENGAGED", "UNDER_MAINTENANCE", "ALL"],
   };
 }
