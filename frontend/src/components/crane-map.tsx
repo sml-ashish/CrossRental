@@ -7,7 +7,7 @@ import { TILE_PANE_CLASS, TILES_ATTRIBUTION, TILES_MAX_ZOOM, TILES_URL } from "@
 import { cn } from "@/lib/cn";
 
 /**
- * Discovery map (P4, BPD 6.8) on Leaflet and OpenStreetMap tiles.
+ * Discovery map (P4, BPD 6.8) on Leaflet with an English-labelled basemap.
  *
  * Basemap configuration lives in `lib/map-tiles.ts` and is shared with the
  * enquiry screen's site map, so both maps are dark in the same way and both

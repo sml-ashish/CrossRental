@@ -172,7 +172,7 @@
 /*
  * Leaflet, dressed for the dark workspace.
  *
- * OpenStreetMap's raster tiles are drawn for a light page. Inverting the tile
+ * The default raster tiles are drawn for a light page. Inverting the tile
  * pane only — never the marker pane — gives a genuinely dark basemap with no
  * key and no per-tile bill. If a dark vector provider is configured later via
  * VITE_MAP_TILES_URL, drop `.map-tiles-inverted` and the tiles arrive dark.
