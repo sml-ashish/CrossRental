@@ -8,6 +8,10 @@ import { cn } from "@/lib/cn";
  * different sizes. One tile keeps the label, the number and the caption in the
  * same relationship everywhere, and lets a tile carry a colour dot so it can
  * match a calendar state or a status badge.
+ *
+ * A tile is also a filter in some places, so it can be a button with an active
+ * state. That is deliberately one prop (`onClick`) rather than every caller
+ * re-creating the button wrapper — the pressed styling then matches everywhere.
  */
 export function StatTile({
   label,
@@ -17,6 +21,8 @@ export function StatTile({
   icon,
   tone = "neutral",
   href,
+  onClick,
+  active,
   className,
 }: {
   label: string;
@@ -27,6 +33,10 @@ export function StatTile({
   icon?: ReactNode;
   tone?: "neutral" | "brand" | "amber" | "red" | "emerald" | "blue";
   href?: string;
+  /** Makes the tile a filter button. */
+  onClick?: () => void;
+  /** Pressed state for an `onClick` tile. */
+  active?: boolean;
   className?: string;
 }) {
   const valueTone = {
@@ -40,27 +50,43 @@ export function StatTile({
 
   const body = (
     <>
-      <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+      <span className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
         {dot ? <span className={cn("size-1.5 rounded-full", dot)} aria-hidden /> : null}
         {icon}
         {label}
-      </p>
-      <p className={cn("mt-1 text-2xl font-semibold tabular-nums", valueTone)}>{value}</p>
-      {hint ? <p className="mt-0.5 text-[11px] text-slate-500">{hint}</p> : null}
+      </span>
+      <span className={cn("mt-1 block text-2xl font-semibold tabular-nums", valueTone)}>
+        {value}
+      </span>
+      {hint ? <span className="mt-0.5 block text-[11px] text-slate-500">{hint}</span> : null}
     </>
   );
 
+  const shell = "card block px-4 py-3 text-left transition-colors duration-150";
+
   if (href) {
     return (
-      <a
-        href={href}
+      <a href={href} className={cn(shell, "hover:border-slate-300 hover:bg-ink-800/60", className)}>
+        {body}
+      </a>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active}
         className={cn(
-          "card px-4 py-3 transition-colors hover:border-slate-300 hover:bg-ink-800/60",
+          shell,
+          "hover:border-ink-700 hover:bg-ink-800/60",
+          active && "border-accent-500/60 bg-ink-800/80 ring-1 ring-accent-500/40",
           className,
         )}
       >
         {body}
-      </a>
+      </button>
     );
   }
 
