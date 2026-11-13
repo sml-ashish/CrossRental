@@ -124,6 +124,7 @@ export function Select({
   placeholder = "Select",
   invalid,
   disabled,
+  ariaLabel,
 }: {
   id: string;
   value: string;
@@ -132,6 +133,8 @@ export function Select({
   placeholder?: string;
   invalid?: boolean;
   disabled?: boolean;
+  /** Used when the select has no visible `<label>` of its own. */
+  ariaLabel?: string;
 }) {
   return (
     <select
@@ -139,6 +142,7 @@ export function Select({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
+      aria-label={ariaLabel}
       aria-invalid={invalid || undefined}
       aria-describedby={invalid ? `${id}-error` : undefined}
       className={cn("field-input", invalid && "border-red-300 focus:border-red-400")}
