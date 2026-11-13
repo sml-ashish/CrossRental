@@ -312,7 +312,7 @@ export type DeclineRfqInput = z.infer<typeof declineRfqSchema>;
 /** The vendor inbox (brief 7.6): filters and default deadline sort. */
 export const vendorInboxQuerySchema = z.object({
   responseStatus: z
-    .enum(["PENDING", "QUOTED", "DECLINED", "EXPIRED"])
+    .enum(["PENDING", "QUOTED", "DECLINED", "EXPIRED", "FINALISED"])
     .optional(),
   search: z.string().trim().max(200).optional(),
 });

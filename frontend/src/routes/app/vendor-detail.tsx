@@ -77,12 +77,23 @@ export function VendorDetailPage() {
 
   const queryClient = useQueryClient();
 
+  const detail = useQuery({
+    queryKey: ["vendors", "detail", vendorId],
+    queryFn: () => loadVendorDetail(vendorId),
+  });
+
   // The options come from admin-editable lists and may be empty; the selects
   // then only offer "Not set", which is the honest state until the owner's SAP
   // values are entered on the settings screen.
+  //
+  // Reading those lists needs the approve capability, so a sales user — who may
+  // open this screen to see the fleet — must not ask for them. Without the
+  // guard the page fires a request the backend rightly refuses, and the failed
+  // call shows up as noise in the console on a page that is otherwise fine.
   const masterLists = useQuery({
     queryKey: ["settings", "master-lists"],
     queryFn: loadMasterLists,
+    enabled: detail.data?.canApprove === true,
   });
 
   const pickFor = (key: SapMasterListKey) => ({
@@ -103,11 +114,6 @@ export function VendorDetailPage() {
     withholdingTaxType: masterPicks.WITHHOLDING_TAX_TYPE,
     legalForm: masterPicks.LEGAL_FORM,
   };
-
-  const detail = useQuery({
-    queryKey: ["vendors", "detail", vendorId],
-    queryFn: () => loadVendorDetail(vendorId),
-  });
 
   // Brief D1: an SML user opens any approved vendor's fleet and maintains it
   // with the same forms, on the vendor's behalf.
@@ -437,7 +443,7 @@ export function VendorDetailPage() {
       </Section>
 
       <Section title="Contacts">
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-ink-800">
           {vendor.contacts.map((contact, index) => (
             <li key={index} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
               <div className="min-w-0">
@@ -544,7 +550,7 @@ export function VendorDetailPage() {
         ) : !fleet.isLoading && (fleet.data?.cranes.length ?? 0) === 0 ? (
           <p className="text-sm text-slate-500">No cranes on record for this vendor.</p>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-ink-800">
             {fleet.data?.cranes.map((crane) => (
               <li
                 key={crane.id}
@@ -621,7 +627,7 @@ export function VendorDetailPage() {
         {vendor.documents.length === 0 ? (
           <p className="text-sm text-slate-500">Nothing uploaded yet.</p>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-ink-800">
             {vendor.documents.map((doc) => (
               <li key={`${doc.docType}-${doc.uploadedAt}`} className="flex items-center justify-between gap-3 py-2.5">
                 <div className="min-w-0">

@@ -18,6 +18,7 @@ import {
   QuotationStatus,
   ReservationStatus,
   ReservationType,
+  ResponseStatus,
   RfqStatus,
 } from "../generated/prisma/client";
 
@@ -315,6 +316,8 @@ export async function awardQuotation(
   const emailsByVendor = new Map(recipients.map((r) => [r.vendorId, r.emails]));
 
   let reservationId = "";
+  /** Recipients moved from Pending to Finalised by this closing award. */
+  let finalisedRecipients = 0;
   try {
     await prisma.$transaction(async (tx) => {
       await tx.quotation.update({
@@ -367,6 +370,19 @@ export async function awardQuotation(
             data: { status: QuotationStatus.NOT_AWARDED },
           });
         }
+
+        // A vendor who never quoted has no quotation row to carry the outcome,
+        // so the recipient row is the only place it can live. Left PENDING it
+        // would keep reading "Awaiting your quote" and stay in that vendor's
+        // to-do list even though the RFQ is finalised. Only PENDING moves: a
+        // vendor who did quote keeps QUOTED, and their quotation already says
+        // Not Awarded.
+        const finalised = await tx.rfqVendorRecipient.updateMany({
+          where: { rfqId, responseStatus: ResponseStatus.PENDING },
+          data: { responseStatus: ResponseStatus.FINALISED },
+        });
+        finalisedRecipients = finalised.count;
+
         await tx.rfq.update({
           where: { id: rfqId },
           data: { status: RfqStatus.CLOSED },
@@ -413,6 +429,7 @@ export async function awardQuotation(
       partial: !closing,
       rfqStatus: closing ? RfqStatus.CLOSED : quotation.rfq.status,
       notAwarded: liveOthers.map((q) => q.id),
+      finalisedRecipients,
       reason: input.reason ?? null,
       reasonCode: input.reasonCode ?? null,
     },

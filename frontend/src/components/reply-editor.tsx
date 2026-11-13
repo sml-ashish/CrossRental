@@ -331,7 +331,7 @@ export function ReplyEditor({
       {message ? <Alert tone="success">{message}</Alert> : null}
 
       {!readOnly ? (
-        <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+        <div className="flex flex-wrap items-center gap-2 border-t border-ink-800 pt-4">
           <button
             type="button"
             className="btn-secondary px-4 py-2 text-sm"

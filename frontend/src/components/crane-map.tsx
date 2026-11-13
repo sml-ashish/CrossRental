@@ -1,66 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MarkerClusterer, type Renderer } from "@googlemaps/markerclusterer";
-import type { DiscoveryCrane } from "@/lib/discovery";
-import { Panel } from "@/components/ui/page-header";
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import type { DiscoveryCrane, DiscoveryVendorPoint } from "@/lib/discovery";
+import { craneClusterSvg, craneFill, cranePillSvg } from "@/components/crane-glyph";
+import { TILE_PANE_CLASS, TILES_ATTRIBUTION, TILES_MAX_ZOOM, TILES_URL } from "@/lib/map-tiles";
+import { cn } from "@/lib/cn";
 
 /**
- * Discovery map (P4, BPD 6.8) on the Google Maps JavaScript API.
+ * Discovery map (P4, BPD 6.8) on Leaflet and OpenStreetMap tiles.
  *
- * The map has two layers over the same data: a marker per crane with stored
- * coordinates, and a heat layer that shows where cranes are concentrated. A red
- * marker is the job site the distances were measured from.
+ * Basemap configuration lives in `lib/map-tiles.ts` and is shared with the
+ * enquiry screen's site map, so both maps are dark in the same way and both
+ * switch providers from the same environment variables.
  *
- * The heat layer is rendered here rather than with `visualization.HeatmapLayer`:
- * Google removed that library from the Maps JavaScript API in v3.65. Instead a
- * georeferenced `GroundOverlay` is built from a canvas — radial intensity per
- * crane, colourised through a blue-to-red ramp — and Google positions it on the
- * map, so it pans and zooms with the base map like any other overlay.
- *
- * The browser key is optional. Without it — or if Google fails to load — the
- * component renders the tile-less plot it replaced, so the screen still works
- * and says why. The key is a build-time `VITE_*` value and must be restricted
- * by HTTP referrer; the server geocoding/routing key never reaches the bundle.
+ * A crane is a capacity pill with a status dot, clustered by screen grid rather
+ * than by a plugin: a cluster is a count, and the grid dissolves on zoom with no
+ * extra dependency. The heat layer is a canvas baked into an `imageOverlay`,
+ * because a per-pixel canvas redraw on every pan is not worth it and Leaflet
+ * repositions overlays for free.
  */
-
-type GoogleMapsApi = typeof google.maps;
-
-const browserKey = (import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY ?? "").trim();
-
-let loaderPromise: Promise<GoogleMapsApi> | null = null;
-
-function loadedMaps(): GoogleMapsApi | undefined {
-  return (window as Window & { google?: { maps?: GoogleMapsApi } }).google?.maps;
-}
-
-function loadGoogleMaps(): Promise<GoogleMapsApi> {
-  const already = loadedMaps();
-  if (already?.Map) return Promise.resolve(already);
-  if (loaderPromise) return loaderPromise;
-  if (!browserKey) return Promise.reject(new Error("missing-browser-key"));
-
-  loaderPromise = new Promise<GoogleMapsApi>((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src =
-      "https://maps.googleapis.com/maps/api/js" +
-      `?key=${encodeURIComponent(browserKey)}` +
-      "&v=weekly&region=IN";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      const maps = loadedMaps();
-      if (maps?.Map) resolve(maps);
-      else reject(new Error("maps-unavailable"));
-    };
-    script.onerror = () => reject(new Error("maps-script-failed"));
-    document.head.appendChild(script);
-  }).catch((err: unknown) => {
-    // Let a later mount retry rather than caching the failure forever.
-    loaderPromise = null;
-    throw err;
-  });
-
-  return loaderPromise;
-}
 
 interface MapPoint {
   crane: DiscoveryCrane;
@@ -68,54 +26,103 @@ interface MapPoint {
   lng: number;
 }
 
+interface HeatPoint {
+  lat: number;
+  lng: number;
+}
+
+/** Cluster cell in screen pixels. Below this, two cranes are one marker. */
+const CLUSTER_CELL = 72;
+
+/** Where the map opens before any data arrives: the middle of India. */
+const INDIA_CENTER: L.LatLngTuple = [22.5, 79];
+const INDIA_ZOOM = 5;
+
+function craneIcon(status: string, capacityT: number, selected: boolean): L.DivIcon {
+  const artwork = cranePillSvg(status, capacityT, selected);
+  return L.divIcon({
+    className: selected ? "crane-pin crane-pin-selected" : "crane-pin",
+    html: artwork.html,
+    iconSize: [artwork.width, artwork.height],
+    // The tail's tip is the crane's position on the ground.
+    iconAnchor: [artwork.width / 2, artwork.anchorY],
+  });
+}
+
+function clusterIcon(count: number): L.DivIcon {
+  const artwork = craneClusterSvg(count);
+  return L.divIcon({
+    className: "crane-pin",
+    html: artwork.html,
+    iconSize: [artwork.width, artwork.height],
+    iconAnchor: [artwork.width / 2, artwork.anchorY],
+  });
+}
+
 /**
- * A cluster's badge. Cranes at the same yard sit on top of each other at
- * national zoom, so a count is more informative than the marker underneath —
- * and it keeps the map readable when the whole demo fleet is shown.
+ * Grid clustering in screen space.
+ *
+ * Buckets are measured in pixels at the current zoom, so a cluster is "these
+ * cranes are within 72px of each other on this screen" — which is exactly what
+ * the eye is asking when it sees overlapping pins. Zooming in splits them
+ * automatically because the same cranes project further apart.
  */
-const clusterRenderer: Renderer = {
-  render({ count, position }) {
-    const size = count >= 10 ? 52 : count >= 4 ? 44 : 36;
-    return new google.maps.Marker({
-      position,
-      title: `${count} cranes`,
-      label: {
-        text: String(count),
-        color: "#ffffff",
-        fontSize: count >= 10 ? "15px" : "13px",
-        fontWeight: "600",
-      },
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: size / 2,
-        fillColor: "#0f766e",
-        fillOpacity: 0.92,
-        strokeColor: "#ffffff",
-        strokeWeight: 2,
-      },
-      zIndex: 1000 + count,
-    });
-  },
-};
+function clusterPoints(points: MapPoint[], map: L.Map, zoom: number) {
+  const buckets = new Map<string, MapPoint[]>();
+  for (const point of points) {
+    const projected = map.project([point.lat, point.lng], zoom);
+    const key = `${Math.floor(projected.x / CLUSTER_CELL)}:${Math.floor(
+      projected.y / CLUSTER_CELL,
+    )}`;
+    const bucket = buckets.get(key);
+    if (bucket) bucket.push(point);
+    else buckets.set(key, [point]);
+  }
+
+  return [...buckets.values()].map((members) => ({
+    cranes: members.map((member) => member.crane),
+    lat: members.reduce((sum, member) => sum + member.lat, 0) / members.length,
+    lng: members.reduce((sum, member) => sum + member.lng, 0) / members.length,
+  }));
+}
 
 export interface CraneMapProps {
   cranes: DiscoveryCrane[];
+  /** One dot per vendor, placed from the vendor's address by the server. */
+  vendorPoints: DiscoveryVendorPoint[];
   site: { latitude: number; longitude: number } | null;
+  /** The crane highlighted in the sidebar, or `null` for none. */
+  selectedCraneId?: string | null;
+  onSelect?: (craneId: string | null) => void;
+  className?: string;
 }
 
-export function CraneMap({ cranes, site }: CraneMapProps) {
+export function CraneMap({
+  cranes,
+  vendorPoints,
+  site,
+  selectedCraneId = null,
+  onSelect,
+  className,
+}: CraneMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapsRef = useRef<GoogleMapsApi | null>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const heatRef = useRef<google.maps.GroundOverlay | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const clustererRef = useRef<MarkerClusterer | null>(null);
-  const infoRef = useRef<google.maps.InfoWindow | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerLayerRef = useRef<L.LayerGroup | null>(null);
+  const heatRef = useRef<L.ImageOverlay | null>(null);
+  const markersRef = useRef(new Map<string, L.Marker>());
+  const fittedRef = useRef(false);
 
-  const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
-    browserKey ? "loading" : "unavailable",
-  );
-  const [showHeat, setShowHeat] = useState(true);
+  // The map's click handler is installed once, so it reads the latest callback
+  // and selection through refs rather than capturing the first render.
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+  const selectedRef = useRef(selectedCraneId);
+  selectedRef.current = selectedCraneId;
+
+  const [ready, setReady] = useState(false);
+  const [zoom, setZoom] = useState(INDIA_ZOOM);
+  const [showHeat, setShowHeat] = useState(false);
+  const [heatMode, setHeatMode] = useState<"cranes" | "vendors">("cranes");
 
   const points = useMemo<MapPoint[]>(
     () =>
@@ -129,217 +136,300 @@ export function CraneMap({ cranes, site }: CraneMapProps) {
   );
 
   const sitePoint = useMemo(
-    () => (site ? { lat: site.latitude, lng: site.longitude } : null),
+    () => (site ? ([site.latitude, site.longitude] as L.LatLngTuple) : null),
     [site],
   );
 
-  // Create the map once. StrictMode runs this effect twice in development, so
-  // the instance is kept in a ref and reused rather than created twice on the
-  // same DOM node.
+  // "8 states live" on the map chip is the spread of the cranes actually on
+  // screen, not of the fleet: it has to move when a filter does.
+  const statesLive = useMemo(
+    () => new Set(points.map((point) => point.crane.stateName).filter(Boolean)).size,
+    [points],
+  );
+
+  // Create the map once. StrictMode mounts effects twice in development, so the
+  // instance lives in a ref and the cleanup removes it before a second mount.
   useEffect(() => {
-    if (!browserKey) {
-      setStatus("unavailable");
-      return;
-    }
-    let cancelled = false;
+    const container = containerRef.current;
+    if (!container || mapRef.current) return;
 
-    if (mapRef.current) {
-      setStatus("ready");
-      return;
-    }
+    const map = L.map(container, {
+      center: INDIA_CENTER,
+      zoom: INDIA_ZOOM,
+      zoomControl: false,
+      attributionControl: true,
+      worldCopyJump: true,
+    });
 
-    loadGoogleMaps()
-      .then((maps) => {
-        if (cancelled || !containerRef.current || mapRef.current) return;
-        mapsRef.current = maps;
-        mapRef.current = new maps.Map(containerRef.current, {
-          center: { lat: 22.5, lng: 79 },
-          zoom: 4,
-          mapTypeControl: false,
-          streetViewControl: false,
-          clickableIcons: false,
-        });
-        setStatus("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setStatus("unavailable");
-      });
+    L.tileLayer(TILES_URL, {
+      attribution: TILES_ATTRIBUTION,
+      maxZoom: TILES_MAX_ZOOM,
+    }).addTo(map);
+
+    if (TILE_PANE_CLASS) container.classList.add(TILE_PANE_CLASS);
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+    map.on("zoomend", () => setZoom(map.getZoom()));
+    map.on("click", () => onSelectRef.current?.(null));
+
+    mapRef.current = map;
+    markerLayerRef.current = L.layerGroup().addTo(map);
+    setReady(true);
 
     return () => {
-      cancelled = true;
+      map.remove();
+      mapRef.current = null;
+      markerLayerRef.current = null;
+      heatRef.current = null;
+      markersRef.current = new Map();
+      fittedRef.current = false;
     };
   }, []);
 
-  // Markers, job-site pin and heat layer, rebuilt whenever the result set moves.
+  // A new result set is a new frame of reference, so the next marker pass may
+  // fit the bounds again. Without this, "Fit all" would only ever run once and a
+  // search that returns cranes elsewhere would leave the map looking at nothing.
   useEffect(() => {
-    if (status !== "ready") return;
-    const maps = mapsRef.current;
+    fittedRef.current = false;
+  }, [points]);
+
+  // Markers and the job-site pin. Rebuilt when the result set or the zoom
+  // changes — never on selection, which only swaps an icon.
+  useEffect(() => {
     const map = mapRef.current;
-    if (!maps || !map) return;
+    const layer = markerLayerRef.current;
+    if (!ready || !map || !layer) return;
 
-    for (const marker of markersRef.current) marker.setMap(null);
-    markersRef.current = [];
-    clustererRef.current?.clearMarkers();
-    clustererRef.current = null;
-    heatRef.current?.setMap(null);
-    heatRef.current = null;
-
-    const info = infoRef.current ?? new maps.InfoWindow();
-    infoRef.current = info;
-    const bounds = new maps.LatLngBounds();
-    const craneMarkers: google.maps.Marker[] = [];
+    layer.clearLayers();
+    markersRef.current = new Map();
 
     if (sitePoint) {
-      const siteMarker = new maps.Marker({
-        map,
-        position: sitePoint,
-        title: "Job site",
-        zIndex: 10,
-        icon: {
-          path: maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: "#dc2626",
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeWeight: 2,
-        },
-      });
-      siteMarker.addListener("click", () => {
-        info.setContent(
-          popup(
-            "Job site",
-            `${site?.latitude.toFixed(4)}, ${site?.longitude.toFixed(4)}`,
-          ),
-        );
-        info.open({ map, anchor: siteMarker });
-      });
-      markersRef.current.push(siteMarker);
-      bounds.extend(sitePoint);
+      L.circleMarker(sitePoint, {
+        radius: 8,
+        color: "#ffffff",
+        weight: 2,
+        fillColor: "#dc2626",
+        fillOpacity: 1,
+      })
+        .bindTooltip("Job site", { direction: "top" })
+        .addTo(layer);
     }
 
-    for (const point of points) {
-      // No `map` here: the clusterer owns placement, so a crane joins whichever
-      // cluster (or stands alone) at the current zoom.
-      const marker = new maps.Marker({
-        position: { lat: point.lat, lng: point.lng },
-        title: `${point.crane.serialRegistrationNo} · ${point.crane.vendorName}`,
-      });
-      const { crane } = point;
-      marker.addListener("click", () => {
-        info.setContent(
-          popup(
-            `${crane.serialRegistrationNo} · ${crane.capacityT} t`,
-            [
-              crane.vendorName,
-              `${crane.typeOfCraneName} · ${crane.make} ${crane.model} (${crane.yom})`,
-              `${crane.currentLocation}, ${crane.stateName}`,
-            ].join("\n"),
-          ),
-        );
-        info.open({ map, anchor: marker });
-      });
-      craneMarkers.push(marker);
-      markersRef.current.push(marker);
-      bounds.extend(marker.getPosition() as google.maps.LatLng);
+    const clusters = clusterPoints(points, map, map.getZoom());
+    for (const cluster of clusters) {
+      if (cluster.cranes.length === 1) {
+        const crane = cluster.cranes[0]!;
+        const selected = crane.craneId === selectedRef.current;
+        const marker = L.marker([cluster.lat, cluster.lng], {
+          icon: craneIcon(crane.currentStatus, crane.capacityT, selected),
+          title: `${crane.serialRegistrationNo} · ${crane.vendorName}`,
+          riseOnHover: true,
+          zIndexOffset: selected ? 1000 : 0,
+          alt: `${crane.serialRegistrationNo}, ${crane.vendorName}`,
+        });
+        marker.on("click", () => onSelectRef.current?.(crane.craneId));
+        marker.addTo(layer);
+        markersRef.current.set(crane.craneId, marker);
+      } else {
+        const marker = L.marker([cluster.lat, cluster.lng], {
+          icon: clusterIcon(cluster.cranes.length),
+          title: `${cluster.cranes.length} cranes`,
+          keyboard: false,
+        });
+        marker.on("click", () => {
+          map.setView(
+            [cluster.lat, cluster.lng],
+            Math.min(map.getZoom() + 2, TILES_MAX_ZOOM),
+            { animate: true },
+          );
+        });
+        marker.addTo(layer);
+      }
     }
 
-    clustererRef.current = new MarkerClusterer({
-      map,
-      markers: craneMarkers,
-      renderer: clusterRenderer,
-    });
-
-    const heat = buildHeatImage(points);
-    if (heat) {
-      heatRef.current = new maps.GroundOverlay(heat.url, heat.bounds, {
-        map: showHeat ? map : null,
-        opacity: 0.75,
-        clickable: false,
-      });
+    // Frame the results once per result set, not on every zoom.
+    if (!fittedRef.current && points.length > 0) {
+      const bounds = L.latLngBounds(points.map((point) => [point.lat, point.lng] as L.LatLngTuple));
+      if (sitePoint) bounds.extend(sitePoint);
+      map.fitBounds(bounds, { padding: [56, 56], maxZoom: 12 });
+      fittedRef.current = true;
     }
+  }, [ready, points, zoom, sitePoint]);
 
-    if (!bounds.isEmpty()) map.fitBounds(bounds, 64);
-    // `showHeat` is intentionally not a dependency: toggling it only changes
-    // layer visibility, handled below, and must not rebuild the markers.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, points, sitePoint, site]);
-
-  // Toggle the heat layer without rebuilding the map.
+  // Selection: grow the pin, raise it, and bring it into view if the cluster
+  // grid has hidden it.
   useEffect(() => {
-    heatRef.current?.setMap(showHeat && status === "ready" ? mapRef.current : null);
-  }, [showHeat, status, points]);
+    if (!ready) return;
+    const map = mapRef.current;
+    if (!map) return;
 
-  useEffect(
-    () => () => {
-      clustererRef.current?.clearMarkers();
-      clustererRef.current = null;
-      for (const marker of markersRef.current) marker.setMap(null);
-      markersRef.current = [];
-      heatRef.current?.setMap(null);
-      heatRef.current = null;
-    },
-    [],
-  );
+    for (const [craneId, marker] of markersRef.current) {
+      const crane = cranes.find((candidate) => candidate.craneId === craneId);
+      if (!crane) continue;
+      const selected = craneId === selectedCraneId;
+      marker.setIcon(craneIcon(crane.currentStatus, crane.capacityT, selected));
+      marker.setZIndexOffset(selected ? 1000 : 0);
+    }
 
-  if (status === "unavailable") {
-    return (
-      <FallbackMap
-        cranes={cranes}
-        site={site}
-        reason={
-          browserKey
-            ? "Google Maps could not load. Showing the stored coordinates instead."
-            : "Google Maps is not configured (VITE_GOOGLE_MAPS_BROWSER_KEY is empty). Showing the stored coordinates instead."
-        }
-      />
+    if (!selectedCraneId) return;
+    const selected = points.find((point) => point.crane.craneId === selectedCraneId);
+    if (!selected) return;
+
+    const position = L.latLng(selected.lat, selected.lng);
+    const marker = markersRef.current.get(selectedCraneId);
+    if (marker) {
+      if (!map.getBounds().pad(-0.12).contains(position)) map.panTo(position);
+      return;
+    }
+
+    // Clustered or off-screen: zoom to the crane so it exists as its own pin.
+    if (!map.getBounds().pad(-0.12).contains(position) || map.getZoom() < 9) {
+      map.setView(position, Math.max(map.getZoom(), 10), { animate: true });
+    }
+  }, [ready, selectedCraneId, points, cranes]);
+
+  // Heat layer, rebuilt only when its basis or the data changes.
+  useEffect(() => {
+    if (!ready) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    heatRef.current?.remove();
+    heatRef.current = null;
+
+    const heat = buildHeatImage(
+      heatMode === "vendors"
+        ? vendorPoints.map((vendor) => ({ lat: vendor.latitude, lng: vendor.longitude }))
+        : points,
     );
-  }
+    if (!heat) return;
+    heatRef.current = L.imageOverlay(heat.url, heat.bounds, {
+      opacity: 0.72,
+      interactive: false,
+      className: "crane-heat",
+    });
+  }, [ready, points, vendorPoints, heatMode]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (showHeat && heatRef.current) heatRef.current.addTo(map);
+    else heatRef.current?.remove();
+  }, [showHeat, heatMode, points, vendorPoints, ready]);
+
+  const fitAll = () => {
+    const map = mapRef.current;
+    if (!map || points.length === 0) return;
+    const bounds = L.latLngBounds(points.map((point) => [point.lat, point.lng] as L.LatLngTuple));
+    if (sitePoint) bounds.extend(sitePoint);
+    map.fitBounds(bounds, { padding: [56, 56], maxZoom: 12 });
+  };
 
   return (
-    <Panel
-      title="Map and crane density"
-      description={`${points.length} of ${cranes.length} cranes have coordinates. The heat layer shows where cranes are concentrated; the red pin is the job site.`}
-      actions={
-        <label className="flex items-center gap-2 text-xs text-slate-600">
-          <input
-            type="checkbox"
-            checked={showHeat}
-            onChange={(event) => setShowHeat(event.target.checked)}
-          />
-          Heat map
-        </label>
-      }
-    >
-      <div className="relative">
-        <div
-          ref={containerRef}
-          className="h-96 w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
-        />
-        {status === "loading" ? (
-          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-white/70 text-sm text-slate-500">
-            Loading map…
+    <div className={cn("relative overflow-hidden bg-ink-950", className)}>
+      <div ref={containerRef} className="h-full w-full" />
+
+      {/* Controls float over the map: the map is the page, so the chrome has to
+          be small and out of the way. */}
+      <div className="absolute top-3 right-3 z-[800] flex flex-col items-end gap-2">
+        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[11px] text-neutral-400 shadow-lg backdrop-blur">
+          <label className="flex cursor-pointer items-center gap-1.5">
+            <input
+              type="checkbox"
+              checked={showHeat}
+              onChange={(event) => setShowHeat(event.target.checked)}
+              className="accent-accent-500"
+            />
+            Heat
+          </label>
+          <div
+            className="inline-flex items-center rounded-md border border-ink-800 bg-ink-850 p-0.5"
+            role="group"
+            aria-label="Heat map basis"
+          >
+            <HeatModeButton
+              active={heatMode === "cranes"}
+              onClick={() => setHeatMode("cranes")}
+              label="Cranes"
+            />
+            <HeatModeButton
+              active={heatMode === "vendors"}
+              onClick={() => setHeatMode("vendors")}
+              label="Vendors"
+            />
           </div>
-        ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={fitAll}
+          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[11px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
+        >
+          Fit all
+        </button>
       </div>
-    </Panel>
+
+      {/* Top-left: where the results are, then what the colours mean. The bottom
+          of the map belongs to the crane card. */}
+      <div className="pointer-events-none absolute top-3 left-3 z-[800] flex flex-col items-start gap-2">
+        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[11px] font-medium text-neutral-300 shadow-lg backdrop-blur">
+          India · {statesLive} state{statesLive === 1 ? "" : "s"} live
+        </div>
+        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[11px] text-neutral-400 shadow-lg backdrop-blur">
+          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <LegendItem status="AVAILABLE" label="Available" />
+            <LegendItem status="ENGAGED" label="Engaged" />
+            <LegendItem status="UNDER_MAINTENANCE" label="Maintenance" />
+            <li className="flex items-center gap-1.5">
+              <span className="inline-block size-2.5 rounded-full bg-accent-500 ring-2 ring-ink-900" />
+              Job site
+            </li>
+          </ul>
+          {points.length < cranes.length ? (
+            <p className="mt-1 text-neutral-500">
+              {points.length} of {cranes.length} cranes placed
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }
 
-/** A DOM node rather than an HTML string: vendor text is never parsed as markup. */
-function popup(title: string, detail: string): HTMLElement {
-  const wrapper = document.createElement("div");
-  wrapper.style.maxWidth = "260px";
+function LegendItem({ status, label }: { status: string; label: string }) {
+  return (
+    <li className="flex items-center gap-1.5">
+      <span
+        aria-hidden
+        className="inline-block size-2.5 rounded-sm ring-1 ring-ink-700"
+        style={{ backgroundColor: craneFill(status) }}
+      />
+      {label}
+    </li>
+  );
+}
 
-  const heading = document.createElement("strong");
-  heading.textContent = title;
-
-  const body = document.createElement("div");
-  body.style.marginTop = "4px";
-  body.style.whiteSpace = "pre-line";
-  body.textContent = detail;
-
-  wrapper.append(heading, body);
-  return wrapper;
+function HeatModeButton({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "rounded px-2 py-0.5 text-[11px] font-medium transition-colors",
+        active ? "bg-ink-700 text-white" : "text-neutral-500 hover:text-neutral-200",
+      )}
+    >
+      {label}
+    </button>
+  );
 }
 
 const HEAT_SIZE = 512;
@@ -375,12 +465,12 @@ function heatColour(value: number): [number, number, number] {
  * Builds the heat layer as a PNG plus the lat/lng rectangle it covers.
  *
  * Radial blobs are accumulated additively, then each pixel's accumulated alpha
- * is mapped through the ramp. A `GroundOverlay` carries the result, so Google
+ * is mapped through the ramp. An `imageOverlay` carries the result, so Leaflet
  * handles positioning and scaling as the map moves; there is no per-pan redraw.
  */
 function buildHeatImage(
-  points: MapPoint[],
-): { url: string; bounds: google.maps.LatLngBoundsLiteral } | null {
+  points: HeatPoint[],
+): { url: string; bounds: L.LatLngBoundsExpression } | null {
   const first = points[0];
   if (!first) return null;
 
@@ -447,68 +537,9 @@ function buildHeatImage(
 
   return {
     url: canvas.toDataURL("image/png"),
-    bounds: { north, south, east, west },
+    bounds: [
+      [south, west],
+      [north, east],
+    ],
   };
-}
-
-/**
- * The tile-less plot shown when Google Maps is not configured or cannot load.
- * It draws the India bounding box the database already enforces, so it never
- * pretends to know more than the stored coordinates.
- */
-function FallbackMap({
-  cranes,
-  site,
-  reason,
-}: {
-  cranes: DiscoveryCrane[];
-  site: { latitude: number; longitude: number } | null;
-  reason: string;
-}) {
-  const LAT_MIN = 6;
-  const LAT_MAX = 38;
-  const LNG_MIN = 68;
-  const LNG_MAX = 98;
-
-  const points = cranes.filter(
-    (crane): crane is DiscoveryCrane & { latitude: number; longitude: number } =>
-      crane.latitude !== null && crane.longitude !== null,
-  );
-
-  const x = (lng: number) => ((lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * 100;
-  const y = (lat: number) => ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100;
-
-  return (
-    <Panel title="Map" description={`${reason} ${points.length} of ${cranes.length} cranes have coordinates.`}>
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-        <svg viewBox="0 0 100 100" className="h-96 w-full" role="img" aria-label="Crane locations">
-          <rect x="0" y="0" width="100" height="100" fill="#f8fafc" />
-          {[0, 25, 50, 75, 100].map((line) => (
-            <g key={line}>
-              <line x1={line} y1="0" x2={line} y2="100" stroke="#e2e8f0" strokeWidth="0.2" />
-              <line x1="0" y1={line} x2="100" y2={line} stroke="#e2e8f0" strokeWidth="0.2" />
-            </g>
-          ))}
-          {site ? (
-            <circle cx={x(site.longitude)} cy={y(site.latitude)} r="1.6" fill="#dc2626">
-              <title>Job site</title>
-            </circle>
-          ) : null}
-          {points.map((crane) => (
-            <circle
-              key={crane.craneId}
-              cx={x(crane.longitude)}
-              cy={y(crane.latitude)}
-              r="1.1"
-              fill="#2563eb"
-            >
-              <title>
-                {crane.vendorName} · {crane.serialRegistrationNo} · {crane.currentLocation}
-              </title>
-            </circle>
-          ))}
-        </svg>
-      </div>
-    </Panel>
-  );
 }

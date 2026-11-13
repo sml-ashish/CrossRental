@@ -1391,6 +1391,26 @@ describe("reminders", () => {
     expect(other?.reminderCount).toBe(0);
   });
 
+  it("refuses to remind on a cancelled RFQ", async () => {
+    // The screen hides the button for a cancelled RFQ; the API must refuse the
+    // call too, so a stale tab or a hand-rolled request cannot chase vendors
+    // about an enquiry that no longer exists.
+    const rfq = await createRfq();
+    await sendRfq(rfq.id, [ctx.a.vendorId]);
+    await appPrisma.rfq.update({
+      where: { id: rfq.id },
+      data: { status: "CANCELLED" },
+    });
+
+    const res = await call(app, "POST", `/api/rfqs/${rfq.id}/remind`, {
+      token: ctx.salesToken,
+      body: {},
+    });
+
+    expect(res.status).toBe(409);
+    expect(await appPrisma.emailLog.count({ where: { template: "rfq_reminder" } })).toBe(0);
+  });
+
   it("does not chase a recipient who has already responded", async () => {
     const rfq = await createRfq();
     await sendRfq(rfq.id, [ctx.a.vendorId]);

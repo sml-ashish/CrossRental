@@ -113,7 +113,7 @@ export function VendorBookingCalendarPage() {
                 "ml-2 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors",
                 month === currentMonth()
                   ? "cursor-default border-slate-200 text-slate-400"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50",
+                  : "border-slate-200 text-slate-700 hover:bg-ink-800",
               )}
               onClick={() => setMonth(currentMonth())}
               disabled={month === currentMonth()}
@@ -141,7 +141,7 @@ export function VendorBookingCalendarPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 bg-slate-50/50 px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-800 bg-ink-900/50 px-4 py-2.5">
           <span className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             Legend
           </span>
@@ -275,7 +275,7 @@ function DayAgenda({
               {inMonth ? fullDate(date) : dayLabel(date)}
             </h2>
             {isToday ? (
-              <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
+              <span className="rounded-full bg-ink-700 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
                 Today
               </span>
             ) : null}
@@ -330,7 +330,7 @@ function DayAgenda({
 
 function AgendaCrane({ crane }: { crane: CalendarCrane }) {
   return (
-    <li className="flex items-baseline justify-between gap-3 rounded-md border border-slate-200/70 bg-white px-2 py-1">
+    <li className="flex items-baseline justify-between gap-3 rounded-md border border-slate-200/70 bg-ink-850 px-2 py-1">
       <Link
         to="/app/fleet/$craneId/edit"
         params={{ craneId: crane.craneId }}
@@ -368,7 +368,7 @@ function IconButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-ink-800 hover:text-slate-900"
     >
       {children}
     </button>

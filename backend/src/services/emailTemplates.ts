@@ -161,7 +161,7 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
          <span style="color:#64748b">Last confirmed: {{lastUpdatedAt}}</span>
        </div>
        <p style="margin:0;font-size:13px;color:#64748b">
-         If nothing has changed, use <strong>Confirm still accurate</strong> — it takes one tap.
+         If nothing has changed, use <strong>Confirm current status</strong> — it takes one tap.
        </p>`,
       { label: "Update crane", url: "{{craneUrl}}" },
     ),

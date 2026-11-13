@@ -77,11 +77,11 @@ export function SapSheetPage() {
         }
       />
 
-      <article className="card p-6 print:border-0 print:shadow-none">
+      <article className="card print-sheet p-6 print:border-0 print:shadow-none">
         <div className="space-y-5">
           {data.sections.map((section) => (
             <section key={section.title} className="break-inside-avoid">
-              <h2 className="border-b border-slate-100 pb-1 text-sm font-semibold text-slate-800">
+              <h2 className="border-b border-ink-800 pb-1 text-sm font-semibold text-slate-800">
                 {section.title}
               </h2>
               <dl className="mt-2 grid grid-cols-1 gap-x-8 gap-y-1.5 sm:grid-cols-2">

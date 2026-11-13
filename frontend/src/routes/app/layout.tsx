@@ -11,24 +11,24 @@ import {
   LogOut,
   MessageSquare,
   Menu,
-  Settings,
   ShieldCheck,
   Truck,
   X,
 } from "lucide-react";
 import { ROLE_HOME, roleLabel, useAuth } from "@/lib/auth";
+import { cn } from "@/lib/cn";
 
 /**
  * The application shell.
  *
- * Nav entries are declared per role and filtered by the signed-in user's role.
- * This is presentation only: hiding a link is a courtesy to the person using
- * the portal; the backend still refuses the request if it is made by hand.
+ * Navigation is a single top bar — the same one the discovery workspace wears —
+ * so moving between screens never moves the way back. It scrolls horizontally
+ * rather than wrapping, because a second row of links pushes every page down and
+ * a bar that changes height between roles looks broken.
  *
- * The links are grouped by the job they belong to rather than listed flat,
- * because a flat list of eleven items is a list nobody reads. Below `lg` the
- * same groups live in a drawer — previously the nav was simply hidden, which
- * left the app with no navigation at all on a phone.
+ * Entries are declared per role and filtered by the signed-in user's role. This
+ * is presentation only: hiding a link is a courtesy to the person using the
+ * portal; the backend still refuses the request if it is made by hand.
  */
 interface NavItem {
   to: string;
@@ -38,140 +38,109 @@ interface NavItem {
   exact?: boolean;
 }
 
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
-
-const NAV_GROUPS: NavGroup[] = [
+const NAV_ITEMS: NavItem[] = [
   {
-    label: "Overview",
-    items: [
-      { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["vendor_user"] },
-      { to: "/app/sales", label: "Dashboard", icon: LayoutDashboard, roles: ["sales_user"] },
-      {
-        to: "/app/management",
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        roles: ["management_viewer"],
-      },
-    ],
+    to: "/app/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    roles: ["vendor_user"],
+  },
+  { to: "/app/sales", label: "Dashboard", icon: LayoutDashboard, roles: ["sales_user"] },
+  {
+    to: "/app/management",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    roles: ["management_viewer"],
+  },
+  { to: "/app/admin", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_user"], exact: true },
+  { to: "/app/enquiries", label: "Enquiries", icon: Inbox, roles: ["sales_user", "admin_user"] },
+  { to: "/app/discovery", label: "Find cranes", icon: Compass, roles: ["sales_user", "admin_user"] },
+  {
+    to: "/app/rfqs",
+    label: "RFQs",
+    icon: FileText,
+    roles: ["vendor_user", "sales_user", "admin_user"],
   },
   {
-    label: "Sourcing",
-    items: [
-      {
-        to: "/app/enquiries",
-        label: "Enquiries",
-        icon: Inbox,
-        roles: ["sales_user", "admin_user"],
-      },
-      {
-        to: "/app/discovery",
-        label: "Discovery",
-        icon: Compass,
-        roles: ["sales_user", "admin_user"],
-      },
-      {
-        to: "/app/rfqs",
-        label: "RFQs",
-        icon: FileText,
-        roles: ["vendor_user", "sales_user", "admin_user"],
-      },
-      {
-        to: "/app/quotes",
-        label: "Quotations",
-        icon: MessageSquare,
-        roles: ["sales_user", "admin_user"],
-      },
-    ],
+    to: "/app/quotes",
+    label: "Quotations",
+    icon: MessageSquare,
+    roles: ["sales_user", "admin_user"],
   },
   {
-    label: "Operations",
-    items: [
-      {
-        to: "/app/bookings",
-        label: "Booking calendar",
-        icon: CalendarDays,
-        roles: ["sales_user", "admin_user"],
-      },
-      {
-        to: "/app/calendar",
-        label: "Booking calendar",
-        icon: CalendarDays,
-        roles: ["vendor_user"],
-      },
-      { to: "/app/fleet", label: "My fleet", icon: Truck, roles: ["vendor_user"] },
-    ],
+    to: "/app/bookings",
+    label: "Bookings",
+    icon: CalendarDays,
+    roles: ["sales_user", "admin_user"],
+  },
+  { to: "/app/calendar", label: "Calendar", icon: CalendarDays, roles: ["vendor_user"] },
+  { to: "/app/fleet", label: "My fleet", icon: Truck, roles: ["vendor_user"] },
+  {
+    to: "/app/approvals",
+    label: "Vendors",
+    icon: Building2,
+    roles: ["admin_user", "sales_user"],
   },
   {
-    label: "Network",
-    items: [
-      {
-        to: "/app/approvals",
-        label: "Vendor onboarding",
-        icon: Building2,
-        roles: ["admin_user", "sales_user"],
-      },
-    ],
+    to: "/app/reports",
+    label: "Reports",
+    icon: BarChart3,
+    roles: ["admin_user", "sales_user", "management_viewer"],
   },
   {
-    label: "Insights",
-    items: [
-      {
-        to: "/app/reports",
-        label: "Reports",
-        icon: BarChart3,
-        roles: ["admin_user", "sales_user", "management_viewer"],
-      },
-      { to: "/app/admin", label: "Admin", icon: ShieldCheck, roles: ["admin_user"], exact: true },
-      {
-        to: "/app/admin/replies",
-        label: "Reply queue",
-        icon: MessageSquare,
-        roles: ["admin_user"],
-      },
-      { to: "/app/settings", label: "Settings", icon: Settings, roles: ["admin_user"] },
-    ],
+    to: "/app/admin/replies",
+    label: "Reply queue",
+    icon: MessageSquare,
+    roles: ["admin_user"],
   },
+  { to: "/app/settings", label: "Settings", icon: ShieldCheck, roles: ["admin_user"] },
 ];
 
 export function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   // A drawer that survives a navigation is a drawer covering the thing the
   // person just asked for, so close it whenever the route changes.
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    setOpen(false);
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open && !menuOpen) return;
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        setMenuOpen(false);
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, menuOpen]);
 
   if (!user) return null;
 
-  const groups = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => item.roles.includes(user.role)),
-  })).filter((group) => group.items.length > 0);
+  const items = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
 
   function onSignOut() {
     logout();
     void navigate({ to: "/auth/login" });
   }
 
+  const initials = (user.fullName ?? user.email)
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
   const identity = (
     <div className="min-w-0">
-      <p className="truncate text-sm font-medium text-slate-900">
-        {user.fullName ?? user.email}
-      </p>
+      <p className="truncate text-sm font-medium text-slate-900">{user.fullName ?? user.email}</p>
       <p className="truncate text-xs text-slate-500">
         {roleLabel(user.role)}
         {user.vendorName ? ` · ${user.vendorName}` : ""}
@@ -181,98 +150,97 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:px-6">
+      <header className="sticky top-0 z-30 border-b border-ink-800 bg-ink-900 print:hidden">
+        <div className="flex h-12 items-center gap-4 px-4 sm:px-6">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 lg:hidden"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-ink-800 text-slate-400 transition-colors hover:bg-ink-850 hover:text-white lg:hidden"
             aria-label="Open navigation"
             aria-expanded={open}
           >
             <Menu className="size-4" aria-hidden />
           </button>
 
-          <Link to={ROLE_HOME[user.role]} className="flex min-w-0 items-center gap-2.5">
-            <span
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-brand-300 via-brand-500 to-brand-600 text-[11px] font-bold tracking-wide text-white"
-              aria-hidden
-            >
-              SML
+          <Link to={ROLE_HOME[user.role]} className="flex shrink-0 items-center gap-2">
+            <span className="flex h-6 items-center gap-0.5" aria-hidden>
+              <span className="block h-4 w-[3px] -skew-x-[18deg] rounded-full bg-accent-500" />
+              <span className="block h-4 w-[3px] -skew-x-[18deg] rounded-full bg-accent-500/60" />
             </span>
-            <span className="min-w-0 leading-tight">
-              <span className="block truncate text-sm font-semibold tracking-tight text-slate-900">
-                crossrentel
-              </span>
-              <span className="block truncate text-[11px] text-slate-500">
-                Crane sourcing &amp; vendor network
-              </span>
-            </span>
+            <span className="text-sm font-semibold tracking-tight text-white">crossrentel</span>
           </Link>
 
-          <div className="ml-auto flex items-center gap-3">
-            <div className="hidden text-right sm:block">{identity}</div>
+          <nav
+            aria-label="Main navigation"
+            className="hidden min-w-0 flex-1 items-center gap-0.5 overflow-x-auto lg:flex"
+          >
+            {items.map((item) => (
+              <Link
+                key={`${item.to}:${item.label}`}
+                to={item.to}
+                activeOptions={{ exact: item.exact ?? false }}
+                className="shrink-0 rounded-md px-2.5 py-1.5 text-[13px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
+                activeProps={{ className: "bg-ink-850 text-white" }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="relative ml-auto flex shrink-0 items-center gap-2">
             <button
               type="button"
-              onClick={onSignOut}
-              className="btn-secondary px-2.5 sm:px-3"
-              title="Sign out"
+              onClick={() => setMenuOpen((value) => !value)}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              aria-label="Account"
+              className="flex size-8 items-center justify-center rounded-full bg-ink-700 text-[11px] font-semibold tracking-wide text-white transition-colors hover:bg-ink-800"
             >
-              <LogOut className="size-4" aria-hidden />
-              <span className="hidden sm:inline">Sign out</span>
+              {initials || "U"}
             </button>
+
+            {menuOpen ? (
+              <>
+                <button
+                  type="button"
+                  aria-label="Close account menu"
+                  className="fixed inset-0 z-[60] cursor-default"
+                  onClick={() => setMenuOpen(false)}
+                />
+                <div
+                  role="menu"
+                  className="absolute top-10 right-0 z-[70] w-60 rounded-xl border border-ink-800 bg-ink-900 p-2 shadow-2xl"
+                >
+                  <div className="px-2 py-2">{identity}</div>
+                  <div className="my-1 h-px bg-ink-800" />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={onSignOut}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-slate-600 transition-colors hover:bg-ink-850 hover:text-white"
+                  >
+                    <LogOut className="size-4" aria-hidden />
+                    Sign out
+                  </button>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1440px] gap-6 px-4 py-6 sm:px-6 print:block print:max-w-none print:p-0">
-        <nav
-          className="hidden w-56 shrink-0 lg:block print:hidden"
-          aria-label="Main navigation"
-        >
-          <div className="sticky top-20 space-y-5">
-            {groups.map((group) => (
-              <div key={group.label}>
-                <p className="px-3 pb-1.5 text-[10px] font-medium tracking-[0.09em] text-slate-400 uppercase">
-                  {group.label}
-                </p>
-                <ul className="space-y-0.5">
-                  {group.items.map((item) => (
-                    <li key={`${item.to}:${item.label}`}>
-                      <Link
-                        to={item.to}
-                        activeOptions={{ exact: item.exact ?? false }}
-                        className="group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                        activeProps={{
-                          className:
-                            "bg-brand-50 font-medium text-brand-700 hover:bg-brand-50 hover:text-brand-700",
-                        }}
-                      >
-                        <item.icon
-                          className="size-4 shrink-0 text-slate-400 group-hover:text-slate-600"
-                          aria-hidden
-                        />
-                        <span className="truncate">{item.label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </nav>
-
-        <main className="min-w-0 flex-1">
+      <div className="px-4 py-6 sm:px-6 print:p-0">
+        <main className="min-w-0">
           <Outlet />
         </main>
       </div>
 
-      {/* Mobile navigation drawer. */}
+      {/* Navigation drawer, below `lg`. */}
       {open ? (
         <div className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/30 backdrop-blur-[1px]"
+            className="absolute inset-0 bg-black/60 backdrop-blur-[1px]"
             aria-label="Close navigation"
             onClick={() => setOpen(false)}
           />
@@ -280,59 +248,42 @@ export function AppLayout() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col bg-white shadow-xl"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85%] flex-col border-r border-ink-800 bg-ink-900 shadow-xl"
           >
-            <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-slate-200 px-4">
-              <span className="flex items-center gap-2">
-                <span
-                  className="flex size-7 items-center justify-center rounded-md bg-gradient-to-b from-brand-300 via-brand-500 to-brand-600 text-[10px] font-bold text-white"
-                  aria-hidden
-                >
-                  SML
-                </span>
-                <span className="text-sm font-semibold text-slate-900">Menu</span>
-              </span>
+            <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-ink-800 px-4">
+              <span className="text-sm font-semibold text-white">Menu</span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="inline-flex size-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                className="inline-flex size-8 items-center justify-center rounded-md text-slate-500 hover:bg-ink-850 hover:text-white"
                 aria-label="Close navigation"
               >
                 <X className="size-4" aria-hidden />
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
-              {groups.map((group) => (
-                <div key={group.label} className="mb-4 last:mb-0">
-                  <p className="px-2 pb-1.5 text-[10px] font-medium tracking-[0.09em] text-slate-400 uppercase">
-                    {group.label}
-                  </p>
-                  <ul className="space-y-0.5">
-                    {group.items.map((item) => (
-                      <li key={`${item.to}:${item.label}`}>
-                        <Link
-                          to={item.to}
-                          activeOptions={{ exact: item.exact ?? false }}
-                          className="group flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-slate-600 hover:bg-slate-100"
-                          activeProps={{
-                            className: "bg-brand-50 font-medium text-brand-700",
-                          }}
-                        >
-                          <item.icon
-                            className="size-4 shrink-0 text-slate-400 group-hover:text-slate-600"
-                            aria-hidden
-                          />
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+              <ul className="space-y-0.5">
+                {items.map((item) => (
+                  <li key={`${item.to}:${item.label}`}>
+                    <Link
+                      to={item.to}
+                      activeOptions={{ exact: item.exact ?? false }}
+                      className={cn(
+                        "group flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-slate-600",
+                        "hover:bg-ink-850 hover:text-white",
+                      )}
+                      activeProps={{ className: "bg-ink-850 font-medium text-white" }}
+                    >
+                      <item.icon className="size-4 shrink-0 text-slate-400" aria-hidden />
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="shrink-0 border-t border-slate-200 p-3">
+            <div className="shrink-0 border-t border-ink-800 p-3">
               <div className="flex items-center gap-2 px-1 pb-2.5">{identity}</div>
               <button type="button" onClick={onSignOut} className="btn-secondary w-full">
                 <LogOut className="size-4" aria-hidden />

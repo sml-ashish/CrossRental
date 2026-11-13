@@ -182,7 +182,7 @@ export function BulkInviteUpload() {
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:items-center">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:items-center">
           <div
             role="dialog"
             aria-modal="true"
@@ -201,7 +201,7 @@ export function BulkInviteUpload() {
               <button
                 type="button"
                 onClick={close}
-                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-ink-800 hover:text-slate-700"
                 aria-label="Close"
               >
                 <X className="size-4" aria-hidden />

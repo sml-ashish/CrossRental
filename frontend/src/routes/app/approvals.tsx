@@ -88,8 +88,8 @@ export function ApprovalQueuePage() {
                     className={cn(
                       "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                       status === tab.value
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                        ? "bg-ink-700 text-white"
+                        : "border border-slate-200 bg-ink-850 text-slate-600 hover:bg-ink-800",
                     )}
                   >
                     {tab.label}

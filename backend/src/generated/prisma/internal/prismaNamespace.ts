@@ -3038,8 +3038,6 @@ export const EnquiryScalarFieldEnum = {
   id: 'id',
   enquiryNo: 'enquiryNo',
   enquiryDate: 'enquiryDate',
-  source: 'source',
-  crOwnerId: 'crOwnerId',
   customerName: 'customerName',
   customerAddress: 'customerAddress',
   siteLocation: 'siteLocation',
@@ -3102,7 +3100,6 @@ export const EnquiryLineItemScalarFieldEnum = {
   rowScope: 'rowScope',
   rentalBudget: 'rentalBudget',
   trailStatus: 'trailStatus',
-  selectedSource: 'selectedSource',
   closureStatus: 'closureStatus',
   cancelledAt: 'cancelledAt',
   cancelReason: 'cancelReason',
@@ -3835,20 +3832,6 @@ export type EnumAttachmentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'AttachmentKind[]'
  */
 export type ListEnumAttachmentKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttachmentKind[]'>
-    
-
-
-/**
- * Reference to a field of type 'EnquirySource'
- */
-export type EnumEnquirySourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquirySource'>
-    
-
-
-/**
- * Reference to a field of type 'EnquirySource[]'
- */
-export type ListEnumEnquirySourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquirySource[]'>
     
 
 

@@ -5,24 +5,98 @@
 /*
  * crossrentel — design tokens.
  *
- * Mirrors design.md: Sanghvi Movers brand red on a neutral slate chrome, with a
- * compact, information-dense layout suited to someone reading this on a phone
- * at a crane yard. Tailwind v4 is CSS-first, so the palette is declared here
- * rather than in a tailwind.config file.
+ * A near-black workspace with a muted brick-red accent. The palette is declared
+ * here because Tailwind v4 is CSS-first.
+ *
+ * The slate scale is deliberately REVERSED: low numbers are surfaces, high
+ * numbers are text. Every screen already uses the scale semantically — `bg-slate-50`
+ * for a page, `text-slate-900` for a heading — so reversing it themes the whole
+ * portal in one place instead of rewriting a thousand utility classes. The
+ * status scales are handled the same way: the 50–300 steps are dark tints and
+ * the 600–800 steps are the light text that sits on them, while 400–500 stay
+ * saturated for dots and indicators.
+ *
+ * `ink-*` and `accent-*` are the discovery workspace's own names for the same
+ * values, used where a component wants the chrome explicitly.
  */
 
 @theme {
-  /* Brand red — primary action buttons use a three-stop gradient. */
-  --color-brand-50: #fff1f0;
-  --color-brand-100: #ffe1e0;
-  --color-brand-200: #ffc9c7;
+  /* Brand red — primary action buttons use a three-stop gradient, so the middle
+     of the scale has to stay exactly as designed. */
+  --color-brand-50: #2a1413;
+  --color-brand-100: #3a1a18;
+  --color-brand-200: #552421;
   --color-brand-300: #fa5a54;
   --color-brand-400: #f83c36;
   --color-brand-500: #f1221c;
   --color-brand-600: #d91b16;
-  --color-brand-700: #b8130f;
-  --color-brand-800: #96100d;
-  --color-brand-900: #7a0d0b;
+  --color-brand-700: #f08a85;
+  --color-brand-800: #f6ada9;
+  --color-brand-900: #fbd0cd;
+
+  /* Chrome and the muted accent. */
+  --color-ink-950: #18191b;
+  --color-ink-900: #1b1c1e;
+  --color-ink-850: #202223;
+  --color-ink-800: #26282b;
+  --color-ink-700: #34363a;
+  --color-accent-500: #c4443f;
+  --color-accent-400: #e07772;
+  --color-accent-600: #a83733;
+
+  /* Surfaces → text, light to dark. */
+  --color-slate-50: #17181b;
+  --color-slate-100: #1e2023;
+  --color-slate-200: #26282b;
+  --color-slate-300: #34363a;
+  --color-slate-400: #6b7078;
+  --color-slate-500: #8f9299;
+  --color-slate-600: #a4a8ae;
+  --color-slate-700: #c3c6cb;
+  --color-slate-800: #d8dade;
+  --color-slate-900: #f2f3f4;
+  --color-slate-950: #ffffff;
+
+  /* Status tints and their text. 400/500 are left alone: they are the dots. */
+  --color-red-50: #2a1514;
+  --color-red-100: #3a1c1a;
+  --color-red-200: #5a2724;
+  --color-red-300: #7f3330;
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fecaca;
+
+  --color-amber-50: #2a2113;
+  --color-amber-100: #3a2d18;
+  --color-amber-200: #5a4522;
+  --color-amber-300: #7f6430;
+  --color-amber-600: #fbbf24;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+
+  --color-emerald-50: #10241c;
+  --color-emerald-100: #163024;
+  --color-emerald-200: #1f4a37;
+  --color-emerald-300: #2a6b4e;
+  --color-emerald-600: #34d399;
+  --color-emerald-700: #6ee7b7;
+  --color-emerald-800: #a7f3d0;
+
+  --color-blue-50: #131c2e;
+  --color-blue-100: #182440;
+  --color-blue-200: #24365c;
+  --color-blue-300: #2f4a7a;
+  --color-blue-600: #60a5fa;
+  --color-blue-700: #93c5fd;
+  --color-blue-800: #bfdbfe;
+
+  --color-orange-50: #2a1a12;
+  --color-orange-200: #5a3320;
+  --color-orange-700: #fdba74;
+
+  --color-purple-50: #1e162e;
+  --color-purple-200: #3a2a5a;
+  --color-purple-700: #d8b4fe;
 
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
@@ -32,6 +106,8 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* Native scrollbars, date pickers and select menus follow the dark surface. */
+    color-scheme: dark;
   }
 
   body {
@@ -43,6 +119,11 @@
 
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  ::selection {
+    background: var(--color-accent-500);
+    color: #ffffff;
   }
 
   /* Inputs inherit the compact density of the rest of the UI. */
@@ -64,22 +145,193 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white
-      px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors
-      hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-ink-800
+      bg-ink-850 px-4 py-2.5 text-sm font-medium text-neutral-200 transition-colors
+      hover:border-ink-700 hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .field-label {
-    @apply mb-1.5 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-sm font-medium text-neutral-300;
   }
 
   .field-input {
-    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900
-      placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
-      focus:outline-none;
+    @apply w-full rounded-lg border border-ink-800 bg-ink-850 px-3 py-2.5 text-sm
+      text-neutral-100 placeholder:text-neutral-500 focus:border-accent-500
+      focus:ring-2 focus:ring-accent-500/25 focus:outline-none;
+  }
+
+  .field-input option {
+    @apply bg-ink-850 text-neutral-100;
   }
 
   .card {
-    @apply rounded-xl border border-slate-200 bg-white;
+    @apply rounded-xl border border-ink-800 bg-ink-850;
   }
 }
+
+/*
+ * Leaflet, dressed for the dark workspace.
+ *
+ * OpenStreetMap's raster tiles are drawn for a light page. Inverting the tile
+ * pane only — never the marker pane — gives a genuinely dark basemap with no
+ * key and no per-tile bill. If a dark vector provider is configured later via
+ * VITE_MAP_TILES_URL, drop `.map-tiles-inverted` and the tiles arrive dark.
+ */
+.map-tiles-inverted .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.75);
+}
+
+.leaflet-container {
+  background: #18191b;
+  font-family: var(--font-sans);
+}
+
+.leaflet-container a {
+  color: #d4605b;
+}
+
+.leaflet-control-attribution {
+  background: rgba(24, 25, 27, 0.82) !important;
+  color: #8b9096 !important;
+  font-size: 10px;
+}
+
+.leaflet-control-attribution a {
+  color: #a9aeb4 !important;
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: #202223;
+  border-bottom-color: #34363a;
+  color: #e8e9ea;
+}
+
+.leaflet-bar a:hover {
+  background: #2a2c2f;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid #34363a !important;
+}
+
+/* A divIcon ships a white box and a border by default; the pin artwork is the
+   icon, so the wrapper has to disappear. */
+.crane-pin {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.crane-pin svg {
+  display: block;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+}
+
+.crane-pin:hover svg,
+.crane-pin:focus-visible svg {
+  filter: drop-shadow(0 0 6px rgba(196, 68, 63, 0.85));
+}
+
+/* The detail panel swaps content in place when another enquiry is selected;
+   a short fade and rise makes the change follow the click without a spinner. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.panel-in {
+  animation: panel-in 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-in {
+    animation: none;
+  }
+}
+
+/* The selected pin is white with a cool outline; it should read as the one the
+   card is describing, not merely as another pin that is slightly bigger. */
+.crane-pin-selected svg {
+  filter: drop-shadow(0 0 10px rgba(157, 184, 255, 0.55))
+    drop-shadow(0 3px 4px rgba(0, 0, 0, 0.6));
+}
+
+/* The job-site pin on the enquiry screen: one red dot inside a halo, so it
+   stays visible on a dark basemap at 140px tall. */
+.site-pin-wrap {
+  background: transparent;
+  border: 0;
+}
+
+.site-pin {
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+}
+
+.site-pin-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(196, 68, 63, 0.5);
+  background: rgba(196, 68, 63, 0.16);
+}
+
+.site-pin-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 9999px;
+  background: var(--color-accent-500);
+  box-shadow:
+    0 0 0 3px rgba(23, 24, 27, 0.9),
+    0 0 14px rgba(196, 68, 63, 0.75);
+}
+
+/* The discovery workspace marks itself so its form controls stay dark even if
+   the surrounding chrome is ever themed differently. */
+.theme-dark {
+  color-scheme: dark;
+}
+
+/*
+ * Paper.
+ *
+ * The SAP vendor creation sheet is the one screen people print. A dark
+ * workspace printed as-is is a page of toner with unreadable grey text, so the
+ * sheet reverts to ink on paper while everything else keeps its dark chrome
+ * (the app header and page header already carry `print:hidden`).
+ */
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .print-sheet,
+  .print-sheet * {
+    background: transparent !important;
+    border-color: #d4d4d8 !important;
+    box-shadow: none !important;
+    color: #111111 !important;
+  }
+
+  /* Labels stay a step lighter than values, as they are on screen. */
+  .print-sheet dt {
+    color: #4b4b52 !important;
+  }
+}
+

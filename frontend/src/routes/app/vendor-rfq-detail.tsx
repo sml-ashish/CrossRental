@@ -209,15 +209,18 @@ function DeadlineBanner({
           ? "amber"
           : "emerald";
 
-  const message = locked
-    ? "This RFQ is finalised. You can still read it and your quotes remain on record."
-    : responseStatus === "QUOTED"
-      ? "Quote received. You can revise it until the deadline."
-      : responseStatus === "DECLINED"
-        ? "You declined this RFQ."
-        : responseStatus === "EXPIRED"
-          ? "This RFQ expired without a quote from you."
-          : countdown.label;
+  const message =
+    responseStatus === "FINALISED"
+      ? "This RFQ was finalised before you quoted. It stays here as a record."
+      : locked
+        ? "This RFQ is finalised. You can still read it and your quotes remain on record."
+        : responseStatus === "QUOTED"
+          ? "Quote received. You can revise it until the deadline."
+          : responseStatus === "DECLINED"
+            ? "You declined this RFQ."
+            : responseStatus === "EXPIRED"
+              ? "This RFQ expired without a quote from you."
+              : countdown.label;
 
   return (
     <div className="min-w-56">
@@ -620,7 +623,7 @@ function QuotationCard({
       ) : null}
 
       {onRevise || onWithdraw ? (
-        <div className="mt-4 flex gap-2 border-t border-slate-100 pt-3">
+        <div className="mt-4 flex gap-2 border-t border-ink-800 pt-3">
           {onRevise ? (
             <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={onRevise}>
               {quotation.status === "WITHDRAWN" ? "Quote again" : "Revise"}
@@ -1008,7 +1011,7 @@ function QuoteForm({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+      <div className="flex flex-wrap gap-2 border-t border-ink-800 pt-4">
         <button
           type="button"
           className="btn-primary px-4 py-2 text-sm"
@@ -1283,7 +1286,7 @@ function HistoryPanel({ rfqId }: { rfqId: string }) {
               {(history.data?.series ?? []).map((series) => (
                 <div key={series.craneId}>
                   <p className="text-sm font-medium text-slate-900">{series.craneLabel}</p>
-                  <ol className="mt-2 space-y-2 border-l-2 border-slate-100 pl-4">
+                  <ol className="mt-2 space-y-2 border-l-2 border-ink-800 pl-4">
                     {series.versions.map((version) => (
                       <li key={version.quotationId}>
                         <div className="flex flex-wrap items-center gap-2">

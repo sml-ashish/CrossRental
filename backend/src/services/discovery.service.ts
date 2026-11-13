@@ -19,6 +19,7 @@ import {
   type CalendarQuery,
 } from "../validation/reservationFields";
 import { calendarForCranes, type CalendarView } from "./reservations.service";
+import { STATE_CENTRES } from "../lib/referenceData";
 
 /**
  * Manual vendor discovery (BPD 6.8 / 5.9): find cranes without an enquiry.
@@ -94,11 +95,32 @@ export interface DiscoveryGroup {
   cranes: DiscoveryCrane[];
 }
 
+/**
+ * One dot per vendor for the density layer, placed from the vendor's address
+ * rather than from its cranes.
+ *
+ * `source: "state"` is the normal case: the vendor's registered state, resolved
+ * to that state's centre. `source: "fleet"` is the fallback for a vendor whose
+ * address state is missing or not in the state master — the centre of its
+ * located cranes — so a vendor never disappears from the map without a trace.
+ */
+export interface DiscoveryVendorPoint {
+  vendorId: string;
+  vendorName: string;
+  stateCode: string | null;
+  stateName: string | null;
+  latitude: number;
+  longitude: number;
+  craneCount: number;
+  source: "state" | "fleet";
+}
+
 export interface DiscoveryResult {
   distancesAvailable: boolean;
   site: { latitude: number; longitude: number } | null;
   groups: DiscoveryGroup[];
   unverified: DiscoveryCrane[];
+  vendorPoints: DiscoveryVendorPoint[];
   totalMatched: number;
 }
 
@@ -112,6 +134,63 @@ function num(value: unknown): number | null {
 
 function daysSince(date: Date): number {
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / DAY_MS));
+}
+
+/**
+ * One point per vendor in the result set, placed from the vendor's address.
+ *
+ * Vendors are collected across all matching cranes — including cranes with no
+ * coordinates — because a vendor's place on the map no longer depends on its
+ * machines being pinned. The address state resolves to that state's centre; the
+ * crane centre is only the fallback when the address state is missing or not in
+ * the state master, and `source` records which was used so the screen can say so.
+ */
+function buildVendorPoints(rows: DiscoveryRow[]): DiscoveryVendorPoint[] {
+  const vendors = new Map<
+    string,
+    { row: DiscoveryRow; cranes: number; latSum: number; lngSum: number; located: number }
+  >();
+
+  for (const row of rows) {
+    const entry =
+      vendors.get(row.vendorId) ??
+      { row, cranes: 0, latSum: 0, lngSum: 0, located: 0 };
+    entry.cranes += 1;
+    const lat = num(row.latitude);
+    const lng = num(row.longitude);
+    if (lat !== null && lng !== null) {
+      entry.latSum += lat;
+      entry.lngSum += lng;
+      entry.located += 1;
+    }
+    vendors.set(row.vendorId, entry);
+  }
+
+  const points: DiscoveryVendorPoint[] = [];
+  for (const [vendorId, entry] of vendors) {
+    const stateCode = entry.row.vendor.stateCode;
+    const centre = stateCode ? STATE_CENTRES[stateCode] : undefined;
+    const base = {
+      vendorId,
+      vendorName: entry.row.vendor.name ?? "The vendor",
+      stateCode,
+      stateName: entry.row.vendor.addressState?.name ?? null,
+      craneCount: entry.cranes,
+    };
+
+    if (centre) {
+      points.push({ ...base, latitude: centre.lat, longitude: centre.lng, source: "state" });
+    } else if (entry.located > 0) {
+      points.push({
+        ...base,
+        latitude: entry.latSum / entry.located,
+        longitude: entry.lngSum / entry.located,
+        source: "fleet",
+      });
+    }
+  }
+
+  return points.sort((a, b) => a.vendorName.localeCompare(b.vendorName));
 }
 
 const DISCOVERY_SELECT = {
@@ -144,6 +223,10 @@ const DISCOVERY_SELECT = {
       name: true,
       companySize: true,
       totalFleetSize: true,
+      // The vendor's own address state, which is what places it on the map —
+      // not the state of the crane, which is where the machine currently is.
+      stateCode: true,
+      addressState: { select: { name: true } },
     },
   },
 } as const;
@@ -177,6 +260,8 @@ type DiscoveryRow = {
     name: string | null;
     companySize: string | null;
     totalFleetSize: number;
+    stateCode: string | null;
+    addressState: { name: string } | null;
   };
 };
 
@@ -425,6 +510,7 @@ export async function searchCranes(
       return a.nearestKm - b.nearestKm;
     }),
     unverified,
+    vendorPoints: buildVendorPoints(rows),
     totalMatched: locatedCranes.length + unverified.length,
   };
 }

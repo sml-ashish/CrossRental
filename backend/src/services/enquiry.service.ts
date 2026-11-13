@@ -1,5 +1,7 @@
 import { prisma } from "../lib/database";
 import type { Prisma } from "../generated/prisma/client";
+import { CoordinateSource } from "../generated/prisma/client";
+import { tryGeocode, getGeoProvider } from "../lib/geo";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import { recordAudit } from "./audit.service";
@@ -33,15 +35,14 @@ import {
   DurationUnit,
   EnquiryLineTrailStatus,
   EnquiryOverallStatus,
-  EnquirySource,
 } from "../generated/prisma/client";
 
 /**
  * Native enquiry intake and the line-item sourcing workspace (P1).
  *
  * **One adapter point.** All creation goes through `createEnquiry(payload,
- * source, actor)`. `source` is `manual` today; a future SAP feed calls the same
- * function with its own source and needs no new code path. Nothing here talks
+ * actor)`. The single-crane form, the bulk upload and any future caller share
+ * it, so numbering, audit and the status trail cannot drift. Nothing here talks
  * to SAP.
  *
  * **The customer block is internal.** `customerName`, `customerAddress` and
@@ -79,8 +80,6 @@ const ENQUIRY_SELECT = {
   id: true,
   enquiryNo: true,
   enquiryDate: true,
-  source: true,
-  crOwnerId: true,
   customerName: true,
   customerAddress: true,
   siteLocation: true,
@@ -88,9 +87,13 @@ const ENQUIRY_SELECT = {
   sitePincode: true,
   region: true,
   overallStatus: true,
+  // The job site's pin, resolved once through the geocoding seam. The list
+  // screen draws it as a small map, so it has to survive the view mapping.
+  siteLatitude: true,
+  siteLongitude: true,
+  siteCoordinateSource: true,
   createdAt: true,
   updatedAt: true,
-  crOwner: { select: { id: true, email: true, fullName: true } },
   siteState: { select: { name: true } },
 } as const;
 
@@ -138,7 +141,6 @@ const LINE_SELECT = {
   rowScope: true,
   rentalBudget: true,
   trailStatus: true,
-  selectedSource: true,
   closureStatus: true,
   cancelledAt: true,
   cancelReason: true,
@@ -147,13 +149,48 @@ const LINE_SELECT = {
   craneType: { select: { name: true } },
 } as const;
 
-type EnquiryRow = Record<string, unknown>;
+/**
+ * The detail view's line, plus the RFQs raised from it.
+ *
+ * The enquiry screen's right-hand panel has to answer "what is the next action
+ * on this line", which means knowing whether an RFQ exists and how many quotes
+ * came back. Counting them here keeps the panel to one request instead of one
+ * per line.
+ */
+const DETAIL_LINE_SELECT = {
+  ...LINE_SELECT,
+  rfqs: {
+    select: {
+      id: true,
+      rfqNumber: true,
+      _count: { select: { quotations: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  },
+} as const;
+
+/**
+ * Rows come back as Prisma results with a handful of relations attached; the
+ * views below copy them through and normalise decimals. `enquiryNo` is named
+ * explicitly because the bulk import reports it back per created row.
+ */
+type EnquiryRow = Record<string, unknown> & { enquiryNo?: string };
 type LineRow = Record<string, unknown>;
 
 /** Decimals become numbers for the API; dates stay as dates (serialised by Express). */
 export function toLineView(row: LineRow) {
+  // `rfqs` is only selected on the detail screen. It is folded into two facts
+  // (the latest RFQ, how many quotes are in) rather than passed through, so the
+  // line payload stays the same shape everywhere it is used.
+  const { rfqs, ...line } = row;
+  const rfqList =
+    (rfqs as
+      | Array<{ id: string; rfqNumber: string; _count?: { quotations?: number } }>
+      | undefined) ?? [];
+  const latest = rfqList[0] ?? null;
+
   return {
-    ...row,
+    ...line,
     capacityT: num(row.capacityT),
     liftLoadT: num(row.liftLoadT),
     workingRadiusM: num(row.workingRadiusM),
@@ -163,6 +200,9 @@ export function toLineView(row: LineRow) {
     requiredWindJibM: num(row.requiredWindJibM),
     durationValue: num(row.durationValue),
     craneTypeName: (row.craneType as { name: string } | null)?.name ?? null,
+    rfqId: latest?.id ?? null,
+    rfqNumber: latest?.rfqNumber ?? null,
+    quoteCount: rfqList.reduce((sum, rfq) => sum + (rfq._count?.quotations ?? 0), 0),
   };
 }
 
@@ -170,6 +210,8 @@ export function toEnquiryView(row: EnquiryRow) {
   return {
     ...row,
     siteStateName: (row.siteState as { name: string } | null)?.name ?? null,
+    siteLatitude: num(row.siteLatitude),
+    siteLongitude: num(row.siteLongitude),
   };
 }
 
@@ -203,27 +245,54 @@ function headerData(input: CreateEnquiryInput | UpdateEnquiryInput) {
   };
 }
 
+/**
+ * Pin the job site at intake.
+ *
+ * The enquiry screen draws the site on a small map before anyone raises an RFQ,
+ * so the pin cannot wait for the recommendation run that used to be the only
+ * thing that geocoded it. This is the same provider seam the RFQ and crane
+ * paths use, and the same rule applies: a failed lookup leaves the coordinates
+ * empty rather than blocking the enquiry. The panel then says the pin is
+ * missing instead of showing a fabricated one.
+ */
+async function sitePin(input: {
+  siteLocation: string;
+  siteStateCode: string;
+  sitePincode: string | null;
+}): Promise<{
+  siteLatitude: number | null;
+  siteLongitude: number | null;
+  siteCoordinateSource: CoordinateSource | null;
+}> {
+  const result = await tryGeocode({
+    location: input.siteLocation,
+    state: await stateNameOf(input.siteStateCode),
+    pincode: input.sitePincode,
+  });
+
+  if (!result.ok) {
+    return { siteLatitude: null, siteLongitude: null, siteCoordinateSource: null };
+  }
+
+  // "auto" means a provider produced the point; the stub invents its
+  // coordinates, so those are labelled manual rather than passed off as real.
+  return {
+    siteLatitude: result.point.lat,
+    siteLongitude: result.point.lng,
+    siteCoordinateSource: getGeoProvider().isAuthoritative
+      ? CoordinateSource.auto
+      : CoordinateSource.manual,
+  };
+}
+
 // --- create / update ------------------------------------------------------
 
 /** The adapter point (P1 section 1). Nothing else creates an enquiry. */
-export async function createEnquiry(
-  raw: unknown,
-  actor: Actor,
-  source: EnquirySource = EnquirySource.manual,
-) {
+export async function createEnquiry(raw: unknown, actor: Actor) {
   assertInternal(actor);
   const input = createEnquirySchema.parse(raw);
   await stateNameOf(input.siteStateCode);
   for (const line of input.lines) await assertCraneType(line.craneTypeCode);
-
-  const crOwnerId = input.crOwnerId ?? actor.id;
-  const owner = await prisma.user.findUnique({
-    where: { id: crOwnerId },
-    select: { role: true },
-  });
-  if (!owner || owner.role === "vendor_user") {
-    throw AppError.badRequest("The enquiry owner must be an SML user");
-  }
 
   const enquiryNo = await nextEnquiryNumber();
 
@@ -231,10 +300,9 @@ export async function createEnquiry(
     data: {
       enquiryNo,
       enquiryDate: input.enquiryDate ?? new Date(),
-      source,
-      crOwnerId,
       createdById: actor.id,
       ...headerData(input),
+      ...(await sitePin(input)),
       lines: {
         create: input.lines.map((line, index) => ({
           ...line,
@@ -242,14 +310,17 @@ export async function createEnquiry(
         })),
       },
     },
-    select: { ...ENQUIRY_SELECT, lines: { select: LINE_SELECT, orderBy: { lineNo: "asc" } } },
+    select: {
+      ...ENQUIRY_SELECT,
+      lines: { select: DETAIL_LINE_SELECT, orderBy: { lineNo: "asc" } },
+    },
   });
 
   await recordAudit({
     entity: "enquiry",
     entityId: row.id,
     action: "create",
-    newValue: { enquiryNo, source, lines: input.lines.length },
+    newValue: { enquiryNo, lines: input.lines.length },
     actor: auditActor(actor),
   });
 
@@ -263,14 +334,30 @@ export async function updateEnquiry(enquiryId: string, raw: unknown, actor: Acto
 
   const existing = await prisma.enquiry.findUnique({
     where: { id: enquiryId },
-    select: { id: true, siteStateCode: true },
+    select: {
+      id: true,
+      siteStateCode: true,
+      siteLocation: true,
+      sitePincode: true,
+    },
   });
   if (!existing) throw AppError.notFound("That enquiry does not exist");
   await stateNameOf(input.siteStateCode);
 
+  // Moving the site moves the pin. A saved address that no longer matches its
+  // coordinates is worse than no pin: the map would confidently point at the
+  // previous job.
+  const siteChanged =
+    existing.siteLocation !== input.siteLocation ||
+    existing.siteStateCode !== input.siteStateCode ||
+    existing.sitePincode !== input.sitePincode;
+
   await prisma.enquiry.update({
     where: { id: enquiryId },
-    data: headerData(input),
+    data: {
+      ...headerData(input),
+      ...(siteChanged ? await sitePin(input) : {}),
+    },
   });
 
   await recordAudit({
@@ -287,7 +374,97 @@ export async function updateEnquiry(enquiryId: string, raw: unknown, actor: Acto
 
 // --- reads ----------------------------------------------------------------
 
-function stageCountsOf(lines: LineRow[]) {
+/**
+ * A line as the list screen needs it: how many cranes, where it is in the trail,
+ * and whether any RFQ or quote exists. Kept narrow on purpose — the list must
+ * not drag every template field of every line across the wire.
+ */
+const LIST_LINE_SELECT = {
+  quantity: true,
+  trailStatus: true,
+  requiredStartDate: true,
+  cancelledAt: true,
+  applicationDescription: true,
+  rfqs: {
+    select: { id: true, _count: { select: { quotations: true } } },
+  },
+} as const;
+
+interface ListLineRow {
+  quantity: number;
+  trailStatus: EnquiryLineTrailStatus;
+  requiredStartDate: Date | string | null;
+  cancelledAt: Date | null;
+  applicationDescription: string | null;
+  rfqs: Array<{ id: string; _count?: { quotations?: number } }>;
+}
+
+/** A line is sourced once a vendor is chosen for it. */
+const SOURCED_TRAIL_STATUSES: EnquiryLineTrailStatus[] = [
+  EnquiryLineTrailStatus.VENDOR_FINALISED,
+  EnquiryLineTrailStatus.BOOKED,
+  EnquiryLineTrailStatus.FULFILLED_INTERNALLY,
+];
+
+/**
+ * Progress is measured in cranes, not lines: a line for three cranes is three
+ * cranes to find, and a two-line enquiry with one three-crane line awarded is
+ * further along than a two-line enquiry with one single-crane line awarded.
+ */
+function metricsOf(lines: ListLineRow[]) {
+  const live = lines.filter((line) => !line.cancelledAt);
+  const craneCount = live.reduce((sum, line) => sum + line.quantity, 0);
+  const sourcedCranes = live
+    .filter((line) => SOURCED_TRAIL_STATUSES.includes(line.trailStatus))
+    .reduce((sum, line) => sum + line.quantity, 0);
+  const rfqCount = live.reduce((sum, line) => sum + line.rfqs.length, 0);
+  const quoteCount = live.reduce(
+    (sum, line) =>
+      sum + line.rfqs.reduce((n, rfq) => n + (rfq._count?.quotations ?? 0), 0),
+    0,
+  );
+  const upcoming = live
+    .filter(
+      (line) =>
+        !SOURCED_TRAIL_STATUSES.includes(line.trailStatus) && line.requiredStartDate,
+    )
+    .map((line) => new Date(line.requiredStartDate as string).getTime())
+    .filter((value) => Number.isFinite(value));
+
+  const sourcedLines = live.filter((line) => SOURCED_TRAIL_STATUSES.includes(line.trailStatus));
+
+  return {
+    lineCount: lines.length,
+    craneCount,
+    sourcedCranes,
+    // A segment per line is drawn from this, so it has to be lines, not cranes.
+    sourcedLineCount: sourcedLines.length,
+    sourcedPercent: craneCount === 0 ? 0 : Math.round((sourcedCranes / craneCount) * 100),
+    rfqCount,
+    quoteCount,
+    nextUnsourcedStart: upcoming.length ? new Date(Math.min(...upcoming)) : null,
+  };
+}
+
+/** The four KPI buckets, plus closed. Mutually exclusive, checked in this order. */
+export type EnquiryBucket = "pending" | "awaiting" | "quotes" | "finalised" | "closed";
+
+function bucketOf(
+  status: EnquiryOverallStatus,
+  metrics: ReturnType<typeof metricsOf>,
+  lines: ListLineRow[],
+): EnquiryBucket {
+  if (status === EnquiryOverallStatus.CLOSED) return "closed";
+  const live = lines.filter((line) => !line.cancelledAt);
+  if (live.length > 0 && live.every((line) => SOURCED_TRAIL_STATUSES.includes(line.trailStatus))) {
+    return "finalised";
+  }
+  if (metrics.quoteCount > 0) return "quotes";
+  if (metrics.rfqCount > 0) return "awaiting";
+  return "pending";
+}
+
+function stageCountsOf(lines: Array<{ trailStatus: unknown }>) {
   const counts: Record<string, number> = {};
   for (const line of lines) {
     const status = String(line.trailStatus);
@@ -324,7 +501,7 @@ function toEnquiryDetailView(row: EnquiryRow) {
   return {
     ...toEnquiryView(row),
     lines: lines.map((line) => toLineView(line)),
-    summary: stageCountsOf(lines),
+    summary: stageCountsOf(lines as Array<{ trailStatus: unknown }>),
   };
 }
 
@@ -350,25 +527,118 @@ export async function listEnquiries(rawQuery: unknown, actor: Actor) {
             OR: [
               { enquiryNo: { contains: query.search, mode: "insensitive" as const } },
               { customerName: { contains: query.search, mode: "insensitive" as const } },
+              // "Project" is the line's application description; the enquiry
+              // itself has no project column, so a search has to reach the line.
+              { siteLocation: { contains: query.search, mode: "insensitive" as const } },
+              {
+                lines: {
+                  some: {
+                    applicationDescription: {
+                      contains: query.search,
+                      mode: "insensitive" as const,
+                    },
+                  },
+                },
+              },
             ],
           }
         : {}),
     },
     select: {
       ...ENQUIRY_SELECT,
-      lines: { select: { trailStatus: true } },
+      lines: { select: LIST_LINE_SELECT, orderBy: { lineNo: "asc" } },
     },
     orderBy: [{ enquiryDate: "desc" }, { createdAt: "desc" }],
   });
 
-  return rows.map((row) => {
-    const lines = (row.lines ?? []) as LineRow[];
+  const mapped = rows.map((row) => {
+    const lines = (row.lines ?? []) as ListLineRow[];
+    const metrics = metricsOf(lines);
     return {
       ...toEnquiryView(row as unknown as EnquiryRow),
-      lineCount: lines.length,
+      ...metrics,
+      bucket: bucketOf(row.overallStatus, metrics, lines),
+      // The card's second line. The enquiry has no project field, so the first
+      // line's application description stands in for it — it is what the work
+      // is, and it is already written by whoever raised the enquiry.
+      project:
+        lines.find((line) => !line.cancelledAt && line.applicationDescription)
+          ?.applicationDescription ?? null,
       summary: stageCountsOf(lines),
     };
   });
+
+  // "Soonest start" and "least progress" are orderings over computed values, so
+  // they are applied after the read rather than pushed into the query.
+  if (query.sort === "startDate") {
+    mapped.sort((a, b) => {
+      const left = a.nextUnsourcedStart?.getTime() ?? Number.POSITIVE_INFINITY;
+      const right = b.nextUnsourcedStart?.getTime() ?? Number.POSITIVE_INFINITY;
+      return left - right;
+    });
+  } else if (query.sort === "progress") {
+    mapped.sort((a, b) => a.sourcedPercent - b.sourcedPercent);
+  }
+
+  return mapped;
+}
+
+/**
+ * The enquiry screen's KPI cards.
+ *
+ * Computed over every enquiry the caller may see, not over the filtered list —
+ * a KPI that changes when a filter is applied is a filter, not a KPI. The
+ * buckets are mutually exclusive (see `bucketOf`), so they add up.
+ */
+export async function enquirySummary(actor: Actor) {
+  assertInternal(actor);
+
+  const rows = await prisma.enquiry.findMany({
+    select: {
+      overallStatus: true,
+      enquiryDate: true,
+      lines: { select: LIST_LINE_SELECT },
+    },
+  });
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const counts = {
+    total: rows.length,
+    active: 0,
+    pendingSourcing: 0,
+    awaitingQuotes: 0,
+    quotesIn: 0,
+    finalised: 0,
+    closed: 0,
+    raisedToday: 0,
+    /** The KPI card's delta: how many of each bucket arrived today. */
+    raisedTodayByBucket: {
+      pending: 0,
+      awaiting: 0,
+      quotes: 0,
+      finalised: 0,
+      closed: 0,
+    } as Record<EnquiryBucket, number>,
+  };
+
+  for (const row of rows) {
+    const lines = (row.lines ?? []) as ListLineRow[];
+    const bucket = bucketOf(row.overallStatus, metricsOf(lines), lines);
+    if (bucket === "closed") counts.closed += 1;
+    else counts.active += 1;
+    if (bucket === "pending") counts.pendingSourcing += 1;
+    if (bucket === "awaiting") counts.awaitingQuotes += 1;
+    if (bucket === "quotes") counts.quotesIn += 1;
+    if (bucket === "finalised") counts.finalised += 1;
+    if (new Date(row.enquiryDate) >= startOfToday) {
+      counts.raisedToday += 1;
+      counts.raisedTodayByBucket[bucket] += 1;
+    }
+  }
+
+  return counts;
 }
 
 /**
@@ -472,7 +742,7 @@ export async function getEnquiryDetail(enquiryId: string, actor: Actor) {
     where: { id: enquiryId },
     select: {
       ...ENQUIRY_SELECT,
-      lines: { select: LINE_SELECT, orderBy: { lineNo: "asc" } },
+      lines: { select: DETAIL_LINE_SELECT, orderBy: { lineNo: "asc" } },
     },
   });
   if (!row) throw AppError.notFound("That enquiry does not exist");

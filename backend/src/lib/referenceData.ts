@@ -61,6 +61,58 @@ export const STATES: StateSeed[] = [
   { code: "DL", name: "Delhi", isUnionTerritory: true },
 ];
 
+/**
+ * Approximate centre of each state, keyed by the same codes as `STATES`.
+ *
+ * A vendor gives SML one address, and its state is the part of that address we
+ * can trust without a geocoding call. So a vendor is placed at its state's
+ * centre: the map can say "vendors operate here", never "this is the vendor's
+ * gate". That is enough for a density view, and it keeps a vendor with no
+ * coordinates on any of its cranes visible.
+ *
+ * Values are the usual geographic centres of the states and union territories,
+ * not capitals — a capital would pull every hotspot in a state towards one city
+ * that may be nowhere near the vendor's fleet.
+ */
+export const STATE_CENTRES: Record<string, { lat: number; lng: number }> = {
+  AP: { lat: 15.9129, lng: 79.74 },
+  AR: { lat: 28.218, lng: 94.7278 },
+  AS: { lat: 26.2006, lng: 92.9376 },
+  BR: { lat: 25.0961, lng: 85.3131 },
+  CG: { lat: 21.2787, lng: 81.8661 },
+  GA: { lat: 15.2993, lng: 74.124 },
+  GJ: { lat: 22.2587, lng: 71.1924 },
+  HR: { lat: 29.0588, lng: 76.0856 },
+  HP: { lat: 31.1048, lng: 77.1734 },
+  JH: { lat: 23.6102, lng: 85.2799 },
+  KA: { lat: 15.3173, lng: 75.7139 },
+  KL: { lat: 10.8505, lng: 76.2711 },
+  LA: { lat: 34.1526, lng: 77.5771 },
+  LD: { lat: 10.5667, lng: 72.6417 },
+  MP: { lat: 22.9734, lng: 78.6569 },
+  MH: { lat: 19.7515, lng: 75.7139 },
+  MN: { lat: 24.6637, lng: 93.9063 },
+  ML: { lat: 25.467, lng: 91.3662 },
+  MZ: { lat: 23.1645, lng: 92.9376 },
+  NL: { lat: 26.1584, lng: 94.5624 },
+  OD: { lat: 20.9517, lng: 85.0985 },
+  PY: { lat: 11.9416, lng: 79.8083 },
+  PB: { lat: 31.1471, lng: 75.3412 },
+  RJ: { lat: 27.0238, lng: 74.2179 },
+  SK: { lat: 27.533, lng: 88.5122 },
+  TN: { lat: 11.1271, lng: 78.6569 },
+  TG: { lat: 18.1124, lng: 79.0193 },
+  TR: { lat: 23.9408, lng: 91.9882 },
+  UP: { lat: 26.8467, lng: 80.9462 },
+  UT: { lat: 30.0668, lng: 79.0193 },
+  WB: { lat: 22.9868, lng: 87.855 },
+  JK: { lat: 33.7782, lng: 76.5762 },
+  AN: { lat: 11.7401, lng: 92.6586 },
+  CH: { lat: 30.7333, lng: 76.7794 },
+  DH: { lat: 20.1809, lng: 73.0169 },
+  DL: { lat: 28.7041, lng: 77.1025 },
+};
+
 export interface CraneTypeSeed {
   code: string;
   name: string;

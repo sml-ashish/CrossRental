@@ -27,9 +27,6 @@ export interface Report {
   summary: {
     enquiriesProcessed: number;
     linesProcessed: number;
-    fulfilledInternally: number;
-    fulfilledByVendors: number;
-    internalSourcingRatio: number | null;
     vendorParticipationRate: number | null;
     rfqResponseRate: number | null;
     averageResponseTimeHours: number | null;

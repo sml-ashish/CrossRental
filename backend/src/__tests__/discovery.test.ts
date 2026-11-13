@@ -98,6 +98,22 @@ function search(query: string, token: string) {
   return call(app, "GET", `/api/discovery/cranes${query ? `?${query}` : ""}`, { token });
 }
 
+/** One dot per vendor, placed from the vendor's address (see buildVendorPoints). */
+interface VendorPointRow {
+  vendorId: string;
+  vendorName: string;
+  stateCode: string | null;
+  stateName: string | null;
+  latitude: number;
+  longitude: number;
+  craneCount: number;
+  source: "state" | "fleet";
+}
+
+function vendorPoints(res: { body: unknown }): VendorPointRow[] {
+  return (res.body as { vendorPoints: VendorPointRow[] }).vendorPoints;
+}
+
 describe("manual vendor discovery (P4, BPD 6.8)", () => {
   it("lists approved vendors' cranes grouped by vendor, with no enquiry", async () => {
     const res = await search("craneType=CRAWLER", ctx.salesToken);
@@ -179,8 +195,14 @@ describe("manual vendor discovery (P4, BPD 6.8)", () => {
       async geocode() {
         return { ok: true, point: { lat: 22.5, lng: 72.5 }, provider: "test-geocoder" };
       },
-      async roadDistance() {
-        return { ok: true, km: 10, method: "road", provider: "test-geocoder" };
+      async roadDistance(origin: { lat: number; lng: number }, destination: { lat: number; lng: number }) {
+        // A constant would leave both vendors tied, and a tie leaves the order
+        // to the table's row order — which is not what this test is about.
+        const km = Math.hypot(
+          (destination.lat - origin.lat) * 111,
+          (destination.lng - origin.lng) * 111 * Math.cos((origin.lat * Math.PI) / 180),
+        );
+        return { ok: true, km: Math.round(km * 10) / 10, method: "road", provider: "test-geocoder" };
       },
     });
 
@@ -414,6 +436,66 @@ describe("manual vendor discovery (P4, BPD 6.8)", () => {
     const from = dayString(inDays(0));
     const to = dayString(inDays(6));
     expect((await calendar(`from=${from}&to=${to}`, ctx.vendorTokenA)).status).toBe(403);
+  });
+
+  it("places each vendor at its address state's centre, not at its cranes", async () => {
+    // Both fixtures are registered in Gujarat and both cranes sit on the same
+    // test pin, so a crane-centre answer would place them identically at
+    // 22.5/72.5. The density layer must answer "where are the vendors based",
+    // which is the state centre from the address.
+    await appPrisma.vendor.update({
+      where: { id: ctx.b.vendorId },
+      data: { stateCode: "MH" },
+    });
+
+    const res = await search("craneType=CRAWLER", ctx.salesToken);
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+
+    const points = vendorPoints(res);
+    expect(points).toHaveLength(2);
+
+    const a = points.find((p) => p.vendorName === "Isolation Vendor A");
+    const b = points.find((p) => p.vendorName === "Isolation Vendor B");
+    expect(a).toMatchObject({ stateCode: "GJ", source: "state", craneCount: 1 });
+    expect(a?.latitude).toBeCloseTo(22.2587, 4);
+    expect(a?.longitude).toBeCloseTo(71.1924, 4);
+    expect(b).toMatchObject({ stateCode: "MH", source: "state" });
+    expect(b?.latitude).toBeCloseTo(19.7515, 4);
+    expect(b?.longitude).toBeCloseTo(75.7139, 4);
+  });
+
+  it("still places a vendor whose cranes have no coordinates", async () => {
+    // The vendor's address is enough; it must not vanish from the map just
+    // because nobody has pinned its machines.
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: { latitude: null, longitude: null, coordinateSource: null },
+    });
+
+    const res = await search("craneType=CRAWLER", ctx.salesToken);
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect(res.body.groups).toHaveLength(1);
+
+    const a = vendorPoints(res).find((p) => p.vendorName === "Isolation Vendor A");
+    expect(a).toMatchObject({ source: "state", stateCode: "GJ" });
+  });
+
+  it("falls back to the crane centre when the address state has no known centre", async () => {
+    // A state added to the master after this build has no centre in the table;
+    // the vendor still gets a point, labelled as the crane centre.
+    await appPrisma.state.create({ data: { code: "ZZ", name: "Test State ZZ" } });
+    await appPrisma.vendor.update({
+      where: { id: ctx.a.vendorId },
+      data: { stateCode: "ZZ" },
+    });
+
+    const res = await search("craneType=CRAWLER", ctx.salesToken);
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+
+    const a = vendorPoints(res).find((p) => p.vendorName === "Isolation Vendor A");
+    expect(a).toMatchObject({ source: "fleet", stateCode: "ZZ", stateName: "Test State ZZ" });
+    expect(a?.latitude).toBeCloseTo(22.5, 4);
+    expect(a?.longitude).toBeCloseTo(72.5, 4);
   });
 
   it("returns filter facets", async () => {

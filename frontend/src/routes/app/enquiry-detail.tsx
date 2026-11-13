@@ -16,6 +16,7 @@ import {
 import { ApiError } from "@/lib/api";
 import { Alert } from "@/components/ui/alert";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { EnquiryBulkLines } from "@/components/enquiry-bulk-lines";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader, Panel } from "@/components/ui/page-header";
 import { Spinner } from "@/components/ui/spinner";
@@ -175,7 +176,6 @@ export function EnquiryDetailPage() {
           <ReadOnlyValue label="Site" value={`${data.siteLocation}${data.siteStateName ? `, ${data.siteStateName}` : ""}`} />
           <ReadOnlyValue label="Pincode" value={data.sitePincode ?? "—"} />
           <ReadOnlyValue label="Enquiry date" value={formatDate(data.enquiryDate)} />
-          <ReadOnlyValue label="Owner" value={data.crOwner?.fullName ?? data.crOwner?.email ?? "—"} />
         </dl>
         {data.customerAddress ? (
           <p className="text-sm text-slate-600">{data.customerAddress}</p>
@@ -187,14 +187,17 @@ export function EnquiryDetailPage() {
           <h2 className="text-sm font-semibold text-slate-900">
             Line items ({data.lines.length})
           </h2>
-          <Link
-            to="/app/enquiries/$enquiryId/lines/new"
-            params={{ enquiryId: data.id }}
-            className="btn-secondary"
-          >
-            <Plus className="size-4" aria-hidden />
-            Add line
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <EnquiryBulkLines enquiryId={data.id} enquiryNo={data.enquiryNo} />
+            <Link
+              to="/app/enquiries/$enquiryId/lines/new"
+              params={{ enquiryId: data.id }}
+              className="btn-secondary"
+            >
+              <Plus className="size-4" aria-hidden />
+              Add line
+            </Link>
+          </div>
         </div>
 
         {data.lines.length === 0 ? (

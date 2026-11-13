@@ -98,7 +98,6 @@ export interface RecommendationResult {
     /** The manual internal availability check recorded on the line, if any. */
     internalCheck: {
       trailStatus: string;
-      selectedSource: string | null;
       closureStatus: string | null;
     } | null;
   };
@@ -133,7 +132,6 @@ interface LineForRecommendation {
   requiredLuffingJibM: unknown;
   requiredWindJibM: unknown;
   trailStatus: string;
-  selectedSource: string | null;
   closureStatus: string | null;
   enquiry: {
     id: string;
@@ -160,7 +158,6 @@ const LINE_FOR_RECOMMENDATION = {
   requiredLuffingJibM: true,
   requiredWindJibM: true,
   trailStatus: true,
-  selectedSource: true,
   closureStatus: true,
   enquiry: {
     select: {
@@ -310,7 +307,6 @@ async function buildRecommendation(
 ): Promise<Omit<RecommendationResult, "snapshotId" | "evaluatedAt" | "lineId">> {
   const smlInternalCheck = {
     trailStatus: line.trailStatus,
-    selectedSource: line.selectedSource,
     closureStatus: line.closureStatus,
   };
 

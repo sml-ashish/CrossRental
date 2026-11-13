@@ -11,7 +11,7 @@ import {
  *
  * One report is built from the same enquiry/line/recipient rows the rest of the
  * portal shows, with the caller's scope applied first:
- * - sales_user sees only enquiries they own (`crOwnerId`),
+ * - sales_user sees only enquiries they created (`createdById`),
  * - admin and management viewers see the whole platform.
  *
  * Aggregate metrics come from the management dashboard so the two screens can
@@ -55,7 +55,7 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
           },
         }
       : {}),
-    ...(scope.ownerId ? { crOwnerId: scope.ownerId } : {}),
+    ...(scope.ownerId ? { createdById: scope.ownerId } : {}),
   };
 
   const lineWhere = {
@@ -78,7 +78,6 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
             id: true,
             lineNo: true,
             trailStatus: true,
-            selectedSource: true,
             craneTypeCode: true,
             capacityT: true,
             quantity: true,
@@ -151,7 +150,6 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
         { key: "capacityT", label: "Capacity (T)" },
         { key: "quantity", label: "Quantity" },
         { key: "trailStatus", label: "Stage" },
-        { key: "selectedSource", label: "Source" },
       ];
       rows = lines.map(({ enquiry, line }) => ({
         enquiryNo: enquiry.enquiryNo,
@@ -160,7 +158,6 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
         capacityT: line.capacityT === null ? "" : Number(line.capacityT),
         quantity: line.quantity,
         trailStatus: String(line.trailStatus),
-        selectedSource: line.selectedSource ?? "",
       }));
       break;
     }
@@ -322,7 +319,7 @@ export function reportToCsv(report: ReportResult): string {
   return [header, ...body].join("\r\n");
 }
 
-/** The caller's report scope: sales own their enquiries; the rest see all. */
+/** The caller's report scope: sales see what they created; the rest see all. */
 export function scopeFor(actor: AuthedRequest["user"]): { ownerId?: string } {
   return actor.role === "sales_user" ? { ownerId: actor.id } : {};
 }

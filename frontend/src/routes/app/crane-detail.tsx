@@ -208,7 +208,7 @@ export function CraneDetailPage() {
 
       {reservations.length > 0 ? (
         <Section title="Reservations">
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-ink-800">
             {reservations.map((reservation) => (
               <li key={reservation.id} className="flex items-center justify-between gap-3 py-2.5">
                 <div>
@@ -240,7 +240,7 @@ export function CraneDetailPage() {
                   key={day.date}
                   title={`${day.date}: ${DAY_STATE_LABELS[day.state as CalendarDayState] ?? day.state}`}
                   className={`inline-block size-5 rounded-sm border border-slate-200 ${
-                    DAY_STATE_TONES[day.state as CalendarDayState] ?? "bg-white"
+                    DAY_STATE_TONES[day.state as CalendarDayState] ?? "bg-ink-850"
                   }`}
                 />
               ))}

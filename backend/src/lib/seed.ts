@@ -746,8 +746,6 @@ async function seedDemoEnquiries() {
       data: {
         enquiryNo: demo.enquiryNo,
         enquiryDate: at(-3),
-        source: "manual",
-        crOwnerId: admin.id,
         customerName: demo.customerName,
         customerAddress: demo.customerAddress,
         siteLocation: demo.siteLocation,

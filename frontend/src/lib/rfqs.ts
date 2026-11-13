@@ -17,7 +17,12 @@ import { api } from "@/lib/api";
 export type RfqStatus = "DRAFT" | "SENT" | "CLOSED" | "CANCELLED";
 export type RfqRollupStatus = "SENT" | "AWAITING_QUOTES" | "QUOTES_RECEIVED";
 export type EmailDeliveryStatus = "QUEUED" | "SENT" | "FAILED";
-export type ResponseStatus = "PENDING" | "QUOTED" | "DECLINED" | "EXPIRED";
+export type ResponseStatus =
+  | "PENDING"
+  | "QUOTED"
+  | "DECLINED"
+  | "EXPIRED"
+  | "FINALISED";
 export type MessageChannel = "EMAIL" | "WHATSAPP";
 export type QuoteSource = "PORTAL" | "EMAIL" | "WHATSAPP" | "MANUAL";
 export type DurationUnit = "DAYS" | "MONTHS";
@@ -48,6 +53,9 @@ export const RESPONSE_LABELS: Record<ResponseStatus, string> = {
   QUOTED: "Quoted",
   DECLINED: "Declined",
   EXPIRED: "Expired",
+  // System-written on a closing award: the RFQ was finalised before this vendor
+  // quoted, so "Pending" would claim an action that no longer exists.
+  FINALISED: "Finalised",
 };
 
 export interface RfqSiteState {

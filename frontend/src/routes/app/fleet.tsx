@@ -276,7 +276,7 @@ export function FleetPage() {
                 onConfirmAccurate={() =>
                   confirmAccurate.mutate({
                     run: () => confirmCraneAccurate(crane.id),
-                    success: "Marked as still accurate.",
+                    success: "Current status confirmed.",
                   })
                 }
                 onDuplicate={() => void navigate({ to: "/app/fleet/new", search: { duplicate: crane.id, vendorId: undefined } })}
@@ -392,7 +392,7 @@ function CraneRow({
           </button>
 
           <button type="button" className="btn-secondary" onClick={onConfirmAccurate} disabled={busy}>
-            <Check className="size-3.5" aria-hidden /> Still accurate
+            <Check className="size-3.5" aria-hidden /> Confirm current status
           </button>
 
           <label className="btn-secondary cursor-pointer">
@@ -440,7 +440,7 @@ function CraneRow({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-slate-100 bg-slate-50/50 px-4 py-2 text-xs text-slate-500">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-ink-800 bg-ink-900/50 px-4 py-2 text-xs text-slate-500">
         {crane.loadChart ? (
           <p>
             Load chart on file: <span className="font-medium text-slate-700">{crane.loadChart.fileName}</span>

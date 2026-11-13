@@ -270,8 +270,17 @@ const rfqsRoute = createRoute({
   path: "/rfqs",
   // The admin dashboard links here with ?delivery=FAILED to land on the rows
   // whose dispatch failed.
-  validateSearch: (search: Record<string, unknown>) => ({
+  //
+  // `response` and `q` are the vendor inbox's view state. Keeping them in the
+  // URL is what makes Back from an RFQ return to the tab the vendor was on, and
+  // lets a filtered view be bookmarked. Internal users never set them, and the
+  // tracking screen ignores them.
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { delivery?: "FAILED"; response?: string; q?: string } => ({
     delivery: search.delivery === "FAILED" ? ("FAILED" as const) : undefined,
+    response: typeof search.response === "string" ? search.response : undefined,
+    q: typeof search.q === "string" ? search.q : undefined,
   }),
   component: RfqIndexPage,
 });

@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api, apiUpload, getStoredToken } from "@/lib/api";
 import type { RfqRollupStatus } from "@/lib/rfqs";
 
 /**
@@ -11,7 +11,6 @@ import type { RfqRollupStatus } from "@/lib/rfqs";
  * fields from here.
  */
 
-export type EnquirySource = "manual";
 export type EnquiryOverallStatus =
   | "RECEIVED_PENDING_SOURCING"
   | "PARTIALLY_QUOTED"
@@ -121,10 +120,14 @@ export interface EnquiryLine {
   rowScope: string | null;
   rentalBudget: string | null;
   trailStatus: EnquiryLineTrailStatus;
-  selectedSource: string | null;
   closureStatus: string | null;
   cancelledAt: string | null;
   cancelReason: string | null;
+  /** The latest RFQ raised from this line, if any. */
+  rfqId?: string | null;
+  rfqNumber?: string | null;
+  /** Quotes received across this line's RFQs. */
+  quoteCount?: number;
 }
 
 export interface EnquirySummary {
@@ -141,9 +144,6 @@ export interface Enquiry {
   id: string;
   enquiryNo: string;
   enquiryDate: string;
-  source: EnquirySource;
-  crOwnerId: string;
-  crOwner: { id: string; email: string; fullName: string | null } | null;
   customerName: string;
   customerAddress: string;
   siteLocation: string;
@@ -151,6 +151,9 @@ export interface Enquiry {
   siteStateName: string | null;
   sitePincode: string | null;
   region: string | null;
+  /** The site pin, resolved once by the server's geocoder. */
+  siteLatitude: number | null;
+  siteLongitude: number | null;
   overallStatus: EnquiryOverallStatus;
   createdAt: string;
   updatedAt: string;
@@ -161,9 +164,44 @@ export interface EnquiryDetail extends Enquiry {
   summary: EnquirySummary;
 }
 
+/**
+ * The enquiry screen's KPI buckets. They are mutually exclusive and computed by
+ * the server, so the cards and the rows can never disagree.
+ */
+export type EnquiryBucket = "pending" | "awaiting" | "quotes" | "finalised" | "closed";
+
 export interface EnquiryListRow extends Enquiry {
   lineCount: number;
+  /** Cranes required, counted by quantity rather than by line. */
+  craneCount: number;
+  sourcedCranes: number;
+  sourcedLineCount: number;
+  sourcedPercent: number;
+  rfqCount: number;
+  quoteCount: number;
+  /** The soonest start among lines that are not sourced yet. */
+  nextUnsourcedStart: string | null;
+  bucket: EnquiryBucket;
+  /**
+   * The enquiry has no project column; this is the first line's application
+   * description, which is the closest honest stand-in.
+   */
+  project: string | null;
   summary: EnquirySummary;
+}
+
+/** The KPI numbers. Unfiltered: a KPI that moves with a filter is a filter. */
+export interface EnquirySummaryCounts {
+  total: number;
+  active: number;
+  pendingSourcing: number;
+  awaitingQuotes: number;
+  quotesIn: number;
+  finalised: number;
+  closed: number;
+  raisedToday: number;
+  /** Per-card delta: how many of each bucket arrived today. */
+  raisedTodayByBucket: Record<EnquiryBucket, number>;
 }
 
 // --- line detail -----------------------------------------------------------
@@ -424,7 +462,11 @@ export interface ListEnquiriesFilters {
   status?: EnquiryOverallStatus;
   search?: string;
   stateCode?: string;
+  sort?: EnquirySort;
 }
+
+/** Newest first, soonest unsourced start, or least progress first. */
+export type EnquirySort = "newest" | "startDate" | "progress";
 
 export function listEnquiries(
   filters: ListEnquiriesFilters = {},
@@ -433,8 +475,13 @@ export function listEnquiries(
   if (filters.status) params.set("status", filters.status);
   if (filters.search) params.set("search", filters.search);
   if (filters.stateCode) params.set("stateCode", filters.stateCode);
+  if (filters.sort && filters.sort !== "newest") params.set("sort", filters.sort);
   const query = params.toString();
   return api(`/enquiries${query ? `?${query}` : ""}`);
+}
+
+export function getEnquirySummary(): Promise<{ summary: EnquirySummaryCounts }> {
+  return api("/enquiries/summary");
 }
 
 /**
@@ -534,5 +581,129 @@ export function formatDate(value: string | null): string {
     day: "2-digit",
     month: "short",
     year: "numeric",
+  });
+}
+
+// --- bulk upload (sales and admin) ----------------------------------------
+
+/**
+ * The `.xlsx` import for enquiries.
+ *
+ * Preview and import run the same server-side parse and validation, so the
+ * preview cannot promise an enquiry the import will refuse. `Enquiry ref` groups
+ * rows into one enquiry with several lines; a blank ref makes each row its own.
+ */
+export interface BulkEnquiryRowResult {
+  /** Excel row number, so the report can point at the line to fix. */
+  row: number;
+  ref: string | null;
+  customerName: string | null;
+  /** `valid` is what `imported` would become — the dry-run wording. */
+  status: "imported" | "valid" | "failed";
+  message: string | null;
+  warnings: string[];
+}
+
+export interface BulkEnquiryResult {
+  dryRun: boolean;
+  summary: {
+    total: number;
+    /** Rows that would import in a dry run; 0 once the import has run. */
+    valid: number;
+    /** Rows written, one per enquiry line. */
+    imported: number;
+    failed: number;
+    /** Enquiries created, or that would be created in a dry run. */
+    enquiries: number;
+  };
+  rows: BulkEnquiryRowResult[];
+}
+
+/** Validates the sheet and returns the per-row report without writing anything. */
+export function previewBulkEnquiries(file: File): Promise<BulkEnquiryResult> {
+  return apiUpload(`/enquiries/bulk?dryRun=true`, file, { method: "POST" });
+}
+
+/** Writes the valid rows, creating one enquiry per group. */
+export function importBulkEnquiries(file: File): Promise<BulkEnquiryResult> {
+  return apiUpload(`/enquiries/bulk?dryRun=false`, file, { method: "POST" });
+}
+
+/**
+ * Downloads the import template through the authenticated API.
+ *
+ * Same object-URL dance as the crane template: a plain link would arrive without
+ * the bearer token.
+ */
+export async function downloadBulkEnquiryTemplate(): Promise<void> {
+  const base = import.meta.env.VITE_API_BASE_URL ?? "/api";
+  const response = await fetch(`${base}/enquiries/bulk/template`, {
+    headers: { Authorization: `Bearer ${getStoredToken() ?? ""}` },
+  });
+  if (!response.ok) throw new Error("The template could not be downloaded.");
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "crossrentel-enquiry-upload.xlsx";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+// --- bulk add lines to one enquiry ----------------------------------------
+
+/**
+ * Appending lines to an enquiry that already exists.
+ *
+ * The target is the enquiry in the URL, not a column in the sheet, so a row
+ * cannot land on a different enquiry than the screen it was uploaded from. The
+ * header columns are ignored on this path: customer, site, state and date come
+ * from the enquiry.
+ */
+export interface BulkLineRowResult {
+  /** Excel row number, so the report can point at the line to fix. */
+  row: number;
+  /** The line number the row got, or would get in a dry run. */
+  lineNo: number | null;
+  /** `valid` is what `imported` would become — the dry-run wording. */
+  status: "imported" | "valid" | "failed";
+  message: string | null;
+  warnings: string[];
+}
+
+export interface BulkLineResult {
+  dryRun: boolean;
+  /** The enquiry the lines were (or would be) added to. */
+  enquiryNo: string;
+  summary: {
+    total: number;
+    /** Rows that would import in a dry run; 0 once the import has run. */
+    valid: number;
+    imported: number;
+    failed: number;
+  };
+  rows: BulkLineRowResult[];
+}
+
+/** Validates the sheet and returns the per-row report without writing anything. */
+export function previewBulkLines(
+  enquiryId: string,
+  file: File,
+): Promise<BulkLineResult> {
+  return apiUpload(`/enquiries/${enquiryId}/lines/bulk?dryRun=true`, file, {
+    method: "POST",
+  });
+}
+
+/** Appends the valid rows to the enquiry, one line per row. */
+export function importBulkLines(
+  enquiryId: string,
+  file: File,
+): Promise<BulkLineResult> {
+  return apiUpload(`/enquiries/${enquiryId}/lines/bulk?dryRun=false`, file, {
+    method: "POST",
   });
 }

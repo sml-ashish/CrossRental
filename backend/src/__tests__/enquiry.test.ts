@@ -486,3 +486,289 @@ describe("trail follows the sourcing journey (P1)", () => {
     expect(reservation.enquiryLineId).toBe(lineId);
   });
 });
+
+// ---------------------------------------------------------------------------
+// The enquiry workspace: list enrichment, buckets, sort and the KPI summary
+// ---------------------------------------------------------------------------
+
+describe("enquiry list screen (P1 workspace)", () => {
+  /** A two-line enquiry: three cranes on one line, one on the other. */
+  async function twoLineEnquiry(overrides: Record<string, unknown> = {}) {
+    return createEnquiry({
+      lines: [
+        linePayload({
+          quantity: 3,
+          applicationDescription: "Metro Line 3 — Pkg 7",
+          requiredStartDate: inDays(9).toISOString(),
+        }),
+        linePayload({
+          quantity: 1,
+          craneTypeCode: "CRAWLER",
+          capacityT: 40,
+          applicationDescription: "Metro Line 3 — Pkg 7",
+          requiredStartDate: inDays(40).toISOString(),
+        }),
+      ],
+      ...overrides,
+    });
+  }
+
+  async function listRows(query = "") {
+    const res = await call(app, "GET", `/api/enquiries${query}`, {
+      token: ctx.salesToken,
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    return res.body.enquiries as Array<Record<string, unknown>>;
+  }
+
+  it("counts cranes by quantity, not by line, and stands the project in from the line", async () => {
+    const enquiry = await twoLineEnquiry();
+    const [row] = await listRows();
+
+    expect(row).toMatchObject({
+      enquiryNo: enquiry.enquiryNo,
+      lineCount: 2,
+      craneCount: 4,
+      sourcedCranes: 0,
+      sourcedPercent: 0,
+      rfqCount: 0,
+      quoteCount: 0,
+      bucket: "pending",
+      // The enquiry has no project column; the first live line's application
+      // description is the honest stand-in.
+      project: "Metro Line 3 — Pkg 7",
+    });
+    // The soonest start among lines that are still unsourced drives the
+    // "starts soon" warning.
+    expect(new Date(row.nextUnsourcedStart as string).getTime()).toBeGreaterThan(Date.now());
+  });
+
+  it("measures sourced progress in cranes and moves the bucket along the journey", async () => {
+    const enquiry = await twoLineEnquiry();
+    const firstLine = enquiry.lines[0].id;
+
+    // One line covered internally: three of four cranes sourced.
+    const covered = await call(
+      app,
+      "POST",
+      `/api/enquiries/lines/${firstLine}/internal-check`,
+      {
+        token: ctx.salesToken,
+        body: { outcome: "FULFILLED_INTERNALLY", notes: "Covered by our own unit" },
+      },
+    );
+    expect(covered.status).toBe(200);
+
+    let [row] = await listRows();
+    expect(row).toMatchObject({ sourcedCranes: 3, sourcedPercent: 75, bucket: "pending" });
+
+    // Raise an RFQ against the other line: nothing sourced it, but the
+    // enquiry is now waiting on a vendor rather than on us.
+    const secondLine = enquiry.lines[1].id;
+    const rfq = await call(app, "POST", `/api/enquiries/lines/${secondLine}/rfq`, {
+      token: ctx.salesToken,
+      body: { submissionDeadline: inDays(7).toISOString() },
+    });
+    expect(rfq.status, JSON.stringify(rfq.body)).toBe(201);
+
+    [row] = await listRows();
+    expect(row).toMatchObject({ rfqCount: 1, quoteCount: 0, bucket: "awaiting" });
+  });
+
+  it("puts an enquiry with a quotation in Quotes in, and all-awarded in Finalised", async () => {
+    const enquiry = await createEnquiry();
+    const lineId = enquiry.lines[0].id;
+
+    const created = await call(app, "POST", `/api/enquiries/lines/${lineId}/rfq`, {
+      token: ctx.salesToken,
+      body: { submissionDeadline: inDays(7).toISOString() },
+    });
+    const rfqId = created.body.rfq.id as string;
+    await call(app, "POST", `/api/rfqs/${rfqId}/send`, {
+      token: ctx.salesToken,
+      body: { vendorIds: [ctx.a.vendorId] },
+    });
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: {
+        loadChartFileRef: "vendors/test/chart.pdf",
+        loadChartFileName: "chart.pdf",
+        loadChartMimeType: "application/pdf",
+        loadChartSizeBytes: 1024,
+      },
+    });
+    const quote = await call(app, "POST", `/api/vendor/rfqs/${rfqId}/quotations`, {
+      token: ctx.vendorTokenA,
+      body: {
+        craneId: ctx.a.craneId,
+        rentalRate: 50_000,
+        rateBasis: "PER_MONTH",
+        mobilisationCharges: 10_000,
+        availabilityConfirmed: true,
+        validityDate: inDays(14).toISOString(),
+        acceptsCommercialTerms: true,
+      },
+    });
+    expect(quote.status, JSON.stringify(quote.body)).toBe(201);
+
+    let [row] = await listRows();
+    expect(row).toMatchObject({ quoteCount: 1, bucket: "quotes" });
+
+    const awarded = await call(
+      app,
+      "POST",
+      `/api/rfqs/${rfqId}/quotations/${quote.body.quotation.quotationId as string}/award`,
+      { token: ctx.adminToken, body: {} },
+    );
+    expect(awarded.status, JSON.stringify(awarded.body)).toBe(200);
+
+    [row] = await listRows();
+    expect(row).toMatchObject({
+      sourcedCranes: 1,
+      sourcedPercent: 100,
+      bucket: "finalised",
+    });
+  });
+
+  it("orders by soonest unsourced start and by least progress", async () => {
+    await createEnquiry({
+      siteLocation: "Late site",
+      lines: [linePayload({ requiredStartDate: inDays(60).toISOString() })],
+    });
+    const early = await createEnquiry({
+      siteLocation: "Early site",
+      lines: [
+        linePayload({ requiredStartDate: inDays(3).toISOString() }),
+        linePayload({ craneTypeCode: "CRAWLER", capacityT: 40, requiredStartDate: inDays(3).toISOString() }),
+      ],
+    });
+    // Half done, but its remaining line still starts in three days: "soonest
+    // start" must stay on the date, not drift to "most finished".
+    await call(app, "POST", `/api/enquiries/lines/${early.lines[0].id}/internal-check`, {
+      token: ctx.salesToken,
+      body: { outcome: "FULFILLED_INTERNALLY", notes: null },
+    });
+    await createEnquiry({
+      siteLocation: "Mid site",
+      lines: [linePayload({ requiredStartDate: inDays(20).toISOString() })],
+    });
+
+    const byStart = await listRows("?sort=startDate");
+    expect(byStart.map((row) => row.siteLocation)).toEqual([
+      "Early site",
+      "Mid site",
+      "Late site",
+    ]);
+
+    const byProgress = await listRows("?sort=progress");
+    expect(byProgress.map((row) => row.sourcedPercent)).toEqual([0, 0, 50]);
+
+    const rejected = await call(app, "GET", "/api/enquiries?sort=sideways", {
+      token: ctx.salesToken,
+    });
+    expect(rejected.status).toBe(400);
+  });
+
+  it("searches the line's project text as well as the number, customer and city", async () => {
+    await createEnquiry({
+      siteLocation: "Pune, Maharashtra",
+      siteStateCode: "MH",
+      lines: [linePayload({ applicationDescription: "Refinery shutdown — CDU" })],
+    });
+    await createEnquiry({
+      siteLocation: "Bhuj, Gujarat",
+      lines: [linePayload({ applicationDescription: "Khavda wind farm" })],
+    });
+
+    const byProject = await listRows("?search=refinery");
+    expect(byProject).toHaveLength(1);
+    expect(byProject[0].siteLocation).toBe("Pune, Maharashtra");
+
+    const byCity = await listRows("?search=Bhuj");
+    expect(byCity).toHaveLength(1);
+    expect(byCity[0].project).toBe("Khavda wind farm");
+  });
+
+  it("summarises the KPI buckets without double-counting and keeps Closed out of Active", async () => {
+    const pending = await twoLineEnquiry();
+    const closed = await createEnquiry();
+    const cancelled = await call(
+      app,
+      "POST",
+      `/api/enquiries/lines/${closed.lines[0].id}/cancel`,
+      { token: ctx.salesToken, body: { reason: "Customer withdrew the lift" } },
+    );
+    expect(cancelled.status, JSON.stringify(cancelled.body)).toBe(200);
+
+    const res = await call(app, "GET", "/api/enquiries/summary", {
+      token: ctx.salesToken,
+    });
+    expect(res.status).toBe(200);
+    const summary = res.body.summary as Record<string, unknown>;
+
+    expect(summary).toMatchObject({
+      total: 2,
+      active: 1,
+      pendingSourcing: 1,
+      awaitingQuotes: 0,
+      quotesIn: 0,
+      finalised: 0,
+      closed: 1,
+      raisedToday: 2,
+    });
+    expect(summary.raisedTodayByBucket).toMatchObject({ pending: 1, closed: 1 });
+
+    // The KPI numbers add up to the total; that is what makes them a partition
+    // rather than four overlapping filters.
+    expect(
+      (summary.pendingSourcing as number) +
+        (summary.awaitingQuotes as number) +
+        (summary.quotesIn as number) +
+        (summary.finalised as number) +
+        (summary.closed as number),
+    ).toBe(summary.total);
+
+    expect(pending.overallStatus).toBe("RECEIVED_PENDING_SOURCING");
+  });
+
+  it("pins the job site at intake so the panel has a map, and re-pins when the site moves", async () => {
+    const enquiry = await createEnquiry();
+    const created = await appPrisma.enquiry.findUniqueOrThrow({
+      where: { id: enquiry.id },
+      select: { siteLatitude: true, siteLongitude: true, siteCoordinateSource: true },
+    });
+    expect(created.siteLatitude).not.toBeNull();
+    expect(created.siteLongitude).not.toBeNull();
+    // The suite runs the stub, which invents points, so the source must not
+    // claim a real provider produced them.
+    expect(created.siteCoordinateSource).toBe("manual");
+
+    const moved = await call(app, "PUT", `/api/enquiries/${enquiry.id}`, {
+      token: ctx.salesToken,
+      body: {
+        customerName: INTERNAL_SECRETS.customerName,
+        customerAddress: INTERNAL_SECRETS.customerAddress,
+        siteLocation: "Nagpur, Maharashtra",
+        siteStateCode: "MH",
+      },
+    });
+    expect(moved.status, JSON.stringify(moved.body)).toBe(200);
+
+    const after = await appPrisma.enquiry.findUniqueOrThrow({
+      where: { id: enquiry.id },
+      select: { siteLatitude: true, siteLongitude: true },
+    });
+    expect(after.siteLatitude).not.toBeNull();
+    expect(
+      Number(after.siteLatitude) !== Number(created.siteLatitude) ||
+        Number(after.siteLongitude) !== Number(created.siteLongitude),
+    ).toBe(true);
+  });
+
+  it("keeps the summary away from vendors too", async () => {
+    const res = await call(app, "GET", "/api/enquiries/summary", {
+      token: ctx.vendorTokenA,
+    });
+    expect(res.status).toBe(403);
+  });
+});

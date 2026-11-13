@@ -25,7 +25,7 @@ export function Toolbar({ children, className }: { children: ReactNode; classNam
 
 export function ToolbarFooter({ children }: { children: ReactNode }) {
   return (
-    <div className="-mx-4 -mb-3 mt-1 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 bg-slate-50/50 px-4 py-2.5">
+    <div className="-mx-4 -mb-3 mt-1 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-800 bg-ink-900/50 px-4 py-2.5">
       {children}
     </div>
   );
@@ -85,7 +85,19 @@ export function SearchInput({
   );
 }
 
-/** Segmented control for two or three mutually exclusive views. */
+/**
+ * Segmented control for mutually exclusive views.
+ *
+ * These are filter buttons, not tabs. There is no `tabpanel` and the list they
+ * narrow is not a panel, so announcing them as a tablist promised arrow-key
+ * navigation and a panel relationship that never existed. A labelled group of
+ * toggle buttons says what they actually do.
+ *
+ * The strip scrolls horizontally rather than widening the page. Status filters
+ * can carry six options ("Awaiting quote" is not a short word), and an
+ * `inline-flex` box with no overflow handling pushed the whole layout sideways
+ * on a phone.
+ */
 export function Segmented<T extends string>({
   value,
   onChange,
@@ -99,21 +111,20 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div
-      role="tablist"
+      role="group"
       aria-label={label}
-      className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5"
+      className="inline-flex max-w-full items-center overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-0.5"
     >
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
-          role="tab"
-          aria-selected={value === option.value}
+          aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+            "inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
             value === option.value
-              ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+              ? "bg-ink-700 text-white shadow-sm ring-1 ring-ink-700"
               : "text-slate-500 hover:text-slate-800",
           )}
         >

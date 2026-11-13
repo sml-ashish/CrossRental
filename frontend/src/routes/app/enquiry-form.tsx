@@ -328,7 +328,7 @@ function LineFields({
   );
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-slate-200 bg-ink-850 p-5">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
         {onRemove ? (
@@ -507,7 +507,7 @@ function LineFields({
           Internal only
         </p>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Field label="Rental budget" htmlFor={`${idPrefix}-budget`}>
+          <Field label="Rental per month" htmlFor={`${idPrefix}-budget`}>
             <TextInput id={`${idPrefix}-budget`} {...t("rentalBudget")} />
           </Field>
         </div>

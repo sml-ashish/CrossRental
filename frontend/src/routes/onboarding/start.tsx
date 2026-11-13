@@ -283,7 +283,7 @@ export function OnboardingStartPage({ token: tokenProp }: { token?: string }) {
         </div>
       ) : null}
 
-      <div className="mb-5 sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
+      <div className="mb-5 sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-ink-850/95 px-4 py-3 backdrop-blur">
         <p className="text-xs text-slate-500">
           {savedAt ? `Draft saved at ${savedAt.toLocaleTimeString()}` : "Not saved yet"}
         </p>
@@ -1212,7 +1212,7 @@ function OperatingRegionsSection({
                     "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                     selected
                       ? "border-brand-500 bg-brand-50 text-brand-700"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
+                      : "border-slate-200 bg-ink-850 text-slate-600 hover:border-slate-300",
                     disabled && "pointer-events-none opacity-60",
                   )}
                 >

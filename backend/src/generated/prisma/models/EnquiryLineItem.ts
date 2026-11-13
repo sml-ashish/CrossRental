@@ -105,7 +105,6 @@ export type EnquiryLineItemMinAggregateOutputType = {
   rowScope: string | null
   rentalBudget: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus | null
-  selectedSource: $Enums.OwnershipType | null
   closureStatus: string | null
   cancelledAt: Date | null
   cancelReason: string | null
@@ -157,7 +156,6 @@ export type EnquiryLineItemMaxAggregateOutputType = {
   rowScope: string | null
   rentalBudget: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus | null
-  selectedSource: $Enums.OwnershipType | null
   closureStatus: string | null
   cancelledAt: Date | null
   cancelReason: string | null
@@ -209,7 +207,6 @@ export type EnquiryLineItemCountAggregateOutputType = {
   rowScope: number
   rentalBudget: number
   trailStatus: number
-  selectedSource: number
   closureStatus: number
   cancelledAt: number
   cancelReason: number
@@ -293,7 +290,6 @@ export type EnquiryLineItemMinAggregateInputType = {
   rowScope?: true
   rentalBudget?: true
   trailStatus?: true
-  selectedSource?: true
   closureStatus?: true
   cancelledAt?: true
   cancelReason?: true
@@ -345,7 +341,6 @@ export type EnquiryLineItemMaxAggregateInputType = {
   rowScope?: true
   rentalBudget?: true
   trailStatus?: true
-  selectedSource?: true
   closureStatus?: true
   cancelledAt?: true
   cancelReason?: true
@@ -397,7 +392,6 @@ export type EnquiryLineItemCountAggregateInputType = {
   rowScope?: true
   rentalBudget?: true
   trailStatus?: true
-  selectedSource?: true
   closureStatus?: true
   cancelledAt?: true
   cancelReason?: true
@@ -536,7 +530,6 @@ export type EnquiryLineItemGroupByOutputType = {
   rowScope: string | null
   rentalBudget: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus
-  selectedSource: $Enums.OwnershipType | null
   closureStatus: string | null
   cancelledAt: Date | null
   cancelReason: string | null
@@ -611,7 +604,6 @@ export type EnquiryLineItemWhereInput = {
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.EnumOwnershipTypeNullableFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
   cancelReason?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
@@ -669,7 +661,6 @@ export type EnquiryLineItemOrderByWithRelationInput = {
   rowScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rentalBudget?: Prisma.SortOrderInput | Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
-  selectedSource?: Prisma.SortOrderInput | Prisma.SortOrder
   closureStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -731,7 +722,6 @@ export type EnquiryLineItemWhereUniqueInput = Prisma.AtLeast<{
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.EnumOwnershipTypeNullableFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
   cancelReason?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
@@ -789,7 +779,6 @@ export type EnquiryLineItemOrderByWithAggregationInput = {
   rowScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rentalBudget?: Prisma.SortOrderInput | Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
-  selectedSource?: Prisma.SortOrderInput | Prisma.SortOrder
   closureStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -849,7 +838,6 @@ export type EnquiryLineItemScalarWhereWithAggregatesInput = {
   rowScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusWithAggregatesFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.EnumOwnershipTypeNullableWithAggregatesFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"EnquiryLineItem"> | Date | string | null
   cancelReason?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
@@ -899,7 +887,6 @@ export type EnquiryLineItemCreateInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -957,7 +944,6 @@ export type EnquiryLineItemUncheckedCreateInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -1011,7 +997,6 @@ export type EnquiryLineItemUpdateInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1069,7 +1054,6 @@ export type EnquiryLineItemUncheckedUpdateInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1125,7 +1109,6 @@ export type EnquiryLineItemCreateManyInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -1175,7 +1158,6 @@ export type EnquiryLineItemUpdateManyMutationInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1227,7 +1209,6 @@ export type EnquiryLineItemUncheckedUpdateManyInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1299,7 +1280,6 @@ export type EnquiryLineItemCountOrderByAggregateInput = {
   rowScope?: Prisma.SortOrder
   rentalBudget?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
-  selectedSource?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelReason?: Prisma.SortOrder
@@ -1366,7 +1346,6 @@ export type EnquiryLineItemMaxOrderByAggregateInput = {
   rowScope?: Prisma.SortOrder
   rentalBudget?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
-  selectedSource?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelReason?: Prisma.SortOrder
@@ -1418,7 +1397,6 @@ export type EnquiryLineItemMinOrderByAggregateInput = {
   rowScope?: Prisma.SortOrder
   rentalBudget?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
-  selectedSource?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   cancelReason?: Prisma.SortOrder
@@ -1570,10 +1548,6 @@ export type EnumEnquiryLineTrailStatusFieldUpdateOperationsInput = {
   set?: $Enums.EnquiryLineTrailStatus
 }
 
-export type NullableEnumOwnershipTypeFieldUpdateOperationsInput = {
-  set?: $Enums.OwnershipType | null
-}
-
 export type EnquiryLineItemCreateNestedOneWithoutInboundRepliesInput = {
   create?: Prisma.XOR<Prisma.EnquiryLineItemCreateWithoutInboundRepliesInput, Prisma.EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput>
   connectOrCreate?: Prisma.EnquiryLineItemCreateOrConnectWithoutInboundRepliesInput
@@ -1646,7 +1620,6 @@ export type EnquiryLineItemCreateWithoutCraneTypeInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -1702,7 +1675,6 @@ export type EnquiryLineItemUncheckedCreateWithoutCraneTypeInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -1787,7 +1759,6 @@ export type EnquiryLineItemScalarWhereInput = {
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.EnumOwnershipTypeNullableFilter<"EnquiryLineItem"> | $Enums.OwnershipType | null
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
   cancelReason?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
@@ -1837,7 +1808,6 @@ export type EnquiryLineItemCreateWithoutRfqsInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -1894,7 +1864,6 @@ export type EnquiryLineItemUncheckedCreateWithoutRfqsInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -1963,7 +1932,6 @@ export type EnquiryLineItemUpdateWithoutRfqsInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2020,7 +1988,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2073,7 +2040,6 @@ export type EnquiryLineItemCreateWithoutReservationsInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2130,7 +2096,6 @@ export type EnquiryLineItemUncheckedCreateWithoutReservationsInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2199,7 +2164,6 @@ export type EnquiryLineItemUpdateWithoutReservationsInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2256,7 +2220,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2309,7 +2272,6 @@ export type EnquiryLineItemCreateWithoutEnquiryInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2365,7 +2327,6 @@ export type EnquiryLineItemUncheckedCreateWithoutEnquiryInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2445,7 +2406,6 @@ export type EnquiryLineItemCreateWithoutInboundRepliesInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2502,7 +2462,6 @@ export type EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2571,7 +2530,6 @@ export type EnquiryLineItemUpdateWithoutInboundRepliesInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2628,7 +2586,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2681,7 +2638,6 @@ export type EnquiryLineItemCreateWithoutRecommendationsInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2738,7 +2694,6 @@ export type EnquiryLineItemUncheckedCreateWithoutRecommendationsInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2807,7 +2762,6 @@ export type EnquiryLineItemUpdateWithoutRecommendationsInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2864,7 +2818,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutRecommendationsInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2918,7 +2871,6 @@ export type EnquiryLineItemCreateManyCraneTypeInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -2968,7 +2920,6 @@ export type EnquiryLineItemUpdateWithoutCraneTypeInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3024,7 +2975,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutCraneTypeInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3079,7 +3029,6 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3130,7 +3079,6 @@ export type EnquiryLineItemCreateManyEnquiryInput = {
   rowScope?: string | null
   rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
-  selectedSource?: $Enums.OwnershipType | null
   closureStatus?: string | null
   cancelledAt?: Date | string | null
   cancelReason?: string | null
@@ -3180,7 +3128,6 @@ export type EnquiryLineItemUpdateWithoutEnquiryInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3236,7 +3183,6 @@ export type EnquiryLineItemUncheckedUpdateWithoutEnquiryInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3291,7 +3237,6 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutEnquiryInput = {
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
-  selectedSource?: Prisma.NullableEnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType | null
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3401,7 +3346,6 @@ export type EnquiryLineItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   rowScope?: boolean
   rentalBudget?: boolean
   trailStatus?: boolean
-  selectedSource?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
@@ -3460,7 +3404,6 @@ export type EnquiryLineItemSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   rowScope?: boolean
   rentalBudget?: boolean
   trailStatus?: boolean
-  selectedSource?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
@@ -3514,7 +3457,6 @@ export type EnquiryLineItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   rowScope?: boolean
   rentalBudget?: boolean
   trailStatus?: boolean
-  selectedSource?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
@@ -3568,7 +3510,6 @@ export type EnquiryLineItemSelectScalar = {
   rowScope?: boolean
   rentalBudget?: boolean
   trailStatus?: boolean
-  selectedSource?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
   cancelReason?: boolean
@@ -3576,7 +3517,7 @@ export type EnquiryLineItemSelectScalar = {
   updatedAt?: boolean
 }
 
-export type EnquiryLineItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryId" | "lineNo" | "craneTypeCode" | "capacityT" | "capacityRule" | "capacityNote" | "quantity" | "applicationDescription" | "loadDescription" | "liftLoadT" | "workingRadiusM" | "requiredMainBoomM" | "requiredFixedJibM" | "requiredLuffingJibM" | "requiredWindJibM" | "configurationNotes" | "requiredStartDate" | "durationValue" | "durationUnit" | "workingDaysPerMonth" | "mobilisationTerms" | "demobilisationTerms" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "accommodationConveyance" | "paymentTerms" | "supportCraneScope" | "steelMatsGroundPrepScope" | "ehsHrCompliance" | "insuranceTerms" | "extensionClause" | "craneAgeCriteriaYears" | "otherTerms" | "additionalManpowerScope" | "intraSiteMovementScope" | "prereleaseTerms" | "ppeScope" | "rowScope" | "rentalBudget" | "trailStatus" | "selectedSource" | "closureStatus" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiryLineItem"]>
+export type EnquiryLineItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryId" | "lineNo" | "craneTypeCode" | "capacityT" | "capacityRule" | "capacityNote" | "quantity" | "applicationDescription" | "loadDescription" | "liftLoadT" | "workingRadiusM" | "requiredMainBoomM" | "requiredFixedJibM" | "requiredLuffingJibM" | "requiredWindJibM" | "configurationNotes" | "requiredStartDate" | "durationValue" | "durationUnit" | "workingDaysPerMonth" | "mobilisationTerms" | "demobilisationTerms" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "accommodationConveyance" | "paymentTerms" | "supportCraneScope" | "steelMatsGroundPrepScope" | "ehsHrCompliance" | "insuranceTerms" | "extensionClause" | "craneAgeCriteriaYears" | "otherTerms" | "additionalManpowerScope" | "intraSiteMovementScope" | "prereleaseTerms" | "ppeScope" | "rowScope" | "rentalBudget" | "trailStatus" | "closureStatus" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiryLineItem"]>
 export type EnquiryLineItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enquiry?: boolean | Prisma.EnquiryDefaultArgs<ExtArgs>
   craneType?: boolean | Prisma.EnquiryLineItem$craneTypeArgs<ExtArgs>
@@ -3652,10 +3593,6 @@ export type $EnquiryLineItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     rowScope: string | null
     rentalBudget: string | null
     trailStatus: $Enums.EnquiryLineTrailStatus
-    /**
-     * SML or vendor, when a source is finalised (P3).
-     */
-    selectedSource: $Enums.OwnershipType | null
     closureStatus: string | null
     cancelledAt: Date | null
     cancelReason: string | null
@@ -4133,7 +4070,6 @@ export interface EnquiryLineItemFieldRefs {
   readonly rowScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly rentalBudget: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly trailStatus: Prisma.FieldRef<"EnquiryLineItem", 'EnquiryLineTrailStatus'>
-  readonly selectedSource: Prisma.FieldRef<"EnquiryLineItem", 'OwnershipType'>
   readonly closureStatus: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly cancelledAt: Prisma.FieldRef<"EnquiryLineItem", 'DateTime'>
   readonly cancelReason: Prisma.FieldRef<"EnquiryLineItem", 'String'>

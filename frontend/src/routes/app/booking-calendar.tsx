@@ -129,7 +129,7 @@ export function BookingCalendarPage() {
                 "ml-2 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors",
                 month === currentMonth()
                   ? "cursor-default border-slate-200 text-slate-400"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50",
+                  : "border-slate-200 text-slate-700 hover:bg-ink-800",
               )}
               onClick={() => setMonth(currentMonth())}
               disabled={month === currentMonth()}
@@ -163,7 +163,7 @@ export function BookingCalendarPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 bg-slate-50/50 px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-800 bg-ink-900/50 px-4 py-2.5">
           <span className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             Legend
           </span>
@@ -247,7 +247,7 @@ function ViewButton({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
         active
-          ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+          ? "bg-ink-700 text-white shadow-sm ring-1 ring-ink-700"
           : "text-slate-500 hover:text-slate-800",
       )}
     >
@@ -271,7 +271,7 @@ function IconButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-ink-800 hover:text-slate-900"
     >
       {children}
     </button>
@@ -392,7 +392,7 @@ function Timeline({
         <tbody>
           {cranes.map((crane) => (
             <tr key={crane.craneId} className="group">
-              <td className="sticky left-0 z-10 border-r border-b border-slate-100 bg-white px-4 py-1.5 whitespace-nowrap group-hover:bg-slate-50">
+              <td className="sticky left-0 z-10 border-r border-b border-ink-800 bg-ink-850 px-4 py-1.5 whitespace-nowrap group-hover:bg-ink-800">
                 <span className="text-xs font-medium text-slate-900">
                   {shortLabel(crane.craneLabel)}
                 </span>
@@ -408,8 +408,8 @@ function Timeline({
                     key={day.date}
                     title={`${day.date}: ${STATE_LABELS[day.state]}`}
                     className={cn(
-                      "border-b border-slate-100 px-0.5 py-1.5 text-center",
-                      weekend && "bg-slate-50/70",
+                      "border-b border-ink-800 px-0.5 py-1.5 text-center",
+                      weekend && "bg-ink-900/70",
                     )}
                   >
                     {day.state === "FREE" ? null : (

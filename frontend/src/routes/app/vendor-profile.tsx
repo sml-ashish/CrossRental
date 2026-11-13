@@ -151,7 +151,7 @@ export function VendorProfilePage() {
       </Panel>
 
       <Panel title="Contacts" bodyClassName="p-0">
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-ink-800">
           {data.contacts.map((contact) => (
             <li key={contact.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <div className="min-w-0">

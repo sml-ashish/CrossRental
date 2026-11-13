@@ -73,7 +73,7 @@ export const STATE_STYLES: Record<
   },
   FREE: {
     dot: "bg-slate-300",
-    chip: "border-slate-200 bg-white text-slate-500",
+    chip: "border-slate-200 bg-ink-850 text-slate-500",
     soft: "bg-slate-50",
     text: "text-slate-500",
     bar: "bg-slate-200",
@@ -271,7 +271,7 @@ export function MonthCalendar({
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[560px] md:min-w-0">
-        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
+        <div className="grid grid-cols-7 border-b border-slate-200 bg-ink-900/80">
           {WEEKDAYS.map((weekday, index) => (
             <div
               key={weekday}
@@ -306,10 +306,10 @@ export function MonthCalendar({
                     aria-pressed={isSelected}
                     aria-label={`${dayLabel(date)}: ${busy.length} busy, ${list.length - busy.length} free`}
                     className={cn(
-                      "group relative flex min-h-[108px] flex-col gap-1 border-b border-slate-100 p-1.5 text-left transition-colors",
+                      "group relative flex min-h-[108px] flex-col gap-1 border-b border-ink-800 p-1.5 text-left transition-colors",
                       column < 6 && "border-r",
-                      inMonth ? "bg-white" : "bg-slate-50/50",
-                      inMonth && weekend && "bg-slate-50/60",
+                      inMonth ? "bg-ink-850" : "bg-ink-900/50",
+                      inMonth && weekend && "bg-ink-900/60",
                       inMonth && "hover:bg-brand-50/40",
                       isSelected && "z-10 bg-brand-50/50 ring-2 ring-brand-500 ring-inset",
                     )}
@@ -319,7 +319,7 @@ export function MonthCalendar({
                         className={cn(
                           "flex size-6 items-center justify-center rounded-full text-xs font-medium tabular-nums",
                           isToday
-                            ? "bg-slate-900 text-white"
+                            ? "bg-ink-700 text-white"
                             : inMonth
                               ? "text-slate-700"
                               : "text-slate-400",
@@ -366,7 +366,7 @@ export function MonthCalendar({
               })}
 
               {renderDetail && selected && week.includes(selected) ? (
-                <div className="col-span-7 border-b border-slate-200 bg-slate-50/70">
+                <div className="col-span-7 border-b border-slate-200 bg-ink-900/70">
                   {renderDetail(selected)}
                 </div>
               ) : null}
@@ -432,7 +432,7 @@ export function DayAgenda({
               {inMonth ? fullDate(date) : shortDate(date)}
             </h2>
             {isToday ? (
-              <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
+              <span className="rounded-full bg-ink-700 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
                 Today
               </span>
             ) : null}
@@ -474,7 +474,7 @@ export function DayAgenda({
                     {group.items.map((entry) => (
                       <li
                         key={entry.crane.craneId}
-                        className="flex items-baseline justify-between gap-3 rounded-md border border-slate-200/70 bg-white px-2 py-1"
+                        className="flex items-baseline justify-between gap-3 rounded-md border border-slate-200/70 bg-ink-850 px-2 py-1"
                       >
                         <span className="shrink-0 text-xs font-medium text-slate-900">
                           {renderCrane

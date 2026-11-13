@@ -79,7 +79,7 @@ export function DiscoveryCalendar({ filters }: { filters: DiscoveryFilters }) {
               "ml-2 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors",
               month === currentMonth()
                 ? "cursor-default border-slate-200 text-slate-400"
-                : "border-slate-200 text-slate-700 hover:bg-slate-50",
+                : "border-slate-200 text-slate-700 hover:bg-ink-800",
             )}
             onClick={() => setMonth(currentMonth())}
             disabled={month === currentMonth()}
@@ -95,7 +95,7 @@ export function DiscoveryCalendar({ filters }: { filters: DiscoveryFilters }) {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 bg-slate-50/50 px-4 py-2.5">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-800 bg-ink-900/50 px-4 py-2.5">
         <span className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
           Legend
         </span>
@@ -168,7 +168,7 @@ function IconButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-ink-800 hover:text-slate-900"
     >
       {children}
     </button>

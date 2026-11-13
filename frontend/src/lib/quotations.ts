@@ -26,7 +26,12 @@ export type QuotationStatus =
   | "REJECTED"
   | "WITHDRAWN"
   | "EXPIRED";
-export type VendorResponseStatus = "PENDING" | "QUOTED" | "DECLINED" | "EXPIRED";
+export type VendorResponseStatus =
+  | "PENDING"
+  | "QUOTED"
+  | "DECLINED"
+  | "EXPIRED"
+  | "FINALISED";
 export type DistanceMethod = "road" | "straight_line";
 
 export const RATE_BASIS_LABELS: Record<RateBasis, string> = {
@@ -50,6 +55,9 @@ export const VENDOR_RESPONSE_LABELS: Record<VendorResponseStatus, string> = {
   QUOTED: "Quoted",
   DECLINED: "Declined",
   EXPIRED: "Expired",
+  // The RFQ was finalised by another vendor's award, so there is nothing left
+  // for this vendor to answer. Written by the server, never by the vendor.
+  FINALISED: "Finalised",
 };
 
 export interface VendorWarning {
@@ -371,10 +379,17 @@ export function listQuotationHistory(rfqId: string) {
 }
 
 /** Indian rupees, matching how the figure appears in the emails. */
-export function formatInr(value: number | null | undefined): string {
+/**
+ * Rupees, in the Indian digit grouping the vendors use.
+ *
+ * `fractionDigits` defaults to paise because a quotation screen is quoting
+ * money. A list column is scanning it, not agreeing it — two decimals on every
+ * row is noise there, so those callers pass 0.
+ */
+export function formatInr(value: number | null | undefined, fractionDigits = 2): string {
   if (value === null || value === undefined) return "—";
   return `₹${value.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   })}`;
 }

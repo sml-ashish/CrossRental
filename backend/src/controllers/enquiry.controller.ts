@@ -3,7 +3,9 @@ import { asyncHandler } from "../middleware/asyncHandler";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import * as enquiries from "../services/enquiry.service";
+import * as bulkEnquiries from "../services/bulkEnquiry.service";
 import { enquiryHistory } from "../services/history.service";
+import { uploadedFile, validateSpreadsheet, XLSX_MIME } from "../middleware/upload";
 import type { Actor } from "../services/rfq.service";
 
 /**
@@ -38,6 +40,11 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
   res.json({ enquiries: rows });
 });
 
+/** The KPI cards on the enquiry screen. Unfiltered by design. */
+export const summary = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ summary: await enquiries.enquirySummary(actorOf(req)) });
+});
+
 /** Open enquiry lines, for the line-driven RFQ creation screen. */
 export const listRaisableLines = asyncHandler(
   async (req: Request, res: Response) => {
@@ -51,6 +58,50 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
   res
     .status(201)
     .json({ enquiry: await enquiries.createEnquiry(req.body, actorOf(req)) });
+});
+
+/**
+ * Bulk upload (sales and admin). `dryRun=true` validates the sheet and returns
+ * the same per-row report without writing anything.
+ */
+export const bulkImport = asyncHandler(async (req: Request, res: Response) => {
+  const file = validateSpreadsheet(uploadedFile(req));
+  const dryRun = req.query["dryRun"] === "true";
+  const result = await bulkEnquiries.importEnquiries({
+    actor: actorOf(req),
+    buffer: file.buffer,
+    dryRun,
+  });
+  res.status(dryRun ? 200 : 201).json(result);
+});
+
+/**
+ * Appending lines to one existing enquiry. The target comes from the URL, not
+ * the sheet, so a row cannot land on a different enquiry than the screen it was
+ * uploaded from.
+ */
+export const bulkLines = asyncHandler(async (req: Request, res: Response) => {
+  const file = validateSpreadsheet(uploadedFile(req));
+  const dryRun = req.query["dryRun"] === "true";
+  const result = await bulkEnquiries.importLines({
+    actor: actorOf(req),
+    enquiryId: param(req, "enquiryId"),
+    buffer: file.buffer,
+    dryRun,
+  });
+  res.status(dryRun ? 200 : 201).json(result);
+});
+
+/** The `.xlsx` template, with dropdowns for the reference lists. */
+export const bulkTemplate = asyncHandler(async (req: Request, res: Response) => {
+  const buffer = await bulkEnquiries.enquiryImportTemplate(actorOf(req));
+  res.setHeader("Content-Type", XLSX_MIME);
+  res.setHeader(
+    "Content-Disposition",
+    'attachment; filename="crossrentel-enquiry-upload.xlsx"',
+  );
+  res.setHeader("Content-Length", String(buffer.length));
+  res.send(buffer);
 });
 
 export const detail = asyncHandler(async (req: Request, res: Response) => {

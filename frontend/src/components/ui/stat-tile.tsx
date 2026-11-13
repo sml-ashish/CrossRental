@@ -55,7 +55,7 @@ export function StatTile({
       <a
         href={href}
         className={cn(
-          "card px-4 py-3 transition-colors hover:border-slate-300 hover:bg-slate-50/60",
+          "card px-4 py-3 transition-colors hover:border-slate-300 hover:bg-ink-800/60",
           className,
         )}
       >

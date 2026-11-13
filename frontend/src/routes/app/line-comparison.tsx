@@ -120,11 +120,11 @@ export function LineComparisonPage() {
 
       <Panel
         title="Internal reference"
-        description="The rental budget is internal only and never part of an RFQ or a vendor's view."
+        description="The rental per month is internal only and never part of an RFQ or a vendor's view."
       >
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium text-slate-500">Rental budget</dt>
+            <dt className="text-xs font-medium text-slate-500">Rental per month</dt>
             <dd className="mt-0.5 text-sm text-slate-900">{data.rentalBudget ?? "—"}</dd>
           </div>
           <div className="sm:col-span-2">
@@ -181,7 +181,7 @@ export function LineComparisonPage() {
               ))}
             </TBody>
           </Table>
-          <p className="border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+          <p className="border-t border-ink-800 px-4 py-3 text-xs text-slate-500">
             A final selection reserves the crane and emails the vendor. Other quotations are
             marked Not Awarded only when the line's quantity is met; until then the award is
             partial and they stay open.

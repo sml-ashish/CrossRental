@@ -116,21 +116,6 @@ export function ManagementDashboardPage() {
             <MetricCard label="Enquiries processed" value={metric(metrics.enquiriesProcessed)} />
             <MetricCard label="Lines processed" value={metric(metrics.linesProcessed)} />
             <MetricCard
-              label="Fulfilled internally"
-              value={metric(metrics.fulfilledInternally)}
-              hint="SML-side sourcing"
-            />
-            <MetricCard
-              label="Fulfilled by vendors"
-              value={metric(metrics.fulfilledByVendors)}
-              hint="Vendor-sourced lines"
-            />
-            <MetricCard
-              label="Internal sourcing ratio"
-              value={metric(metrics.internalSourcingRatio, "%")}
-              hint="Of lines processed"
-            />
-            <MetricCard
               label="Vendor participation rate"
               value={metric(metrics.vendorParticipationRate, "%")}
               hint="Quoted or declined / recipients"

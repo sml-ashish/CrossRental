@@ -119,12 +119,6 @@ enum ReservationType {
 // Enquiries (P1)
 // ---------------------------------------------------------------------------
 
-// How an enquiry arrived. Only `manual` exists today; the adapter point
-// (`createEnquiry`) is what a future SAP feed would call with its own source.
-enum EnquirySource {
-  manual
-}
-
 // The enquiry header's rolled-up status (P1 section 4).
 enum EnquiryOverallStatus {
   RECEIVED_PENDING_SOURCING
@@ -200,6 +194,10 @@ enum ResponseStatus {
   QUOTED
   DECLINED
   EXPIRED
+  // Written by the system, never by a vendor: the RFQ was finalised by another
+  // vendor's award and this vendor never quoted. Without it the row keeps
+  // reading "Awaiting your quote" and stays in their to-do list for ever.
+  FINALISED
 }
 
 enum RateBasis {
@@ -645,7 +643,6 @@ model User {
   auditLogs               AuditLog[]
   reservationsCreated     Reservation[]            @relation("ReservationCreatedBy")
   reservationsReleased    Reservation[]            @relation("ReservationReleasedBy")
-  ownedEnquiries          Enquiry[]                @relation("EnquiryCrOwner")
   createdEnquiries        Enquiry[]                @relation("EnquiryCreatedBy")
   recommendationSnapshots RecommendationSnapshot[] @relation("RecommendationSnapshotBy")
   inboundRepliesReviewed  InboundReply[]           @relation("InboundReplyReviewedBy")
@@ -1086,10 +1083,6 @@ model Enquiry {
   id                String        @id @default(uuid())
   enquiryNo   String        @unique
   enquiryDate DateTime
-  source      EnquirySource @default(manual)
-
-  crOwnerId String
-  crOwner   User   @relation("EnquiryCrOwner", fields: [crOwnerId], references: [id])
 
   // Internal only, never copied into an RFQ.
   customerName    String
@@ -1197,8 +1190,6 @@ model EnquiryLineItem {
 
   // --- Status (event driven; see services/enquiryTrail.service.ts) ---
   trailStatus    EnquiryLineTrailStatus @default(NEW)
-  /// SML or vendor, when a source is finalised (P3).
-  selectedSource OwnershipType?
   closureStatus  String?
   cancelledAt    DateTime?
   cancelReason   String?

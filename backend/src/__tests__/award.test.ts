@@ -679,6 +679,133 @@ describe("vendor dashboard (brief 7.5, M7)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Finalising the RFQ for the vendors who did not quote
+// ---------------------------------------------------------------------------
+
+/**
+ * "Awaiting your quote" is a to-do, not a fact that survives an award.
+ *
+ * When a closing award finalises the RFQ, a vendor who never quoted has no
+ * quotation row to carry the outcome — so the recipient row is the only place
+ * the truth can live. Left Pending, the row would keep asking for a quote the
+ * server would refuse, and stay in the vendor's to-do list for ever.
+ */
+describe("finalising an RFQ (recipient outcome)", () => {
+  async function recipientOf(rfqId: string, vendorId: string) {
+    return appPrisma.rfqVendorRecipient.findFirstOrThrow({
+      where: { rfqId, vendorId },
+      select: { responseStatus: true, respondedAt: true },
+    });
+  }
+
+  it("moves a vendor who never quoted to Finalised when another vendor wins", async () => {
+    const rfq = await createRfq();
+    await sendRfq(rfq.id, [ctx.a.vendorId, ctx.b.vendorId]);
+    await giveLoadCharts();
+    const quoteA = await submitQuote(rfq.id, ctx.a, 50_000, ctx.vendorTokenA);
+
+    const res = await award(rfq.id, quoteA.quotationId, ctx.adminToken);
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    expect(res.body.result.rfqClosed).toBe(true);
+
+    // The winner keeps Quoted — they answered. Only the silent vendor moves.
+    expect((await recipientOf(rfq.id, ctx.a.vendorId)).responseStatus).toBe("QUOTED");
+    expect((await recipientOf(rfq.id, ctx.b.vendorId)).responseStatus).toBe("FINALISED");
+
+    // It leaves the "Awaiting your quote" tab and appears under Finalised.
+    const pending = await call(app, "GET", "/api/vendor/rfqs?responseStatus=PENDING", {
+      token: ctx.vendorTokenB,
+    });
+    expect(pending.status, JSON.stringify(pending.body)).toBe(200);
+    expect(pending.body.rfqs).toHaveLength(0);
+
+    const finalised = await call(
+      app,
+      "GET",
+      "/api/vendor/rfqs?responseStatus=FINALISED",
+      { token: ctx.vendorTokenB },
+    );
+    expect(finalised.status, JSON.stringify(finalised.body)).toBe(200);
+    expect(finalised.body.rfqs).toHaveLength(1);
+    expect(finalised.body.rfqs[0]).toMatchObject({
+      rfqId: rfq.id,
+      responseStatus: "FINALISED",
+      canRespond: false,
+    });
+
+    // The detail screen agrees, and says nothing about who won.
+    const detail = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenB,
+    });
+    expect(detail.status).toBe(200);
+    expect(detail.body.rfq.locked).toBe(true);
+    expect(detail.body.response).toMatchObject({
+      responseStatus: "FINALISED",
+      canRespond: false,
+    });
+    // Never another vendor's data — not even the name of who won.
+    const winner = await appPrisma.vendor.findUniqueOrThrow({
+      where: { id: ctx.a.vendorId },
+      select: { name: true },
+    });
+    expect(JSON.stringify(detail.body)).not.toContain(winner.name);
+
+    // And the vendor dashboard stops counting it as awaiting a response.
+    const dashboard = await call(app, "GET", "/api/vendor/dashboard", {
+      token: ctx.vendorTokenB,
+    });
+    expect(dashboard.status, JSON.stringify(dashboard.body)).toBe(200);
+    expect(dashboard.body.rfqs.awaitingResponseCount).toBe(0);
+    expect(dashboard.body.rfqs.awaitingResponse).toHaveLength(0);
+  });
+
+  it("leaves the other vendors waiting while a quantity-2 award is still partial", async () => {
+    // Only A quotes; B has not answered. A partial award must not tell B the
+    // RFQ is over — the second crane is still wanted, so B can still quote.
+    const rfq = await createRfq({ quantity: 2 });
+    await sendRfq(rfq.id, [ctx.a.vendorId, ctx.b.vendorId]);
+    await giveLoadCharts();
+    const quoteA = await submitQuote(rfq.id, ctx.a, 50_000, ctx.vendorTokenA);
+
+    const first = await award(rfq.id, quoteA.quotationId, ctx.adminToken);
+    expect(first.status).toBe(200);
+    expect(first.body.result.rfqClosed).toBe(false);
+
+    expect((await recipientOf(rfq.id, ctx.b.vendorId)).responseStatus).toBe("PENDING");
+
+    const detail = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenB,
+    });
+    expect(detail.body.response).toMatchObject({
+      responseStatus: "PENDING",
+      canRespond: true,
+    });
+  });
+
+  it("keeps a vendor who quoted on Quoted, with the quotation Not Awarded", async () => {
+    const { rfq, quoteA, quoteB } = await quotedRfq();
+    await award(rfq.id, quoteA.quotationId, ctx.adminToken);
+
+    expect((await recipientOf(rfq.id, ctx.b.vendorId)).responseStatus).toBe("QUOTED");
+
+    const quotation = await appPrisma.quotation.findUniqueOrThrow({
+      where: { id: quoteB.quotationId },
+      select: { status: true },
+    });
+    expect(quotation.status).toBe("NOT_AWARDED");
+
+    // The losing vendor reads "Not selected" on the quote, not on the RFQ row.
+    const detail = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenB,
+    });
+    const losing = detail.body.quotations.find(
+      (q: { quotationId: string }) => q.quotationId === quoteB.quotationId,
+    );
+    expect(losing.status).toBe("NOT_AWARDED");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Stale-fleet reminders (brief 6.5)
 // ---------------------------------------------------------------------------
 

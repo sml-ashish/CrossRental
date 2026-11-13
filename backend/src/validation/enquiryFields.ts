@@ -112,8 +112,6 @@ const baseLineFields = {
 
 const headerFields = {
   enquiryDate: dateField.optional(),
-  /** Defaults to the acting CR user when omitted. */
-  crOwnerId: z.string().uuid("That is not a valid owner reference").optional(),
   customerName: trimmed(300).min(1, "Enter the customer name"),
   customerAddress: trimmed(2000).min(2, "Enter the customer address"),
   siteLocation: trimmed(300).min(3, "Enter the job site location"),
@@ -123,9 +121,8 @@ const headerFields = {
 };
 
 /**
- * Creating an enquiry and all of its lines in one call (the adapter point). A
- * future SAP feed calls the same service with `source` set differently; it does
- * not need a different schema.
+ * Creating an enquiry and all of its lines in one call (the adapter point). The
+ * form, the bulk upload and any future SAP feed all use this one schema.
  */
 export const createEnquirySchema = z.object({
   ...headerFields,
@@ -195,6 +192,12 @@ export const listEnquiriesQuerySchema = z.object({
   stateCode: trimmed(10).optional(),
   from: dateField.optional(),
   to: dateField.optional(),
+  /**
+   * The list screen's order. `newest` is the default; `startDate` puts the
+   * enquiries whose unsourced work begins soonest first; `progress` shows the
+   * least-sourced first, which is where attention is needed.
+   */
+  sort: z.enum(["newest", "startDate", "progress"]).optional(),
 });
 
 export type ListEnquiriesQuery = z.infer<typeof listEnquiriesQuerySchema>;

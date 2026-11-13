@@ -125,13 +125,6 @@ export const ReservationType = {
 export type ReservationType = (typeof ReservationType)[keyof typeof ReservationType]
 
 
-export const EnquirySource = {
-  manual: 'manual'
-} as const
-
-export type EnquirySource = (typeof EnquirySource)[keyof typeof EnquirySource]
-
-
 export const EnquiryOverallStatus = {
   RECEIVED_PENDING_SOURCING: 'RECEIVED_PENDING_SOURCING',
   PARTIALLY_QUOTED: 'PARTIALLY_QUOTED',
@@ -226,7 +219,8 @@ export const ResponseStatus = {
   PENDING: 'PENDING',
   QUOTED: 'QUOTED',
   DECLINED: 'DECLINED',
-  EXPIRED: 'EXPIRED'
+  EXPIRED: 'EXPIRED',
+  FINALISED: 'FINALISED'
 } as const
 
 export type ResponseStatus = (typeof ResponseStatus)[keyof typeof ResponseStatus]

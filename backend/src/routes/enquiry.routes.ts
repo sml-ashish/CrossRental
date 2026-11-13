@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as enquiry from "../controllers/enquiry.controller";
 import { requireAuth, requireCapability } from "../middleware/auth";
 import { apiLimiter } from "../middleware/rateLimiter";
+import { uploadSpreadsheet } from "../middleware/upload";
 
 const router = Router();
 
@@ -64,7 +65,26 @@ router.post("/lines/:lineId/rfq", requireCapability("rfq:create"), enquiry.creat
 
 // --- list + create ---
 router.get("/", requireCapability("enquiry:view"), enquiry.list);
+/** KPI cards. Declared before `/:enquiryId` so it is not read as an id. */
+router.get("/summary", requireCapability("enquiry:view"), enquiry.summary);
 router.post("/", requireCapability("enquiry:create"), enquiry.create);
+
+// --- bulk upload (static, before `/:enquiryId`) ---
+/**
+ * The CR team's `.xlsx` import. Declared before `/:enquiryId` so `/bulk` is
+ * never captured as an enquiry id.
+ */
+router.get(
+  "/bulk/template",
+  requireCapability("enquiry:create"),
+  enquiry.bulkTemplate,
+);
+router.post(
+  "/bulk",
+  requireCapability("enquiry:create"),
+  uploadSpreadsheet("file"),
+  enquiry.bulkImport,
+);
 
 // --- one enquiry ---
 router.get("/:enquiryId", requireCapability("enquiry:view"), enquiry.detail);
@@ -79,6 +99,17 @@ router.post(
   "/:enquiryId/lines",
   requireCapability("enquiry:manage"),
   enquiry.addLine,
+);
+/**
+ * Bulk add lines to this enquiry. The target is the URL, so there is no
+ * `Enquiry no` column to mistype; declared after `/:enquiryId/lines` because the
+ * paths do not overlap.
+ */
+router.post(
+  "/:enquiryId/lines/bulk",
+  requireCapability("enquiry:manage"),
+  uploadSpreadsheet("file"),
+  enquiry.bulkLines,
 );
 
 export default router;

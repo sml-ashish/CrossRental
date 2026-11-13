@@ -228,7 +228,7 @@ function InternalRfqDetailPage() {
               <ReadOnlyValue label="Extension clause" value={rfq.extensionClause ?? "—"} />
               <ReadOnlyValue label="Notes" value={rfq.notes ?? "—"} />
             </dl>
-            <div className="border-t border-slate-100 pt-3">
+            <div className="border-t border-ink-800 pt-3">
               <p className="text-xs font-medium text-slate-500">SML contact</p>
               <p className="mt-0.5 text-sm text-slate-900">
                 {rfq.smlContactName ?? "—"}
@@ -264,7 +264,12 @@ function InternalRfqDetailPage() {
             />
           ) : null}
 
-          <RecipientsSection rfqId={rfqId} recipients={rfq.recipients} onDone={invalidate} />
+          <RecipientsSection
+            rfqId={rfqId}
+            status={rfq.status}
+            recipients={rfq.recipients}
+            onDone={invalidate}
+          />
           <InboundRepliesSection rfqId={rfqId} />
           <QuotationsSection
             rfqId={rfqId}
@@ -557,11 +562,40 @@ function CandidatePickerSection({
   const pickerVendors = candidates.data?.candidates.located ?? [];
   const unverified = candidates.data?.candidates.unverified ?? [];
 
+  // Every vendor the recommendation offers, once: one vendor can hold both a
+  // pinned and an unpinned crane, so the two lists are merged by id. Vendors
+  // already on the RFQ are left out of the bulk action — re-sending to them
+  // would be a duplicate mail nobody asked for; they can still be ticked by hand.
+  const recommendedIds = [
+    ...new Set([
+      ...pickerVendors.map((group) => group.vendorId),
+      ...unverified.map((crane) => crane.vendorId),
+    ]),
+  ].filter((vendorId) => !alreadySent.includes(vendorId));
+
+  // "All vendors" on the approved list means the ones that can actually be
+  // mailed: the list flags vendors with no active user, and selecting those
+  // would only produce refusals at send time.
+  const approvedIds = (allVendors.data?.vendors ?? [])
+    .filter((vendor) => vendor.users.length > 0 && !alreadySent.includes(vendor.id))
+    .map((vendor) => vendor.id);
+
   function toggle(vendorId: string) {
     setSelected((previous) =>
       previous.includes(vendorId)
         ? previous.filter((id) => id !== vendorId)
         : [...previous, vendorId],
+    );
+  }
+
+  /** One click for "send this RFQ to all of them", one click to undo it. */
+  function toggleAll(vendorIds: string[]) {
+    if (vendorIds.length === 0) return;
+    const allChosen = vendorIds.every((vendorId) => selected.includes(vendorId));
+    setSelected((previous) =>
+      allChosen
+        ? previous.filter((vendorId) => !vendorIds.includes(vendorId))
+        : [...new Set([...previous, ...vendorIds])],
     );
   }
 
@@ -623,6 +657,35 @@ function CandidatePickerSection({
             </div>
           ) : null}
 
+          {pickerVendors.length > 0 || unverified.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+              <p className="text-xs text-slate-600">
+                {selected.length === 0
+                  ? recommendedIds.length === 0
+                    ? "Every vendor in this list is already a recipient. Tick one to send again."
+                    : `${recommendedIds.length} vendor${
+                        recommendedIds.length === 1 ? "" : "s"
+                      } can receive this RFQ.`
+                  : `${selected.length} vendor${
+                      selected.length === 1 ? "" : "s"
+                    } selected — every one is attempted on every chosen channel.`}
+              </p>
+              {recommendedIds.length > 0 ? (
+                <button
+                  type="button"
+                  className="btn-secondary whitespace-nowrap px-2.5 py-1.5 text-xs"
+                  onClick={() => toggleAll(recommendedIds)}
+                >
+                  {recommendedIds.every((vendorId) => selected.includes(vendorId))
+                    ? "Clear selection"
+                    : `RFQ to all ${recommendedIds.length} vendor${
+                        recommendedIds.length === 1 ? "" : "s"
+                      }`}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
           {pickerVendors.map((group) => (
             <VendorGroupCard
               key={group.vendorId}
@@ -653,7 +716,7 @@ function CandidatePickerSection({
                   </p>
                 </div>
               </div>
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-ink-800">
                 {unverified.map((crane) => (
                   <li key={crane.craneId} className="px-4 py-2.5 text-sm">
                     <label className="flex items-start gap-2.5">
@@ -688,10 +751,28 @@ function CandidatePickerSection({
             </button>
             {showAllVendors ? (
               <div className="mt-3 rounded-lg border border-slate-200">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2">
+                  <p className="text-xs text-slate-600">
+                    Approved vendors, with or without a matching crane.
+                  </p>
+                  {approvedIds.length > 0 ? (
+                    <button
+                      type="button"
+                      className="btn-secondary whitespace-nowrap px-2.5 py-1.5 text-xs"
+                      onClick={() => toggleAll(approvedIds)}
+                    >
+                      {approvedIds.every((vendorId) => selected.includes(vendorId))
+                        ? "Clear selection"
+                        : `RFQ to all ${approvedIds.length} approved vendor${
+                            approvedIds.length === 1 ? "" : "s"
+                          }`}
+                    </button>
+                  ) : null}
+                </div>
                 {allVendors.isLoading ? (
                   <p className="px-4 py-3 text-sm text-slate-500">Loading vendors…</p>
                 ) : (
-                  <ul className="max-h-64 divide-y divide-slate-100 overflow-y-auto">
+                  <ul className="max-h-64 divide-y divide-ink-800 overflow-y-auto">
                     {(allVendors.data?.vendors ?? []).map((vendor) => (
                       <li key={vendor.id} className="px-4 py-2.5 text-sm">
                         <label className="flex items-start gap-2.5">
@@ -773,7 +854,7 @@ function CandidatePickerSection({
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+      <div className="flex flex-wrap items-center gap-3 border-t border-ink-800 pt-4">
         <button
           type="button"
           className="btn-primary px-5 py-2.5 text-sm"
@@ -851,7 +932,7 @@ function VendorGroupCard({
         </button>
       </div>
       {expanded ? (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-ink-800">
           {group.cranes.map((crane) => (
             <li key={crane.craneId} className="px-4 py-2.5 text-sm">
               <p className="font-medium text-slate-800">
@@ -928,10 +1009,12 @@ function CraneChips({ crane }: { crane: CandidateCrane }) {
 
 function RecipientsSection({
   rfqId,
+  status,
   recipients,
   onDone,
 }: {
   rfqId: string;
+  status: string;
   recipients: Array<{
     recipientId: string;
     vendorId: string;
@@ -967,6 +1050,12 @@ function RecipientsSection({
 
   const pending = recipients.filter((r) => r.responseStatus === "PENDING");
 
+  // A cancelled RFQ has nothing to chase, and the backend refuses the call
+  // outright; a closed one has already been awarded. Offering the button would
+  // only produce an error (or a pointless mail), so it is removed rather than
+  // left to fail.
+  const remindersOff = status === "CANCELLED" || status === "CLOSED";
+
   if (recipients.length === 0) {
     return (
       <Section title="Recipients">
@@ -980,9 +1069,15 @@ function RecipientsSection({
   return (
     <Section
       title="Recipients"
-      description="Delivery and response status per vendor. A failed delivery means the vendor was never reached."
+      description={
+        status === "CANCELLED"
+          ? "Delivery and response status per vendor. This RFQ was cancelled, so reminders are switched off."
+          : status === "CLOSED"
+            ? "Delivery and response status per vendor. This RFQ is closed, so reminders are switched off."
+            : "Delivery and response status per vendor. A failed delivery means the vendor was never reached."
+      }
     >
-      {pending.length > 0 ? (
+      {!remindersOff && pending.length > 0 ? (
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -1079,7 +1174,7 @@ function RecipientsSection({
                   ) : null}
                 </TD>
                 <TD align="right">
-                  {recipient.responseStatus === "PENDING" ? (
+                  {!remindersOff && recipient.responseStatus === "PENDING" ? (
                     <button
                       type="button"
                       className="btn-secondary px-2.5 py-1.5 text-xs"
@@ -1157,7 +1252,7 @@ function InboundRepliesSection({ rfqId }: { rfqId: string }) {
                   <pre className="whitespace-pre-wrap font-sans text-sm text-slate-800">
                     {reply.bodyText}
                   </pre>
-                  <dl className="grid gap-3 border-t border-slate-100 pt-3 sm:grid-cols-3">
+                  <dl className="grid gap-3 border-t border-ink-800 pt-3 sm:grid-cols-3">
                     <ReadOnlyValue
                       label="Quoted rate"
                       value={

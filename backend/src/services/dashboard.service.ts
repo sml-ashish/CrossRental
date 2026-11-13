@@ -112,7 +112,7 @@ export interface ManagementFilters {
   to?: Date;
   region?: string;
   craneCategory?: string;
-  /** Sales reports are scoped to the CR owner; admin/management see all. */
+  /** Sales reports are scoped to the user who created the enquiry; admin/management see all. */
   ownerId?: string;
 }
 
@@ -126,9 +126,6 @@ export interface ManagementDashboard {
   metrics: {
     enquiriesProcessed: number;
     linesProcessed: number;
-    fulfilledInternally: number;
-    fulfilledByVendors: number;
-    internalSourcingRatio: number | null;
     vendorParticipationRate: number | null;
     rfqResponseRate: number | null;
     averageResponseTimeHours: number | null;
@@ -168,7 +165,7 @@ export async function managementDashboard(
         }
       : {}),
     ...(filters.region ? { region: filters.region } : {}),
-    ...(filters.ownerId ? { crOwnerId: filters.ownerId } : {}),
+    ...(filters.ownerId ? { createdById: filters.ownerId } : {}),
   };
 
   const lineWhere = {
@@ -187,8 +184,6 @@ export async function managementDashboard(
   const [
     enquiriesProcessed,
     linesProcessed,
-    fulfilledInternally,
-    fulfilledByVendors,
     totalRecipients,
     respondedRecipients,
     quotedRecipients,
@@ -202,21 +197,6 @@ export async function managementDashboard(
   ] = await Promise.all([
     prisma.enquiry.count({ where }),
     prisma.enquiryLineItem.count({ where: lineWhere }),
-    prisma.enquiryLineItem.count({
-      where: {
-        ...lineWhere,
-        OR: [{ selectedSource: "SML" }, { trailStatus: "FULFILLED_INTERNALLY" }],
-      },
-    }),
-    prisma.enquiryLineItem.count({
-      where: {
-        ...lineWhere,
-        OR: [
-          { selectedSource: "VENDOR" },
-          { reservations: { some: { status: { in: ["ACTIVE", "COMPLETED"] } } } },
-        ],
-      },
-    }),
     prisma.rfqVendorRecipient.count({ where: recipientWhere }),
     prisma.rfqVendorRecipient.count({
       where: { ...recipientWhere, responseStatus: { in: ["QUOTED", "DECLINED"] } },
@@ -338,9 +318,6 @@ export async function managementDashboard(
     metrics: {
       enquiriesProcessed,
       linesProcessed,
-      fulfilledInternally,
-      fulfilledByVendors,
-      internalSourcingRatio: percentage(fulfilledInternally, linesProcessed),
       vendorParticipationRate: percentage(respondedRecipients, totalRecipients),
       rfqResponseRate: percentage(rfqsWithQuotes, rfqs.length),
       averageResponseTimeHours: mean(responseHours),

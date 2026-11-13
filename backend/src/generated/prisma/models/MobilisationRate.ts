@@ -509,6 +509,10 @@ export type MobilisationRateUncheckedUpdateManyWithoutCraneTypeNestedInput = {
   deleteMany?: Prisma.MobilisationRateScalarWhereInput | Prisma.MobilisationRateScalarWhereInput[]
 }
 
+export type NullableEnumOwnershipTypeFieldUpdateOperationsInput = {
+  set?: $Enums.OwnershipType | null
+}
+
 export type MobilisationRateCreateWithoutCraneTypeInput = {
   id?: string
   capacityMinT: runtime.Decimal | runtime.DecimalJsLike | number | string

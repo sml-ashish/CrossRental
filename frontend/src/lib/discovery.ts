@@ -85,11 +85,31 @@ export interface DiscoveryGroup {
   cranes: DiscoveryCrane[];
 }
 
+/**
+ * Where a vendor sits on the density map.
+ *
+ * `source: "state"` means the point is the centre of the vendor's registered
+ * state — the map shows where vendors are based, not where their cranes happen
+ * to be parked. `source: "fleet"` is the server's fallback for a vendor whose
+ * address state is unknown: the centre of its located cranes.
+ */
+export interface DiscoveryVendorPoint {
+  vendorId: string;
+  vendorName: string;
+  stateCode: string | null;
+  stateName: string | null;
+  latitude: number;
+  longitude: number;
+  craneCount: number;
+  source: "state" | "fleet";
+}
+
 export interface DiscoveryResult {
   distancesAvailable: boolean;
   site: { latitude: number; longitude: number } | null;
   groups: DiscoveryGroup[];
   unverified: DiscoveryCrane[];
+  vendorPoints: DiscoveryVendorPoint[];
   totalMatched: number;
 }
 

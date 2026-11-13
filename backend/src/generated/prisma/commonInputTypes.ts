@@ -847,28 +847,11 @@ export type EnumAttachmentKindWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAttachmentKindFilter<$PrismaModel>
 }
 
-export type EnumEnquirySourceFilter<$PrismaModel = never> = {
-  equals?: $Enums.EnquirySource | Prisma.EnumEnquirySourceFieldRefInput<$PrismaModel>
-  in?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  notIn?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumEnquirySourceFilter<$PrismaModel> | $Enums.EnquirySource
-}
-
 export type EnumEnquiryOverallStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.EnquiryOverallStatus | Prisma.EnumEnquiryOverallStatusFieldRefInput<$PrismaModel>
   in?: $Enums.EnquiryOverallStatus[] | Prisma.ListEnumEnquiryOverallStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.EnquiryOverallStatus[] | Prisma.ListEnumEnquiryOverallStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumEnquiryOverallStatusFilter<$PrismaModel> | $Enums.EnquiryOverallStatus
-}
-
-export type EnumEnquirySourceWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.EnquirySource | Prisma.EnumEnquirySourceFieldRefInput<$PrismaModel>
-  in?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  notIn?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumEnquirySourceWithAggregatesFilter<$PrismaModel> | $Enums.EnquirySource
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumEnquirySourceFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumEnquirySourceFilter<$PrismaModel>
 }
 
 export type EnumEnquiryOverallStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -895,13 +878,6 @@ export type EnumEnquiryLineTrailStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel> | $Enums.EnquiryLineTrailStatus
 }
 
-export type EnumOwnershipTypeNullableFilter<$PrismaModel = never> = {
-  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel> | $Enums.OwnershipType | null
-}
-
 export type EnumDurationUnitNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.DurationUnit | Prisma.EnumDurationUnitFieldRefInput<$PrismaModel> | null
   in?: $Enums.DurationUnit[] | Prisma.ListEnumDurationUnitFieldRefInput<$PrismaModel> | null
@@ -920,16 +896,6 @@ export type EnumEnquiryLineTrailStatusWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel>
-}
-
-export type EnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.OwnershipType | null
-  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
 }
 
 export type EnumEmailLogStatusFilter<$PrismaModel = never> = {
@@ -1066,6 +1032,23 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedJsonFilter<$PrismaModel>
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
+}
+
+export type EnumOwnershipTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel> | $Enums.OwnershipType | null
+}
+
+export type EnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.OwnershipType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
 }
 
 export type NestedStringFilter<$PrismaModel = never> = {
@@ -1887,28 +1870,11 @@ export type NestedEnumAttachmentKindWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumAttachmentKindFilter<$PrismaModel>
 }
 
-export type NestedEnumEnquirySourceFilter<$PrismaModel = never> = {
-  equals?: $Enums.EnquirySource | Prisma.EnumEnquirySourceFieldRefInput<$PrismaModel>
-  in?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  notIn?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumEnquirySourceFilter<$PrismaModel> | $Enums.EnquirySource
-}
-
 export type NestedEnumEnquiryOverallStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.EnquiryOverallStatus | Prisma.EnumEnquiryOverallStatusFieldRefInput<$PrismaModel>
   in?: $Enums.EnquiryOverallStatus[] | Prisma.ListEnumEnquiryOverallStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.EnquiryOverallStatus[] | Prisma.ListEnumEnquiryOverallStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumEnquiryOverallStatusFilter<$PrismaModel> | $Enums.EnquiryOverallStatus
-}
-
-export type NestedEnumEnquirySourceWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.EnquirySource | Prisma.EnumEnquirySourceFieldRefInput<$PrismaModel>
-  in?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  notIn?: $Enums.EnquirySource[] | Prisma.ListEnumEnquirySourceFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumEnquirySourceWithAggregatesFilter<$PrismaModel> | $Enums.EnquirySource
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumEnquirySourceFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumEnquirySourceFilter<$PrismaModel>
 }
 
 export type NestedEnumEnquiryOverallStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -1935,13 +1901,6 @@ export type NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel> | $Enums.EnquiryLineTrailStatus
 }
 
-export type NestedEnumOwnershipTypeNullableFilter<$PrismaModel = never> = {
-  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel> | $Enums.OwnershipType | null
-}
-
 export type NestedEnumDurationUnitNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.DurationUnit | Prisma.EnumDurationUnitFieldRefInput<$PrismaModel> | null
   in?: $Enums.DurationUnit[] | Prisma.ListEnumDurationUnitFieldRefInput<$PrismaModel> | null
@@ -1960,16 +1919,6 @@ export type NestedEnumEnquiryLineTrailStatusWithAggregatesFilter<$PrismaModel = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEnquiryLineTrailStatusFilter<$PrismaModel>
-}
-
-export type NestedEnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.OwnershipType | null
-  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumEmailLogStatusFilter<$PrismaModel = never> = {
@@ -2079,6 +2028,23 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumOwnershipTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel> | $Enums.OwnershipType | null
+}
+
+export type NestedEnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnershipType | Prisma.EnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.OwnershipType[] | Prisma.ListEnumOwnershipTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumOwnershipTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.OwnershipType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOwnershipTypeNullableFilter<$PrismaModel>
 }
 
 

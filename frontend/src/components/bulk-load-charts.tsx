@@ -363,7 +363,7 @@ export function BulkLoadCharts({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:items-center">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:items-center">
           <div
             role="dialog"
             aria-modal="true"
@@ -384,7 +384,7 @@ export function BulkLoadCharts({
                 type="button"
                 onClick={close}
                 disabled={uploading}
-                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-ink-800 hover:text-slate-700 disabled:opacity-40"
                 aria-label="Close"
               >
                 <X className="size-4" aria-hidden />
@@ -393,7 +393,7 @@ export function BulkLoadCharts({
 
             <div className="space-y-4 px-5 py-4">
               <div
-                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50/60 px-4 py-6 text-center"
+                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-ink-900/60 px-4 py-6 text-center"
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
                   event.preventDefault();
@@ -523,7 +523,7 @@ export function BulkLoadCharts({
                             <TD>
                               <button
                                 type="button"
-                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-ink-800 hover:text-slate-700 disabled:opacity-40"
                                 onClick={() => remove(row.id)}
                                 disabled={locked}
                                 aria-label={`Remove ${row.file.name}`}

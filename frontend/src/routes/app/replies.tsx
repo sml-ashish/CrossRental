@@ -99,7 +99,7 @@ export function ReplyQueuePage() {
                 className={`w-full rounded-lg border p-3 text-left transition-colors ${
                   selectedId === reply.id
                     ? "border-brand-300 bg-brand-50"
-                    : "border-slate-200 bg-white hover:border-brand-200"
+                    : "border-slate-200 bg-ink-850 hover:border-brand-200"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">

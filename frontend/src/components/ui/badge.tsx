@@ -69,6 +69,7 @@ export function statusTone(status: string): BadgeTone {
     case "SHORTLISTED":
       return "purple";
     case "WITHDRAWN":
+    case "FINALISED":
       return "neutral";
     case "DRAFT":
     case "SUBMITTED_QUOTE":
