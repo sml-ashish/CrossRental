@@ -28,6 +28,7 @@ import { EnquiryBulkUpload } from "@/components/enquiry-bulk-upload";
 import { SiteMap } from "@/components/site-map";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/cn";
+import { cityOf, titleCase } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 
 /**
@@ -227,17 +228,6 @@ function durationLabel(line: EnquiryLine): string {
   const unit = line.durationUnit === "MONTHS" ? "month" : "day";
   const value = line.durationValue === 1 ? unit : `${unit}s`;
   return `${line.durationValue} ${value}`;
-}
-
-/** Display casing only — stored locations keep whatever the CR team typed. */
-function titleCase(value: string): string {
-  return value.replace(/[A-Za-z][A-Za-z'’-]*/g, (word) =>
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-  );
-}
-
-function cityOf(row: { siteLocation: string }): string {
-  return titleCase(row.siteLocation.split(",")[0]?.trim() || row.siteLocation);
 }
 
 /**
@@ -619,10 +609,9 @@ export function EnquiryIndexPage() {
     const days = daysUntil(row.nextUnsourcedStart);
     const urgent = days !== null && days <= 14 && row.sourcedPercent < 100;
     const project = row.project ?? row.siteLocation;
-    const site =
-      row.siteStateName && !row.siteLocation.toLowerCase().includes(row.siteStateName.toLowerCase())
-        ? `${cityOf(row)}, ${titleCase(row.siteStateName)}`
-        : cityOf(row);
+    const site = row.siteStateName
+      ? `${cityOf(row)}, ${titleCase(row.siteStateName)}`
+      : cityOf(row);
 
     return (
       <div
