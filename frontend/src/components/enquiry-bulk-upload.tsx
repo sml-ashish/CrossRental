@@ -96,7 +96,12 @@ function Summary({ result }: { result: BulkEnquiryResult }) {
   return <p className="text-sm font-medium text-slate-800">{parts.join(" · ")}</p>;
 }
 
-export function EnquiryBulkUpload() {
+export function EnquiryBulkUpload({
+  triggerClassName = "btn-secondary",
+}: {
+  /** Optional trigger styling; the dialog is unchanged. */
+  triggerClassName?: string;
+} = {}) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<BulkEnquiryResult | null>(null);
@@ -160,8 +165,8 @@ export function EnquiryBulkUpload() {
 
   return (
     <>
-      <button type="button" className="btn-secondary" onClick={() => setOpen(true)}>
-        <UploadCloud className="size-3.5" aria-hidden />
+      <button type="button" className={triggerClassName} onClick={() => setOpen(true)}>
+        <UploadCloud className="size-4" aria-hidden />
         Bulk upload
       </button>
 

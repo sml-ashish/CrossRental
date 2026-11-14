@@ -200,6 +200,17 @@
   color: #a9aeb4 !important;
 }
 
+/* The enquiry panel's map is small, so its legal line is set as quiet small
+   print rather than a wall: tighter padding, a shorter line box and a softer
+   backdrop. The text itself stays complete and readable. */
+.site-map .leaflet-control-attribution {
+  max-width: calc(100% - 12px);
+  padding: 1px 4px;
+  font-size: 9px;
+  line-height: 1.35;
+  background: rgba(24, 25, 27, 0.68) !important;
+}
+
 .leaflet-bar a,
 .leaflet-bar a:hover {
   background: #202223;
