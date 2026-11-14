@@ -26,3 +26,32 @@ export function cityOf(row: { siteLocation: string }): string {
 export function craneTypeLabel(name: string | null | undefined): string {
   return (name ?? "Crane").replace(/\s+Crane$/i, "");
 }
+
+export function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
+}
+
+/**
+ * A calendar date, printed as the UTC day it names.
+ *
+ * Brief 6.4 anchors calendar dates (required start, quote validity, available
+ * from) at UTC midnight so the stored date means the same thing everywhere.
+ * Formatting that instant in the browser's own zone shifts it by a day for
+ * anyone west of UTC — `2026-01-01T00:00:00Z` would print as 31 December, which
+ * is a deadline stated wrongly. Only calendar dates belong here; a real moment in
+ * time, such as a submission deadline, still uses `formatDateTime`.
+ */
+export function formatCalendarDate(iso: string | null): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString(undefined, { timeZone: "UTC" });
+}
+
+export function formatDateTime(iso: string | null): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
+}
