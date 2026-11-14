@@ -28,7 +28,7 @@ import { EnquiryBulkUpload } from "@/components/enquiry-bulk-upload";
 import { SiteMap } from "@/components/site-map";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/cn";
-import { cityOf, titleCase } from "@/lib/format";
+import { cityOf, craneTypeLabel, titleCase } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 
 /**
@@ -228,14 +228,6 @@ function durationLabel(line: EnquiryLine): string {
   const unit = line.durationUnit === "MONTHS" ? "month" : "day";
   const value = line.durationValue === 1 ? unit : `${unit}s`;
   return `${line.durationValue} ${value}`;
-}
-
-/**
- * "Crawler Crane · 250t" repeats the noun; next to a capacity the type alone is
- * what the buyer scans for, so the trailing "Crane" is dropped for display.
- */
-function craneTypeLabel(name: string | null | undefined): string {
-  return (name ?? "Crane").replace(/\s+Crane$/i, "");
 }
 
 /**

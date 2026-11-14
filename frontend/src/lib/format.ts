@@ -18,3 +18,11 @@ export function titleCase(value: string): string {
 export function cityOf(row: { siteLocation: string }): string {
   return titleCase(row.siteLocation.split(",")[0]?.trim() || row.siteLocation);
 }
+
+/**
+ * "Crawler Crane · 250 t" repeats the noun; next to a capacity the type alone is
+ * what the buyer scans for, so the trailing "Crane" is dropped for display.
+ */
+export function craneTypeLabel(name: string | null | undefined): string {
+  return (name ?? "Crane").replace(/\s+Crane$/i, "");
+}

@@ -304,6 +304,11 @@ const rfqNewRoute = createRoute({
 const rfqDetailRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/rfqs/$rfqId",
+  // The detail screen's sections are tabs; keeping the open one in the URL
+  // makes "look at the quotes" a link someone can send.
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+  }),
   component: () => (
     <RequireAuth roles={["admin_user", "sales_user", "vendor_user"]}>
       <RfqDetailPage />

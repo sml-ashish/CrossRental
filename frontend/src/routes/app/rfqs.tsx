@@ -13,7 +13,7 @@ import {
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
-import { cityOf, titleCase } from "@/lib/format";
+import { cityOf, craneTypeLabel, titleCase } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { VendorRfqIndexPage } from "@/routes/app/vendor-rfqs";
 
@@ -44,7 +44,7 @@ const STATUS_TABS: Array<{ value: RfqStatus | "ALL"; label: string }> = [
 ];
 
 /** Status is a dot and a word here too, never a bordered pill. */
-function statusTone(status: RfqStatus): { dot: string; text: string } {
+export function statusTone(status: RfqStatus): { dot: string; text: string } {
   switch (status) {
     case "CLOSED":
       return { dot: "bg-emerald-500", text: "text-emerald-600" };
@@ -55,11 +55,6 @@ function statusTone(status: RfqStatus): { dot: string; text: string } {
     default:
       return { dot: "bg-blue-500", text: "text-blue-600" };
   }
-}
-
-/** "Crawler Crane" next to a capacity is noise; the type alone is the noun. */
-function craneTypeLabel(name: string | null | undefined): string {
-  return (name ?? "Crane").replace(/\s+Crane$/i, "");
 }
 
 function durationLabel(value: number, unit: RfqListRow["durationUnit"]): string {
