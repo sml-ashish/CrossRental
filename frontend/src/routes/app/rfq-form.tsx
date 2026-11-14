@@ -42,6 +42,15 @@ import { Spinner } from "@/components/ui/spinner";
  * the picker reports distances as unavailable until one exists.
  */
 
+/** The form's sections, in the order they are filled in. */
+const FORM_SECTIONS = [
+  { id: "rfq-section-requirement", label: "Requirement" },
+  { id: "rfq-section-site", label: "Job site" },
+  { id: "rfq-section-deployment", label: "Deployment" },
+  { id: "rfq-section-terms", label: "Commercial terms" },
+  { id: "rfq-section-contact", label: "Contact" },
+] as const;
+
 export function RfqFormPage() {
   const { rfqId } = useParams({ strict: false }) as { rfqId: string };
   const navigate = useNavigate();
@@ -119,6 +128,21 @@ export function RfqFormPage() {
         description="One RFQ covers one enquiry line item. Saving stores a draft; vendors are only emailed when you send it."
       />
 
+      <nav aria-label="Form sections" className="flex flex-wrap items-center gap-1">
+        {FORM_SECTIONS.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            onClick={() => {
+              document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="rounded-lg px-2.5 py-1.5 text-[13px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            {section.label}
+          </button>
+        ))}
+      </nav>
+
       {locked ? (
         <Alert tone="info" title="This RFQ has already been sent">
           Its requirement is in the recipients&rsquo; inboxes, so it can no longer be edited.
@@ -164,7 +188,7 @@ export function RfqFormPage() {
           ) : null}
         </Panel>
 
-        <Section title="Requirement">
+        <Section id="rfq-section-requirement" title="Requirement">
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Crane type" htmlFor="rfq-crane-type" required error={fieldErrors.craneType}>
               <Select
@@ -305,6 +329,7 @@ export function RfqFormPage() {
         </Section>
 
         <Section
+          id="rfq-section-site"
           title="Job site"
           description="Distances to this point are what the candidate picker sorts on."
         >
@@ -381,7 +406,7 @@ export function RfqFormPage() {
           </div>
         </Section>
 
-        <Section title="Deployment">
+        <Section id="rfq-section-deployment" title="Deployment">
           <Checkbox
             id="rfq-start-tbc"
             checked={form.startDateTbc}
@@ -472,6 +497,7 @@ export function RfqFormPage() {
         </Section>
 
         <Section
+          id="rfq-section-terms"
           title="Commercial terms"
           description="Defaults from the enquiry mail. Every term stays editable per RFQ, because a customer's payment terms are often the thing being negotiated."
         >
@@ -609,7 +635,7 @@ export function RfqFormPage() {
           </Field>
         </Section>
 
-        <Section title="SML contact" description="Shown to every vendor this RFQ is sent to.">
+        <Section id="rfq-section-contact" title="SML contact" description="Shown to every vendor this RFQ is sent to.">
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Name" htmlFor="rfq-contact-name">
               <TextInput
@@ -643,18 +669,30 @@ export function RfqFormPage() {
         </Section>
 
         {!locked ? (
-          <div className="flex items-center gap-3">
-            <button
-              type="submit"
-              className="btn-primary px-5 py-2.5 text-sm"
-              disabled={save.isPending}
-            >
-              {save.isPending ? <Spinner /> : null}
-              Save changes
-            </button>
-            <p className="text-xs text-slate-500">
-              Saving keeps the RFQ a draft until you send it.
-            </p>
+          // Pinned to the bottom of the viewport: the form is long enough that
+          // tucking the only save button under the last field means scrolling
+          // past twelve terms to fix one number in the first.
+          <div className="sticky bottom-0 z-20 -mx-1 border-t border-slate-200 bg-slate-50 px-1 py-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                className="btn-primary px-5 py-2.5 text-sm"
+                disabled={save.isPending}
+              >
+                {save.isPending ? <Spinner /> : null}
+                Save changes
+              </button>
+              <p className="hidden text-xs text-slate-500 sm:block">
+                Saving keeps the RFQ a draft until you send it.
+              </p>
+              <Link
+                to="/app/rfqs/$rfqId"
+                params={{ rfqId }}
+                className="ml-auto text-[13px] text-slate-500 transition-colors hover:text-slate-900"
+              >
+                Back to RFQ
+              </Link>
+            </div>
           </div>
         ) : null}
       </form>

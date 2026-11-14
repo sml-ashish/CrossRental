@@ -193,14 +193,17 @@ export function Section({
   description,
   actions,
   children,
+  id,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
   children: ReactNode;
+  /** Anchor target, so a long form can jump to one of its sections. */
+  id?: string;
 }) {
   return (
-    <Panel title={title} description={description} actions={actions}>
+    <Panel id={id} title={title} description={description} actions={actions}>
       <div className="space-y-4">{children}</div>
     </Panel>
   );

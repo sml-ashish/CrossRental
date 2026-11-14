@@ -74,6 +74,7 @@ export function Panel({
   children,
   bodyClassName,
   className,
+  id,
 }: {
   title?: ReactNode;
   description?: ReactNode;
@@ -82,9 +83,11 @@ export function Panel({
   /** Padding override for panels whose child manages its own edges (tables). */
   bodyClassName?: string;
   className?: string;
+  /** Anchor target, so a long form can link to one of its sections. */
+  id?: string;
 }) {
   return (
-    <section className={cn("card overflow-hidden", className)}>
+    <section id={id} className={cn("card scroll-mt-20 overflow-hidden", className)}>
       {title || actions ? (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
           <div className="min-w-0">
