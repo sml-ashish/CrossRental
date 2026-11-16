@@ -1,7 +1,6 @@
 import { useId, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ChevronDown,
   RefreshCw,
   SlidersHorizontal,
   X,
@@ -9,7 +8,8 @@ import {
 import {
   formatKm,
   lineRecommendations,
-  recommendationCranes,
+  cranesLocatedIn,
+  orderedRecommendationCranes,
   refreshLineRecommendations,
   type LineRecommendations,
   type LineRecommendationsResponse,
@@ -95,9 +95,10 @@ export interface RecommendationPanelProps {
   /** The selected crane's route contact, once the API answers. */
   route: RouteSummary | null;
   selectedCraneId: string | null;
-  hoveredCraneId: string | null;
+  /** "From": only cranes located here are listed. */
+  fromText: string;
+  onFromChange: (value: string) => void;
   onSelect: (craneId: string) => void;
-  onHover: (craneId: string | null) => void;
   onModeChange: (mode: RecommendationMode) => void;
   onClear: () => void;
   onRetry: () => void;
@@ -113,31 +114,33 @@ export function RecommendationPanel({
   error,
   route,
   selectedCraneId,
-  hoveredCraneId,
+  fromText,
+  onFromChange,
   onSelect,
-  onHover,
   onModeChange,
   onClear,
   onRetry,
 }: RecommendationPanelProps) {
   const noticeId = useId();
-  const groups = recommendations?.vendor.groups ?? [];
-  const unverified = recommendations?.vendor.unverified ?? [];
-  const total = recommendationCranes(recommendations).length;
+  const allCranes = orderedRecommendationCranes(recommendations, mode);
+  const cranes = cranesLocatedIn(allCranes, fromText);
+  const total = cranes.length;
+  const filteredOut = allCranes.length > 0 && total === 0;
+  const siteLabel = recommendations?.site.siteLocation ?? line?.siteLocation ?? "";
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 border-b border-ink-800 px-4 pt-4 pb-3">
+      <div className="shrink-0 border-b border-ink-800 px-5 pt-5 pb-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Recommendations
             </p>
-            <p className="mt-1 truncate text-[13px] font-semibold text-white">
+            <p className="mt-1 truncate text-[14px] font-semibold text-white">
               {line ? lineReference(line) : "Selected line"}
             </p>
             {line ? (
-              <p className="mt-0.5 truncate text-[10px] text-neutral-400">
+              <p className="mt-0.5 truncate text-[11px] text-neutral-400">
                 {line.craneTypeName ?? line.craneTypeCode ?? "Crane type not set"} ·{" "}
                 {capacityText(line)}
                 {line.siteLocation ? ` · ${line.siteLocation}` : ""}
@@ -147,7 +150,7 @@ export function RecommendationPanel({
           <button
             type="button"
             onClick={onClear}
-            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[11px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[12px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
           >
             <X className="size-3" aria-hidden />
             Clear
@@ -167,14 +170,14 @@ export function RecommendationPanel({
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {isError ? (
           <Alert tone="error" title="Could not load recommendations">
             <p>{error?.message}</p>
             <button
               type="button"
               onClick={onRetry}
-              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[11px] font-medium text-red-100 hover:bg-red-500/10"
+              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[12px] font-medium text-red-700 hover:bg-red-500/10"
             >
               Try again
             </button>
@@ -182,7 +185,7 @@ export function RecommendationPanel({
         ) : isPending || !recommendations ? (
           <div className="space-y-2" aria-hidden>
             {[0, 1, 2, 3, 4].map((index) => (
-              <Skeleton key={index} className="h-[92px] w-full" />
+              <Skeleton key={index} className="h-[112px] w-full" />
             ))}
           </div>
         ) : (
@@ -195,26 +198,86 @@ export function RecommendationPanel({
               </div>
             ) : null}
 
-            <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
-              <p className="text-[10px] text-neutral-500">
-                {mode === "distance"
-                  ? "Nearest first · capacity is a label, not a filter"
-                  : `${total} crane${total === 1 ? "" : "s"} · ${recommendations.capacityRule}`}
-              </p>
+            <div className="mb-4 grid grid-cols-2 gap-2">
+              <label className="min-w-0">
+                <span className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+                  From
+                </span>
+                <span className="relative mt-1.5 block">
+                  <input
+                    type="text"
+                    value={fromText}
+                    onChange={(event) => onFromChange(event.target.value)}
+                    placeholder="Crane location, e.g. Pune"
+                    className="w-full rounded-lg border border-ink-800 bg-ink-850 py-2 pr-7 pl-3 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+                  />
+                  {fromText ? (
+                    <button
+                      type="button"
+                      onClick={() => onFromChange("")}
+                      aria-label="Clear from location"
+                      className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center rounded text-neutral-500 hover:text-white"
+                    >
+                      <X className="size-3.5" aria-hidden />
+                    </button>
+                  ) : null}
+                </span>
+              </label>
+              <div className="min-w-0">
+                <span className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+                  To
+                </span>
+                <p
+                  className="mt-1.5 truncate rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[13px] text-neutral-300"
+                  title={siteLabel}
+                >
+                  {siteLabel || "Enquiry site"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-3 flex items-start justify-between gap-3 px-0.5">
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium text-neutral-200">
+                  {total} crane{total === 1 ? "" : "s"}
+                  {fromText.trim() ? ` in ${fromText.trim()}` : ""}
+                  <span className="font-normal text-neutral-500">
+                    {" · "}
+                    {mode === "distance" ? "nearest first" : "smallest adequate first"}
+                  </span>
+                </p>
+                <p className="mt-0.5 text-[11px] text-neutral-500" title={recommendations.capacityRule}>
+                  {mode === "distance"
+                    ? "Capacity is a label here, not a filter"
+                    : recommendations.evaluatedAt
+                      ? recommendations.snapshotId
+                        ? evaluatedLabel(recommendations.evaluatedAt)
+                        : "Live evaluation"
+                      : null}
+                </p>
+              </div>
               {mode === "technical" ? (
                 <RefreshButton lineId={lineId} onModeChange={onModeChange} />
               ) : null}
             </div>
 
-            {mode === "technical" && recommendations.evaluatedAt ? (
-              <p className="mb-2 px-0.5 text-[10px] text-neutral-600">
-                {recommendations.snapshotId
-                  ? evaluatedLabel(recommendations.evaluatedAt)
-                  : "Live evaluation"}
-              </p>
-            ) : null}
-
-            {total === 0 ? (
+            {filteredOut ? (
+              <EmptyState
+                icon={<SlidersHorizontal className="size-4" aria-hidden />}
+                title={`No cranes in ${fromText.trim()}`}
+                description="None of the recommended cranes are located there. Try a nearby city or clear it."
+                className="px-0 py-10 [&_p]:text-neutral-200 [&_p:last-child]:text-neutral-500"
+                action={
+                  <button
+                    type="button"
+                    onClick={() => onFromChange("")}
+                    className="rounded-lg border border-ink-700 px-3 py-1.5 text-[12px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
+                  >
+                    Clear From
+                  </button>
+                }
+              />
+            ) : total === 0 ? (
               <EmptyState
                 icon={<SlidersHorizontal className="size-4" aria-hidden />}
                 title={
@@ -233,7 +296,7 @@ export function RecommendationPanel({
                     <button
                       type="button"
                       onClick={() => onModeChange("distance")}
-                      className="rounded-lg border border-ink-700 px-3 py-1.5 text-[11px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
+                      className="rounded-lg border border-ink-700 px-3 py-1.5 text-[12px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
                     >
                       Try Distance
                     </button>
@@ -241,60 +304,18 @@ export function RecommendationPanel({
                 }
               />
             ) : (
-              <div className="space-y-3">
-                {groups.map((group) => (
-                  <section key={group.vendorId}>
-                    <p className="px-1 pb-1 text-[10px] font-semibold tracking-[0.08em] text-neutral-500 uppercase">
-                      {group.vendorName}
-                      {group.nearestKm !== null ? (
-                        <span className="ml-1 font-normal normal-case tracking-normal text-neutral-600">
-                          · nearest {formatKm(group.nearestKm)}
-                        </span>
-                      ) : null}
-                    </p>
-                    <ul className="space-y-1.5">
-                      {group.cranes.map((crane) => (
-                        <RecommendationRow
-                          key={crane.craneId}
-                          crane={crane}
-                          mode={mode}
-                          selected={crane.craneId === selectedCraneId}
-                          hovered={crane.craneId === hoveredCraneId}
-                          route={route && route.craneId === crane.craneId ? route : null}
-                          onHover={onHover}
-                          onSelect={onSelect}
-                        />
-                      ))}
-                    </ul>
-                  </section>
+              <ul className="space-y-2.5">
+                {cranes.map((crane) => (
+                  <RecommendationRow
+                    key={crane.craneId}
+                    crane={crane}
+                    mode={mode}
+                    selected={crane.craneId === selectedCraneId}
+                    route={route && route.craneId === crane.craneId ? route : null}
+                    onSelect={onSelect}
+                  />
                 ))}
-
-                {unverified.length > 0 ? (
-                  <details className="group rounded-xl border border-ink-800 bg-ink-900/40">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[11px] font-medium text-neutral-300">
-                      <span>No location on file · {unverified.length}</span>
-                      <ChevronDown
-                        className="size-3.5 text-neutral-500 transition-transform group-open:rotate-180"
-                        aria-hidden
-                      />
-                    </summary>
-                    <ul className="space-y-1.5 p-1.5 pt-0">
-                      {unverified.map((crane) => (
-                        <RecommendationRow
-                          key={crane.craneId}
-                          crane={crane}
-                          mode={mode}
-                          selected={crane.craneId === selectedCraneId}
-                          hovered={crane.craneId === hoveredCraneId}
-                          route={route && route.craneId === crane.craneId ? route : null}
-                          onHover={onHover}
-                          onSelect={onSelect}
-                        />
-                      ))}
-                    </ul>
-                  </details>
-                ) : null}
-              </div>
+              </ul>
             )}
           </>
         )}
@@ -303,49 +324,54 @@ export function RecommendationPanel({
   );
 }
 
+/**
+ * One crane. The happy path is quiet — "Available in time" is a small green
+ * dot with text, not a pill — and only the exceptions (engaged, below capacity,
+ * location unverified, stale) are drawn as badges, so a list full of good
+ * options reads calmly and the ones that need a second look stand out.
+ *
+ * The crane type is not repeated per row: the header already says what the line
+ * asked for. Vendor and place share one line.
+ */
 function RecommendationRow({
   crane,
   mode,
   selected,
-  hovered,
   route,
-  onHover,
   onSelect,
 }: {
   crane: RecommendationCrane;
   mode: RecommendationMode;
   selected: boolean;
-  hovered: boolean;
   /** Only the selected crane has a fetched route. */
   route: RouteSummary | null;
-  onHover: (craneId: string | null) => void;
   onSelect: (craneId: string) => void;
 }) {
   const engagedUntil = crane.availableInTime ? null : shortDay(crane.availableFrom);
+  const place = `${crane.currentLocation}${crane.stateName ? `, ${crane.stateName}` : ""}`;
+  const hasExceptions =
+    (mode === "distance" && crane.belowRequiredCapacity) ||
+    !crane.availableInTime ||
+    crane.locationUnverified ||
+    crane.stale;
 
   return (
     <li id={`crane-row-${crane.craneId}`}>
       <button
         type="button"
         onClick={() => onSelect(crane.craneId)}
-        onMouseEnter={() => onHover(crane.craneId)}
-        onMouseLeave={() => onHover(null)}
-        onFocus={() => onHover(crane.craneId)}
-        onBlur={() => onHover(null)}
         aria-pressed={selected}
         className={cn(
-          "w-full rounded-xl border px-2.5 py-2.5 text-left transition-colors",
+          "w-full rounded-xl border px-3.5 py-3.5 text-left transition-colors",
           selected
             ? "border-accent-500/70 bg-accent-500/10"
-            : hovered
-              ? "border-ink-700 bg-ink-850/80"
-              : "border-ink-800 bg-ink-900/40 hover:border-ink-700 hover:bg-ink-850/70",
+            : "border-ink-800 bg-ink-900 hover:border-ink-700 hover:bg-ink-850",
         )}
       >
-        <div className="flex items-start gap-2.5">
+        <div className="flex items-start gap-3.5">
           <span
             className={cn(
-              "relative flex size-11 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border",
+              "relative flex size-12 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border",
               selected
                 ? "border-white bg-white text-ink-950"
                 : "border-ink-700 bg-ink-850 text-white",
@@ -358,36 +384,28 @@ function RecommendationRow({
                 fill={craneFill(crane.currentStatus)}
               />
             </svg>
-            <span className="relative text-[15px] leading-none font-semibold tabular-nums">
+            <span className="relative text-[16px] leading-none font-semibold tabular-nums">
               {Math.round(crane.capacityT)}
             </span>
-            <span
-              className={cn(
-                "relative mt-0.5 text-[7px] font-semibold tracking-[0.14em]",
-                selected ? "text-neutral-500" : "text-neutral-500",
-              )}
-            >
+            <span className="relative mt-1 text-[10px] font-semibold tracking-[0.14em] text-neutral-500">
               TON
             </span>
           </span>
 
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[12px] font-semibold text-neutral-100">
+            <span className="block truncate text-[14px] font-semibold text-neutral-100">
               {crane.make} {crane.model}
             </span>
-            <span className="mt-0.5 block truncate text-[10px] text-neutral-400">
+            <span className="mt-1 block truncate text-[12px] text-neutral-400">
               {crane.vendorName}
             </span>
-            <span className="mt-0.5 block truncate text-[10px] text-neutral-500">
-              {crane.typeOfCraneName} · {crane.currentLocation}
-              {crane.stateName ? `, ${crane.stateName}` : ""}
-            </span>
+            <span className="mt-0.5 block truncate text-[12px] text-neutral-500">{place}</span>
           </span>
 
           <span className="shrink-0 text-right">
             <span
               className={cn(
-                "block text-[13px] leading-tight font-semibold text-neutral-100 tabular-nums",
+                "block text-[14px] leading-tight font-semibold text-neutral-100 tabular-nums",
                 route?.loading && "opacity-60",
               )}
             >
@@ -395,10 +413,8 @@ function RecommendationRow({
             </span>
             <span
               className={cn(
-                "mt-1 inline-block rounded-full border px-1.5 py-0 text-[9px] font-medium",
-                route?.fallback
-                  ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                  : "border-ink-700 bg-ink-900 text-neutral-400",
+                "mt-1 block text-[11px]",
+                route?.fallback ? "text-amber-700" : "text-neutral-500",
               )}
             >
               {route ? route.methodLabel : listMethodLabel(crane)}
@@ -406,40 +422,41 @@ function RecommendationRow({
           </span>
         </div>
 
-        <span className="mt-2 flex flex-wrap items-center gap-1">
-          {mode === "distance" && crane.belowRequiredCapacity ? (
-            <Badge tone="amber" className="px-1.5 py-0 text-[9px]">
-              Below capacity
-            </Badge>
-          ) : null}
+        <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           {crane.availableInTime ? (
-            <Badge tone="emerald" className="px-1.5 py-0 text-[9px]">
+            <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-700">
+              <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />
               Available in time
-            </Badge>
-          ) : (
-            <Badge tone="amber" className="px-1.5 py-0 text-[9px]">
-              {engagedUntil ? `Engaged until ${engagedUntil}` : "Not free in time"}
-            </Badge>
-          )}
-          {crane.locationUnverified ? (
-            <Badge tone="amber" className="px-1.5 py-0 text-[9px]">
-              Location unverified
-            </Badge>
-          ) : null}
-          {crane.stale ? (
-            <Badge tone="neutral" className="px-1.5 py-0 text-[9px]">
-              Stale
-            </Badge>
-          ) : null}
-          {crane.estimatedMobilisationCost !== null ? (
-            <span className="text-[9px] text-neutral-500">
-              Mob. ≈ ₹{Math.round(crane.estimatedMobilisationCost).toLocaleString("en-IN")}
             </span>
+          ) : null}
+          {hasExceptions ? (
+            <>
+              {mode === "distance" && crane.belowRequiredCapacity ? (
+                <Badge tone="amber" className="px-2 py-0 text-[11px]">
+                  Below capacity
+                </Badge>
+              ) : null}
+              {!crane.availableInTime ? (
+                <Badge tone="amber" className="px-2 py-0 text-[11px]">
+                  {engagedUntil ? `Engaged until ${engagedUntil}` : "Not free in time"}
+                </Badge>
+              ) : null}
+              {crane.locationUnverified ? (
+                <Badge tone="amber" className="px-2 py-0 text-[11px]">
+                  Location unverified
+                </Badge>
+              ) : null}
+              {crane.stale ? (
+                <Badge tone="neutral" className="px-2 py-0 text-[11px]">
+                  Stale
+                </Badge>
+              ) : null}
+            </>
           ) : null}
         </span>
 
         {crane.boomWarnings.length > 0 ? (
-          <span className="mt-1 block truncate text-[9px] text-amber-200/90">
+          <span className="mt-2 block text-[11px] leading-snug text-amber-700">
             {crane.boomWarnings.join(" · ")}
           </span>
         ) : null}
@@ -478,12 +495,12 @@ function RefreshButton({
         type="button"
         onClick={() => refresh.mutate()}
         disabled={refresh.isPending}
-        className="flex items-center gap-1 rounded-md border border-ink-800 px-2 py-1 text-[10px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
+        className="flex items-center gap-1 rounded-md border border-ink-800 px-2 py-1 text-[11px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
       >
         <RefreshCw className={cn("size-3", refresh.isPending && "animate-spin")} aria-hidden />
         {refresh.isPending ? "Evaluating…" : "Refresh"}
       </button>
-      {note ? <p className="max-w-40 text-right text-[9px] text-red-300">{note}</p> : null}
+      {note ? <p className="max-w-40 text-right text-[11px] text-red-700">{note}</p> : null}
     </div>
   );
 }

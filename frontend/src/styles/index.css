@@ -329,6 +329,125 @@
 }
 
 /*
+ * Light mode for the discovery workspace.
+ *
+ * Every component here reads its colours from the tokens above, so a light
+ * workspace is just the same tokens re-declared on a wrapper — no component
+ * needs a `dark:` variant. Scales stay semantic: `ink-*` are surfaces
+ * (950 = page, 900 = panel, 850 = raised/inputs, 800/700 = borders), `neutral-*`
+ * run text-dark (100) to text-quiet (500). `--color-white` becomes the strong
+ * text/ink colour, so `text-white` headings and the inverted selected chip
+ * (`bg-white text-ink-950`) flip correctly; buttons that sit on the red accent
+ * use `text-[#fff]` so they stay white.
+ */
+.theme-light {
+  color-scheme: light;
+
+  --color-white: #14161a;
+
+  --color-ink-950: #eef0f3;
+  --color-ink-900: #ffffff;
+  --color-ink-850: #f5f6f8;
+  --color-ink-800: #e2e5e9;
+  --color-ink-700: #cbd0d6;
+  --color-accent-500: #c4443f;
+  --color-accent-400: #b3352f;
+  --color-accent-600: #a83733;
+
+  --color-neutral-100: #1b1e22;
+  --color-neutral-200: #262a30;
+  --color-neutral-300: #3a3f47;
+  --color-neutral-400: #565d67;
+  --color-neutral-500: #667085;
+  --color-neutral-600: #7b8391;
+
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
+
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-600: #b45309;
+  --color-amber-700: #92400e;
+  --color-amber-800: #78350f;
+
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+
+  --color-orange-50: #fff7ed;
+  --color-orange-200: #fed7aa;
+  --color-orange-700: #c2410c;
+
+  --color-purple-50: #faf5ff;
+  --color-purple-200: #e9d5ff;
+  --color-purple-700: #7e22ce;
+}
+
+/* Leaflet fallback map: no tile inversion, light chrome. */
+.theme-light .map-tiles-inverted .leaflet-tile-pane {
+  filter: none;
+}
+
+.theme-light .leaflet-container {
+  background: #eef0f3;
+}
+
+.theme-light .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #566070 !important;
+}
+
+.theme-light .leaflet-control-attribution a {
+  color: #3a3f47 !important;
+}
+
+.theme-light .leaflet-bar a,
+.theme-light .leaflet-bar a:hover {
+  background: #ffffff;
+  border-bottom-color: #e2e5e9;
+  color: #262a30;
+}
+
+.theme-light .leaflet-bar a:hover {
+  background: #f5f6f8;
+}
+
+.theme-light .leaflet-control-zoom {
+  border: 1px solid #cbd0d6 !important;
+}
+
+/*
  * Paper.
  *
  * The SAP vendor creation sheet is the one screen people print. A dark

@@ -150,7 +150,7 @@ export function RouteCard({
       >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-500 uppercase">
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-neutral-500 uppercase">
               {crane.typeOfCraneName}
             </p>
             <h2
@@ -217,17 +217,17 @@ export function RouteCard({
         )}
 
         {route === undefined ? null : routeMissing ? (
-          <p className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-200/90">
+          <p className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[12px] leading-relaxed text-amber-700">
             No route: {routeMissing === "site" ? "the job site has" : "this crane has"} no pin.
           </p>
         ) : route ? (
           <div className="mt-3 rounded-xl border border-ink-800 bg-ink-950/50 px-3 py-2.5">
             {showDetails ? (
               <>
-                <p className="text-[10px] font-semibold tracking-[0.1em] text-neutral-500 uppercase">
+                <p className="text-[11px] font-semibold tracking-[0.1em] text-neutral-500 uppercase">
                   Route
                 </p>
-                <p className="mt-1 truncate text-[11px] text-neutral-400">
+                <p className="mt-1 truncate text-[12px] text-neutral-400">
                   {route.siteLabel}
                   <span className="mx-1 text-neutral-500">→</span>
                   {route.craneLabel}
@@ -245,9 +245,9 @@ export function RouteCard({
               </p>
               <span
                 className={cn(
-                  "shrink-0 rounded-full border px-1.5 py-0 text-[9px] font-medium",
+                  "shrink-0 rounded-full border px-1.5 py-0 text-[11px] font-medium",
                   route.fallback
-                    ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-700"
                     : "border-ink-700 bg-ink-900 text-neutral-400",
                 )}
               >
@@ -255,7 +255,7 @@ export function RouteCard({
               </span>
             </div>
             {route.via ? (
-              <p className="mt-0.5 truncate text-[10px] text-neutral-500">via {route.via}</p>
+              <p className="mt-0.5 truncate text-[11px] text-neutral-500">via {route.via}</p>
             ) : null}
             {showDetails && route.alternatives && route.alternatives.length > 1 ? (
               <ul className="mt-2 space-y-1">
@@ -266,7 +266,7 @@ export function RouteCard({
                       onClick={() => route.onSelectRoute?.(alternative.id)}
                       aria-pressed={alternative.selected}
                       className={cn(
-                        "flex w-full items-center gap-2 rounded-lg border px-2 py-1 text-left text-[10px] transition-colors",
+                        "flex w-full items-center gap-2 rounded-lg border px-2 py-1 text-left text-[11px] transition-colors",
                         alternative.selected
                           ? "border-[#1a73e8]/60 bg-[#1a73e8]/15 text-neutral-100"
                           : "border-ink-800 text-neutral-400 hover:border-ink-700 hover:text-neutral-200",
@@ -286,10 +286,10 @@ export function RouteCard({
               </ul>
             ) : null}
             {route.fallback ? (
-              <p className="mt-1.5 text-[10px] leading-snug text-amber-200/90">
+              <p className="mt-1.5 text-[11px] leading-snug text-amber-700">
                 Road route unavailable, showing straight-line approx.
                 {route.fallbackReason ? (
-                  <span className="mt-0.5 block break-words text-amber-200/70">
+                  <span className="mt-0.5 block break-words text-amber-700/80">
                     Reason: {describeFallbackReason(route.fallbackReason)}
                   </span>
                 ) : null}
@@ -298,7 +298,7 @@ export function RouteCard({
             {showDetails &&
             crane.estimatedMobilisationCost !== undefined &&
             crane.estimatedMobilisationCost !== null ? (
-              <p className="mt-1 text-[10px] text-neutral-500">
+              <p className="mt-1 text-[11px] text-neutral-500">
                 Mobilisation &asymp; ₹
                 {Math.round(crane.estimatedMobilisationCost).toLocaleString("en-IN")}
               </p>
@@ -306,14 +306,14 @@ export function RouteCard({
             {showDetails && crane.boomWarnings && crane.boomWarnings.length > 0 ? (
               <ul className="mt-1.5 space-y-0.5">
                 {crane.boomWarnings.map((warning) => (
-                  <li key={warning} className="text-[10px] leading-snug text-amber-200/90">
+                  <li key={warning} className="text-[11px] leading-snug text-amber-700">
                     {warning}
                   </li>
                 ))}
               </ul>
             ) : null}
             {showDetails ? (
-              <p className="mt-1.5 border-t border-ink-800 pt-1.5 text-[9px] leading-snug text-neutral-600">
+              <p className="mt-1.5 border-t border-ink-800 pt-1.5 text-[11px] leading-snug text-neutral-600">
                 Indicative road route for a standard vehicle. Heavy-haul / oversize routes can
                 differ.
               </p>
@@ -325,8 +325,8 @@ export function RouteCard({
           type="button"
           onClick={() => setRequestOpen(true)}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-4 font-semibold text-white transition-colors hover:bg-accent-600",
-            tight ? "mt-2.5 py-2 text-[13px]" : "mt-4 py-2.5 text-sm",
+            "flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-4 font-semibold text-[#fff] transition-colors hover:bg-accent-600",
+            tight ? "mt-2.5 py-2 text-[14px]" : "mt-4 py-2.5 text-sm",
           )}
         >
           Request this crane
@@ -368,11 +368,11 @@ function CardFact({
 }) {
   return (
     <div className="min-w-0">
-      <dt className="flex items-center gap-1 text-[10px] font-medium tracking-[0.08em] text-neutral-500 uppercase">
+      <dt className="flex items-center gap-1 text-[11px] font-medium tracking-[0.08em] text-neutral-500 uppercase">
         <Icon className="size-3" aria-hidden />
         {label}
       </dt>
-      <dd className="mt-0.5 truncate text-[12px] text-neutral-200">{value}</dd>
+      <dd className="mt-0.5 truncate text-[13px] text-neutral-200">{value}</dd>
     </div>
   );
 }
@@ -394,4 +394,3 @@ function shortDate(iso: string | null): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" });
 }
-

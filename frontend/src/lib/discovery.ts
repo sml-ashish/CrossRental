@@ -386,6 +386,59 @@ export function recommendationCranes(
   ];
 }
 
+/**
+ * "From" filter: keep the cranes that are located in the place typed — `Pune`,
+ * `Pune, Maharashtra`, a state. Each comma-separated part has to appear in the
+ * crane's city/state, case-insensitively. Empty text keeps everything.
+ *
+ * Only the crane's own location is matched (not make, model or vendor), so
+ * "Pune" means cranes that are in Pune.
+ */
+export function cranesLocatedIn<T extends { currentLocation: string; stateName?: string | null }>(
+  cranes: T[],
+  from: string,
+): T[] {
+  const parts = from
+    .split(",")
+    .map((part) => part.trim().toLowerCase())
+    .filter(Boolean);
+  if (parts.length === 0) return cranes;
+  return cranes.filter((crane) => {
+    const place = `${crane.currentLocation} ${crane.stateName ?? ""}`.toLowerCase();
+    return parts.every((part) => place.includes(part));
+  });
+}
+
+/**
+ * One flat list of cranes in the order the chosen view asks for — no vendor
+ * grouping, so the vendor is just a line on each crane's card.
+ *
+ * - `distance`: nearest first.
+ * - `technical`: smallest adequate capacity first, nearest breaking ties.
+ *
+ * Cranes with no distance (location unverified) always sit last. This only orders
+ * rows for display; every figure on a row still comes from the server.
+ */
+export function orderedRecommendationCranes(
+  recommendations: LineRecommendations | undefined,
+  mode: RecommendationMode,
+): RecommendationCrane[] {
+  const km = (crane: RecommendationCrane) =>
+    crane.distanceKm !== null && Number.isFinite(crane.distanceKm) && crane.distanceKm > 0
+      ? crane.distanceKm
+      : Number.POSITIVE_INFINITY;
+  const byDistance = (a: RecommendationCrane, b: RecommendationCrane) => {
+    const x = km(a);
+    const y = km(b);
+    if (x === y) return 0;
+    return x < y ? -1 : 1;
+  };
+  return [...recommendationCranes(recommendations)].sort((a, b) => {
+    if (mode === "technical" && a.capacityT !== b.capacityT) return a.capacityT - b.capacityT;
+    return byDistance(a, b) || a.vendorName.localeCompare(b.vendorName);
+  });
+}
+
 /** `412 km` — whole kilometres once the number is big enough to stop caring. */
 export function formatKm(km: number | null): string {
   if (km === null || !Number.isFinite(km) || km <= 0) return "—";

@@ -58,6 +58,8 @@ export interface GoogleCraneMapProps {
   onSelect?: (craneId: string | null) => void;
   /** The route from the job site to the selected crane, when a line is open. */
   route?: GoogleMapRoute | null;
+  /** Fixed at map creation by Google, so the parent remounts the map when it changes. */
+  theme?: "light" | "dark";
   className?: string;
 }
 
@@ -106,6 +108,7 @@ export function GoogleCraneMap({
   selectedCraneId = null,
   onSelect,
   route = null,
+  theme = "dark",
   className,
 }: GoogleCraneMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -191,8 +194,8 @@ export function GoogleCraneMap({
       center: INDIA_CENTER,
       zoom: INDIA_ZOOM,
       mapId: MAP_ID,
-      colorScheme: "DARK",
-      backgroundColor: "#0a0b0d",
+      colorScheme: theme === "light" ? "LIGHT" : "DARK",
+      backgroundColor: theme === "light" ? "#eef0f3" : "#0a0b0d",
       gestureHandling: "greedy",
       mapTypeControl: false,
       streetViewControl: false,
@@ -522,7 +525,7 @@ export function GoogleCraneMap({
           onSelect={onSelect}
         />
         <div className="pointer-events-none absolute inset-x-0 top-3 z-[900] flex justify-center px-3">
-          <p className="max-w-md rounded-xl border border-amber-500/35 bg-ink-900/95 px-3 py-1.5 text-center text-[11px] leading-snug text-amber-200 shadow-lg backdrop-blur">
+          <p className="max-w-md rounded-xl border border-amber-500/35 bg-ink-900/95 px-3 py-1.5 text-center text-[12px] leading-snug text-amber-700 shadow-lg backdrop-blur">
             {failure}
           </p>
         </div>
@@ -536,14 +539,14 @@ export function GoogleCraneMap({
 
       {!ready ? (
         <div className="absolute inset-0 z-[700] flex items-center justify-center bg-ink-950">
-          <p className="rounded-full border border-ink-800 bg-ink-900 px-3 py-1.5 text-[11px] text-neutral-400 shadow-lg">
+          <p className="rounded-full border border-ink-800 bg-ink-900 px-3 py-1.5 text-[12px] text-neutral-400 shadow-lg">
             Loading the map…
           </p>
         </div>
       ) : null}
 
       <div className="absolute top-3 right-3 z-[800] flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[11px] text-neutral-400 shadow-lg backdrop-blur">
+        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[12px] text-neutral-400 shadow-lg backdrop-blur">
           <label className="flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -573,17 +576,17 @@ export function GoogleCraneMap({
         <button
           type="button"
           onClick={fitAll}
-          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[11px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
+          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[12px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
         >
           Fit all
         </button>
       </div>
 
       <div className="pointer-events-none absolute top-3 left-3 z-[800] flex flex-col items-start gap-2">
-        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[11px] font-medium text-neutral-300 shadow-lg backdrop-blur">
+        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[12px] font-medium text-neutral-300 shadow-lg backdrop-blur">
           India · {statesLive} state{statesLive === 1 ? "" : "s"} live
         </div>
-        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[11px] text-neutral-400 shadow-lg backdrop-blur">
+        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[12px] text-neutral-400 shadow-lg backdrop-blur">
           <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <LegendItem status="AVAILABLE" label="Available" />
             <LegendItem status="ENGAGED" label="Engaged" />
@@ -634,7 +637,7 @@ function HeatModeButton({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded px-2 py-0.5 text-[11px] font-medium transition-colors",
+        "rounded px-2 py-0.5 text-[12px] font-medium transition-colors",
         active ? "bg-ink-700 text-white" : "text-neutral-500 hover:text-neutral-200",
       )}
     >
@@ -877,4 +880,3 @@ function heatGroups(
     count: bucket.count,
   }));
 }
-

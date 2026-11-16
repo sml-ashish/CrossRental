@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
+import { useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
   ChevronDown,
   MapPin,
-  Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -14,6 +13,7 @@ import {
   formatDriveTime,
   formatKm,
   formatRouteDistance,
+  cranesLocatedIn,
   getLineRoute,
   recommendationCranes,
   searchDiscovery,
@@ -23,7 +23,6 @@ import {
   type DiscoveryFilters,
   type RecommendationMode,
 } from "@/lib/discovery";
-import { formatDistance } from "@/lib/rfqs";
 import {
   GoogleCraneMap,
   type GoogleMapRoute,
@@ -32,6 +31,7 @@ import { craneFill, craneStatusLabel } from "@/components/crane-glyph";
 import { DiscoveryCalendar } from "@/components/discovery-calendar";
 import {
   LinePanel,
+  ThemeToggle,
   lineReference,
   useRaisableLines,
 } from "@/components/discovery/line-panel";
@@ -43,6 +43,7 @@ import { RouteCard, type RouteSummary } from "@/components/discovery/route-card"
 import { useAuth } from "@/lib/auth";
 import { Field, Select, TextInput } from "@/components/ui/form";
 import { cn } from "@/lib/cn";
+import { useDiscoveryTheme } from "@/lib/discoveryTheme";
 
 /**
  * Find cranes — manual vendor discovery (P4, BPD 6.8 / 5.9).
@@ -63,24 +64,17 @@ import { cn } from "@/lib/cn";
  * The whole view is shareable: filters and the selected crane live in the URL.
  */
 
-type RailView = "flat" | "grouped";
-
 interface FilterState {
-  /** Free text: city, state, make or model. */
+  /** "From": where the cranes are — a city or state. */
   location: string;
   craneType: string;
   capacityT: string;
   capacityRule: "AT_LEAST" | "EXACT";
   availability: DiscoveryAvailability | "";
   vendorName: string;
-  vendorRegion: string;
-  companySize: string;
-  fleetSizeMin: string;
-  region: string;
   yomFrom: string;
   yomTo: string;
   siteLocation: string;
-  sitePincode: string;
   availableFrom: string;
   availableTo: string;
 }
@@ -92,29 +86,20 @@ const EMPTY_FILTERS: FilterState = {
   capacityRule: "AT_LEAST",
   availability: "",
   vendorName: "",
-  vendorRegion: "",
-  companySize: "",
-  fleetSizeMin: "",
-  region: "",
   yomFrom: "",
   yomTo: "",
   siteLocation: "",
-  sitePincode: "",
   availableFrom: "",
   availableTo: "",
 };
 
 /** The fields that live behind "More" — used for the badge on that button. */
 const MORE_FIELDS: Array<keyof FilterState> = [
+  "location",
   "vendorName",
-  "vendorRegion",
-  "companySize",
-  "fleetSizeMin",
-  "region",
   "yomFrom",
   "yomTo",
   "siteLocation",
-  "sitePincode",
   "availableFrom",
   "availableTo",
 ];
@@ -129,14 +114,9 @@ function toQuery(filters: FilterState): DiscoveryFilters {
   }
   if (filters.availability) query.availability = filters.availability;
   if (filters.vendorName.trim()) query.vendorName = filters.vendorName.trim();
-  if (filters.vendorRegion) query.vendorRegion = filters.vendorRegion;
-  if (filters.companySize) query.companySize = filters.companySize;
-  if (filters.fleetSizeMin) query.fleetSizeMin = filters.fleetSizeMin;
-  if (filters.region) query.region = filters.region;
   if (filters.yomFrom) query.yomFrom = filters.yomFrom;
   if (filters.yomTo) query.yomTo = filters.yomTo;
   if (filters.siteLocation.trim()) query.siteLocation = filters.siteLocation.trim();
-  if (filters.sitePincode.trim()) query.sitePincode = filters.sitePincode.trim();
   // The hire window is a pair. One date has no period to test a booking
   // against, so a half-filled window is simply not applied.
   if (filters.availableFrom && filters.availableTo) {
@@ -238,6 +218,7 @@ function greeting(now = new Date()): string {
 
 export function DiscoveryPage() {
   const { user } = useAuth();
+  const [theme, toggleTheme] = useDiscoveryTheme();
   const navigate = useNavigate();
   const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -266,8 +247,6 @@ export function DiscoveryPage() {
   );
   /** Which of the server's route options is highlighted. Null = the primary. */
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
-  const [hoveredCraneId, setHoveredCraneId] = useState<string | null>(null);
-  const [rail, setRail] = useState<RailView>("flat");
   const [moreOpen, setMoreOpen] = useState(false);
   const [calendar, setCalendar] = useState(false);
   const [linePanelCollapsed, setLinePanelCollapsed] = useState(false);
@@ -384,11 +363,12 @@ export function DiscoveryPage() {
   const data = results.data;
   const browseCranes = useMemo(() => flatten(data), [data]);
   const recommendedCranes = useMemo(
-    () => recommendationCranes(recommendations).map(toDisplayCrane),
-    [recommendations],
+    () =>
+      cranesLocatedIn(recommendationCranes(recommendations), filters.location).map(toDisplayCrane),
+    [recommendations, filters.location],
   );
   const cranes = lineId ? recommendedCranes : browseCranes;
-  const highlightedCraneId = hoveredCraneId ?? selectedCraneId;
+  const highlightedCraneId = selectedCraneId;
   const selectedCrane = cranes.find((crane) => crane.craneId === selectedCraneId) ?? null;
 
   const selectedLine = useMemo(
@@ -654,7 +634,6 @@ export function DiscoveryPage() {
       if (document.querySelector('[aria-modal="true"]')) return;
       if (selectedCraneId) {
         setSelectedCraneId(null);
-        setHoveredCraneId(null);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -674,7 +653,6 @@ export function DiscoveryPage() {
 
   const selectFromMap = (craneId: string | null) => {
     setSelectedCraneId(craneId);
-    setHoveredCraneId(null);
     if (craneId) {
       document.getElementById(`crane-row-${craneId}`)?.scrollIntoView({ block: "nearest" });
     }
@@ -689,7 +667,6 @@ export function DiscoveryPage() {
     setLineId(nextLineId);
     setMode("technical");
     setSelectedCraneId(null);
-    setHoveredCraneId(null);
     setCalendar(false);
   };
 
@@ -702,7 +679,6 @@ export function DiscoveryPage() {
   const changeMode = (nextMode: RecommendationMode) => {
     setMode(nextMode);
     setSelectedCraneId(null);
-    setHoveredCraneId(null);
   };
 
   // ------------------------------------------------------------- drag sheet
@@ -743,6 +719,8 @@ export function DiscoveryPage() {
     error: (raisable.error as Error | null) ?? null,
     greeting: greeting(),
     displayName,
+    theme,
+    onToggleTheme: toggleTheme,
     onPickLine: pickLine,
     onClear: clearLine,
     onRetry: () => void raisable.refetch(),
@@ -759,9 +737,9 @@ export function DiscoveryPage() {
       error={(recommendationQuery.error as Error | null) ?? null}
       route={routeSummary}
       selectedCraneId={selectedCraneId}
-      hoveredCraneId={hoveredCraneId}
+      fromText={filters.location}
+      onFromChange={(value) => set("location", value)}
       onSelect={setSelectedCraneId}
-      onHover={setHoveredCraneId}
       onModeChange={changeMode}
       onClear={clearLine}
       onRetry={() => void recommendationQuery.refetch()}
@@ -774,7 +752,7 @@ export function DiscoveryPage() {
     <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0 px-4 pt-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+          <p className="text-[12px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
             Browse cranes
           </p>
           <button
@@ -782,7 +760,7 @@ export function DiscoveryPage() {
             onClick={() => setCalendar((value) => !value)}
             aria-pressed={calendar}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] transition-colors",
+              "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[12px] transition-colors",
               calendar
                 ? "bg-ink-850 text-white"
                 : "text-neutral-400 hover:bg-ink-850 hover:text-white",
@@ -793,22 +771,7 @@ export function DiscoveryPage() {
           </button>
         </div>
 
-        <div className="relative mt-2.5">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-accent-500"
-            aria-hidden
-          />
-          <input
-            type="search"
-            value={filters.location}
-            onChange={(event) => set("location", event.target.value)}
-            placeholder="Job site, city, make or vendor"
-            aria-label="Search cranes"
-            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
-          />
-        </div>
-
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <Select
             id="discovery-type"
             value={filters.craneType}
@@ -854,7 +817,7 @@ export function DiscoveryPage() {
             type="button"
             onClick={() => setMoreOpen(true)}
             className={cn(
-              "ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
+              "ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors",
               moreCount > 0
                 ? "border-accent-500/60 bg-accent-500/10 text-accent-400"
                 : "border-ink-700 text-neutral-400 hover:border-ink-700 hover:text-white",
@@ -864,7 +827,7 @@ export function DiscoveryPage() {
             <SlidersHorizontal className="size-3" aria-hidden />
             More
             {moreCount > 0 ? (
-              <span className="rounded-full bg-accent-500 px-1.5 text-[10px] font-semibold text-white">
+              <span className="rounded-full bg-accent-500 px-1.5 text-[11px] font-semibold text-[#fff]">
                 {moreCount}
               </span>
             ) : null}
@@ -873,7 +836,7 @@ export function DiscoveryPage() {
       </div>
 
       <div className="mt-2 flex shrink-0 items-center justify-between gap-2 border-y border-ink-800 px-4 py-2">
-        <p className="text-[12px] text-neutral-400" aria-live="polite">
+        <p className="text-[13px] text-neutral-400" aria-live="polite">
           <span className="font-semibold text-white tabular-nums">
             {data?.totalMatched ?? 0}
           </span>{" "}
@@ -881,29 +844,17 @@ export function DiscoveryPage() {
           <span className="mx-1.5 text-ink-700">·</span>
           <span className="font-semibold text-accent-400 tabular-nums">{readyNow}</span> ready now
         </p>
-        <div
-          role="group"
-          aria-label="Group results"
-          className="inline-flex shrink-0 items-center rounded-lg border border-ink-800 bg-ink-850 p-0.5"
-        >
-          <RailButton active={rail === "flat"} onClick={() => setRail("flat")}>
-            All cranes
-          </RailButton>
-          <RailButton active={rail === "grouped"} onClick={() => setRail("grouped")}>
-            By vendor
-          </RailButton>
-        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {results.isError ? (
-          <div className="m-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-[12px] text-red-200">
+          <div className="m-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-[13px] text-red-700">
             <p className="font-medium">Could not run that search</p>
-            <p className="mt-0.5 text-red-200/70">{(results.error as Error).message}</p>
+            <p className="mt-0.5 text-red-700/80">{(results.error as Error).message}</p>
             <button
               type="button"
               onClick={() => void results.refetch()}
-              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[11px] font-medium text-red-100 hover:bg-red-500/10"
+              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[12px] font-medium text-red-700 hover:bg-red-500/10"
             >
               Try again
             </button>
@@ -911,8 +862,8 @@ export function DiscoveryPage() {
         ) : null}
 
         {siteMissing ? (
-          <p className="mx-3 mt-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200/90">
-            Job site not found, so the list is not distance-sorted. Try a nearby town or a pincode.
+          <p className="mx-3 mt-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[12px] text-amber-700">
+            The "To" location was not found, so the list is not distance-sorted. Try a nearby town.
           </p>
         ) : null}
 
@@ -922,7 +873,7 @@ export function DiscoveryPage() {
           <div className="px-5 py-16 text-center">
             <p className="text-sm font-medium text-neutral-200">No cranes match your filters</p>
             <p className="mt-1 text-xs text-neutral-500">
-              Widen the capacity, clear the search, then try again.
+              Widen the capacity, clear the filters, then try again.
             </p>
             <button
               type="button"
@@ -932,13 +883,6 @@ export function DiscoveryPage() {
               Clear filters
             </button>
           </div>
-        ) : rail === "grouped" ? (
-          <GroupedRail
-            data={data}
-            selectedCraneId={highlightedCraneId}
-            onHover={setHoveredCraneId}
-            onSelect={setSelectedCraneId}
-          />
         ) : (
           <ul>
             {cranes.map((crane) => (
@@ -946,7 +890,6 @@ export function DiscoveryPage() {
                 key={crane.craneId}
                 crane={crane}
                 selected={crane.craneId === highlightedCraneId}
-                onHover={setHoveredCraneId}
                 onSelect={setSelectedCraneId}
               />
             ))}
@@ -973,10 +916,10 @@ export function DiscoveryPage() {
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-ink-800 px-4 py-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Availability
             </p>
-            <p className="mt-0.5 truncate text-[13px] font-semibold text-white">
+            <p className="mt-0.5 truncate text-[14px] font-semibold text-white">
               {data?.totalMatched ?? 0} crane{(data?.totalMatched ?? 0) === 1 ? "" : "s"} matched
               {committed.availableFrom && committed.availableTo
                 ? ` · free from ${committed.availableFrom} to ${committed.availableTo}`
@@ -1027,13 +970,13 @@ export function DiscoveryPage() {
   ) : null;
 
   return (
-    <div className="theme-dark isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6">
+    <div className={cn("isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6", theme === "light" ? "theme-light" : "theme-dark")}>
       {isDesktop ? (
-      <div className="flex min-h-0 flex-1 gap-3 p-3">
+      <div className="flex min-h-0 flex-1 gap-4 p-4">
         <aside
           className={cn(
-            "flex min-h-0 shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900",
-            linePanelCollapsed ? "w-14" : "w-[300px]",
+            "flex min-h-0 shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm",
+            linePanelCollapsed ? "w-14" : "w-[320px]",
           )}
         >
           <LinePanel
@@ -1043,12 +986,14 @@ export function DiscoveryPage() {
           />
         </aside>
 
-        <aside className="flex min-h-0 w-[360px] shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900">
+        <aside className="flex min-h-0 w-[400px] shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm">
           {lineId ? recommendationPanel : browseRail}
         </aside>
 
         <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl border border-ink-800">
           <GoogleCraneMap
+            key={theme}
+            theme={theme}
             className="h-full w-full"
             cranes={cranes}
             vendorPoints={lineId ? [] : (data?.vendorPoints ?? [])}
@@ -1076,15 +1021,16 @@ export function DiscoveryPage() {
           >
             <MapPin className="size-3.5 shrink-0 text-accent-400" aria-hidden />
             <span className="min-w-0 flex-1">
-              <span className="block text-[9px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+              <span className="block text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
                 Enquiry line
               </span>
-              <span className="block truncate text-[12px] font-medium text-neutral-100">
+              <span className="block truncate text-[13px] font-medium text-neutral-100">
                 {selectedLine ? lineReference(selectedLine) : "Pick a line · or browse all cranes"}
               </span>
             </span>
             <ChevronDown className="size-4 shrink-0 text-neutral-500" aria-hidden />
           </button>
+          <ThemeToggle theme={theme} onToggle={toggleTheme} className="border border-ink-800" />
           {lineId ? (
             <button
               type="button"
@@ -1099,6 +1045,8 @@ export function DiscoveryPage() {
 
         <main className="relative min-h-0 flex-1">
           <GoogleCraneMap
+            key={theme}
+            theme={theme}
             className="h-full w-full"
             cranes={cranes}
             vendorPoints={lineId ? [] : (data?.vendorPoints ?? [])}
@@ -1112,7 +1060,7 @@ export function DiscoveryPage() {
 
         <div
           ref={sheetRef}
-          className="relative z-[850] flex shrink-0 flex-col overflow-hidden rounded-t-2xl border-t border-ink-800 bg-ink-900 shadow-[0_-12px_30px_rgba(0,0,0,0.45)]"
+          className="relative z-[850] flex shrink-0 flex-col overflow-hidden rounded-t-2xl border-t border-ink-800 bg-ink-900 shadow-[0_-12px_30px_rgba(0,0,0,0.2)]"
           style={{ height: `${sheetPct}%`, transition: sheetTransition }}
         >
           <div
@@ -1147,7 +1095,7 @@ export function DiscoveryPage() {
         <MoreFilters
           filters={filters}
           set={set}
-          facets={facets.data}
+          enquirySite={selectedLine?.siteLocation ?? null}
           halfWindow={halfWindow}
           activeCount={moreCount}
           onClear={clearAll}
@@ -1198,34 +1146,10 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-full px-3 py-1 text-[11px] font-medium transition-colors",
+        "rounded-full px-3 py-1 text-[12px] font-medium transition-colors",
         active
           ? "bg-white text-ink-950"
           : "border border-ink-700 text-neutral-400 hover:border-ink-700 hover:text-white",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function RailButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
-        active ? "bg-ink-700 text-white" : "text-neutral-500 hover:text-neutral-200",
       )}
     >
       {children}
@@ -1244,12 +1168,10 @@ function RailButton({
 function CraneRow({
   crane,
   selected,
-  onHover,
   onSelect,
 }: {
   crane: DiscoveryCrane;
   selected: boolean;
-  onHover: (craneId: string | null) => void;
   onSelect: (craneId: string) => void;
 }) {
   return (
@@ -1257,10 +1179,6 @@ function CraneRow({
       <button
         type="button"
         onClick={() => onSelect(crane.craneId)}
-        onMouseEnter={() => onHover(crane.craneId)}
-        onMouseLeave={() => onHover(null)}
-        onFocus={() => onHover(crane.craneId)}
-        onBlur={() => onHover(null)}
         aria-pressed={selected}
         className={cn(
           "flex w-full items-center gap-3 border-b border-l-[3px] border-ink-800/70 px-4 py-3 text-left transition-colors",
@@ -1282,7 +1200,7 @@ function CraneRow({
           </span>
           <span
             className={cn(
-              "mt-1 text-[8px] font-semibold tracking-[0.16em]",
+              "mt-1 text-[10px] font-semibold tracking-[0.16em]",
               selected ? "text-neutral-500" : "text-neutral-500",
             )}
           >
@@ -1291,18 +1209,18 @@ function CraneRow({
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold text-neutral-100">
+          <span className="block truncate text-[14px] font-semibold text-neutral-100">
             {crane.make} {crane.model}
           </span>
-          <span className="mt-0.5 block truncate text-[11px] text-neutral-400">
+          <span className="mt-0.5 block truncate text-[12px] text-neutral-400">
             {crane.typeOfCraneName} · {crane.currentLocation}
           </span>
-          <span className="mt-0.5 block truncate text-[10px] text-neutral-500">
+          <span className="mt-0.5 block truncate text-[11px] text-neutral-500">
             {crane.vendorName}
           </span>
         </span>
 
-        <span className="flex shrink-0 items-center gap-1.5 text-[11px] text-neutral-400">
+        <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-neutral-400">
           <span
             aria-hidden
             className="size-1.5 rounded-full"
@@ -1312,79 +1230,6 @@ function CraneRow({
         </span>
       </button>
     </li>
-  );
-}
-
-function GroupedRail({
-  data,
-  selectedCraneId,
-  onHover,
-  onSelect,
-}: {
-  data: ResultData;
-  selectedCraneId: string | null;
-  onHover: (craneId: string | null) => void;
-  onSelect: (craneId: string) => void;
-}) {
-  return (
-    <div>
-      {data.groups.map((group) => (
-        <section key={group.vendorId}>
-          <div className="flex items-center justify-between gap-2 border-b border-ink-800/70 bg-ink-950/60 px-4 py-2">
-            <div className="min-w-0">
-              <h2 className="truncate text-[12px] font-semibold text-neutral-200">
-                {group.vendorName}
-              </h2>
-              <p className="mt-0.5 text-[10px] text-neutral-500">
-                {group.companySize ? `${group.companySize} · ` : ""}
-                {group.fleetSize} crane{group.fleetSize === 1 ? "" : "s"} · nearest{" "}
-                {formatDistance(group.nearestKm, group.distanceApproximate)}
-              </p>
-            </div>
-            <Link
-              to="/app/vendors/$vendorId"
-              params={{ vendorId: group.vendorId }}
-              className="shrink-0 text-[10px] font-medium text-accent-400 hover:text-accent-300"
-            >
-              Vendor
-            </Link>
-          </div>
-          <ul>
-            {group.cranes.map((crane) => (
-              <CraneRow
-                key={crane.craneId}
-                crane={crane}
-                selected={crane.craneId === selectedCraneId}
-                onHover={onHover}
-                onSelect={onSelect}
-              />
-            ))}
-          </ul>
-        </section>
-      ))}
-
-      {data.unverified.length > 0 ? (
-        <section>
-          <div className="border-b border-ink-800/70 bg-ink-950/60 px-4 py-2">
-            <h2 className="text-[12px] font-semibold text-neutral-200">Location unverified</h2>
-            <p className="mt-0.5 text-[10px] text-neutral-500">
-              No stored coordinates, so these cannot appear on the map.
-            </p>
-          </div>
-          <ul>
-            {data.unverified.map((crane) => (
-              <CraneRow
-                key={crane.craneId}
-                crane={crane}
-                selected={crane.craneId === selectedCraneId}
-                onHover={onHover}
-                onSelect={onSelect}
-              />
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </div>
   );
 }
 
@@ -1420,7 +1265,7 @@ function SkeletonRows() {
 function MoreFilters({
   filters,
   set,
-  facets,
+  enquirySite,
   halfWindow,
   activeCount,
   onClear,
@@ -1428,7 +1273,8 @@ function MoreFilters({
 }: {
   filters: FilterState;
   set: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
-  facets: Awaited<ReturnType<typeof discoveryFacets>> | undefined;
+  /** The selected enquiry's site, when one is picked; it then fills "To". */
+  enquirySite: string | null;
   halfWindow: boolean;
   activeCount: number;
   onClear: () => void;
@@ -1470,7 +1316,7 @@ function MoreFilters({
 
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
           <fieldset className="space-y-3">
-            <legend className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            <legend className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Hire window
             </legend>
             <div className="grid grid-cols-2 gap-2">
@@ -1491,7 +1337,7 @@ function MoreFilters({
                 />
               </Field>
             </div>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[12px] text-neutral-500">
               {halfWindow
                 ? "Set both dates — one date has no period to test a booking against."
                 : "A crane must be free for the whole window, not only on the first day."}
@@ -1499,48 +1345,44 @@ function MoreFilters({
           </fieldset>
 
           <fieldset className="space-y-3">
-            <legend className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-              Job site
+            <legend className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+              Route
             </legend>
             <Field
-              label="Site address"
-              htmlFor="more-site"
-              hint="Drops the red site pin and sorts the list by road distance."
+              label="From"
+              htmlFor="more-from-location"
+              hint="Only cranes located here are listed, e.g. Pune."
             >
               <TextInput
-                id="more-site"
-                value={filters.siteLocation}
-                onChange={(value) => set("siteLocation", value)}
-                placeholder="e.g. Vadodara, Gujarat"
+                id="more-from-location"
+                value={filters.location}
+                onChange={(value) => set("location", value)}
+                placeholder="Crane location, e.g. Pune"
               />
             </Field>
-            <Field label="Pincode" htmlFor="more-pin">
+            <Field
+              label="To"
+              htmlFor="more-to-location"
+              hint={
+                enquirySite
+                  ? "Taken from the selected enquiry."
+                  : "The enquiry site. Drops the red site pin and sorts the list by road distance."
+              }
+            >
               <TextInput
-                id="more-pin"
-                value={filters.sitePincode}
-                onChange={(value) => set("sitePincode", value)}
-                inputMode="numeric"
-                placeholder="e.g. 390001"
+                id="more-to-location"
+                value={enquirySite ?? filters.siteLocation}
+                onChange={(value) => set("siteLocation", value)}
+                disabled={Boolean(enquirySite)}
+                placeholder="Enquiry site, e.g. Vadodara, Gujarat"
               />
             </Field>
           </fieldset>
 
           <fieldset className="space-y-3">
-            <legend className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            <legend className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Crane
             </legend>
-            <Field label="Crane state" htmlFor="more-region">
-              <Select
-                id="more-region"
-                value={filters.region}
-                onChange={(value) => set("region", value)}
-                placeholder="All states"
-                options={(facets?.states ?? []).map((state) => ({
-                  value: state.code,
-                  label: state.name,
-                }))}
-              />
-            </Field>
             <div className="grid grid-cols-2 gap-2">
               <Field label="YOM from" htmlFor="more-yom-from">
                 <TextInput
@@ -1561,7 +1403,7 @@ function MoreFilters({
                 />
               </Field>
             </div>
-            <label className="flex cursor-pointer items-center gap-2 text-[12px] text-neutral-300">
+            <label className="flex cursor-pointer items-center gap-2 text-[13px] text-neutral-300">
               <input
                 type="checkbox"
                 checked={filters.capacityRule === "EXACT"}
@@ -1575,7 +1417,7 @@ function MoreFilters({
           </fieldset>
 
           <fieldset className="space-y-3">
-            <legend className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            <legend className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Vendor
             </legend>
             <Field label="Vendor name" htmlFor="more-vendor">
@@ -1586,41 +1428,6 @@ function MoreFilters({
                 placeholder="e.g. Sharma"
               />
             </Field>
-            <Field label="Operating region" htmlFor="more-vendor-region">
-              <Select
-                id="more-vendor-region"
-                value={filters.vendorRegion}
-                onChange={(value) => set("vendorRegion", value)}
-                placeholder="All states"
-                options={(facets?.states ?? []).map((state) => ({
-                  value: state.code,
-                  label: state.name,
-                }))}
-              />
-            </Field>
-            <div className="grid grid-cols-2 gap-2">
-              <Field label="Company size" htmlFor="more-size">
-                <Select
-                  id="more-size"
-                  value={filters.companySize}
-                  onChange={(value) => set("companySize", value)}
-                  placeholder="Any"
-                  options={(facets?.companySizes ?? []).map((size) => ({
-                    value: size,
-                    label: size,
-                  }))}
-                />
-              </Field>
-              <Field label="Fleet min" htmlFor="more-fleet">
-                <TextInput
-                  id="more-fleet"
-                  value={filters.fleetSizeMin}
-                  onChange={(value) => set("fleetSizeMin", value)}
-                  inputMode="numeric"
-                  placeholder="e.g. 5"
-                />
-              </Field>
-            </div>
           </fieldset>
         </div>
 
@@ -1635,7 +1442,7 @@ function MoreFilters({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent-600"
+            className="flex-1 rounded-lg bg-accent-500 px-3 py-2 text-xs font-semibold text-[#fff] transition-colors hover:bg-accent-600"
           >
             Done{activeCount > 0 ? ` · ${activeCount} applied` : ""}
           </button>
