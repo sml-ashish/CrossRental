@@ -197,10 +197,18 @@ export const recommendations = asyncHandler(
     const result = await enquiries.getLineRecommendations(
       param(req, "lineId"),
       actorOf(req),
+      req.query,
     );
     res.json(result);
   },
 );
+
+/** Part B: the drivable path from the job site to one crane. */
+export const lineRoute = asyncHandler(async (req: Request, res: Response) => {
+  res.json(
+    await enquiries.getLineRoute(param(req, "lineId"), req.query, actorOf(req)),
+  );
+});
 
 /** Re-run the recommendation engine, keeping earlier snapshots (P2). */
 export const refreshRecommendations = asyncHandler(

@@ -2,11 +2,17 @@ import { prisma } from "../lib/database";
 import type { Prisma } from "../generated/prisma/client";
 import { CoordinateSource } from "../generated/prisma/client";
 import { tryGeocode, getGeoProvider } from "../lib/geo";
+import { env } from "../config/env";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import { recordAudit } from "./audit.service";
 import { nextEnquiryNumber } from "./enquiryNumber.service";
-import { evaluateAndStore, getOrEvaluateLatest, listSnapshots } from "./recommendation.service";
+import {
+  evaluateAndStore,
+  getRecommendation,
+  listSnapshots,
+} from "./recommendation.service";
+import { getLineRoute as resolveLineRoute } from "./route.service";
 import { compareQuotationsForLine } from "./comparison.service";
 import { createRfq, type Actor } from "./rfq.service";
 import * as trail from "./enquiryTrail.service";
@@ -20,6 +26,8 @@ import {
   rfqFromLineSchema,
   listEnquiriesQuerySchema,
   listRaisableLinesQuerySchema,
+  recommendationQuerySchema,
+  lineRouteQuerySchema,
   type CreateEnquiryInput,
   type UpdateEnquiryInput,
   type AddLineInput,
@@ -700,6 +708,8 @@ export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
       capacityRule: true,
       quantity: true,
       requiredStartDate: true,
+      durationValue: true,
+      durationUnit: true,
       trailStatus: true,
       craneType: { select: { name: true } },
       enquiry: {
@@ -707,6 +717,8 @@ export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
           enquiryNo: true,
           siteLocation: true,
           sitePincode: true,
+          siteLatitude: true,
+          siteLongitude: true,
           siteState: { select: { name: true } },
         },
       },
@@ -728,9 +740,15 @@ export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
     quantity: row.quantity,
     requiredStartDate: row.requiredStartDate,
     startDateTbc: row.requiredStartDate === null,
+    // The requirement summary in the line panel needs the hire length and
+    // whether the site can be pinned at all.
+    durationValue: num(row.durationValue),
+    durationUnit: row.durationUnit,
     siteLocation: row.enquiry.siteLocation,
     siteStateName: row.enquiry.siteState?.name ?? null,
     sitePincode: row.enquiry.sitePincode,
+    siteLatitude: num(row.enquiry.siteLatitude),
+    siteLongitude: num(row.enquiry.siteLongitude),
     trailStatus: row.trailStatus,
     rfqCount: row._count.rfqs,
   }));
@@ -1012,11 +1030,16 @@ export type { CreateEnquiryInput };
 // --- recommendations (P2) -------------------------------------------------
 
 /** The latest recommendations plus the snapshot history. */
-export async function getLineRecommendations(lineId: string, actor: Actor) {
+export async function getLineRecommendations(
+  lineId: string,
+  actor: Actor,
+  rawQuery?: unknown,
+) {
   assertInternal(actor);
-  const recommendations = await getOrEvaluateLatest(lineId, actor);
+  const query = recommendationQuerySchema.parse(rawQuery ?? {});
+  const recommendations = await getRecommendation(lineId, actor, query.mode);
   const snapshots = await listSnapshots(lineId);
-  return { recommendations, snapshots };
+  return { recommendations, snapshots, routeAvailable: env.route.polyline };
 }
 
 /** Re-run the engine and keep the earlier snapshots. */
@@ -1024,7 +1047,18 @@ export async function refreshLineRecommendations(lineId: string, actor: Actor) {
   assertInternal(actor);
   const recommendations = await evaluateAndStore(lineId, actor, "refresh");
   const snapshots = await listSnapshots(lineId);
-  return { recommendations, snapshots };
+  return { recommendations, snapshots, routeAvailable: env.route.polyline };
+}
+
+/** The drivable path from the job site to one crane (route.service). */
+export async function getLineRoute(
+  lineId: string,
+  rawQuery: unknown,
+  actor: Actor,
+) {
+  assertInternal(actor);
+  const query = lineRouteQuerySchema.parse(rawQuery ?? {});
+  return resolveLineRoute(lineId, query.craneId, actor);
 }
 
 // --- comparison (P3) ------------------------------------------------------

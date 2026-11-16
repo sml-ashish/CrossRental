@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import {
   Check,
   ChevronDown,
@@ -168,6 +169,10 @@ export function VendorPickerSection({
   onPinConfirmed: () => void;
 }) {
   const queryClient = useQueryClient();
+  const routeSearch = useSearch({ strict: false }) as { vendor?: string };
+  // Read once, at mount. The RFQ screen rewrites its own `tab` search param, so
+  // a live read could lose the vendor between render and the first preselection.
+  const [requestedVendorId] = useState<string | null>(() => routeSearch.vendor ?? null);
   const [sort, setSort] = useState<SortMode>("best");
   const [filters, setFilters] = useState<PickerFilters>(EMPTY_FILTERS);
   const [search, setSearch] = useState("");
@@ -192,7 +197,9 @@ export function VendorPickerSection({
   const approved = useQuery({
     queryKey: ["rfq-approved-vendors", vendorSearch],
     queryFn: () => listApprovedVendors(vendorSearch),
-    enabled: view === "approved",
+    // A vendor carried in from the Request window needs a name even when it is
+    // not among the ranked candidates, so the list is loaded for that case too.
+    enabled: view === "approved" || Boolean(requestedVendorId),
   });
 
   const contactedIndex = useMemo(
@@ -476,14 +483,27 @@ export function VendorPickerSection({
   }, [expanded]);
 
   // Pre-selection runs once, after both the fleet and the enquiry history have
-  // settled, and never again once the user has touched the shortlist.
+  // settled, and never again once the user has touched the shortlist. A vendor
+  // named in `?vendor=` (from the "Request this crane" window) wins over the
+  // recommendation: the person has already chosen who they came to add.
   useEffect(() => {
     if (preselectionApplied.current || touched) return;
     if (!candidates.data || !summary.isSuccess) return;
     preselectionApplied.current = true;
-    setSelected(recommendedIds);
-    announceSelection(recommendedIds.length);
-  }, [candidates.data, summary.isSuccess, touched, recommendedIds]);
+    const initial =
+      requestedVendorId && !alreadySent.includes(requestedVendorId)
+        ? [requestedVendorId]
+        : recommendedIds;
+    setSelected(initial);
+    announceSelection(initial.length);
+  }, [
+    candidates.data,
+    summary.isSuccess,
+    touched,
+    recommendedIds,
+    requestedVendorId,
+    alreadySent,
+  ]);
 
   // The mobile sheet holds the rail; Esc closes it like any other overlay.
   useEffect(() => {

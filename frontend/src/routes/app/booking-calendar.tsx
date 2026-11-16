@@ -4,8 +4,8 @@ import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-ro
 import {
   ArrowUpRight,
   ChevronDown,
+  Mail,
   RefreshCw,
-  Search,
   SlidersHorizontal,
 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Field, Select, TextInput } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RequestCraneDialog } from "@/components/request-crane-dialog";
 import {
   EMPTY_FILTERS,
   addDays,
@@ -462,7 +463,6 @@ export function BookingCalendarPage() {
                 open
                 expandedId={expandedId}
                 view={view}
-                minCapacity={view.filters.min}
                 onToggle={toggleExpanded}
               />
               <GroupSection
@@ -472,7 +472,6 @@ export function BookingCalendarPage() {
                 open
                 expandedId={expandedId}
                 view={view}
-                minCapacity={view.filters.min}
                 onToggle={toggleExpanded}
               />
               <GroupSection
@@ -483,7 +482,6 @@ export function BookingCalendarPage() {
                 onOpenChange={setShowNotAvailable}
                 expandedId={expandedId}
                 view={view}
-                minCapacity={view.filters.min}
                 onToggle={toggleExpanded}
               />
             </>
@@ -519,7 +517,6 @@ function GroupSection({
   onOpenChange,
   expandedId,
   view,
-  minCapacity,
   onToggle,
 }: {
   title: string;
@@ -529,7 +526,6 @@ function GroupSection({
   onOpenChange?: (open: boolean) => void;
   expandedId: string | null;
   view: ViewState;
-  minCapacity: string;
   onToggle: (craneId: string) => void;
 }) {
   const collapsible = Boolean(onOpenChange);
@@ -574,7 +570,6 @@ function GroupSection({
               key={row.crane.craneId}
               row={row}
               view={view}
-              minCapacity={minCapacity}
               expanded={expandedId === row.crane.craneId}
               onToggle={onToggle}
             />
@@ -587,17 +582,16 @@ function GroupSection({
 function CraneRow({
   row,
   view,
-  minCapacity,
   expanded,
   onToggle,
 }: {
   row: ClassifiedCrane;
   view: ViewState;
-  minCapacity: string;
   expanded: boolean;
   onToggle: (craneId: string) => void;
 }) {
   const { crane, availability } = row;
+  const [requestOpen, setRequestOpen] = useState(false);
   const panelId = `availability-panel-${crane.craneId}`;
   const bookings = useMemo(
     () => bookingsWithin(crane, view.from, view.to),
@@ -608,13 +602,13 @@ function CraneRow({
   const todayOffset = diffDays(view.from, today);
   const showToday = todayOffset >= 0 && todayOffset < totalDays;
 
-  const rfqSearch = {
-    craneType: crane.craneTypeCode,
-    capacityT: Number(minCapacity || crane.capacityT),
-    capacityRule: "AT_LEAST",
-    availableFrom: view.from,
-    availableTo: view.to,
-  };
+  // The first free run is what the request window is told about. It is not the
+  // whole period on screen: a partly free crane may only be free from the 20th.
+  const firstFree = availability.segments.find((segment) => segment.kind === "free");
+  const freeWindow =
+    availability.kind === "none"
+      ? undefined
+      : { from: firstFree?.start ?? view.from, to: firstFree?.end ?? view.to };
 
   return (
     <article
@@ -705,11 +699,41 @@ function CraneRow({
               <ArrowUpRight className="size-3.5" aria-hidden />
               Open crane
             </Link>
-            <Link to="/app/discovery" search={rfqSearch} className="btn-primary px-3 py-1.5 text-xs">
-              <Search className="size-3.5" aria-hidden />
+            <button
+              type="button"
+              onClick={() => setRequestOpen(true)}
+              className="btn-primary px-3 py-1.5 text-xs"
+            >
+              <Mail className="size-3.5" aria-hidden />
               Start an RFQ
-            </Link>
+            </button>
           </div>
+
+          <RequestCraneDialog
+            open={requestOpen}
+            onOpenChange={setRequestOpen}
+            freeWindow={freeWindow}
+            availabilityNote={
+              availability.kind === "none"
+                ? availability.blocker ?? "Not free in this period"
+                : undefined
+            }
+            crane={{
+              craneId: crane.craneId,
+              vendorId: crane.vendorId,
+              vendorName: crane.vendorName,
+              typeOfCraneCode: crane.craneTypeCode,
+              typeOfCraneName: crane.craneTypeName,
+              capacityT: crane.capacityT,
+              mainBoomM: null,
+              currentLocation: crane.currentLocation,
+              stateCode: crane.stateCode,
+              stateName: crane.stateName,
+              availableFrom: null,
+              latitude: null,
+              longitude: null,
+            }}
+          />
         </div>
       ) : null}
     </article>

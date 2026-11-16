@@ -164,3 +164,246 @@ export function searchDiscoveryCalendar(
   }
   return api(`/discovery/calendar?${params.toString()}`);
 }
+
+/* ------------------------------------------------- enquiry recommendations */
+
+/**
+ * The two lists the enquiry section can show.
+ *
+ * `technical` is the snapshot the recommendation engine stored — the list sales
+ * actually acted on. `distance` is computed live and is never stored, which is
+ * why the response carries no `snapshotId` for it.
+ */
+export type RecommendationMode = "technical" | "distance";
+
+export interface RecommendationParticipation {
+  invitations: number;
+  quoted: number;
+  awarded: number;
+  responsivenessPct: number | null;
+  winPct: number | null;
+}
+
+/** A recommended crane: a candidate plus cost, warnings and its stored pin. */
+export interface RecommendationCrane {
+  craneId: string;
+  vendorId: string;
+  vendorName: string;
+  typeOfCraneCode: string;
+  typeOfCraneName: string;
+  capacityT: number;
+  /** True in distance mode for a crane below the line's tonnage. */
+  belowRequiredCapacity: boolean;
+  make: string;
+  model: string;
+  yom: number | null;
+  currentStatus: string;
+  currentLocation: string;
+  stateCode: string;
+  stateName: string;
+  availableFrom: string | null;
+  loadChartFileName: string | null;
+  mainBoomM: number | null;
+  fixedJibM: number | null;
+  luffingJibM: number | null;
+  windJibM: number | null;
+  ownershipType: string;
+  availableInTime: boolean;
+  /** The crane's own pin. Null means no route and no marker for it. */
+  latitude: number | null;
+  longitude: number | null;
+  locationUnverified: boolean;
+  stale: boolean;
+  daysSinceUpdate: number;
+  lastUpdatedAt: string;
+  distanceKm: number | null;
+  distanceMethod: string | null;
+  distanceApproximate: boolean;
+  estimatedMobilisationCost: number | null;
+  ratePerKm: number | null;
+  boomWarnings: string[];
+}
+
+export interface RecommendationGroup {
+  vendorId: string;
+  vendorName: string;
+  nearestKm: number | null;
+  distanceMethod: string | null;
+  distanceApproximate: boolean;
+  participation: RecommendationParticipation | null;
+  cranes: RecommendationCrane[];
+}
+
+export interface RecommendationSite {
+  siteLocation: string;
+  stateCode: string;
+  stateName: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationUnverified: boolean;
+}
+
+export interface LineRecommendations {
+  lineId: string;
+  /** Null for the live distance list, which is not a stored snapshot. */
+  snapshotId: string | null;
+  trigger: string;
+  evaluatedAt: string;
+  provider: string | null;
+  site: RecommendationSite;
+  distancesAvailable: boolean;
+  startDateTbc: boolean;
+  capacityRule: string;
+  notice: string | null;
+  sml: {
+    ownership: string;
+    cranes: RecommendationCrane[];
+    internalCheck: { trailStatus: string; closureStatus: string | null } | null;
+  };
+  vendor: {
+    ownership: string;
+    groups: RecommendationGroup[];
+    unverified: RecommendationCrane[];
+  };
+}
+
+export interface SnapshotSummary {
+  id: string;
+  trigger: string;
+  evaluatedAt: string;
+  provider: string | null;
+  vendorCraneCount: number;
+}
+
+export interface LineRecommendationsResponse {
+  recommendations: LineRecommendations;
+  snapshots: SnapshotSummary[];
+  /** True when `ROUTE_POLYLINE` is on and a real path can be requested. */
+  routeAvailable: boolean;
+}
+
+export function lineRecommendations(
+  lineId: string,
+  mode: RecommendationMode,
+): Promise<LineRecommendationsResponse> {
+  return api(`/enquiries/lines/${lineId}/recommendations?mode=${mode}`);
+}
+
+/** Re-runs the engine and stores a new snapshot. Technical view only. */
+export function refreshLineRecommendations(
+  lineId: string,
+): Promise<LineRecommendationsResponse> {
+  return api(`/enquiries/lines/${lineId}/recommendations/refresh`, { method: "POST" });
+}
+
+/**
+ * One drivable option from the job site to one crane.
+ *
+ * The shape is **encoded**: `encodedPolyline` is Google's polyline, decoded in
+ * the browser by the Maps JavaScript geometry library. The server never ships
+ * a decoded vertex array, and the client never measures anything — `km` and
+ * `durationMin` come from the backend.
+ */
+export interface LineRouteOption {
+  /** "r0", "r1", … — stable within one response. */
+  id: string;
+  /** Google's recommended option. Exactly one carries this. */
+  isPrimary: boolean;
+  km: number;
+  durationMin: number | null;
+  /** The road the option is described by, e.g. "NH 48". */
+  via: string | null;
+  /** Null only on the straight-line fallback. */
+  encodedPolyline: string | null;
+}
+
+/**
+ * A drivable route from the job site to one crane.
+ *
+ * `routes` is primary first and holds at most three options. On a routing
+ * failure the shape is still present, `method` is `"straight_line"` and the one
+ * option's `encodedPolyline` is null: the map draws a **dashed, labelled**
+ * line, never an unlabelled road.
+ */
+export interface LineRoute {
+  method: "road" | "straight_line";
+  approximate: boolean;
+  siteLabel: string;
+  craneLabel: string;
+  routes: LineRouteOption[];
+}
+
+export function getLineRoute(
+  lineId: string,
+  craneId: string,
+  signal?: AbortSignal,
+): Promise<LineRoute> {
+  const params = new URLSearchParams({ craneId });
+  return api(`/enquiries/lines/${lineId}/route?${params.toString()}`, { signal });
+}
+
+/**
+ * A crane the map and the card can draw, from either a browse or a
+ * recommendation. The recommendation adds cost and warnings to the same shape,
+ * so there is a single render path for a crane.
+ */
+export type DisplayCrane = DiscoveryCrane &
+  Partial<
+    Pick<
+      RecommendationCrane,
+      "estimatedMobilisationCost" | "ratePerKm" | "boomWarnings" | "belowRequiredCapacity"
+    >
+  >;
+
+export function toDisplayCrane(crane: RecommendationCrane): DisplayCrane {
+  return {
+    ...crane,
+    // Browse-only fields. The card and map do not read them, but keeping the
+    // object whole means neither has to know where the crane came from.
+    vendorCompanySize: null,
+    vendorFleetSize: 0,
+    expectedReadyDate: null,
+    serialRegistrationNo: `${crane.make} ${crane.model}`,
+    // The recommendation payload allows a missing year; the browse shape does
+    // not. Zero is the card's "not recorded" signal, never a real model year.
+    yom: crane.yom ?? 0,
+  };
+}
+
+export function recommendationCranes(
+  recommendations: LineRecommendations | undefined,
+): RecommendationCrane[] {
+  if (!recommendations) return [];
+  return [
+    ...recommendations.vendor.groups.flatMap((group) => group.cranes),
+    ...recommendations.vendor.unverified,
+  ];
+}
+
+/** `412 km` — whole kilometres once the number is big enough to stop caring. */
+export function formatKm(km: number | null): string {
+  if (km === null || !Number.isFinite(km) || km <= 0) return "—";
+  const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
+  return `${rounded} km`;
+}
+
+/** `9 h 10 min` — a drive time in the unit people actually plan with. */
+export function formatDriveTime(minutes: number | null): string | null {
+  if (minutes === null || !Number.isFinite(minutes) || minutes <= 0) return null;
+  const total = Math.round(minutes);
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  if (hours === 0) return `${rest} min`;
+  if (rest === 0) return `${hours} h`;
+  return `${hours} h ${rest} min`;
+}
+
+/** `412 km · about 9 h 10 min`, or just the distance when there is no drive time. */
+export function formatRouteDistance(
+  km: number | null,
+  durationMin: number | null,
+): string {
+  const distance = formatKm(km);
+  const drive = formatDriveTime(durationMin);
+  return drive ? `${distance} · about ${drive}` : distance;
+}

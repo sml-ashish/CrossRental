@@ -383,3 +383,61 @@
   }
 }
 
+
+/*
+ * Printing one RFQ's requirement from the vendor portal.
+ *
+ * The page is a workspace with a sticky bar, a fixed mobile action bar and a
+ * quote panel; a dispatcher who asks for "print the requirement" wants the
+ * requirement, not a screenshot of the chrome. `printRequirement()` sets
+ * `data-print="rfq"` on the root for the duration of the print, so this block
+ * can isolate the `#rfq-print` column without a second print layout.
+ */
+@media print {
+  html[data-print="rfq"],
+  html[data-print="rfq"] body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  /* Everything else stays laid out but invisible, so no surrounding block
+     reflows and no hidden panel can grow a blank page. */
+  html[data-print="rfq"] body * {
+    visibility: hidden !important;
+  }
+
+  html[data-print="rfq"] #rfq-print,
+  html[data-print="rfq"] #rfq-print * {
+    visibility: visible !important;
+  }
+
+  html[data-print="rfq"] #rfq-print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  html[data-print="rfq"] #rfq-print,
+  html[data-print="rfq"] #rfq-print * {
+    background: transparent !important;
+    border-color: #d4d4d8 !important;
+    box-shadow: none !important;
+    color: #111111 !important;
+  }
+
+  /* Labels stay a step lighter than their values, as on screen. */
+  html[data-print="rfq"] #rfq-print dt {
+    color: #4b4b52 !important;
+  }
+
+  html[data-print="rfq"] #rfq-print .card {
+    break-inside: avoid;
+  }
+
+  html[data-print="rfq"] #rfq-print section {
+    break-inside: avoid;
+  }
+}

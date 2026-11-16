@@ -34,6 +34,11 @@ router.get(
   enquiry.recommendations,
 );
 router.get(
+  "/lines/:lineId/route",
+  requireCapability("enquiry:view"),
+  enquiry.lineRoute,
+);
+router.get(
   "/lines/:lineId/comparison",
   requireCapability("enquiry:view"),
   enquiry.comparison,

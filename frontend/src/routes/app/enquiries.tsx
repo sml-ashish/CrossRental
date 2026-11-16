@@ -540,6 +540,7 @@ export function EnquiryIndexPage() {
     return {
       to: "/app/discovery" as const,
       search: {
+        ...(line ? { line: line.id } : {}),
         ...(row?.siteLocation ? { siteLocation: row.siteLocation } : {}),
         ...(line?.craneTypeCode ? { craneType: line.craneTypeCode } : {}),
         ...(line?.capacityT ? { capacityT: line.capacityT } : {}),

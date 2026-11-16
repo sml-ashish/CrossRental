@@ -305,9 +305,11 @@ const rfqDetailRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/rfqs/$rfqId",
   // The detail screen's sections are tabs; keeping the open one in the URL
-  // makes "look at the quotes" a link someone can send.
-  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+  // makes "look at the quotes" a link someone can send. `vendor` is the
+  // preselection a "Request this crane" window carries into the picker.
+  validateSearch: (search: Record<string, unknown>): { tab?: string; vendor?: string } => ({
     tab: typeof search.tab === "string" ? search.tab : undefined,
+    vendor: typeof search.vendor === "string" ? search.vendor : undefined,
   }),
   component: () => (
     <RequireAuth roles={["admin_user", "sales_user", "vendor_user"]}>

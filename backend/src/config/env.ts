@@ -202,6 +202,12 @@ export const env = Object.freeze({
     googleTimeoutMs: num("GOOGLE_MAPS_TIMEOUT_MS", 8_000),
   }),
 
+  // Part B: draw the real mobilisation path instead of the dashed straight
+  // line. Off by default because the polyline field is a billed Routes SKU.
+  route: Object.freeze({
+    polyline: bool("ROUTE_POLYLINE", false),
+  }),
+
   // Seeded into app_settings on first run; the DB copy is what the app reads
   // afterwards so the thresholds can be changed without a redeploy.
   defaultSettings: Object.freeze({

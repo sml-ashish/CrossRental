@@ -2,26 +2,44 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowRight,
-  Building2,
   CalendarDays,
+  ChevronDown,
   MapPin,
-  Ruler,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
 import {
   discoveryFacets,
+  formatDriveTime,
+  formatKm,
+  formatRouteDistance,
+  getLineRoute,
+  recommendationCranes,
   searchDiscovery,
+  toDisplayCrane,
   type DiscoveryAvailability,
   type DiscoveryCrane,
   type DiscoveryFilters,
+  type RecommendationMode,
 } from "@/lib/discovery";
 import { formatDistance } from "@/lib/rfqs";
-import { CraneMap } from "@/components/crane-map";
-import { CRANE_PATH, craneFill, craneStatusLabel } from "@/components/crane-glyph";
+import {
+  GoogleCraneMap,
+  type GoogleMapRoute,
+} from "@/components/google-crane-map";
+import { craneFill, craneStatusLabel } from "@/components/crane-glyph";
 import { DiscoveryCalendar } from "@/components/discovery-calendar";
+import {
+  LinePanel,
+  lineReference,
+  useRaisableLines,
+} from "@/components/discovery/line-panel";
+import {
+  RecommendationPanel,
+  useLineRecommendations,
+} from "@/components/discovery/recommendation-panel";
+import { RouteCard, type RouteSummary } from "@/components/discovery/route-card";
 import { useAuth } from "@/lib/auth";
 import { Field, Select, TextInput } from "@/components/ui/form";
 import { cn } from "@/lib/cn";
@@ -157,7 +175,12 @@ function fromSearch(search: Record<string, unknown>): FilterState {
   return next;
 }
 
-function toSearch(filters: FilterState, craneId: string | null): Record<string, string> {
+function toSearch(
+  filters: FilterState,
+  craneId: string | null,
+  lineId: string | null,
+  mode: RecommendationMode,
+): Record<string, string> {
   const search: Record<string, string> = {};
   for (const [key, value] of Object.entries(filters)) {
     if (typeof value !== "string" || value.trim() === "") continue;
@@ -167,6 +190,12 @@ function toSearch(filters: FilterState, craneId: string | null): Record<string, 
     search[key] = value;
   }
   if (filters.capacityT) search.capacityRule = filters.capacityRule;
+  // The enquiry choice is part of the shareable view, but only when it is on:
+  // a plain browse must not grow a `mode=technical` it never asked for.
+  if (lineId) {
+    search.line = lineId;
+    search.mode = mode;
+  }
   if (craneId) search.crane = craneId;
   return search;
 }
@@ -178,7 +207,9 @@ function toSearch(filters: FilterState, craneId: string | null): Record<string, 
  */
 function searchKeyOf(search: Record<string, unknown>): string {
   const craneId = typeof search.crane === "string" ? search.crane : null;
-  return JSON.stringify(toSearch(fromSearch(search), craneId));
+  const lineId = typeof search.line === "string" && search.line !== "" ? search.line : null;
+  const mode: RecommendationMode = search.mode === "distance" ? "distance" : "technical";
+  return JSON.stringify(toSearch(fromSearch(search), craneId, lineId, mode));
 }
 
 function countMore(filters: FilterState): number {
@@ -196,24 +227,6 @@ type ResultData = Awaited<ReturnType<typeof searchDiscovery>>;
 function flatten(data: ResultData | undefined): DiscoveryCrane[] {
   if (!data) return [];
   return [...data.groups.flatMap((group) => group.cranes), ...data.unverified];
-}
-
-/** `14 Nov` — a date on a card, not a deadline with a year in it. */
-function shortDate(iso: string | null): string | null {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" });
-}
-
-function availabilityText(crane: DiscoveryCrane): string {
-  if (crane.currentStatus === "AVAILABLE") return "Free now";
-  if (crane.currentStatus === "UNDER_MAINTENANCE") {
-    const ready = shortDate(crane.expectedReadyDate);
-    return ready ? `Ready ${ready}` : "In maintenance";
-  }
-  const from = shortDate(crane.availableFrom);
-  return from ? `Free from ${from}` : "Engaged";
 }
 
 function greeting(now = new Date()): string {
@@ -240,6 +253,72 @@ export function DiscoveryPage() {
   const lastRouteKey = useRef(routeKey);
   const lastWrittenKey = useRef<string | null>(null);
 
+  const [filters, setFilters] = useState<FilterState>(() => fromSearch(routeSearch));
+  const [committed, setCommitted] = useState<FilterState>(() => fromSearch(routeSearch));
+  const [selectedCraneId, setSelectedCraneId] = useState<string | null>(() =>
+    typeof routeSearch.crane === "string" ? routeSearch.crane : null,
+  );
+  const [lineId, setLineId] = useState<string | null>(() =>
+    typeof routeSearch.line === "string" && routeSearch.line !== "" ? routeSearch.line : null,
+  );
+  const [mode, setMode] = useState<RecommendationMode>(() =>
+    routeSearch.mode === "distance" ? "distance" : "technical",
+  );
+  /** Which of the server's route options is highlighted. Null = the primary. */
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+  const [hoveredCraneId, setHoveredCraneId] = useState<string | null>(null);
+  const [rail, setRail] = useState<RailView>("flat");
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [calendar, setCalendar] = useState(false);
+  const [linePanelCollapsed, setLinePanelCollapsed] = useState(false);
+  const [lineSheetOpen, setLineSheetOpen] = useState(false);
+
+  // The phone/tablet sheet. Height is a percentage so it survives rotation and
+  // the on-screen keyboard; dragging snaps to one of three sizes.
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startY: number;
+    startPct: number;
+    viewport: number;
+  } | null>(null);
+  const [sheetPct, setSheetPct] = useState(52);
+  const [sheetDragging, setSheetDragging] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1280px)").matches,
+  );
+  const autoSelectedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(query.matches);
+    const onChange = () => setReduceMotion(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  /**
+   * One layout at a time.
+   *
+   * The desktop three-panel grid and the phone sheet both draw a Leaflet map.
+   * Hiding one with CSS would still mount it, giving a second map with its own
+   * tiles, markers and route fetch. The media query decides which branch mounts
+   * at all.
+   */
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1280px)");
+    setIsDesktop(query.matches);
+    const onChange = () => setIsDesktop(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  // Picking a crane on a phone collapses the list so the route is visible.
+  useEffect(() => {
+    if (selectedCraneId) setSheetPct(42);
+  }, [selectedCraneId]);
+
   useEffect(() => {
     if (routeKey === lastRouteKey.current) return;
     lastRouteKey.current = routeKey;
@@ -248,20 +327,16 @@ export function DiscoveryPage() {
     const next = fromSearch(routeSearch);
     setFilters(next);
     setCommitted(next);
+    setLineId(
+      typeof routeSearch.line === "string" && routeSearch.line !== ""
+        ? routeSearch.line
+        : null,
+    );
+    setMode(routeSearch.mode === "distance" ? "distance" : "technical");
     setSelectedCraneId(
       typeof routeSearch.crane === "string" ? routeSearch.crane : null,
     );
   }, [routeKey, routeSearch]);
-
-  const [filters, setFilters] = useState<FilterState>(() => fromSearch(routeSearch));
-  const [committed, setCommitted] = useState<FilterState>(() => fromSearch(routeSearch));
-  const [selectedCraneId, setSelectedCraneId] = useState<string | null>(() =>
-    typeof routeSearch.crane === "string" ? routeSearch.crane : null,
-  );
-  const [hoveredCraneId, setHoveredCraneId] = useState<string | null>(null);
-  const [rail, setRail] = useState<RailView>("flat");
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [calendar, setCalendar] = useState(false);
 
   // Typing should not fire a request per keystroke, but a chip should feel
   // instant; 220ms is short enough to feel immediate and long enough to coalesce
@@ -280,17 +355,26 @@ export function DiscoveryPage() {
   // write only happens once this screen is the location.
   useEffect(() => {
     if (pathname !== "/app/discovery") return;
-    const search = toSearch(committed, selectedCraneId);
+    const search = toSearch(committed, selectedCraneId, lineId, mode);
     lastWrittenKey.current = JSON.stringify(search);
     void navigate({ to: "/app/discovery", search, replace: true });
-  }, [committed, selectedCraneId, navigate, pathname]);
+  }, [committed, selectedCraneId, lineId, mode, navigate, pathname]);
 
   const facets = useQuery({ queryKey: ["discovery", "facets"], queryFn: discoveryFacets });
+
+  // The line picker and its recommendations. The panel and this screen share
+  // the same query keys, so the list is fetched once and both see it.
+  const raisable = useRaisableLines();
+  const recommendationQuery = useLineRecommendations(lineId, mode);
+  const recommendations = recommendationQuery.data?.recommendations;
 
   const committedQuery = useMemo(() => toQuery(committed), [committed]);
   const results = useQuery({
     queryKey: ["discovery", "search", committedQuery],
     queryFn: () => searchDiscovery(committedQuery),
+    // A chosen line answers the question already; browsing behind it would
+    // fetch a second, irrelevant fleet and fight the map's fitBounds.
+    enabled: !lineId,
     placeholderData: (previous) => previous,
   });
 
@@ -298,9 +382,276 @@ export function DiscoveryPage() {
     setFilters((prev) => ({ ...prev, [key]: value }));
 
   const data = results.data;
-  const cranes = useMemo(() => flatten(data), [data]);
+  const browseCranes = useMemo(() => flatten(data), [data]);
+  const recommendedCranes = useMemo(
+    () => recommendationCranes(recommendations).map(toDisplayCrane),
+    [recommendations],
+  );
+  const cranes = lineId ? recommendedCranes : browseCranes;
   const highlightedCraneId = hoveredCraneId ?? selectedCraneId;
   const selectedCrane = cranes.find((crane) => crane.craneId === selectedCraneId) ?? null;
+
+  const selectedLine = useMemo(
+    () => raisable.data?.lines.find((line) => line.id === lineId) ?? null,
+    [raisable.data, lineId],
+  );
+
+  const sitePoint = useMemo(() => {
+    if (recommendations) {
+      const { latitude, longitude } = recommendations.site;
+      if (typeof latitude === "number" && typeof longitude === "number") {
+        return { latitude, longitude };
+      }
+      return null;
+    }
+    // A line answers its own site; a stale browse site must not leak into it.
+    if (lineId) return null;
+    return data?.site ?? null;
+  }, [recommendations, data, lineId]);
+
+  const craneHasPin =
+    selectedCrane !== null &&
+    typeof selectedCrane.latitude === "number" &&
+    typeof selectedCrane.longitude === "number";
+
+  /**
+   * The server draws the route, not the browser.
+   *
+   * The query only runs for a selected crane that has a pin and a pinned site,
+   * and TanStack cancels a stale request through the `AbortSignal` when the
+   * selection changes quickly. The previous response is kept as placeholder data
+   * so the map can fade the old shape instead of blinking empty.
+   */
+  const routeQuery = useQuery({
+    queryKey: ["discovery", "route", lineId, selectedCraneId],
+    queryFn: ({ signal }) =>
+      getLineRoute(lineId as string, selectedCraneId as string, signal),
+    enabled: Boolean(lineId && selectedCraneId && craneHasPin && sitePoint),
+    staleTime: 10 * 60_000,
+    retry: false,
+    placeholderData: (previous) => previous,
+  });
+
+  const routeLoading = routeQuery.isFetching || routeQuery.isPlaceholderData;
+  // Placeholder data belongs to the previous crane: useful as a faded map shape,
+  // never as this crane's distance or labels.
+  const currentRoute = routeQuery.isPlaceholderData ? undefined : routeQuery.data;
+  const displayRoute = currentRoute ?? (routeQuery.isPlaceholderData ? routeQuery.data : undefined);
+  const routeFailed = !routeLoading && routeQuery.isError;
+
+  // A new line, crane or tab starts from the server's recommended option.
+  useEffect(() => {
+    setSelectedRouteId(null);
+  }, [lineId, selectedCraneId, mode]);
+
+  const selectedRoute = useMemo(() => {
+    if (!currentRoute) return undefined;
+    return (
+      currentRoute.routes.find((option) => option.id === selectedRouteId) ??
+      currentRoute.routes.find((option) => option.isPrimary) ??
+      currentRoute.routes[0]
+    );
+  }, [currentRoute, selectedRouteId]);
+
+  // Default to the primary option as soon as the response arrives.
+  useEffect(() => {
+    if (!currentRoute || currentRoute.routes.length === 0) return;
+    if (selectedRouteId && currentRoute.routes.some((option) => option.id === selectedRouteId)) {
+      return;
+    }
+    const primary =
+      currentRoute.routes.find((option) => option.isPrimary) ?? currentRoute.routes[0];
+    if (primary) setSelectedRouteId(primary.id);
+  }, [currentRoute, selectedRouteId]);
+
+  const routeMissing: "site" | "crane" | null = !lineId
+    ? null
+    : !sitePoint
+      ? "site"
+      : !craneHasPin
+        ? "crane"
+        : null;
+
+  /**
+   * The card's route block.
+   *
+   * Until the server answers, the crane's list distance is shown, clearly marked
+   * approximate. A failed request falls back to a labelled straight line — never
+   * to an unlabelled one — and a missing pin is its own message. The alternatives
+   * are the server's options, formatted here only for display.
+   */
+  const routeSummary = useMemo<RouteSummary | null>(() => {
+    if (!lineId || !selectedCrane) return null;
+    const siteLabel = recommendations?.site.siteLocation ?? "Job site";
+    const craneLabel = `${selectedCrane.make} ${selectedCrane.model}`;
+
+    if (routeMissing) {
+      return {
+        craneId: selectedCrane.craneId,
+        distanceLabel: "No route",
+        methodLabel: "no pin",
+        fallback: false,
+        loading: false,
+        siteLabel,
+        craneLabel,
+      };
+    }
+
+    if (currentRoute && selectedRoute) {
+      const fallback = currentRoute.method === "straight_line";
+      const alternatives = currentRoute.routes.map((option) => ({
+        id: option.id,
+        selected: option.id === selectedRoute.id,
+        label: [option.via ? `via ${option.via}` : null, formatDriveTime(option.durationMin), formatKm(option.km)]
+          .filter(Boolean)
+          .join(" · "),
+      }));
+      return {
+        craneId: selectedCrane.craneId,
+        distanceLabel: fallback
+          ? `~${formatKm(selectedRoute.km)}`
+          : formatRouteDistance(selectedRoute.km, selectedRoute.durationMin),
+        methodLabel: fallback ? "approx." : "road",
+        fallback,
+        loading: routeLoading,
+        siteLabel: currentRoute.siteLabel || siteLabel,
+        craneLabel: currentRoute.craneLabel || craneLabel,
+        via: selectedRoute.via,
+        alternatives,
+        onSelectRoute: (routeId) => setSelectedRouteId(routeId),
+      };
+    }
+
+    const listKm = selectedCrane.distanceKm;
+    return {
+      craneId: selectedCrane.craneId,
+      distanceLabel:
+        listKm !== null
+          ? `~${formatKm(listKm)}`
+          : routeFailed
+            ? "Road route unavailable"
+            : "Distance unavailable",
+      methodLabel:
+        routeFailed ||
+        selectedCrane.distanceApproximate ||
+        selectedCrane.distanceMethod !== "road"
+          ? "approx."
+          : "road",
+      fallback: routeFailed,
+      loading: routeLoading,
+      siteLabel,
+      craneLabel,
+      onSelectRoute: (routeId) => setSelectedRouteId(routeId),
+    };
+  }, [
+    lineId,
+    selectedCrane,
+    recommendations,
+    routeMissing,
+    currentRoute,
+    selectedRoute,
+    routeLoading,
+    routeFailed,
+  ]);
+
+  const mapRoute = useMemo<GoogleMapRoute | null>(() => {
+    if (!lineId || !selectedCrane || !sitePoint || !craneHasPin) return null;
+    const active = displayRoute;
+    // A failed request still gets a labelled dashed line, using the list
+    // distance the server already returned. The client never measures.
+    const failedOption =
+      !active && routeFailed
+        ? [
+            {
+              id: "r0",
+              isPrimary: true,
+              km: selectedCrane.distanceKm ?? 0,
+              durationMin: null,
+              via: null,
+              encodedPolyline: null,
+            },
+          ]
+        : [];
+    const routes = active?.routes ?? failedOption;
+    const selectedId =
+      selectedRoute?.id ??
+      routes.find((option) => option.isPrimary)?.id ??
+      routes[0]?.id ??
+      "r0";
+
+    return {
+      from: {
+        lat: sitePoint.latitude,
+        lng: sitePoint.longitude,
+        label: recommendations?.site.siteLocation ?? "Job site",
+      },
+      to: {
+        lat: selectedCrane.latitude as number,
+        lng: selectedCrane.longitude as number,
+        label: `${selectedCrane.make} ${selectedCrane.model}`,
+        craneId: selectedCrane.craneId,
+      },
+      routes,
+      selectedRouteId: selectedId,
+      onSelectRoute: (routeId) => setSelectedRouteId(routeId),
+      // A straight line is drawn only when the API says so or the request
+      // failed; a pending route draws pins and waits for the road.
+      fallback: active ? active.method === "straight_line" : routeFailed,
+      loading: routeLoading,
+    };
+  }, [
+    lineId,
+    selectedCrane,
+    sitePoint,
+    craneHasPin,
+    recommendations,
+    displayRoute,
+    selectedRoute,
+    routeFailed,
+    routeLoading,
+  ]);
+
+  /**
+   * Auto-select the nearest crane with a pin, once per (line, mode).
+   *
+   * A route on the map the moment the list appears is the whole point of the
+   * screen. The ref keeps the auto-pick from fighting a later click: once the
+   * pair has been auto-selected, only the person changes it.
+   */
+  useEffect(() => {
+    if (!lineId || !recommendations || recommendations.lineId !== lineId) return;
+    const key = `${lineId}:${mode}`;
+    if (autoSelectedRef.current === key) return;
+    autoSelectedRef.current = key;
+    if (selectedCraneId) return;
+    const nearest = recommendationCranes(recommendations)
+      .filter((crane) => crane.latitude !== null && crane.longitude !== null)
+      .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))[0];
+    if (nearest) setSelectedCraneId(nearest.craneId);
+  }, [lineId, mode, recommendations, selectedCraneId]);
+
+  // Esc closes the line sheet, then the calendar, then clears the crane. An open
+  // dialog owns its own Escape handling, so it is left alone.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (lineSheetOpen) {
+        setLineSheetOpen(false);
+        return;
+      }
+      if (calendar) {
+        setCalendar(false);
+        return;
+      }
+      if (document.querySelector('[aria-modal="true"]')) return;
+      if (selectedCraneId) {
+        setSelectedCraneId(null);
+        setHoveredCraneId(null);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [lineSheetOpen, calendar, selectedCraneId]);
 
   const readyNow = cranes.filter((crane) => crane.currentStatus === "AVAILABLE").length;
   const moreCount = countMore(committed);
@@ -323,248 +674,465 @@ export function DiscoveryPage() {
 
   if (!user) return null;
 
-  const displayName = user.vendorName ?? user.fullName?.split(" ")[0] ?? user.email.split("@")[0];
+  const displayName =
+    user.vendorName ?? user.fullName?.split(" ")[0] ?? user.email.split("@")[0] ?? "there";
 
-  return (
-    <div className="theme-dark isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6">
-      <div className="flex min-h-0 flex-1">
-        {/* ----------------------------------------------------------- sidebar */}
-        <aside className="flex w-[420px] shrink-0 flex-col border-r border-ink-800 bg-ink-900">
-          <div className="shrink-0 space-y-3 px-5 pt-5">
-            <p className="text-[12px] text-neutral-500">
-              {greeting()}, <span className="text-neutral-300">{displayName}</span>
-            </p>
-            <div className="flex items-start justify-between gap-3">
-              <h1 className="text-[26px] leading-none font-semibold tracking-tight text-white">
-                Where&rsquo;s the lift?
-              </h1>
-              <button
-                type="button"
-                onClick={() => setCalendar((value) => !value)}
-                aria-pressed={calendar}
-                className={cn(
-                  "mt-0.5 flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] transition-colors",
-                  calendar
-                    ? "bg-ink-850 text-white"
-                    : "text-neutral-400 hover:bg-ink-850 hover:text-white",
-                )}
-              >
-                <CalendarDays className="size-3.5" aria-hidden />
-                Calendar
-              </button>
-            </div>
+  const pickLine = (nextLineId: string) => {
+    setLineId(nextLineId);
+    setMode("technical");
+    setSelectedCraneId(null);
+    setHoveredCraneId(null);
+    setCalendar(false);
+  };
 
-            <div className="relative">
-              <Search
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-accent-500"
-                aria-hidden
-              />
-              <input
-                type="search"
-                value={filters.location}
-                onChange={(event) => set("location", event.target.value)}
-                placeholder="Job site, city, make or vendor"
-                aria-label="Search cranes"
-                className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
-              />
-            </div>
+  const clearLine = () => {
+    setLineId(null);
+    setMode("technical");
+    setSelectedCraneId(null);
+  };
 
-            <div className="grid grid-cols-2 gap-2">
-              <Select
-                id="discovery-type"
-                value={filters.craneType}
-                onChange={(value) => set("craneType", value)}
-                placeholder="Any crane type"
-                options={(facets.data?.craneTypes ?? []).map((type) => ({
-                  value: type.code,
-                  label: type.name,
-                }))}
-              />
-              <TextInput
-                id="discovery-capacity"
-                value={filters.capacityT}
-                onChange={(value) => set("capacityT", value)}
-                inputMode="decimal"
-                placeholder="Min capacity (t)"
-              />
-            </div>
+  const changeMode = (nextMode: RecommendationMode) => {
+    setMode(nextMode);
+    setSelectedCraneId(null);
+    setHoveredCraneId(null);
+  };
 
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Chip active={filters.availability === ""} onClick={() => set("availability", "")}>
-                All
-              </Chip>
-              <Chip
-                active={filters.availability === "AVAILABLE"}
-                onClick={() => set("availability", "AVAILABLE")}
-              >
-                Available
-              </Chip>
-              <Chip
-                active={filters.availability === "ENGAGED"}
-                onClick={() => set("availability", "ENGAGED")}
-              >
-                Engaged
-              </Chip>
-              <Chip
-                active={filters.availability === "UNDER_MAINTENANCE"}
-                onClick={() => set("availability", "UNDER_MAINTENANCE")}
-              >
-                Maintenance
-              </Chip>
-              <button
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                className={cn(
-                  "ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
-                  moreCount > 0
-                    ? "border-accent-500/60 bg-accent-500/10 text-accent-400"
-                    : "border-ink-700 text-neutral-400 hover:border-ink-700 hover:text-white",
-                )}
-                aria-haspopup="dialog"
-              >
-                <SlidersHorizontal className="size-3" aria-hidden />
-                More
-                {moreCount > 0 ? (
-                  <span className="rounded-full bg-accent-500 px-1.5 text-[10px] font-semibold text-white">
-                    {moreCount}
-                  </span>
-                ) : null}
-              </button>
-            </div>
-          </div>
+  // ------------------------------------------------------------- drag sheet
+  const sheetTransition = sheetDragging || reduceMotion ? "none" : "height 180ms ease";
 
-          <div className="mt-3 flex shrink-0 items-center justify-between gap-2 border-y border-ink-800 px-5 py-2.5">
-            <p className="text-[12px] text-neutral-400" aria-live="polite">
-              <span className="font-semibold text-white tabular-nums">
-                {data?.totalMatched ?? 0}
-              </span>{" "}
-              crane{(data?.totalMatched ?? 0) === 1 ? "" : "s"}
-              <span className="mx-1.5 text-ink-700">·</span>
-              <span className="font-semibold text-accent-400 tabular-nums">{readyNow}</span> ready
-              now
-            </p>
-            <div
-              role="group"
-              aria-label="Group results"
-              className="inline-flex shrink-0 items-center rounded-lg border border-ink-800 bg-ink-850 p-0.5"
+  const onSheetPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startPct: sheetPct,
+      viewport: window.innerHeight,
+    };
+    setSheetDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onSheetPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const deltaPct = ((drag.startY - event.clientY) / drag.viewport) * 100;
+    setSheetPct(Math.min(88, Math.max(26, drag.startPct + deltaPct)));
+  };
+
+  const onSheetPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    setSheetDragging(false);
+    setSheetPct((value) => (value < 39 ? 38 : value < 70 ? 55 : 88));
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+  };
+
+  const linePanelProps = {
+    lineId,
+    lines: raisable.data?.lines,
+    isPending: raisable.isPending,
+    error: (raisable.error as Error | null) ?? null,
+    greeting: greeting(),
+    displayName,
+    onPickLine: pickLine,
+    onClear: clearLine,
+    onRetry: () => void raisable.refetch(),
+  };
+
+  const recommendationPanel = (
+    <RecommendationPanel
+      lineId={lineId as string}
+      line={selectedLine}
+      mode={mode}
+      recommendations={recommendations}
+      isPending={recommendationQuery.isPending}
+      isError={recommendationQuery.isError}
+      error={(recommendationQuery.error as Error | null) ?? null}
+      route={routeSummary}
+      selectedCraneId={selectedCraneId}
+      hoveredCraneId={hoveredCraneId}
+      onSelect={setSelectedCraneId}
+      onHover={setHoveredCraneId}
+      onModeChange={changeMode}
+      onClear={clearLine}
+      onRetry={() => void recommendationQuery.refetch()}
+    />
+  );
+
+  /* Browse mode: the filters and the crane list, unchanged by the line picker.
+     It is the whole of panel 2 when no line is selected. */
+  const browseRail = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 px-4 pt-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            Browse cranes
+          </p>
+          <button
+            type="button"
+            onClick={() => setCalendar((value) => !value)}
+            aria-pressed={calendar}
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[11px] transition-colors",
+              calendar
+                ? "bg-ink-850 text-white"
+                : "text-neutral-400 hover:bg-ink-850 hover:text-white",
+            )}
+          >
+            <CalendarDays className="size-3.5" aria-hidden />
+            Calendar
+          </button>
+        </div>
+
+        <div className="relative mt-2.5">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-accent-500"
+            aria-hidden
+          />
+          <input
+            type="search"
+            value={filters.location}
+            onChange={(event) => set("location", event.target.value)}
+            placeholder="Job site, city, make or vendor"
+            aria-label="Search cranes"
+            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+          />
+        </div>
+
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <Select
+            id="discovery-type"
+            value={filters.craneType}
+            onChange={(value) => set("craneType", value)}
+            placeholder="Any crane type"
+            options={(facets.data?.craneTypes ?? []).map((type) => ({
+              value: type.code,
+              label: type.name,
+            }))}
+          />
+          <TextInput
+            id="discovery-capacity"
+            value={filters.capacityT}
+            onChange={(value) => set("capacityT", value)}
+            inputMode="decimal"
+            placeholder="Min capacity (t)"
+          />
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <Chip active={filters.availability === ""} onClick={() => set("availability", "")}>
+            All
+          </Chip>
+          <Chip
+            active={filters.availability === "AVAILABLE"}
+            onClick={() => set("availability", "AVAILABLE")}
+          >
+            Available
+          </Chip>
+          <Chip
+            active={filters.availability === "ENGAGED"}
+            onClick={() => set("availability", "ENGAGED")}
+          >
+            Engaged
+          </Chip>
+          <Chip
+            active={filters.availability === "UNDER_MAINTENANCE"}
+            onClick={() => set("availability", "UNDER_MAINTENANCE")}
+          >
+            Maintenance
+          </Chip>
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            className={cn(
+              "ml-auto flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
+              moreCount > 0
+                ? "border-accent-500/60 bg-accent-500/10 text-accent-400"
+                : "border-ink-700 text-neutral-400 hover:border-ink-700 hover:text-white",
+            )}
+            aria-haspopup="dialog"
+          >
+            <SlidersHorizontal className="size-3" aria-hidden />
+            More
+            {moreCount > 0 ? (
+              <span className="rounded-full bg-accent-500 px-1.5 text-[10px] font-semibold text-white">
+                {moreCount}
+              </span>
+            ) : null}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-2 flex shrink-0 items-center justify-between gap-2 border-y border-ink-800 px-4 py-2">
+        <p className="text-[12px] text-neutral-400" aria-live="polite">
+          <span className="font-semibold text-white tabular-nums">
+            {data?.totalMatched ?? 0}
+          </span>{" "}
+          crane{(data?.totalMatched ?? 0) === 1 ? "" : "s"}
+          <span className="mx-1.5 text-ink-700">·</span>
+          <span className="font-semibold text-accent-400 tabular-nums">{readyNow}</span> ready now
+        </p>
+        <div
+          role="group"
+          aria-label="Group results"
+          className="inline-flex shrink-0 items-center rounded-lg border border-ink-800 bg-ink-850 p-0.5"
+        >
+          <RailButton active={rail === "flat"} onClick={() => setRail("flat")}>
+            All cranes
+          </RailButton>
+          <RailButton active={rail === "grouped"} onClick={() => setRail("grouped")}>
+            By vendor
+          </RailButton>
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {results.isError ? (
+          <div className="m-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-[12px] text-red-200">
+            <p className="font-medium">Could not run that search</p>
+            <p className="mt-0.5 text-red-200/70">{(results.error as Error).message}</p>
+            <button
+              type="button"
+              onClick={() => void results.refetch()}
+              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[11px] font-medium text-red-100 hover:bg-red-500/10"
             >
-              <RailButton active={rail === "flat"} onClick={() => setRail("flat")}>
-                All cranes
-              </RailButton>
-              <RailButton active={rail === "grouped"} onClick={() => setRail("grouped")}>
-                By vendor
-              </RailButton>
-            </div>
+              Try again
+            </button>
           </div>
+        ) : null}
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {results.isError ? (
-              <div className="m-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-[12px] text-red-200">
-                <p className="font-medium">Could not run that search</p>
-                <p className="mt-0.5 text-red-200/70">{(results.error as Error).message}</p>
-                <button
-                  type="button"
-                  onClick={() => void results.refetch()}
-                  className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[11px] font-medium text-red-100 hover:bg-red-500/10"
-                >
-                  Try again
-                </button>
-              </div>
-            ) : null}
+        {siteMissing ? (
+          <p className="mx-3 mt-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200/90">
+            Job site not found, so the list is not distance-sorted. Try a nearby town or a pincode.
+          </p>
+        ) : null}
 
-            {siteMissing ? (
-              <p className="mx-3 mt-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200/90">
-                Job site not found, so the list is not distance-sorted. Try a nearby town or a
-                pincode.
-              </p>
-            ) : null}
-
-            {results.isPending && !data ? (
-              <SkeletonRows />
-            ) : !data || cranes.length === 0 ? (
-              <div className="px-5 py-16 text-center">
-                <p className="text-sm font-medium text-neutral-200">
-                  No cranes match your filters
-                </p>
-                <p className="mt-1 text-xs text-neutral-500">
-                  Widen the capacity, clear the search, then try again.
-                </p>
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="mt-4 rounded-lg border border-ink-700 px-3 py-2 text-xs font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
-                >
-                  Clear filters
-                </button>
-              </div>
-            ) : rail === "grouped" ? (
-              <GroupedRail
-                data={data}
-                selectedCraneId={highlightedCraneId}
+        {results.isPending && !data ? (
+          <SkeletonRows />
+        ) : !data || cranes.length === 0 ? (
+          <div className="px-5 py-16 text-center">
+            <p className="text-sm font-medium text-neutral-200">No cranes match your filters</p>
+            <p className="mt-1 text-xs text-neutral-500">
+              Widen the capacity, clear the search, then try again.
+            </p>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="mt-4 rounded-lg border border-ink-700 px-3 py-2 text-xs font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : rail === "grouped" ? (
+          <GroupedRail
+            data={data}
+            selectedCraneId={highlightedCraneId}
+            onHover={setHoveredCraneId}
+            onSelect={setSelectedCraneId}
+          />
+        ) : (
+          <ul>
+            {cranes.map((crane) => (
+              <CraneRow
+                key={crane.craneId}
+                crane={crane}
+                selected={crane.craneId === highlightedCraneId}
                 onHover={setHoveredCraneId}
                 onSelect={setSelectedCraneId}
               />
-            ) : (
-              <ul>
-                {cranes.map((crane) => (
-                  <CraneRow
-                    key={crane.craneId}
-                    crane={crane}
-                    selected={crane.craneId === highlightedCraneId}
-                    onHover={setHoveredCraneId}
-                    onSelect={setSelectedCraneId}
-                  />
-                ))}
-              </ul>
-            )}
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+
+  /* The calendar is a view of the same result set, opened over the workspace.
+     Kept as an overlay rather than swapping the map out so the map keeps its
+     viewport — and its Leaflet instance — when the calendar closes. */
+  const calendarOverlay = calendar ? (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Crane availability calendar"
+      className="fixed inset-0 z-[1000] flex items-stretch justify-center bg-black/70 p-3 sm:items-center sm:p-6"
+      onClick={() => setCalendar(false)}
+    >
+      <div
+        className="flex max-h-full w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-950"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-ink-800 px-4 py-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+              Availability
+            </p>
+            <p className="mt-0.5 truncate text-[13px] font-semibold text-white">
+              {data?.totalMatched ?? 0} crane{(data?.totalMatched ?? 0) === 1 ? "" : "s"} matched
+              {committed.availableFrom && committed.availableTo
+                ? ` · free from ${committed.availableFrom} to ${committed.availableTo}`
+                : ""}
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setCalendar(false)}
+            aria-label="Close calendar"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-ink-800 text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <div className="rounded-xl bg-slate-100 p-4">
+            <p className="mb-3 text-xs text-slate-500">
+              Day states come from reservations; the crane&rsquo;s own status fills the rest
+            </p>
+            <DiscoveryCalendar filters={committedQuery} />
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const craneCard = selectedCrane ? (
+    <RouteCard
+      crane={selectedCrane}
+      route={lineId ? routeSummary : undefined}
+      routeMissing={lineId ? routeMissing : undefined}
+      onClose={() => setSelectedCraneId(null)}
+    />
+  ) : null;
+
+  /* The phone summary strip: the same card, minus the artwork and the facts the
+     list already showed, so the sheet can stay short while the route is read. */
+  const mobileCraneCard = selectedCrane ? (
+    <RouteCard
+      crane={selectedCrane}
+      route={lineId ? routeSummary : undefined}
+      routeMissing={lineId ? routeMissing : undefined}
+      compact
+      onClose={() => setSelectedCraneId(null)}
+    />
+  ) : null;
+
+  return (
+    <div className="theme-dark isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6">
+      {isDesktop ? (
+      <div className="flex min-h-0 flex-1 gap-3 p-3">
+        <aside
+          className={cn(
+            "flex min-h-0 shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900",
+            linePanelCollapsed ? "w-14" : "w-[300px]",
+          )}
+        >
+          <LinePanel
+            {...linePanelProps}
+            collapsed={linePanelCollapsed}
+            onToggleCollapsed={() => setLinePanelCollapsed((value) => !value)}
+          />
         </aside>
 
-        {/* --------------------------------------------------------------- map */}
-        <main className="relative min-w-0 flex-1">
-          {calendar ? (
-            <div className="h-full overflow-y-auto bg-ink-950 p-4">
-              <div className="rounded-xl bg-slate-100 p-4">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm text-slate-600">
-                    <span className="font-semibold text-slate-900 tabular-nums">
-                      {data?.totalMatched ?? 0}
-                    </span>{" "}
-                    crane{(data?.totalMatched ?? 0) === 1 ? "" : "s"} matched
-                    {committed.availableFrom && committed.availableTo
-                      ? ` · free from ${committed.availableFrom} to ${committed.availableTo}`
-                      : ""}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Day states come from reservations; the crane&rsquo;s own status fills the rest
-                  </p>
-                </div>
-                <DiscoveryCalendar filters={committedQuery} />
-              </div>
-            </div>
-          ) : (
-            <>
-              <CraneMap
-                className="h-full w-full"
-                cranes={cranes}
-                vendorPoints={data?.vendorPoints ?? []}
-                site={data?.site ?? null}
-                selectedCraneId={highlightedCraneId}
-                onSelect={selectFromMap}
-              />
+        <aside className="flex min-h-0 w-[360px] shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900">
+          {lineId ? recommendationPanel : browseRail}
+        </aside>
 
-              {selectedCrane ? (
-                <div className="pointer-events-none absolute inset-x-0 bottom-5 z-[900] flex justify-center px-4">
-                  <CraneCard
-                    crane={selectedCrane}
-                    onClose={() => setSelectedCraneId(null)}
-                  />
-                </div>
-              ) : null}
-            </>
-          )}
+        <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl border border-ink-800">
+          <GoogleCraneMap
+            className="h-full w-full"
+            cranes={cranes}
+            vendorPoints={lineId ? [] : (data?.vendorPoints ?? [])}
+            site={sitePoint}
+            siteLabel={lineId ? (recommendations?.site.siteLocation ?? null) : null}
+            selectedCraneId={highlightedCraneId}
+            route={mapRoute}
+            onSelect={selectFromMap}
+          />
+          {craneCard ? (
+            <div className="pointer-events-none absolute inset-x-4 bottom-4 z-[900] flex justify-center">
+              {craneCard}
+            </div>
+          ) : null}
         </main>
       </div>
+      ) : (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex shrink-0 items-center gap-2 border-b border-ink-800 bg-ink-900 px-3 py-2">
+          <button
+            type="button"
+            onClick={() => setLineSheetOpen(true)}
+            aria-haspopup="dialog"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-ink-800 bg-ink-850 px-2.5 py-1.5 text-left"
+          >
+            <MapPin className="size-3.5 shrink-0 text-accent-400" aria-hidden />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[9px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+                Enquiry line
+              </span>
+              <span className="block truncate text-[12px] font-medium text-neutral-100">
+                {selectedLine ? lineReference(selectedLine) : "Pick a line · or browse all cranes"}
+              </span>
+            </span>
+            <ChevronDown className="size-4 shrink-0 text-neutral-500" aria-hidden />
+          </button>
+          {lineId ? (
+            <button
+              type="button"
+              onClick={clearLine}
+              aria-label="Clear enquiry line"
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-ink-800 text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+          ) : null}
+        </div>
+
+        <main className="relative min-h-0 flex-1">
+          <GoogleCraneMap
+            className="h-full w-full"
+            cranes={cranes}
+            vendorPoints={lineId ? [] : (data?.vendorPoints ?? [])}
+            site={sitePoint}
+            siteLabel={lineId ? (recommendations?.site.siteLocation ?? null) : null}
+            selectedCraneId={highlightedCraneId}
+            route={mapRoute}
+            onSelect={selectFromMap}
+          />
+        </main>
+
+        <div
+          ref={sheetRef}
+          className="relative z-[850] flex shrink-0 flex-col overflow-hidden rounded-t-2xl border-t border-ink-800 bg-ink-900 shadow-[0_-12px_30px_rgba(0,0,0,0.45)]"
+          style={{ height: `${sheetPct}%`, transition: sheetTransition }}
+        >
+          <div
+            onPointerDown={onSheetPointerDown}
+            onPointerMove={onSheetPointerMove}
+            onPointerUp={onSheetPointerUp}
+            onPointerCancel={onSheetPointerUp}
+            role="separator"
+            aria-label="Drag the crane list"
+            aria-orientation="horizontal"
+            className="flex shrink-0 cursor-grab touch-none justify-center py-2 active:cursor-grabbing"
+          >
+            <span className="h-1 w-10 rounded-full bg-ink-700" aria-hidden />
+          </div>
+
+          {selectedCrane ? (
+            <div className="max-h-[46%] shrink-0 overflow-y-auto border-b border-ink-800 px-2.5 pb-2.5">
+              {mobileCraneCard}
+            </div>
+          ) : null}
+
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {lineId ? recommendationPanel : browseRail}
+          </div>
+        </div>
+      </div>
+      )}
+
+      {calendarOverlay}
 
       {moreOpen ? (
         <MoreFilters
@@ -576,6 +1144,29 @@ export function DiscoveryPage() {
           onClear={clearAll}
           onClose={() => setMoreOpen(false)}
         />
+      ) : null}
+
+      {/* The line picker as a sheet on screens without room for three panels. */}
+      {lineSheetOpen && !isDesktop ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Pick an enquiry line"
+          className="fixed inset-0 z-[1000] flex items-end bg-black/60 xl:hidden"
+          onClick={() => setLineSheetOpen(false)}
+        >
+          <div
+            className="h-[85dvh] w-full overflow-hidden rounded-t-2xl border-t border-ink-800 bg-ink-900"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <LinePanel
+              {...linePanelProps}
+              collapsed={false}
+              onToggleCollapsed={() => setLineSheetOpen(false)}
+              onPicked={() => setLineSheetOpen(false)}
+            />
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -813,116 +1404,9 @@ function SkeletonRows() {
  * The floating crane card.
  *
  * Bottom-centre of the map so it never covers the pins it is describing, and
- * only as tall as it needs to be. The CTA opens the crane's own screen: there is
- * no per-crane request endpoint, and inventing one on the client would promise a
- * request the server cannot take.
- */
-function CraneCard({ crane, onClose }: { crane: DiscoveryCrane; onClose: () => void }) {
-  return (
-    <div className="pointer-events-auto w-[400px] overflow-hidden rounded-2xl border border-ink-700 bg-ink-850 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.85)]">
-      <div className="relative h-28 overflow-hidden border-b border-ink-800 bg-ink-900">
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage:
-              "linear-gradient(#26282b 1px, transparent 1px), linear-gradient(90deg, #26282b 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-        <svg viewBox="0 0 200 84" className="absolute inset-0 h-full w-full" aria-hidden>
-          <defs>
-            <radialGradient id="crane-card-glow" cx="50%" cy="70%" r="55%">
-              <stop offset="0%" stopColor={craneFill(crane.currentStatus)} stopOpacity="0.22" />
-              <stop offset="100%" stopColor={craneFill(crane.currentStatus)} stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <rect width="200" height="84" fill="url(#crane-card-glow)" />
-          <path
-            d={CRANE_PATH}
-            transform="translate(73 19) scale(1.5)"
-            fill={craneFill(crane.currentStatus)}
-            stroke="#ffffff"
-            strokeWidth="1"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close crane details"
-          className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full border border-ink-700 bg-ink-900/90 text-neutral-300 transition-colors hover:text-white"
-        >
-          <X className="size-3.5" aria-hidden />
-        </button>
-      </div>
-
-      <div className="p-4">
-        <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-500 uppercase">
-          {crane.typeOfCraneName}
-        </p>
-        <h2 className="mt-1 truncate text-xl font-semibold tracking-tight text-white">
-          {crane.make} {crane.model}
-        </h2>
-        <p className="mt-0.5 text-xs text-neutral-400">
-          {Math.round(crane.capacityT)} t · {crane.yom}
-        </p>
-
-        <dl className="mt-3.5 grid grid-cols-2 gap-x-3 gap-y-2.5">
-          <CardFact icon={Building2} label="Vendor" value={crane.vendorName} />
-          <CardFact
-            icon={MapPin}
-            label="Location"
-            value={`${crane.currentLocation}, ${crane.stateName}`}
-          />
-          <CardFact
-            icon={Ruler}
-            label="Boom"
-            value={crane.mainBoomM === null ? "—" : `${crane.mainBoomM} m main boom`}
-          />
-          <CardFact icon={CalendarDays} label="Availability" value={availabilityText(crane)} />
-        </dl>
-
-        <Link
-          to="/app/cranes/$craneId"
-          params={{ craneId: crane.craneId }}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
-        >
-          Request this crane
-          <ArrowRight className="size-4" aria-hidden />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function CardFact({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="min-w-0">
-      <dt className="flex items-center gap-1 text-[10px] font-medium tracking-[0.08em] text-neutral-500 uppercase">
-        <Icon className="size-3" aria-hidden />
-        {label}
-      </dt>
-      <dd className="mt-0.5 truncate text-[12px] text-neutral-200">{value}</dd>
-    </div>
-  );
-}
-
-/**
- * "More" — the filters that do not earn a permanent place in the rail.
- *
- * The rail carries the three questions people actually arrive with (what, how
- * big, is it free); everything else is a refinement, and a fourteen-field form
- * beside a map is a form nobody fills in. Values apply live, like the rail, so
- * the footer only has to dismiss.
+ * only as tall as it needs to be. The CTA opens the request window, which lists
+ * the live RFQs and lines this crane can be offered against; "Open crane" inside
+ * that window still reaches the crane's own screen.
  */
 function MoreFilters({
   filters,

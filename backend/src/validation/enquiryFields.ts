@@ -208,3 +208,22 @@ export const listRaisableLinesQuerySchema = z.object({
 });
 
 export type ListRaisableLinesQuery = z.infer<typeof listRaisableLinesQuerySchema>;
+
+/**
+ * Which recommendation view the enquiry section asked for.
+ *
+ * `technical` (the default) is the stored snapshot, unchanged. `distance` is a
+ * live list that drops the capacity filter, so it is never persisted.
+ */
+export const recommendationQuerySchema = z.object({
+  mode: z.enum(["technical", "distance"]).default("technical"),
+});
+
+export type RecommendationQuery = z.infer<typeof recommendationQuerySchema>;
+
+/** Part B: the crane whose pin ends the route from the job site. */
+export const lineRouteQuerySchema = z.object({
+  craneId: z.string().trim().min(1),
+});
+
+export type LineRouteQuery = z.infer<typeof lineRouteQuerySchema>;

@@ -39,6 +39,31 @@ export type DistanceResult =
   | { ok: true; km: number; method: DistanceMethod; provider: string }
   | { ok: false; reason: string };
 
+/**
+ * One drivable route option, for drawing the mobilisation route.
+ *
+ * The polyline stays **encoded**: the browser has the Maps JavaScript geometry
+ * library and decodes it there. Shipping a decoded vertex array would make the
+ * response several times larger, and decoding is arithmetic the client already
+ * owns.
+ */
+export interface RouteOption {
+  /** "r0", "r1", … — stable within one response, used as the selection key. */
+  id: string;
+  /** Google's recommended route. Exactly one option carries this. */
+  isPrimary: boolean;
+  km: number;
+  /** Drive time in whole minutes, or null when Google did not return one. */
+  durationMin: number | null;
+  /** The road the route is described by, e.g. "NH 48". */
+  via: string | null;
+  encodedPolyline: string | null;
+}
+
+export type RoutesResult =
+  | { ok: true; routes: RouteOption[]; provider: string }
+  | { ok: false; reason: string };
+
 /** The address pieces a reverse lookup can return, all optional in practice. */
 export interface GeocodedAddress {
   /** A human-readable place — the locality or sublocality. */
@@ -61,6 +86,13 @@ export interface GeoProvider {
   readonly isAuthoritative: boolean;
   geocode(input: { location: string; state: string; pincode?: string | null }): Promise<GeocodeResult>;
   roadDistance(origin: GeoPoint, destination: GeoPoint): Promise<DistanceResult>;
+  /**
+   * The drivable route options between two points, for the map's route line.
+   * Optional because it is the billed call (polylines and alternatives sit on a
+   * higher SKU): a provider or deployment that has not opted in simply has no
+   * route to draw, and the screen keeps its labelled straight line.
+   */
+  roadRoutes?(origin: GeoPoint, destination: GeoPoint): Promise<RoutesResult>;
   /**
    * Turns a coordinate back into an address. Optional on purpose: a provider
    * that cannot do this (the stub, the disabled provider) leaves it out, so an
@@ -187,6 +219,11 @@ class UnverifiedGeoProvider implements GeoProvider {
 const GOOGLE_GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 const GOOGLE_ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
+/** Google can return more; the screen can only compare a handful. */
+const MAX_ROUTE_OPTIONS = 3;
+/** Above this, the encoded primary route is re-requested at OVERVIEW quality. */
+const MAX_POLYLINE_CHARS = 200_000;
+
 interface GoogleGeocodeResponse {
   status?: string;
   error_message?: string;
@@ -202,7 +239,13 @@ interface GoogleGeocodeResponse {
 }
 
 interface GoogleRoutesResponse {
-  routes?: Array<{ distanceMeters?: number; duration?: string }>;
+  routes?: Array<{
+    distanceMeters?: number;
+    duration?: string;
+    /** Google's own short description, e.g. "NH 48". */
+    description?: string;
+    polyline?: { encodedPolyline?: string };
+  }>;
   error?: { code?: number; message?: string; status?: string };
 }
 
@@ -475,6 +518,132 @@ export class GoogleGeoProvider implements GeoProvider {
       provider: this.name,
     };
   }
+
+  /**
+   * Route options with geometry, for the map.
+   *
+   * This is the billed call: asking for `routes.polyline` and alternative routes
+   * moves the request onto a higher Routes SKU, which is why the caller keeps it
+   * behind `ROUTE_POLYLINE` and never uses it to populate a list.
+   *
+   * `polylineQuality: HIGH_QUALITY` follows the road faithfully, but Google's
+   * encoded blob for a long haul can run past 200 KB per route. In that case the
+   * request is repeated at `OVERVIEW`: the map is never zoomed far enough on a
+   * 1,000 km route to tell the difference, and the smaller payload is the one
+   * that actually arrives.
+   */
+  async roadRoutes(origin: GeoPoint, destination: GeoPoint): Promise<RoutesResult> {
+    if (
+      !Number.isFinite(origin.lat) ||
+      !Number.isFinite(origin.lng) ||
+      !Number.isFinite(destination.lat) ||
+      !Number.isFinite(destination.lng)
+    ) {
+      return { ok: false, reason: "Both ends of the route need a coordinate" };
+    }
+
+    const detailed = await this.requestRoutes(origin, destination, "HIGH_QUALITY");
+    if (!detailed.ok) return detailed;
+
+    const primarySize = detailed.routes[0]?.encodedPolyline?.length ?? 0;
+    if (primarySize <= MAX_POLYLINE_CHARS) {
+      return { ...detailed, routes: detailed.routes.slice(0, MAX_ROUTE_OPTIONS) };
+    }
+
+    const overview = await this.requestRoutes(origin, destination, "OVERVIEW");
+    if (!overview.ok) return detailed; // A big shape beats no shape.
+    return { ...overview, routes: overview.routes.slice(0, MAX_ROUTE_OPTIONS) };
+  }
+
+  /** One Compute Routes call at a chosen polyline quality. */
+  private async requestRoutes(
+    origin: GeoPoint,
+    destination: GeoPoint,
+    polylineQuality: "HIGH_QUALITY" | "OVERVIEW",
+  ): Promise<RoutesResult> {
+    const body = {
+      origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
+      destination: {
+        location: { latLng: { latitude: destination.lat, longitude: destination.lng } },
+      },
+      travelMode: "DRIVE",
+      // Same preference as `roadDistance`, so the list figure and the route
+      // figure are planning numbers from the same table.
+      routingPreference: "TRAFFIC_UNAWARE",
+      computeAlternativeRoutes: true,
+      polylineQuality,
+      regionCode: this.region,
+      languageCode: this.language,
+      units: "METRIC",
+    };
+
+    let response: Response;
+    try {
+      response = await this.fetchImpl(GOOGLE_ROUTES_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": this.apiKey,
+          "X-Goog-FieldMask":
+            "routes.distanceMeters,routes.duration,routes.description,routes.polyline.encodedPolyline",
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch {
+      return { ok: false, reason: "Google routing could not be reached" };
+    }
+
+    if (!response.ok) {
+      let detail = "";
+      try {
+        const failure = (await response.json()) as GoogleRoutesResponse;
+        detail = failure.error?.message?.trim().slice(0, 300) ?? "";
+      } catch {
+        // The status is still the useful fact when the body is unreadable.
+      }
+      return {
+        ok: false,
+        reason: `Google routing returned HTTP ${response.status}${detail ? `: ${detail}` : ""}`,
+      };
+    }
+
+    let parsed: GoogleRoutesResponse;
+    try {
+      parsed = (await response.json()) as GoogleRoutesResponse;
+    } catch {
+      return { ok: false, reason: "Google routing returned an unreadable response" };
+    }
+
+    const routes: RouteOption[] = [];
+    for (const route of parsed.routes ?? []) {
+      const meters = Number(route?.distanceMeters);
+      const encoded = route?.polyline?.encodedPolyline?.trim();
+      if (!Number.isFinite(meters) || meters <= 0 || !encoded) continue;
+
+      // `duration` arrives as a protobuf duration string, e.g. "33000s".
+      const seconds = Number((route?.duration ?? "").replace(/s$/, ""));
+      const durationMin =
+        Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds / 60) : null;
+      const description = route?.description?.trim();
+      const index = routes.length;
+
+      routes.push({
+        id: `r${index}`,
+        isPrimary: index === 0,
+        km: Number((meters / 1000).toFixed(2)),
+        durationMin,
+        via: description && description.length > 0 ? description : null,
+        encodedPolyline: encoded,
+      });
+      if (routes.length >= MAX_ROUTE_OPTIONS) break;
+    }
+
+    if (routes.length === 0) {
+      return { ok: false, reason: "Google routing found no drivable route" };
+    }
+    return { ok: true, routes, provider: this.name };
+  }
 }
 
 function buildGeoProvider(): GeoProvider {
@@ -544,6 +713,36 @@ export async function tryRoadDistance(
   } catch (err) {
     console.error("[geo] road distance failed", err);
     return { ok: false, reason: "Distance lookup failed" };
+  }
+}
+
+/**
+ * Route options, never throwing.
+ *
+ * A provider without `roadRoutes` (the stub, the disabled provider, or a future
+ * one that does not return geometry) gets a clear reason rather than a straight
+ * line pretending to be a road. The caller falls back to its labelled
+ * approximation and keeps the straight-line label.
+ */
+export async function tryRoadRoutes(
+  origin: GeoPoint,
+  destination: GeoPoint,
+): Promise<RoutesResult> {
+  const geo = getGeoProvider();
+  if (!geo.roadRoutes) {
+    return {
+      ok: false,
+      reason: "Route drawing is not available with the current map provider",
+    };
+  }
+  try {
+    if (!isInsideIndia(origin) || !isInsideIndia(destination)) {
+      return { ok: false, reason: "Both ends of the route must be inside India" };
+    }
+    return await geo.roadRoutes(origin, destination);
+  } catch (err) {
+    console.error("[geo] road route failed", err);
+    return { ok: false, reason: "Route lookup failed" };
   }
 }
 

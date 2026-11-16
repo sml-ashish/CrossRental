@@ -633,13 +633,27 @@ describe("M2 submitting", () => {
     await call(app, "PUT", `/api/onboarding/invitation/${token}`, { body: fullForm() });
     await uploadAll(token);
 
-    const incomplete = { ...fullForm(), pan: "", gstn: "", declarationDesignation: "" };
+    const incomplete = {
+      ...fullForm(),
+      pan: "",
+      gstn: "",
+      declarationDesignation: "",
+      pincode: "",
+    };
     const res = await call(app, "POST", `/api/onboarding/invitation/${token}/submit`, {
       body: incomplete,
     });
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("VALIDATION_ERROR");
+    // The pincode is mandatory at submit even though a partial draft save may
+    // leave it blank until the vendor reaches the address section.
+    expect(
+      res.body.details.some(
+        (d: { path: string; message: string }) =>
+          d.path === "pincode" && /6-digit pincode/i.test(d.message),
+      ),
+    ).toBe(true);
   });
 
   it("moves a complete application to SUBMITTED", async () => {

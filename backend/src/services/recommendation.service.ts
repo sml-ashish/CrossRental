@@ -1,7 +1,11 @@
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
 import { getGeoProvider, tryGeocode } from "../lib/geo";
-import { candidatesForRfq, type CandidateCrane } from "./candidate.service";
+import {
+  candidatesForRfq,
+  type CandidateCrane,
+  type CandidateMode,
+} from "./candidate.service";
 import {
   estimateMobilisationCost,
   loadRateTable,
@@ -304,6 +308,7 @@ export async function participationByVendor(
  */
 async function buildRecommendation(
   line: LineForRecommendation,
+  options: { mode?: CandidateMode } = {},
 ): Promise<Omit<RecommendationResult, "snapshotId" | "evaluatedAt" | "lineId">> {
   const smlInternalCheck = {
     trailStatus: line.trailStatus,
@@ -357,7 +362,7 @@ async function buildRecommendation(
     siteLatitude: pin.latitude,
     siteLongitude: pin.longitude,
     site: line.enquiry.siteState ?? { name: "" },
-  });
+  }, { mode: options.mode });
 
   const rates = await loadRateTable();
 
@@ -556,4 +561,39 @@ export async function getOrEvaluateLatest(
   const latest = await getLatestRecommendation(lineId);
   if (latest) return latest;
   return evaluateAndStore(lineId, actor, "initial");
+}
+
+async function loadLine(lineId: string): Promise<LineForRecommendation> {
+  const line = (await prisma.enquiryLineItem.findUnique({
+    where: { id: lineId },
+    select: LINE_FOR_RECOMMENDATION,
+  })) as unknown as LineForRecommendation | null;
+  if (!line) throw AppError.notFound("That enquiry line does not exist");
+  return line;
+}
+
+/**
+ * The list for one mode.
+ *
+ * `technical` is the stored snapshot, unchanged — it is the list sales acted
+ * on. `distance` is a live question ("what is physically nearest?") that drops
+ * the tonnage filter, so it is computed on every read and never snapshotted:
+ * storing it would add a second, competing history for the same line.
+ */
+export async function getRecommendation(
+  lineId: string,
+  actor: Actor,
+  mode: CandidateMode = "technical",
+): Promise<RecommendationResult> {
+  assertInternal(actor);
+  if (mode === "technical") return getOrEvaluateLatest(lineId, actor);
+
+  const line = await loadLine(lineId);
+  const built = await buildRecommendation(line, { mode });
+  return {
+    lineId: line.id,
+    snapshotId: null,
+    evaluatedAt: new Date().toISOString(),
+    ...built,
+  };
 }

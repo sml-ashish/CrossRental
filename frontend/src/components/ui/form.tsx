@@ -48,6 +48,8 @@ export function TextInput({
   id,
   value,
   onChange,
+  onFocus,
+  onBlur,
   type = "text",
   placeholder,
   invalid,
@@ -59,6 +61,9 @@ export function TextInput({
   id: string;
   value: string;
   onChange: (value: string) => void;
+  /** Optional so a money field can tidy its own format on entry/exit. */
+  onFocus?: () => void;
+  onBlur?: () => void;
   type?: string;
   placeholder?: string;
   invalid?: boolean;
@@ -73,6 +78,8 @@ export function TextInput({
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      onFocus={onFocus}
+      onBlur={onBlur}
       placeholder={placeholder}
       disabled={disabled}
       autoComplete={autoComplete}

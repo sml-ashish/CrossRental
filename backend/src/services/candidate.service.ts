@@ -65,6 +65,9 @@ export interface CandidateCrane {
   ownershipType: OwnershipType;
   /** True when the crane is Engaged but free by the required start date. */
   availableInTime: boolean;
+  /** The crane's stored pin, when it has one. Additive: route drawing needs it. */
+  latitude: number | null;
+  longitude: number | null;
   locationUnverified: boolean;
   stale: boolean;
   daysSinceUpdate: number;
@@ -344,6 +347,8 @@ export async function candidatesForRfq(
         row.currentStatus !== CraneStatus.ENGAGED ||
         (row.availableFrom !== null &&
           row.availableFrom.getTime() <= rfq.requiredStartDate.getTime()),
+      latitude: num(row.latitude),
+      longitude: num(row.longitude),
       locationUnverified: false,
       stale: days >= settings.staleFlagDays,
       daysSinceUpdate: days,

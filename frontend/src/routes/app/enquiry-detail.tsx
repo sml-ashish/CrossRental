@@ -131,6 +131,7 @@ function statusDot(status: EnquiryDetail["overallStatus"]): string {
 function discoverySearch(enquiry: EnquiryDetail, line: EnquiryLine) {
   const window = lineWindow(line);
   return {
+    line: line.id,
     siteLocation: enquiry.siteLocation,
     ...(line.craneTypeCode ? { craneType: line.craneTypeCode } : {}),
     ...(line.capacityT !== null

@@ -500,9 +500,15 @@ export interface RaisableLine {
   quantity: number;
   requiredStartDate: string | null;
   startDateTbc: boolean;
+  /** Hire length, for the requirement summary. */
+  durationValue: number | null;
+  durationUnit: DurationUnit | null;
   siteLocation: string;
   siteStateName: string | null;
   sitePincode: string | null;
+  /** The job site's pin, when it has one. Drives the "Pinned" indicator. */
+  siteLatitude: number | null;
+  siteLongitude: number | null;
   trailStatus: EnquiryLineTrailStatus;
   /** How many RFQs this line already carries, so a re-tender is visible. */
   rfqCount: number;
