@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -89,7 +90,8 @@ function clusterPoints(points: MapPoint[], map: L.Map, zoom: number) {
 export interface CraneMapProps {
   cranes: DiscoveryCrane[];
   /** One dot per vendor, placed from the vendor's address by the server. */
-  vendorPoints: DiscoveryVendorPoint[];
+  /** @deprecated The map no longer has a vendor view; ignored. */
+  vendorPoints?: DiscoveryVendorPoint[];
   site: { latitude: number; longitude: number } | null;
   /** The crane highlighted in the sidebar, or `null` for none. */
   selectedCraneId?: string | null;
@@ -99,7 +101,6 @@ export interface CraneMapProps {
 
 export function CraneMap({
   cranes,
-  vendorPoints,
   site,
   selectedCraneId = null,
   onSelect,
@@ -122,7 +123,6 @@ export function CraneMap({
   const [ready, setReady] = useState(false);
   const [zoom, setZoom] = useState(INDIA_ZOOM);
   const [showHeat, setShowHeat] = useState(false);
-  const [heatMode, setHeatMode] = useState<"cranes" | "vendors">("cranes");
 
   const points = useMemo<MapPoint[]>(
     () =>
@@ -297,25 +297,21 @@ export function CraneMap({
     heatRef.current?.remove();
     heatRef.current = null;
 
-    const heat = buildHeatImage(
-      heatMode === "vendors"
-        ? vendorPoints.map((vendor) => ({ lat: vendor.latitude, lng: vendor.longitude }))
-        : points,
-    );
+    const heat = buildHeatImage(points);
     if (!heat) return;
     heatRef.current = L.imageOverlay(heat.url, heat.bounds, {
       opacity: 0.72,
       interactive: false,
       className: "crane-heat",
     });
-  }, [ready, points, vendorPoints, heatMode]);
+  }, [ready, points]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     if (showHeat && heatRef.current) heatRef.current.addTo(map);
     else heatRef.current?.remove();
-  }, [showHeat, heatMode, points, vendorPoints, ready]);
+  }, [showHeat, points, ready]);
 
   const fitAll = () => {
     const map = mapRef.current;
@@ -342,22 +338,6 @@ export function CraneMap({
             />
             Heat
           </label>
-          <div
-            className="inline-flex items-center rounded-md border border-ink-800 bg-ink-850 p-0.5"
-            role="group"
-            aria-label="Heat map basis"
-          >
-            <HeatModeButton
-              active={heatMode === "cranes"}
-              onClick={() => setHeatMode("cranes")}
-              label="Cranes"
-            />
-            <HeatModeButton
-              active={heatMode === "vendors"}
-              onClick={() => setHeatMode("vendors")}
-              label="Vendors"
-            />
-          </div>
         </div>
         <button
           type="button"
@@ -408,29 +388,6 @@ function LegendItem({ status, label }: { status: string; label: string }) {
   );
 }
 
-function HeatModeButton({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "rounded px-2 py-0.5 text-[11px] font-medium transition-colors",
-        active ? "bg-ink-700 text-white" : "text-neutral-500 hover:text-neutral-200",
-      )}
-    >
-      {label}
-    </button>
-  );
-}
 
 const HEAT_SIZE = 512;
 const HEAT_RADIUS = 64;
@@ -543,3 +500,4 @@ function buildHeatImage(
     ],
   };
 }
+

@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Mail,
   RefreshCw,
   SlidersHorizontal,
   X,
@@ -25,6 +26,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { CRANE_PATH, craneFill } from "@/components/crane-glyph";
 import { capacityText, lineReference } from "@/components/discovery/line-panel";
 import type { RouteSummary } from "@/components/discovery/route-card";
+import { SendRfqDialog } from "@/components/discovery/send-rfq-dialog";
 import { cn } from "@/lib/cn";
 
 /**
@@ -99,6 +101,10 @@ export interface RecommendationPanelProps {
   fromText: string;
   onFromChange: (value: string) => void;
   onSelect: (craneId: string) => void;
+  /** Cranes ticked for an RFQ. The RFQ goes to their vendors only. */
+  checkedIds: ReadonlySet<string>;
+  onToggleChecked: (craneId: string) => void;
+  onSetChecked: (craneIds: string[]) => void;
   onModeChange: (mode: RecommendationMode) => void;
   onClear: () => void;
   onRetry: () => void;
@@ -117,16 +123,25 @@ export function RecommendationPanel({
   fromText,
   onFromChange,
   onSelect,
+  checkedIds,
+  onToggleChecked,
+  onSetChecked,
   onModeChange,
   onClear,
   onRetry,
 }: RecommendationPanelProps) {
   const noticeId = useId();
+  const [sendOpen, setSendOpen] = useState(false);
   const allCranes = orderedRecommendationCranes(recommendations, mode);
   const cranes = cranesLocatedIn(allCranes, fromText);
   const total = cranes.length;
   const filteredOut = allCranes.length > 0 && total === 0;
   const siteLabel = recommendations?.site.siteLocation ?? line?.siteLocation ?? "";
+  // Only ticks that are still on the visible list count: a crane filtered out by
+  // "From" must not silently receive an RFQ.
+  const checkedCranes = cranes.filter((crane) => checkedIds.has(crane.craneId));
+  const checkedVendors = new Set(checkedCranes.map((crane) => crane.vendorId)).size;
+  const allChecked = total > 0 && checkedCranes.length === total;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -304,22 +319,72 @@ export function RecommendationPanel({
                 }
               />
             ) : (
+              <>
+              <label className="mb-2 flex w-fit cursor-pointer items-center gap-2 px-0.5 text-[12px] text-neutral-400">
+                <input
+                  type="checkbox"
+                  checked={allChecked}
+                  onChange={() =>
+                    onSetChecked(allChecked ? [] : cranes.map((crane) => crane.craneId))
+                  }
+                  className="size-3.5 accent-accent-500"
+                />
+                Select all {total} to send an RFQ
+              </label>
               <ul className="space-y-2.5">
                 {cranes.map((crane) => (
                   <RecommendationRow
                     key={crane.craneId}
                     crane={crane}
                     mode={mode}
+                    checked={checkedIds.has(crane.craneId)}
+                    onToggleChecked={onToggleChecked}
                     selected={crane.craneId === selectedCraneId}
                     route={route && route.craneId === crane.craneId ? route : null}
                     onSelect={onSelect}
                   />
                 ))}
               </ul>
+              </>
             )}
           </>
         )}
       </div>
+
+      {checkedCranes.length > 0 ? (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-ink-800 bg-ink-900 px-4 py-3">
+          <p className="min-w-0 text-[12px] text-neutral-400">
+            <span className="font-semibold text-white tabular-nums">{checkedCranes.length}</span>{" "}
+            crane{checkedCranes.length === 1 ? "" : "s"} ·{" "}
+            <span className="font-semibold text-white tabular-nums">{checkedVendors}</span> vendor
+            {checkedVendors === 1 ? "" : "s"}
+            <button
+              type="button"
+              onClick={() => onSetChecked([])}
+              className="ml-2 text-neutral-500 underline-offset-2 hover:text-white hover:underline"
+            >
+              Clear
+            </button>
+          </p>
+          <button
+            type="button"
+            onClick={() => setSendOpen(true)}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-[12px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
+          >
+            <Mail className="size-3.5" aria-hidden />
+            Send RFQ
+          </button>
+        </div>
+      ) : null}
+
+      <SendRfqDialog
+        open={sendOpen}
+        onOpenChange={setSendOpen}
+        lineId={lineId}
+        lineLabel={line ? lineReference(line) : "Selected line"}
+        cranes={checkedCranes}
+        onSent={() => onSetChecked([])}
+      />
     </div>
   );
 }
@@ -336,12 +401,16 @@ export function RecommendationPanel({
 function RecommendationRow({
   crane,
   mode,
+  checked,
+  onToggleChecked,
   selected,
   route,
   onSelect,
 }: {
   crane: RecommendationCrane;
   mode: RecommendationMode;
+  checked: boolean;
+  onToggleChecked: (craneId: string) => void;
   selected: boolean;
   /** Only the selected crane has a fetched route. */
   route: RouteSummary | null;
@@ -356,14 +425,26 @@ function RecommendationRow({
     crane.stale;
 
   return (
-    <li id={`crane-row-${crane.craneId}`}>
+    <li id={`crane-row-${crane.craneId}`} className="flex items-stretch gap-2">
+      <label
+        className="flex shrink-0 cursor-pointer items-start pt-4 pl-0.5"
+        title="Include this crane's vendor in the RFQ"
+      >
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={() => onToggleChecked(crane.craneId)}
+          aria-label={`Send RFQ to ${crane.vendorName} for ${crane.make} ${crane.model}`}
+          className="size-4 accent-accent-500"
+        />
+      </label>
       <button
         type="button"
         onClick={() => onSelect(crane.craneId)}
         aria-pressed={selected}
         className={cn(
-          "w-full rounded-xl border px-3.5 py-3.5 text-left transition-colors",
-          selected
+          "min-w-0 flex-1 rounded-xl border px-3.5 py-3.5 text-left transition-colors",
+          selected || checked
             ? "border-accent-500/70 bg-accent-500/10"
             : "border-ink-800 bg-ink-900 hover:border-ink-700 hover:bg-ink-850",
         )}
@@ -504,3 +585,4 @@ function RefreshButton({
     </div>
   );
 }
+

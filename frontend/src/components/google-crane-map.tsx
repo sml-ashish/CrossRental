@@ -50,7 +50,8 @@ export interface GoogleMapRoute {
 
 export interface GoogleCraneMapProps {
   cranes: DiscoveryCrane[];
-  vendorPoints: DiscoveryVendorPoint[];
+  /** @deprecated The map no longer has a vendor view; ignored. */
+  vendorPoints?: DiscoveryVendorPoint[];
   site: { latitude: number; longitude: number } | null;
   /** The site's text label, for the map's own marker. */
   siteLabel?: string | null;
@@ -102,7 +103,6 @@ const HEAT_COLOURS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444"];
 
 export function GoogleCraneMap({
   cranes,
-  vendorPoints,
   site,
   siteLabel,
   selectedCraneId = null,
@@ -139,7 +139,6 @@ export function GoogleCraneMap({
   );
   const [ready, setReady] = useState(false);
   const [showHeat, setShowHeat] = useState(false);
-  const [heatMode, setHeatMode] = useState<"cranes" | "vendors">("cranes");
 
   const points = useMemo<MapPoint[]>(
     () =>
@@ -466,17 +465,11 @@ export function GoogleCraneMap({
     if (!showHeat) return;
 
     const groups = heatGroups(
-      heatMode === "vendors"
-        ? vendorPoints.map((vendor) => ({
-            lat: vendor.latitude,
-            lng: vendor.longitude,
-            key: vendor.stateName ?? vendor.stateCode ?? "Unknown",
-          }))
-        : points.map((point) => ({
-            lat: point.lat,
-            lng: point.lng,
-            key: point.crane.stateName || "Unknown",
-          })),
+      points.map((point) => ({
+        lat: point.lat,
+        lng: point.lng,
+        key: point.crane.stateName || "Unknown",
+      })),
     );
     if (groups.length === 0) return;
 
@@ -499,7 +492,7 @@ export function GoogleCraneMap({
       return circle;
     });
     heatRef.current = circles;
-  }, [api, ready, showHeat, heatMode, points, vendorPoints]);
+  }, [api, ready, showHeat, points]);
 
   const fitAll = () => {
     const map = mapRef.current;
@@ -519,7 +512,6 @@ export function GoogleCraneMap({
         <CraneMap
           className="h-full w-full"
           cranes={cranes}
-          vendorPoints={vendorPoints}
           site={site}
           selectedCraneId={selectedCraneId}
           onSelect={onSelect}
@@ -556,22 +548,6 @@ export function GoogleCraneMap({
             />
             Heat
           </label>
-          <div
-            className="inline-flex items-center rounded-md border border-ink-800 bg-ink-850 p-0.5"
-            role="group"
-            aria-label="Heat map basis"
-          >
-            <HeatModeButton
-              active={heatMode === "cranes"}
-              onClick={() => setHeatMode("cranes")}
-              label="Cranes"
-            />
-            <HeatModeButton
-              active={heatMode === "vendors"}
-              onClick={() => setHeatMode("vendors")}
-              label="Vendors"
-            />
-          </div>
         </div>
         <button
           type="button"
@@ -622,29 +598,6 @@ function LegendItem({ status, label }: { status: string; label: string }) {
   );
 }
 
-function HeatModeButton({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "rounded px-2 py-0.5 text-[12px] font-medium transition-colors",
-        active ? "bg-ink-700 text-white" : "text-neutral-500 hover:text-neutral-200",
-      )}
-    >
-      {label}
-    </button>
-  );
-}
 
 function clearOverlays(overlays: {
   lines: google.maps.Polyline[];
@@ -880,3 +833,4 @@ function heatGroups(
     count: bucket.count,
   }));
 }
+

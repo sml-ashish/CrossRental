@@ -136,6 +136,26 @@ export function ThemeToggle({
   );
 }
 
+/**
+ * "To" filter: keep the lines whose job site is in the place typed — `Vadodara`,
+ * `Vadodara, Gujarat`, a state. Every comma-separated part has to appear in the
+ * line's site or state, case-insensitively; a pincode matches too.
+ */
+export function linesToSite(lines: RaisableLine[], to: string): RaisableLine[] {
+  const parts = to
+    .split(",")
+    .map((part) => part.trim().toLowerCase())
+    .filter(Boolean);
+  if (parts.length === 0) return lines;
+  return lines.filter((line) => {
+    const place = [line.siteLocation, line.siteStateName, line.sitePincode]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return parts.every((part) => place.includes(part));
+  });
+}
+
 function lineMatches(line: RaisableLine, query: string): boolean {
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
@@ -171,6 +191,9 @@ export interface LinePanelProps {
   onToggleCollapsed: () => void;
   theme: DiscoveryTheme;
   onToggleTheme: () => void;
+  /** "To": the enquiry site typed on the screen. Lists the enquiries going there. */
+  toText: string;
+  onToChange: (value: string) => void;
   onPickLine: (lineId: string) => void;
   onClear: () => void;
   onRetry: () => void;
@@ -189,6 +212,8 @@ export function LinePanel({
   onToggleCollapsed,
   theme,
   onToggleTheme,
+  toText,
+  onToChange,
   onPickLine,
   onClear,
   onRetry,
@@ -200,13 +225,13 @@ export function LinePanel({
 
   const matches = useMemo(() => {
     const needle = query.trim();
-    return (lines ?? []).filter((line) => {
+    return linesToSite(lines ?? [], toText).filter((line) => {
       if (!lineMatches(line, needle)) return false;
       if (filter === "rfq") return line.rfqCount > 0;
       if (filter === "no-rfq") return line.rfqCount === 0;
       return true;
     });
-  }, [lines, query, filter]);
+  }, [lines, query, filter, toText]);
 
   const groups = useMemo(() => {
     const byEnquiry = new Map<string, { enquiryNo: string; lines: RaisableLine[] }>();
@@ -290,6 +315,38 @@ export function LinePanel({
           />
         </div>
 
+        <div className="relative mt-2">
+          <MapPin
+            className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-neutral-500"
+            aria-hidden
+          />
+          <input
+            type="text"
+            value={toText}
+            onChange={(event) => onToChange(event.target.value)}
+            placeholder="To: enquiry site, e.g. Vadodara"
+            aria-label="To: show enquiries for this site"
+            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-8 pl-9 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+          />
+          {toText ? (
+            <button
+              type="button"
+              onClick={() => onToChange("")}
+              aria-label="Clear To"
+              className="absolute top-1/2 right-2 flex size-5 -translate-y-1/2 items-center justify-center rounded text-neutral-500 hover:text-white"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          ) : null}
+        </div>
+
+        {toText.trim() ? (
+          <p className="mt-2 px-0.5 text-[12px] text-neutral-400" aria-live="polite">
+            <span className="font-semibold text-white tabular-nums">{matches.length}</span>{" "}
+            enquiry line{matches.length === 1 ? "" : "s"} to {toText.trim()}
+          </p>
+        ) : null}
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {LINE_FILTERS.map((option) => (
             <button
@@ -343,8 +400,12 @@ export function LinePanel({
         ) : groups.length === 0 ? (
           <EmptyState
             icon={<Compass className="size-4" aria-hidden />}
-            title="No open lines match"
-            description="Clear the search, or open the enquiry to add a line."
+            title={toText.trim() ? `No enquiries to ${toText.trim()}` : "No open lines match"}
+            description={
+              toText.trim()
+                ? "No open enquiry line has its site there. Try a nearby town or clear To."
+                : "Clear the search, or open the enquiry to add a line."
+            }
             className="px-2 py-10 [&_p]:text-neutral-200 [&_p:last-child]:text-neutral-500"
           />
         ) : (
@@ -487,3 +548,4 @@ function Fact({
     </div>
   );
 }
+

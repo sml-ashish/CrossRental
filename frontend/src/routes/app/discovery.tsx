@@ -247,6 +247,8 @@ export function DiscoveryPage() {
   );
   /** Which of the server's route options is highlighted. Null = the primary. */
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+  /** Cranes ticked in the recommendation list, to send an RFQ to their vendors. */
+  const [checkedIds, setCheckedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [moreOpen, setMoreOpen] = useState(false);
   const [calendar, setCalendar] = useState(false);
   const [linePanelCollapsed, setLinePanelCollapsed] = useState(false);
@@ -663,7 +665,16 @@ export function DiscoveryPage() {
   const displayName =
     user.vendorName ?? user.fullName?.split(" ")[0] ?? user.email.split("@")[0] ?? "there";
 
+  const toggleChecked = (craneId: string) =>
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(craneId)) next.delete(craneId);
+      else next.add(craneId);
+      return next;
+    });
+
   const pickLine = (nextLineId: string) => {
+    setCheckedIds(new Set());
     setLineId(nextLineId);
     setMode("technical");
     setSelectedCraneId(null);
@@ -671,12 +682,14 @@ export function DiscoveryPage() {
   };
 
   const clearLine = () => {
+    setCheckedIds(new Set());
     setLineId(null);
     setMode("technical");
     setSelectedCraneId(null);
   };
 
   const changeMode = (nextMode: RecommendationMode) => {
+    setCheckedIds(new Set());
     setMode(nextMode);
     setSelectedCraneId(null);
   };
@@ -721,6 +734,8 @@ export function DiscoveryPage() {
     displayName,
     theme,
     onToggleTheme: toggleTheme,
+    toText: filters.siteLocation,
+    onToChange: (value: string) => set("siteLocation", value),
     onPickLine: pickLine,
     onClear: clearLine,
     onRetry: () => void raisable.refetch(),
@@ -740,6 +755,9 @@ export function DiscoveryPage() {
       fromText={filters.location}
       onFromChange={(value) => set("location", value)}
       onSelect={setSelectedCraneId}
+      checkedIds={checkedIds}
+      onToggleChecked={toggleChecked}
+      onSetChecked={(ids) => setCheckedIds(new Set(ids))}
       onModeChange={changeMode}
       onClear={clearLine}
       onRetry={() => void recommendationQuery.refetch()}
@@ -996,7 +1014,6 @@ export function DiscoveryPage() {
             theme={theme}
             className="h-full w-full"
             cranes={cranes}
-            vendorPoints={lineId ? [] : (data?.vendorPoints ?? [])}
             site={sitePoint}
             siteLabel={lineId ? (recommendations?.site.siteLocation ?? null) : null}
             selectedCraneId={highlightedCraneId}
@@ -1049,7 +1066,6 @@ export function DiscoveryPage() {
             theme={theme}
             className="h-full w-full"
             cranes={cranes}
-            vendorPoints={lineId ? [] : (data?.vendorPoints ?? [])}
             site={sitePoint}
             siteLabel={lineId ? (recommendations?.site.siteLocation ?? null) : null}
             selectedCraneId={highlightedCraneId}
@@ -1451,3 +1467,4 @@ function MoreFilters({
     </div>
   );
 }
+
