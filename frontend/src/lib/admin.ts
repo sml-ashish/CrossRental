@@ -33,6 +33,25 @@ export interface AdminDashboard {
   alerts: AlertItem[];
 }
 
+/** The four counters whose number is opened as a Review drawer. */
+export type AdminDashboardItemKind = "stale" | "unverified" | "lapsed" | "pending-fleet";
+
+export interface AdminDashboardItem {
+  craneId: string;
+  label: string;
+  make: string;
+  model: string;
+  capacityT: number;
+  vendorId: string;
+  vendorName: string | null;
+  currentStatus: string;
+  approvalStatus: string;
+  statusUpdatedAt: string;
+  availableFrom: string | null;
+  daysSinceUpdate: number;
+  daysOverdue: number | null;
+}
+
 export type InternalRole = Extract<
   UserRole,
   "admin_user" | "sales_user" | "management_viewer"
@@ -51,6 +70,18 @@ export interface AdminUser {
 export async function loadAdminDashboard(): Promise<AdminDashboard> {
   const res = await api<{ dashboard: AdminDashboard }>("/admin/dashboard");
   return res.dashboard;
+}
+
+/**
+ * The exact cranes behind one dashboard counter. The server reuses the
+ * counter's query, so `total` and the number on the dashboard always match.
+ */
+export async function loadAdminDashboardItems(
+  kind: AdminDashboardItemKind,
+): Promise<{ items: AdminDashboardItem[]; total: number }> {
+  return api<{ items: AdminDashboardItem[]; total: number }>(
+    `/admin/dashboard/items?kind=${kind}`,
+  );
 }
 
 export async function loadAdminUsers(): Promise<AdminUser[]> {

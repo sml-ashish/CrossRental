@@ -19,6 +19,7 @@ export function PageHeader({
   meta,
   mono,
   className,
+  titleClassName,
 }: {
   title: string;
   description?: ReactNode;
@@ -29,6 +30,8 @@ export function PageHeader({
   /** Render the title as an identifier (RFQ number, crane serial, vendor code). */
   mono?: boolean;
   className?: string;
+  /** Size override for a screen whose title is the primary object on the page. */
+  titleClassName?: string;
 }) {
   return (
     <header className={cn("space-y-2", className)}>
@@ -48,6 +51,7 @@ export function PageHeader({
             className={cn(
               "text-xl font-semibold tracking-tight text-slate-900",
               mono && "font-mono text-lg",
+              titleClassName,
             )}
           >
             {title}

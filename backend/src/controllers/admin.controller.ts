@@ -7,6 +7,7 @@ import type { Actor } from "../services/rfq.service";
 import { emailField, shortText } from "../validation/vendorFields";
 import {
   adminDashboard,
+  adminDashboardItems,
   createInternalUser,
   listInternalUsers,
   reinstateVendor,
@@ -51,6 +52,19 @@ const suspendSchema = z.object({
 
 export const dashboard = asyncHandler(async (_req: Request, res: Response) => {
   res.json({ dashboard: await adminDashboard() });
+});
+
+const dashboardItemsQuery = z.object({
+  kind: z.enum(["stale", "unverified", "lapsed", "pending-fleet"]),
+});
+
+/**
+ * The rows behind one dashboard counter. Read-only and admin-gated, and it uses
+ * the same where clauses as the counter so the drawer cannot disagree with it.
+ */
+export const dashboardItems = asyncHandler(async (req: Request, res: Response) => {
+  const { kind } = dashboardItemsQuery.parse(req.query);
+  res.json(await adminDashboardItems(kind));
 });
 
 export const listUsers = asyncHandler(async (_req: Request, res: Response) => {

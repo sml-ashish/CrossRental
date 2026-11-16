@@ -131,6 +131,30 @@ describe("admin dashboard (P0 B1)", () => {
       failedEmails: 0,
     });
     expect(res.body.dashboard.thresholds.staleFlagDays).toBe(60);
+
+    // The drawer reads the same rows as the counter, so the two can never drift.
+    for (const [kind, expected] of [
+      ["stale", 1],
+      ["unverified", 1],
+      ["lapsed", 1],
+      ["pending-fleet", 0],
+    ] as const) {
+      const items = await call(app, "GET", `/api/admin/dashboard/items?kind=${kind}`, {
+        token,
+      });
+      expect(items.status).toBe(200);
+      expect(items.body.total).toBe(expected);
+      expect(items.body.items).toHaveLength(expected);
+    }
+
+    const stale = await call(app, "GET", "/api/admin/dashboard/items?kind=stale", { token });
+    expect(stale.body.items[0]).toMatchObject({
+      craneId: fixtures.vendorA.craneId,
+      vendorId: fixtures.vendorA.vendorId,
+      currentStatus: "AVAILABLE",
+      daysSinceUpdate: 61,
+    });
+    expect(stale.body.items[0].label).toBeTruthy();
   });
 
   it("refuses sales and unauthenticated callers", async () => {

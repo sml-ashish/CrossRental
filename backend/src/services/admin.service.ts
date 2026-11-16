@@ -1,4 +1,5 @@
 import { OnboardingStatus, UserRole } from "../generated/prisma/client";
+import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
 import { getSettings } from "../utils/settings";
@@ -133,6 +134,116 @@ export async function adminDashboard(): Promise<AdminDashboard> {
     },
     alerts,
   };
+}
+
+// --- B1: the rows behind one counter --------------------------------------
+
+export type AdminDashboardItemKind = "stale" | "unverified" | "lapsed" | "pending-fleet";
+
+export interface AdminDashboardItem {
+  craneId: string;
+  /** The vendor's own identifier for the crane, usually the registration no. */
+  label: string;
+  make: string;
+  model: string;
+  capacityT: number;
+  vendorId: string;
+  vendorName: string | null;
+  currentStatus: string;
+  approvalStatus: string;
+  statusUpdatedAt: string;
+  availableFrom: string | null;
+  daysSinceUpdate: number;
+  daysOverdue: number | null;
+}
+
+/** A drawer shows the worst first and pages on the client; 200 is plenty. */
+const DASHBOARD_ITEM_LIMIT = 200;
+
+/**
+ * The exact rows behind one dashboard counter (P0 B1).
+ *
+ * The where clauses are deliberately identical to `adminDashboard()`: the
+ * drawer's list and the row's number are two views of the same query, so they
+ * cannot drift apart. Unlike `/api/cranes`, this includes cranes whose vendor is
+ * not approved yet — the counter does, and the note under the row says so.
+ *
+ * Sorted by severity: oldest update first for stale/unverified, longest overdue
+ * first for lapsed, oldest record first for the approval queue.
+ */
+export async function adminDashboardItems(
+  kind: AdminDashboardItemKind,
+): Promise<{ items: AdminDashboardItem[]; total: number }> {
+  const settings = await getSettings();
+  const now = new Date();
+  const staleBefore = new Date(now.getTime() - settings.staleFlagDays * 86_400_000);
+
+  if (kind === "pending-fleet" && !settings.fleetApprovalRequired) {
+    return { items: [], total: 0 };
+  }
+
+  const where: Prisma.CraneWhereInput =
+    kind === "stale"
+      ? { isActive: true, statusUpdatedAt: { lt: staleBefore } }
+      : kind === "unverified"
+        ? { isActive: true, OR: [{ latitude: null }, { longitude: null }] }
+        : kind === "lapsed"
+          ? { isActive: true, currentStatus: "ENGAGED", availableFrom: { lt: now } }
+          : { isActive: true, approvalStatus: "PENDING" };
+
+  const orderBy: Prisma.CraneOrderByWithRelationInput =
+    kind === "lapsed"
+      ? { availableFrom: "asc" }
+      : kind === "pending-fleet"
+        ? { createdAt: "asc" }
+        : { statusUpdatedAt: "asc" };
+
+  const [rows, total] = await Promise.all([
+    prisma.crane.findMany({
+      where,
+      select: {
+        id: true,
+        serialRegistrationNo: true,
+        make: true,
+        model: true,
+        capacityT: true,
+        currentStatus: true,
+        approvalStatus: true,
+        statusUpdatedAt: true,
+        availableFrom: true,
+        vendor: { select: { id: true, name: true } },
+      },
+      orderBy,
+      take: DASHBOARD_ITEM_LIMIT,
+    }),
+    prisma.crane.count({ where }),
+  ]);
+
+  const items = rows.map((row) => ({
+    craneId: row.id,
+    label: row.serialRegistrationNo,
+    make: row.make,
+    model: row.model,
+    capacityT: Number(row.capacityT),
+    vendorId: row.vendor.id,
+    vendorName: row.vendor.name,
+    currentStatus: row.currentStatus,
+    approvalStatus: row.approvalStatus,
+    statusUpdatedAt: row.statusUpdatedAt.toISOString(),
+    availableFrom: row.availableFrom?.toISOString() ?? null,
+    daysSinceUpdate: Math.max(
+      0,
+      Math.floor((now.getTime() - row.statusUpdatedAt.getTime()) / 86_400_000),
+    ),
+    daysOverdue: row.availableFrom
+      ? Math.max(
+          0,
+          Math.floor((now.getTime() - row.availableFrom.getTime()) / 86_400_000),
+        )
+      : null,
+  }));
+
+  return { items, total };
 }
 
 // --- B2: internal users ---------------------------------------------------

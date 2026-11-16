@@ -586,6 +586,11 @@ const settingsRoute = createRoute({
 const adminRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/admin",
+  // `?review=stale-cranes` opens the matching drawer, so a link from an email
+  // or a colleague lands on the same rows without a second click.
+  validateSearch: (search: Record<string, unknown>): { review?: string } => ({
+    review: typeof search.review === "string" ? search.review : undefined,
+  }),
   component: () => (
     <RequireAuth roles={["admin_user"]}>
       <AdminPage />

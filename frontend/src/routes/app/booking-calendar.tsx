@@ -1,432 +1,789 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, ChevronLeft, ChevronRight, Rows3 } from "lucide-react";
+import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
+import {
+  ArrowUpRight,
+  ChevronDown,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Field, Select, TextInput } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
-import { Spinner } from "@/components/ui/spinner";
-import { Select, TextInput } from "@/components/ui/form";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  DayAgenda,
-  MonthCalendar,
-  STATE_STYLES,
-  currentMonth,
-  dayLabel,
-  indexCranes,
-  monthBounds,
-  monthGrid,
-  monthLabel,
-  monthStats,
-  shortLabel,
-  shiftMonth,
+  EMPTY_FILTERS,
+  addDays,
+  bookingLine,
+  bookingsWithin,
+  classifyRange,
+  defaultRange,
+  diffDays,
+  formatDay,
+  formatDayFull,
+  formatRange,
+  groupByAvailability,
+  isDay,
+  matchesFilters,
+  presetsFor,
+  splitRange,
   todayKey,
-  type MonthStats,
-} from "@/components/month-calendar";
-import {
-  DAY_STATE_LABELS,
-  getBookingCalendar,
-  type CalendarCrane,
-  type CalendarDayState,
-  type CalendarOwnershipType,
-} from "@/lib/calendar";
+  type AvailabilityFilters,
+  type ClassifiedCrane,
+  type DaySegment,
+  type RangeAvailability,
+} from "@/lib/availability";
+import { getBookingCalendar, type CalendarView, type CalendarCrane } from "@/lib/calendar";
 import { cn } from "@/lib/cn";
 
 /**
- * The booking calendar (P2, brief 6.17 / BPD 6.17).
+ * Crane availability — "which cranes are free between these dates?".
  *
- * Two views over one server response, because they answer different questions.
- * The month grid answers "what is happening on the 14th"; the timeline answers
- * "what is this crane doing for the next four weeks". Both are driven by the
- * same month window and the same derived day states, so they cannot disagree.
+ * A salesperson is on the phone with a request. The page answers it in one
+ * screen: pick the dates, optionally narrow by type and capacity, and read down
+ * three groups — free the whole time, free for part of it, not available. Each
+ * row carries a plain sentence as well as a strip, so the answer survives both
+ * a colour-blind reader and a screen reader.
  *
- * A day answers exactly one question, "what is this crane doing", and
- * reservations win: a booking reads RESERVED or HIRED before the crane's own
- * maintenance status is consulted. The state of a day is derived by the server;
- * these screens only paint it.
+ * The day grid and the timeline toggle that lived here before answered a
+ * different question ("what happens on the 14th") and needed a legend to read.
+ * This page has one question and one answer.
  *
- * The window is capped server-side at 92 days (validation); a calendar month is
- * at most 31, so the picker is a month and never an unbounded range.
+ * Everything is read-only. The API caps a calendar request at 92 days, so a
+ * longer custom period is fetched in consecutive chunks and merged.
  */
 
-type ViewMode = "calendar" | "timeline";
+const SEARCH_DEBOUNCE_MS = 220;
 
-const STATE_LABELS = DAY_STATE_LABELS;
+interface ViewState {
+  from: string;
+  to: string;
+  filters: AvailabilityFilters;
+}
 
-const LEGEND: CalendarDayState[] = ["HIRED", "RESERVED", "BLOCKED", "UNAVAILABLE", "FREE"];
+function text(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  // The router parses query values as JSON, so `?min=250` arrives as a number.
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return "";
+}
+
+function parseView(search: Record<string, unknown>, today: string): ViewState {
+  const fallback = defaultRange(today);
+  const from = isDay(text(search.from)) ? text(search.from) : fallback.from;
+  const rawTo = isDay(text(search.to)) ? text(search.to) : addDays(from, 29);
+  const to = rawTo < from ? addDays(from, 29) : rawTo;
+  return {
+    from,
+    to,
+    filters: {
+      type: text(search.type),
+      min: text(search.min),
+      state: text(search.state),
+      q: text(search.q),
+    },
+  };
+}
+
+function toSearch(view: ViewState): Record<string, string | number> {
+  const search: Record<string, string | number> = { from: view.from, to: view.to };
+  if (view.filters.type) search.type = view.filters.type;
+  if (view.filters.min) search.min = Number(view.filters.min);
+  if (view.filters.state) search.state = view.filters.state;
+  if (view.filters.q) search.q = view.filters.q;
+  return search;
+}
+
+function keyOf(search: Record<string, unknown>): string {
+  return Object.keys(search)
+    .sort()
+    .map((key) => `${key}=${String(search[key] ?? "")}`)
+    .join("&");
+}
+
+/** One response from one or more 92-day chunks, keyed by crane. */
+function mergeCalendars(calendars: CalendarView[]): CalendarView {
+  const byId = new Map<string, CalendarCrane>();
+  for (const calendar of calendars) {
+    for (const crane of calendar.cranes) {
+      const existing = byId.get(crane.craneId);
+      if (existing) {
+        existing.days = [...existing.days, ...crane.days].sort((a, b) =>
+          a.date.localeCompare(b.date),
+        );
+      } else {
+        byId.set(crane.craneId, { ...crane, days: [...crane.days] });
+      }
+    }
+  }
+  return {
+    from: calendars[0]?.from ?? "",
+    to: calendars[calendars.length - 1]?.to ?? "",
+    days: calendars[0]?.days ?? [],
+    cranes: [...byId.values()],
+  };
+}
 
 export function BookingCalendarPage() {
-  const [month, setMonth] = useState(() => currentMonth());
-  const [view, setView] = useState<ViewMode>("calendar");
-  const [ownershipType, setOwnershipType] = useState<"" | CalendarOwnershipType>("");
-  const [craneType, setCraneType] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const today = todayKey();
+  const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const navigate = useNavigate();
 
-  const { from, to } = useMemo(() => monthBounds(month), [month]);
+  const [view, setView] = useState<ViewState>(() => parseView(routeSearch, today));
+  const [query, setQuery] = useState(view.filters.q);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showNotAvailable, setShowNotAvailable] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
+  // ---- URL is the view -----------------------------------------------------
+  const routeKey = keyOf(routeSearch);
+  const lastRouteKey = useRef(routeKey);
+  const lastWrittenKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (routeKey === lastRouteKey.current) return;
+    lastRouteKey.current = routeKey;
+    if (routeKey === lastWrittenKey.current) return;
+    const next = parseView(routeSearch, today);
+    setView(next);
+    setQuery(next.filters.q);
+  }, [routeKey, routeSearch, today]);
+
+  useEffect(() => {
+    if (pathname !== "/app/bookings") return;
+    const search = toSearch(view);
+    lastWrittenKey.current = keyOf(search);
+    void navigate({ to: "/app/bookings", search, replace: true });
+  }, [view, pathname, navigate]);
+
+  // Typing stays local until it settles, so the list is not rebuilt per key.
+  useEffect(() => {
+    setQuery(view.filters.q);
+  }, [view.filters.q]);
+  useEffect(() => {
+    if (query === view.filters.q) return;
+    const timer = window.setTimeout(() => {
+      setView((previous) => ({ ...previous, filters: { ...previous.filters, q: query } }));
+      setExpandedId(null);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [query, view.filters.q]);
+
+  // ---- Calendar ------------------------------------------------------------
+  const chunks = useMemo(() => splitRange(view.from, view.to), [view.from, view.to]);
   const calendar = useQuery({
-    queryKey: ["booking-calendar", from, to, ownershipType, craneType],
-    queryFn: () =>
-      getBookingCalendar({
-        from,
-        to,
-        ownershipType: ownershipType === "" ? undefined : ownershipType,
-        craneType: craneType.trim() === "" ? undefined : craneType.trim(),
-      }),
+    queryKey: ["availability", view.from, view.to],
+    queryFn: async () => {
+      const parts: CalendarView[] = [];
+      for (const chunk of chunks) {
+        const response = await getBookingCalendar(chunk);
+        parts.push(response.calendar);
+      }
+      return mergeCalendars(parts);
+    },
   });
 
-  const cranes = calendar.data?.calendar.cranes ?? [];
-  const dates = useMemo(() => monthGrid(month), [month]);
-  const entries = useMemo(() => indexCranes(cranes), [cranes]);
-  const stats = useMemo(() => monthStats(cranes), [cranes]);
+  const cranes = useMemo(() => calendar.data?.cranes ?? [], [calendar.data]);
+  const classified = useMemo(
+    () =>
+      cranes
+        .filter((crane) => matchesFilters(crane, view.filters))
+        .map((crane) => ({ crane, availability: classifyRange(crane, view.from, view.to) })),
+    [cranes, view.filters, view.from, view.to],
+  );
+  const groups = useMemo(() => groupByAvailability(classified), [classified]);
+  const freeCount = groups.whole.length + groups.part.length;
 
-  // A day selected in one month means nothing in the next, so moving the month
-  // clears it and the panel falls back to today (or the first of the month).
-  useEffect(() => setSelected(null), [month, ownershipType, craneType]);
+  const types = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const crane of cranes) map.set(crane.craneTypeCode, crane.craneTypeName);
+    return [...map.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [cranes]);
 
-  const today = todayKey();
-  const activeDate = selected ?? (today.startsWith(month) ? today : `${month}-01`);
+  const states = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const crane of cranes) map.set(crane.stateCode, crane.stateName);
+    return [...map.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [cranes]);
+
+  const presets = useMemo(() => presetsFor(today), [today]);
+
+  // ---- Handlers ------------------------------------------------------------
+  const setRange = useCallback((from: string, to: string) => {
+    setView((previous) => {
+      const keepLength = Math.max(0, diffDays(previous.from, previous.to));
+      const nextTo = to < from ? addDays(from, keepLength) : to;
+      return { ...previous, from, to: nextTo };
+    });
+    setExpandedId(null);
+  }, []);
+
+  const setFrom = useCallback(
+    (value: string) => {
+      if (!isDay(value)) return;
+      setView((previous) => ({
+        ...previous,
+        from: value,
+        to: value > previous.to ? addDays(value, Math.max(0, diffDays(previous.from, previous.to))) : previous.to,
+      }));
+      setExpandedId(null);
+    },
+    [],
+  );
+
+  const setTo = useCallback((value: string) => {
+    if (!isDay(value)) return;
+    setView((previous) => ({
+      ...previous,
+      to: value,
+      from: value < previous.from ? value : previous.from,
+    }));
+    setExpandedId(null);
+  }, []);
+
+  const setFilter = useCallback(<K extends keyof AvailabilityFilters>(key: K, value: AvailabilityFilters[K]) => {
+    setView((previous) => ({ ...previous, filters: { ...previous.filters, [key]: value } }));
+    setExpandedId(null);
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setQuery("");
+    setView((previous) => ({ ...previous, filters: { ...EMPTY_FILTERS } }));
+    setExpandedId(null);
+  }, []);
+
+  const activeFilters = Boolean(
+    view.filters.type || view.filters.min || view.filters.state || view.filters.q,
+  );
+
+  const rangeLabel = formatRange(view.from, view.to);
+  const rangeProse = `${formatDay(view.from)} to ${formatDay(view.to)}`;
+  const summaryParts = [
+    rangeLabel,
+    view.filters.type ? types.find((type) => type.value === view.filters.type)?.label : "",
+    view.filters.min ? `${view.filters.min} t or larger` : "",
+    view.filters.state ? states.find((state) => state.value === view.filters.state)?.label : "",
+  ].filter(Boolean);
+
+  const toggleExpanded = useCallback((craneId: string) => {
+    setExpandedId((previous) => (previous === craneId ? null : craneId));
+  }, []);
 
   return (
-    <div className="space-y-4">
-      <PageHeader
-        title="Booking calendar"
-        description="What every crane is doing, day by day. Reservations win over the crane's own status."
-        actions={
-          <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-            <ViewButton
-              active={view === "calendar"}
-              onClick={() => setView("calendar")}
-              icon={<CalendarDays className="size-3.5" aria-hidden />}
-              label="Calendar"
-            />
-            <ViewButton
-              active={view === "timeline"}
-              onClick={() => setView("timeline")}
-              icon={<Rows3 className="size-3.5" aria-hidden />}
-              label="Timeline"
-            />
-          </div>
-        }
-      />
+    <div className="space-y-4 pb-8">
+      <PageHeader title="Crane availability" description="Which cranes are free, and when?" />
 
-      <section className="card overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-1">
-            <IconButton
-              label="Previous month"
-              onClick={() => setMonth((prev) => shiftMonth(prev, -1))}
-            >
-              <ChevronLeft className="size-4" aria-hidden />
-            </IconButton>
-            <span className="min-w-40 px-1 text-center text-sm font-semibold text-slate-900">
-              {monthLabel(month)}
-            </span>
-            <IconButton label="Next month" onClick={() => setMonth((prev) => shiftMonth(prev, 1))}>
-              <ChevronRight className="size-4" aria-hidden />
-            </IconButton>
-            <button
-              type="button"
-              className={cn(
-                "ml-2 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors",
-                month === currentMonth()
-                  ? "cursor-default border-slate-200 text-slate-400"
-                  : "border-slate-200 text-slate-700 hover:bg-ink-800",
-              )}
-              onClick={() => setMonth(currentMonth())}
-              disabled={month === currentMonth()}
-            >
-              Today
-            </button>
+      <section className="card p-4" aria-labelledby="availability-dates-heading">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 id="availability-dates-heading" className="text-sm font-semibold text-slate-900">
+              When do you need a crane?
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Choose the dates, then narrow the list if you need to.
+            </p>
           </div>
-
-          <div className="flex flex-wrap items-end gap-3">
-            <FilterControl label="Ownership" htmlFor="cal-ownership">
-              <Select
-                id="cal-ownership"
-                value={ownershipType}
-                onChange={(value) => setOwnershipType(value as "" | CalendarOwnershipType)}
-                placeholder="All cranes"
-                options={[
-                  { value: "VENDOR", label: "Vendor cranes" },
-                  { value: "SML", label: "SML cranes" },
-                ]}
-              />
-            </FilterControl>
-            <FilterControl label="Crane type" htmlFor="cal-type">
-              <TextInput
-                id="cal-type"
-                value={craneType}
-                onChange={setCraneType}
-                placeholder="All types"
-                className="min-w-40"
-              />
-            </FilterControl>
-          </div>
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-controls="availability-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
+            className="btn-secondary px-3 py-1.5 text-xs md:hidden"
+          >
+            <SlidersHorizontal className="size-3.5" aria-hidden />
+            {filtersOpen ? "Hide filters" : "Change dates and filters"}
+          </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-800 bg-ink-900/50 px-4 py-2.5">
-          <span className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-            Legend
-          </span>
-          {LEGEND.map((state) => (
-            <span key={state} className="inline-flex items-center gap-1.5 text-xs text-slate-600">
-              <span className={cn("size-2 rounded-full", STATE_STYLES[state].dot)} aria-hidden />
-              {STATE_LABELS[state]}
-            </span>
-          ))}
+        <p className="mt-2 text-[13px] text-slate-500 md:hidden">{summaryParts.join(" · ")}</p>
+
+        <div
+          id="availability-filters"
+          className={cn("mt-3 space-y-3", !filtersOpen && "hidden md:block")}
+        >
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label="From" htmlFor="availability-from">
+              <TextInput
+                id="availability-from"
+                type="date"
+                value={view.from}
+                onChange={setFrom}
+              />
+            </Field>
+            <Field label="To" htmlFor="availability-to">
+              <TextInput id="availability-to" type="date" value={view.to} onChange={setTo} />
+            </Field>
+
+            <div
+              className="flex flex-wrap items-center gap-1.5 pb-1"
+              role="group"
+              aria-label="Quick date ranges"
+            >
+              {presets.map((preset) => {
+                const selected = view.from === preset.from && view.to === preset.to;
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setRange(preset.from, preset.to)}
+                    className={cn(
+                      "rounded-full border px-2.5 py-1.5 text-[12px] font-medium transition-colors duration-150",
+                      selected
+                        ? "border-brand-300 bg-brand-50 text-brand-700"
+                        : "border-slate-200 text-slate-600 hover:bg-ink-800 hover:text-slate-900",
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label="Crane type" htmlFor="availability-type">
+              <Select
+                id="availability-type"
+                value={view.filters.type}
+                onChange={(value) => setFilter("type", value)}
+                placeholder="Any type"
+                options={types}
+              />
+            </Field>
+
+            <Field label="Min capacity (t)" htmlFor="availability-min">
+              <TextInput
+                id="availability-min"
+                type="number"
+                value={view.filters.min}
+                onChange={(value) => setFilter("min", value.replace(/[^0-9]/g, ""))}
+                placeholder="Any"
+                inputMode="numeric"
+              />
+            </Field>
+
+            <Field label="State" htmlFor="availability-state">
+              <Select
+                id="availability-state"
+                value={view.filters.state}
+                onChange={(value) => setFilter("state", value)}
+                placeholder="Any state"
+                options={states}
+              />
+            </Field>
+
+            <Field label="Search crane or vendor" htmlFor="availability-q">
+              <TextInput
+                id="availability-q"
+                value={query}
+                onChange={setQuery}
+                placeholder="Name, vendor or city"
+              />
+            </Field>
+          </div>
+
+          {activeFilters ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-xs font-medium text-brand-700 underline-offset-2 hover:underline"
+            >
+              Clear filters
+            </button>
+          ) : null}
         </div>
       </section>
 
       {calendar.isPending ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <LoadingRows />
       ) : calendar.isError ? (
-        <Alert tone="error">Could not load the calendar.</Alert>
+        <Alert tone="error" title="Could not load crane availability">
+          <p>The calendar could not be read for these dates. Nothing has changed; try again.</p>
+          <button
+            type="button"
+            onClick={() => void calendar.refetch()}
+            className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-800 hover:bg-red-100"
+          >
+            <RefreshCw className="size-3.5" aria-hidden />
+            Retry
+          </button>
+        </Alert>
+      ) : cranes.length === 0 ? (
+        <div className="card">
+          <EmptyState
+            title="No cranes in this period"
+            description="The calendar returned no cranes for these dates. Try another period."
+            action={
+              <button type="button" onClick={() => setRange(today, addDays(today, 29))} className="btn-secondary px-3 py-1.5 text-xs">
+                Reset dates
+              </button>
+            }
+          />
+        </div>
       ) : (
-        <>
-          <StatsStrip stats={stats} />
+        <section className="overflow-hidden rounded-lg border border-ink-800 bg-ink-900" aria-label="Cranes by availability">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-800 px-4 py-2.5">
+            <p className="text-[13px] text-slate-600" aria-live="polite">
+              <span className="font-semibold text-slate-900">{freeCount}</span>{" "}
+              {freeCount === 1 ? "crane" : "cranes"} free for all or part of{" "}
+              <span className="font-medium text-slate-800">{rangeProse}</span>
+            </p>
+            <p className="text-[12px] text-slate-500 tabular-nums">
+              {groups.whole.length} free the whole time · {groups.part.length} partly free
+            </p>
+          </div>
 
-          <section className="card overflow-hidden">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900">
-                  {view === "calendar" ? "Month view" : "Timeline"}
-                </h2>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {stats.cranes === 0
-                    ? "No cranes match these filters"
-                    : `${stats.cranes} cranes · ${stats.utilisation}% of crane-days committed`}
-                </p>
-              </div>
-              <p className="text-xs text-slate-400">
-                {view === "calendar" ? "Select a day for the detail" : "One row per crane"}
-              </p>
-            </div>
-
-            {cranes.length === 0 ? (
-              <p className="px-4 py-10 text-center text-sm text-slate-500">
-                No cranes match these filters.
-              </p>
-            ) : view === "calendar" ? (
-              <MonthCalendar
-                month={month}
-                dates={dates}
-                entries={entries}
-                selected={activeDate}
-                onSelect={setSelected}
-                renderDetail={(date) => (
-                  <DayAgenda date={date} entries={entries.get(date) ?? []} month={month} />
-                )}
+          {freeCount === 0 ? (
+            <EmptyState
+              title="No cranes match these dates and filters."
+              description="Try a shorter period or fewer filters."
+              action={
+                activeFilters ? (
+                  <button type="button" onClick={clearFilters} className="btn-secondary px-3 py-1.5 text-xs">
+                    Clear filters
+                  </button>
+                ) : undefined
+              }
+            />
+          ) : (
+            <>
+              <GroupSection
+                title="Free for your whole period"
+                count={groups.whole.length}
+                rows={groups.whole}
+                open
+                expandedId={expandedId}
+                view={view}
+                minCapacity={view.filters.min}
+                onToggle={toggleExpanded}
               />
-            ) : (
-              <Timeline dates={dates} cranes={cranes} month={month} />
-            )}
-          </section>
-        </>
+              <GroupSection
+                title="Free for part of your period"
+                count={groups.part.length}
+                rows={groups.part}
+                open
+                expandedId={expandedId}
+                view={view}
+                minCapacity={view.filters.min}
+                onToggle={toggleExpanded}
+              />
+              <GroupSection
+                title="Not available"
+                count={groups.none.length}
+                rows={groups.none}
+                open={showNotAvailable}
+                onOpenChange={setShowNotAvailable}
+                expandedId={expandedId}
+                view={view}
+                minCapacity={view.filters.min}
+                onToggle={toggleExpanded}
+              />
+            </>
+          )}
+        </section>
       )}
     </div>
   );
 }
 
-function ViewButton({
-  active,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-}) {
+function LoadingRows() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-        active
-          ? "bg-ink-700 text-white shadow-sm ring-1 ring-ink-700"
-          : "text-slate-500 hover:text-slate-800",
-      )}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
-function IconButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="inline-flex size-8 items-center justify-center rounded-md border border-slate-200 text-slate-600 transition-colors hover:bg-ink-800 hover:text-slate-900"
-    >
-      {children}
-    </button>
-  );
-}
-
-function FilterControl({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label
-        htmlFor={htmlFor}
-        className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase"
-      >
-        {label}
-      </label>
-      <div className="[&>input]:py-1.5 [&>select]:py-1.5">{children}</div>
-    </div>
-  );
-}
-
-function StatsStrip({ stats }: { stats: MonthStats }) {
-  const tiles: Array<{ label: string; value: string; sub: string; dot?: string }> = [
-    {
-      label: "Utilisation",
-      value: `${stats.utilisation}%`,
-      sub: "of crane-days committed",
-    },
-    {
-      label: "Hired",
-      value: stats.hired.toLocaleString("en-IN"),
-      sub: "crane-days on hire",
-      dot: STATE_STYLES.HIRED.dot,
-    },
-    {
-      label: "Reserved",
-      value: stats.reserved.toLocaleString("en-IN"),
-      sub: "crane-days held",
-      dot: STATE_STYLES.RESERVED.dot,
-    },
-    {
-      label: "Blocked",
-      value: stats.blocked.toLocaleString("en-IN"),
-      sub: "crane-days blocked",
-      dot: STATE_STYLES.BLOCKED.dot,
-    },
-    {
-      label: "Maintenance",
-      value: stats.maintenance.toLocaleString("en-IN"),
-      sub: "crane-days unavailable",
-      dot: STATE_STYLES.UNAVAILABLE.dot,
-    },
-  ];
-
-  return (
-    <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      {tiles.map((tile) => (
-        <div key={tile.label} className="card px-4 py-3">
-          <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-            {tile.dot ? (
-              <span className={cn("size-1.5 rounded-full", tile.dot)} aria-hidden />
-            ) : null}
-            {tile.label}
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900 tabular-nums">{tile.value}</p>
-          <p className="mt-0.5 text-[11px] text-slate-500">{tile.sub}</p>
+    <div className="card space-y-3 p-4" role="status" aria-label="Loading crane availability">
+      {[0, 1, 2, 3, 4].map((row) => (
+        <div key={row} className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1.2fr)_minmax(220px,1.5fr)_minmax(0,1fr)] md:items-center">
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-3 w-32" />
+          </div>
+          <Skeleton className="h-2.5 w-full rounded-full" />
+          <Skeleton className="h-4 w-44" />
         </div>
       ))}
+    </div>
+  );
+}
+
+function GroupSection({
+  title,
+  count,
+  rows,
+  open,
+  onOpenChange,
+  expandedId,
+  view,
+  minCapacity,
+  onToggle,
+}: {
+  title: string;
+  count: number;
+  rows: ClassifiedCrane[];
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  expandedId: string | null;
+  view: ViewState;
+  minCapacity: string;
+  onToggle: (craneId: string) => void;
+}) {
+  const collapsible = Boolean(onOpenChange);
+  const headerContent = (
+    <>
+      {collapsible ? (
+        <ChevronDown
+          className={cn("size-4 shrink-0 text-slate-500 transition-transform", !open && "-rotate-90 motion-reduce:transition-none")}
+          aria-hidden
+        />
+      ) : (
+        <span className="size-4 shrink-0" aria-hidden />
+      )}
+      <span className="text-[13px] font-semibold text-slate-800">{title}</span>
+      <span className="text-[13px] text-slate-500 tabular-nums">· {count}</span>
+      {!open && collapsible && count > 0 ? (
+        <span className="ml-auto text-[12px] font-medium text-brand-700">Show</span>
+      ) : null}
+    </>
+  );
+
+  return (
+    <section aria-label={`${title}, ${count}`} className="border-t border-ink-800">
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={() => onOpenChange?.(!open)}
+          aria-expanded={open}
+          className="flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-ink-850"
+        >
+          {headerContent}
+        </button>
+      ) : (
+        <div className="flex w-full items-center gap-2 px-4 py-2.5 text-left">
+          {headerContent}
+        </div>
+      )}
+
+      {open
+        ? rows.map((row) => (
+            <CraneRow
+              key={row.crane.craneId}
+              row={row}
+              view={view}
+              minCapacity={minCapacity}
+              expanded={expandedId === row.crane.craneId}
+              onToggle={onToggle}
+            />
+          ))
+        : null}
     </section>
   );
 }
 
-function Timeline({
-  dates,
-  cranes,
-  month,
+function CraneRow({
+  row,
+  view,
+  minCapacity,
+  expanded,
+  onToggle,
 }: {
-  dates: string[];
-  cranes: CalendarCrane[];
-  month: string;
+  row: ClassifiedCrane;
+  view: ViewState;
+  minCapacity: string;
+  expanded: boolean;
+  onToggle: (craneId: string) => void;
 }) {
+  const { crane, availability } = row;
+  const panelId = `availability-panel-${crane.craneId}`;
+  const bookings = useMemo(
+    () => bookingsWithin(crane, view.from, view.to),
+    [crane, view.from, view.to],
+  );
+  const totalDays = Math.max(1, diffDays(view.from, view.to) + 1);
   const today = todayKey();
-  const monthDays = dates.filter((date) => date.startsWith(month));
+  const todayOffset = diffDays(view.from, today);
+  const showToday = todayOffset >= 0 && todayOffset < totalDays;
+
+  const rfqSearch = {
+    craneType: crane.craneTypeCode,
+    capacityT: Number(minCapacity || crane.capacityT),
+    capacityRule: "AT_LEAST",
+    availableFrom: view.from,
+    availableTo: view.to,
+  };
 
   return (
-    <div className="max-h-[36rem] overflow-auto">
-      <table className="w-full border-collapse text-xs">
-        <thead>
-          <tr>
-            <th className="sticky top-0 left-0 z-30 border-r border-b border-slate-200 bg-slate-50 px-4 py-2 text-left text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-              Crane
-            </th>
-            {monthDays.map((day) => {
-              const weekend = (new Date(`${day}T00:00:00Z`).getUTCDay() + 6) % 7 > 4;
-              return (
-                <th
-                  key={day}
-                  title={dayLabel(day)}
-                  className={cn(
-                    "sticky top-0 z-20 border-b border-slate-200 py-2 text-center text-[11px] font-medium tabular-nums",
-                    day === today ? "text-slate-900" : "text-slate-400",
-                    weekend ? "bg-slate-100" : "bg-slate-50",
-                  )}
-                >
-                  {Number(day.slice(8, 10))}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {cranes.map((crane) => (
-            <tr key={crane.craneId} className="group">
-              <td className="sticky left-0 z-10 border-r border-b border-ink-800 bg-ink-850 px-4 py-1.5 whitespace-nowrap group-hover:bg-ink-800">
-                <span className="text-xs font-medium text-slate-900">
-                  {shortLabel(crane.craneLabel)}
-                </span>
-                <span className="ml-2 text-[11px] text-slate-500">
-                  {crane.capacityT} t ·{" "}
-                  {crane.ownershipType === "SML" ? "SML" : crane.vendorName}
-                </span>
-              </td>
-              {crane.days.map((day) => {
-                const weekend = (new Date(`${day.date}T00:00:00Z`).getUTCDay() + 6) % 7 > 4;
-                return (
-                  <td
-                    key={day.date}
-                    title={`${day.date}: ${STATE_LABELS[day.state]}`}
-                    className={cn(
-                      "border-b border-ink-800 px-0.5 py-1.5 text-center",
-                      weekend && "bg-ink-900/70",
-                    )}
-                  >
-                    {day.state === "FREE" ? null : (
-                      <span
-                        className={cn(
-                          "mx-auto block size-3.5 rounded-[3px]",
-                          STATE_STYLES[day.state].bar,
-                        )}
-                      />
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <article
+      className={cn(
+        "border-t border-ink-800",
+        expanded && "bg-ink-850/60",
+      )}
+    >
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        aria-label={`${crane.craneLabel}, ${crane.capacityT} tonnes, ${crane.craneTypeName}. ${availability.sentence}. ${crane.vendorName}, ${crane.currentLocation}.`}
+        onClick={(event) => {
+          if ((event.target as HTMLElement).closest("a,button")) return;
+          onToggle(crane.craneId);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onToggle(crane.craneId);
+          }
+        }}
+        className={cn(
+          "grid cursor-pointer grid-cols-1 gap-2 px-4 py-3 outline-offset-[-2px] transition-colors hover:bg-ink-850/70",
+          "md:grid-cols-[minmax(0,1.2fr)_minmax(220px,1.5fr)_minmax(0,1fr)] md:items-center md:gap-4",
+          expanded && "border-l-2 border-brand-500",
+        )}
+      >
+        <div className="order-1 min-w-0">
+          <p className="flex items-center gap-1.5 text-[15px] leading-tight font-semibold text-slate-900">
+            <ChevronDown
+              className={cn("size-3.5 shrink-0 text-slate-500 transition-transform", !expanded && "-rotate-90 motion-reduce:transition-none")}
+              aria-hidden
+            />
+            <span className="truncate">{crane.craneLabel}</span>
+          </p>
+          <p className="mt-1 truncate text-[13px] text-slate-600 tabular-nums">
+            {crane.capacityT} t · {crane.craneTypeName.replace(/\s+Crane$/i, "")}
+          </p>
+          <p className="truncate text-[13px] text-slate-500">
+            {crane.vendorName} · {crane.currentLocation}
+          </p>
+        </div>
+
+        <div className="order-3 min-w-0 md:order-2">
+          <CraneStrip
+            availability={availability}
+            from={view.from}
+            to={view.to}
+            totalDays={totalDays}
+            todayPosition={showToday ? todayOffset : null}
+          />
+        </div>
+
+        <div className="order-2 min-w-0 md:order-3">
+          <p className="text-sm text-slate-800">{availability.sentence}</p>
+          {availability.kind === "part" && availability.blocker ? (
+            <p className="mt-0.5 text-[13px] text-slate-500">{availability.blocker}</p>
+          ) : null}
+        </div>
+      </div>
+
+      {expanded ? (
+        <div id={panelId} className="border-t border-ink-800 px-4 py-3 md:pl-11">
+          <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+            In this period
+          </p>
+          {bookings.length === 0 ? (
+            <p className="mt-1.5 text-[13px] text-slate-500">
+              No bookings or blocks in this period.
+            </p>
+          ) : (
+            <ul className="mt-1.5 space-y-1">
+              {bookings.map((segment) => (
+                <BookingLineRow key={`${segment.start}-${segment.state}-${segment.reservationId ?? "none"}`} segment={segment} />
+              ))}
+            </ul>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Link
+              to="/app/cranes/$craneId"
+              params={{ craneId: crane.craneId }}
+              className="btn-secondary px-3 py-1.5 text-xs"
+            >
+              <ArrowUpRight className="size-3.5" aria-hidden />
+              Open crane
+            </Link>
+            <Link to="/app/discovery" search={rfqSearch} className="btn-primary px-3 py-1.5 text-xs">
+              <Search className="size-3.5" aria-hidden />
+              Start an RFQ
+            </Link>
+          </div>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function BookingLineRow({ segment }: { segment: DaySegment }) {
+  return (
+    <li className="flex items-baseline gap-2 text-[13px] text-slate-700">
+      <span
+        className={cn(
+          "mt-1 size-1.5 shrink-0 rounded-full",
+          segment.kind === "booked" ? "bg-blue-500" : "bg-amber-500",
+        )}
+        aria-hidden
+      />
+      <span>
+        {bookingLine(segment)}
+      </span>
+    </li>
+  );
+}
+
+function CraneStrip({
+  availability,
+  from,
+  to,
+  totalDays,
+  todayPosition,
+}: {
+  availability: RangeAvailability;
+  from: string;
+  to: string;
+  totalDays: number;
+  todayPosition: number | null;
+}) {
+  const segments =
+    availability.segments.length > 0
+      ? availability.segments
+      : [{ state: "FREE" as const, kind: "free" as const, reservationId: null, start: from, end: to, days: totalDays }];
+
+  return (
+    <div>
+      <div
+        className="relative flex h-2.5 gap-px overflow-hidden rounded-full bg-ink-800"
+        role="img"
+        aria-label={`${availability.sentence}. From ${formatDayFull(from)} to ${formatDayFull(to)}.${todayPosition !== null ? " Today is inside this period." : ""}`}
+      >
+        {segments.map((segment) => (
+          <span
+            key={`${segment.start}-${segment.state}-${segment.reservationId ?? "none"}`}
+            title={bookingLine(segment)}
+            className={cn(
+              "h-full",
+              segment.kind === "booked" && "bg-blue-500",
+              segment.kind === "unavailable" && "bg-amber-500",
+              segment.kind === "free" && "bg-transparent",
+            )}
+            style={{ flexGrow: segment.days, flexBasis: 0 }}
+          />
+        ))}
+        {todayPosition !== null ? (
+          <span
+            className="absolute inset-y-0 z-10 w-px bg-brand-500"
+            style={{ left: `${((todayPosition + 0.5) / totalDays) * 100}%` }}
+            aria-hidden
+          />
+        ) : null}
+      </div>
+      <div className="mt-1 flex items-baseline justify-between gap-2 text-[12px] text-slate-500 tabular-nums">
+        <span>{formatDay(from)}</span>
+        {todayPosition !== null ? <span className="text-brand-700">Today</span> : null}
+        <span>{formatDay(to)}</span>
+      </div>
     </div>
   );
 }

@@ -16,6 +16,7 @@ const router = Router();
 router.use(apiLimiter, requireAuth, requireCapability("vendor:approve"));
 
 router.get("/dashboard", admin.dashboard);
+router.get("/dashboard/items", admin.dashboardItems);
 
 router.get("/users", admin.listUsers);
 router.post("/users", admin.createUser);

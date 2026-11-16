@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Building2,
   CalendarDays,
-  LogOut,
   MapPin,
   Ruler,
   Search,
@@ -23,7 +22,7 @@ import { formatDistance } from "@/lib/rfqs";
 import { CraneMap } from "@/components/crane-map";
 import { CRANE_PATH, craneFill, craneStatusLabel } from "@/components/crane-glyph";
 import { DiscoveryCalendar } from "@/components/discovery-calendar";
-import { roleLabel, useAuth } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { Field, Select, TextInput } from "@/components/ui/form";
 import { cn } from "@/lib/cn";
 
@@ -33,9 +32,10 @@ import { cn } from "@/lib/cn";
  * A browse across every approved vendor's fleet with no enquiry in view, laid
  * out as a workspace rather than a page: the map is the screen, the list is a
  * rail beside it, and a crane is the same object whether it is a pin, a row or
- * the card floating over the map. The screen fills the viewport and hides the
- * application chrome, because a map squeezed into a 1440px column with a page
- * header above it is a map nobody can read.
+ * the card floating over the map. The screen fills the viewport below the shared
+ * application header — which stays put, navigation and all — because a map
+ * squeezed into a 1440px column with a page header above it is a map nobody can
+ * read, but a screen that replaces the navigation strands the person on it.
  *
  * Filters apply live — there is no Search button in this workspace. Text is
  * debounced so typing does not fire a request per keystroke, and the previous
@@ -223,15 +223,8 @@ function greeting(now = new Date()): string {
   return "Good evening";
 }
 
-const TOP_NAV = [
-  { to: "/app/discovery", label: "Find cranes" },
-  { to: "/app/enquiries", label: "Enquiries" },
-  { to: "/app/rfqs", label: "RFQs" },
-  { to: "/app/approvals", label: "Vendors" },
-] as const;
-
 export function DiscoveryPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -269,7 +262,6 @@ export function DiscoveryPage() {
   const [rail, setRail] = useState<RailView>("flat");
   const [moreOpen, setMoreOpen] = useState(false);
   const [calendar, setCalendar] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   // Typing should not fire a request per keystroke, but a chip should feel
   // instant; 220ms is short enough to feel immediate and long enough to coalesce
@@ -332,108 +324,9 @@ export function DiscoveryPage() {
   if (!user) return null;
 
   const displayName = user.vendorName ?? user.fullName?.split(" ")[0] ?? user.email.split("@")[0];
-  const initials = (user.fullName ?? user.email)
-    .split(/[\s@.]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
 
   return (
-    <div className="theme-dark fixed inset-0 z-50 flex flex-col overflow-hidden bg-ink-950 text-neutral-200">
-      {/* ---------------------------------------------------------------- top */}
-      <header className="flex h-12 shrink-0 items-center gap-6 border-b border-ink-800 bg-ink-900 px-4">
-        <Link to="/app/discovery" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-6 items-center gap-0.5" aria-hidden>
-            <span className="block h-4 w-[3px] -skew-x-[18deg] rounded-full bg-accent-500" />
-            <span className="block h-4 w-[3px] -skew-x-[18deg] rounded-full bg-accent-500/60" />
-          </span>
-          <span className="text-sm font-semibold tracking-tight text-white">crossrentel</span>
-        </Link>
-
-        <nav aria-label="Main" className="flex items-center gap-1">
-          {TOP_NAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              activeOptions={{ exact: item.to === "/app/discovery" }}
-              className="rounded-md px-2.5 py-1.5 text-[13px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
-              activeProps={{ className: "bg-ink-850 text-white" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setCalendar((value) => !value)}
-            aria-pressed={calendar}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] transition-colors",
-              calendar
-                ? "bg-ink-850 text-white"
-                : "text-neutral-400 hover:bg-ink-850 hover:text-white",
-            )}
-          >
-            <CalendarDays className="size-3.5" aria-hidden />
-            Calendar
-          </button>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((value) => !value)}
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-              aria-label="Account"
-              className="flex size-8 items-center justify-center rounded-full bg-ink-700 text-[11px] font-semibold tracking-wide text-white transition-colors hover:bg-ink-800"
-            >
-              {initials || "U"}
-            </button>
-
-            {menuOpen ? (
-              <>
-                <button
-                  type="button"
-                  aria-label="Close account menu"
-                  className="fixed inset-0 z-[60] cursor-default"
-                  onClick={() => setMenuOpen(false)}
-                />
-                <div
-                  role="menu"
-                  className="absolute top-10 right-0 z-[70] w-60 rounded-xl border border-ink-800 bg-ink-900 p-2 shadow-2xl"
-                >
-                  <div className="px-2 py-2">
-                    <p className="truncate text-sm font-medium text-white">
-                      {user.fullName ?? user.email}
-                    </p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {roleLabel(user.role)}
-                      {user.vendorName ? ` · ${user.vendorName}` : ""}
-                    </p>
-                  </div>
-                  <div className="my-1 h-px bg-ink-800" />
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      logout();
-                      void navigate({ to: "/auth/login" });
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
-                  >
-                    <LogOut className="size-4" aria-hidden />
-                    Sign out
-                  </button>
-                </div>
-              </>
-            ) : null}
-          </div>
-        </div>
-      </header>
-
+    <div className="theme-dark isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6">
       <div className="flex min-h-0 flex-1">
         {/* ----------------------------------------------------------- sidebar */}
         <aside className="flex w-[420px] shrink-0 flex-col border-r border-ink-800 bg-ink-900">
@@ -441,9 +334,25 @@ export function DiscoveryPage() {
             <p className="text-[12px] text-neutral-500">
               {greeting()}, <span className="text-neutral-300">{displayName}</span>
             </p>
-            <h1 className="text-[26px] leading-none font-semibold tracking-tight text-white">
-              Where&rsquo;s the lift?
-            </h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-[26px] leading-none font-semibold tracking-tight text-white">
+                Where&rsquo;s the lift?
+              </h1>
+              <button
+                type="button"
+                onClick={() => setCalendar((value) => !value)}
+                aria-pressed={calendar}
+                className={cn(
+                  "mt-0.5 flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[12px] transition-colors",
+                  calendar
+                    ? "bg-ink-850 text-white"
+                    : "text-neutral-400 hover:bg-ink-850 hover:text-white",
+                )}
+              >
+                <CalendarDays className="size-3.5" aria-hidden />
+                Calendar
+              </button>
+            </div>
 
             <div className="relative">
               <Search

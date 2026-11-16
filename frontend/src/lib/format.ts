@@ -20,6 +20,24 @@ export function cityOf(row: { siteLocation: string }): string {
 }
 
 /**
+ * "Jamnagar, Gujarat" — the site as one line.
+ *
+ * The location is typed by hand and often already ends with the state, so the
+ * state is only appended when it is not already there. Printing it twice makes
+ * a single site read like two.
+ */
+export function siteLabel(row: {
+  siteLocation: string;
+  siteState?: { name: string } | null;
+  siteStateCode?: string;
+}): string {
+  const location = titleCase(row.siteLocation.trim());
+  const state = row.siteState?.name ? titleCase(row.siteState.name) : row.siteStateCode ?? "";
+  if (state === "") return location;
+  return location.toLowerCase().includes(state.toLowerCase()) ? location : `${location}, ${state}`;
+}
+
+/**
  * "Crawler Crane · 250 t" repeats the noun; next to a capacity the type alone is
  * what the buyer scans for, so the trailing "Crane" is dropped for display.
  */

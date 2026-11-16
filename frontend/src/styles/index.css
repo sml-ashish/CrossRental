@@ -265,6 +265,17 @@
   .panel-in {
     animation: none;
   }
+
+  /* Skeletons, spinners, hovers and the smooth scroll after a send: none of
+     them carry information, so a reader who asked for stillness gets it. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* The selected pin is white with a cool outline; it should read as the one the
@@ -343,6 +354,32 @@
   /* Labels stay a step lighter than values, as they are on screen. */
   .print-sheet dt {
     color: #4b4b52 !important;
+  }
+
+  /* Reports: the table scrolls inside a 70vh window on screen. On paper every
+     row has to appear once, with the header repeated on each page and nothing
+     pinned to a viewport that no longer scrolls. */
+  .print-sheet .report-table {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .print-sheet .report-table table {
+    min-width: 0 !important;
+  }
+
+  .print-sheet .report-table thead {
+    display: table-header-group;
+  }
+
+  .print-sheet .report-table thead th,
+  .print-sheet .report-table tbody td,
+  .print-sheet .report-table tfoot td {
+    position: static !important;
+  }
+
+  .print-sheet .report-table tr {
+    break-inside: avoid;
   }
 }
 

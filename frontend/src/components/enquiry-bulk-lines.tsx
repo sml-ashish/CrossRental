@@ -97,11 +97,26 @@ function Summary({ result }: { result: BulkLineResult }) {
 export function EnquiryBulkLines({
   enquiryId,
   enquiryNo,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
 }: {
   enquiryId: string;
   enquiryNo: string;
+  /** Optional controlled open, so a page's ⋯ menu can own the trigger. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Defaults true; the page header menu passes false and opens it itself. */
+  showTrigger?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+
+  function setOpen(next: boolean) {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  }
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<BulkLineResult | null>(null);
   const [result, setResult] = useState<BulkLineResult | null>(null);
@@ -164,10 +179,12 @@ export function EnquiryBulkLines({
 
   return (
     <>
-      <button type="button" className="btn-secondary" onClick={() => setOpen(true)}>
-        <ListPlus className="size-3.5" aria-hidden />
-        Add lines in bulk
-      </button>
+      {showTrigger ? (
+        <button type="button" className="btn-secondary" onClick={() => setOpen(true)}>
+          <ListPlus className="size-3.5" aria-hidden />
+          Add lines in bulk
+        </button>
+      ) : null}
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:items-center">
