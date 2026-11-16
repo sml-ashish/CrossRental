@@ -8,8 +8,10 @@ import {
   type LineRouteOption,
 } from "@/lib/discovery";
 import {
+  hasGoogleMapsAuthFailed,
   isGoogleMapsConfigured,
   loadGoogleMaps,
+  onGoogleMapsAuthFailure,
   type GoogleMapsApi,
 } from "@/lib/google-maps";
 import { CraneMap } from "@/components/crane-map";
@@ -82,6 +84,14 @@ const NOT_CONFIGURED =
 const LOAD_FAILED =
   "Google Maps could not load, showing the basic map. Routes are unavailable. Check the browser key, its referrer restrictions and the Maps JavaScript API.";
 
+/**
+ * Google accepted the script but rejected the key, so the map would render in
+ * its "for development purposes only" mode. The console line starting with
+ * "Google Maps JavaScript API error" names the exact cause.
+ */
+const AUTH_FAILED =
+  "Google Maps rejected the browser key (billing, API not enabled, referrer or invalid key), showing the basic map. Routes are unavailable. See the browser console for the exact error.";
+
 const ROUTE_BLUE = "#1a73e8";
 const ROUTE_ALT = "#8ea7c9";
 
@@ -118,7 +128,11 @@ export function GoogleCraneMap({
 
   const [api, setApi] = useState<GoogleMapsApi | null>(null);
   const [failure, setFailure] = useState<string | null>(() =>
-    isGoogleMapsConfigured() ? null : NOT_CONFIGURED,
+    !isGoogleMapsConfigured()
+      ? NOT_CONFIGURED
+      : hasGoogleMapsAuthFailed()
+        ? AUTH_FAILED
+        : null,
   );
   const [ready, setReady] = useState(false);
   const [showHeat, setShowHeat] = useState(false);
@@ -163,6 +177,10 @@ export function GoogleCraneMap({
       cancelled = true;
     };
   }, []);
+
+  // A rejected key is reported after the script loads, so it needs its own
+  // listener: the load promise above resolves fine.
+  useEffect(() => onGoogleMapsAuthFailure(() => setFailure(AUTH_FAILED)), []);
 
   // ---------------------------------------------------------------- the map
   useEffect(() => {
@@ -859,3 +877,4 @@ function heatGroups(
     count: bucket.count,
   }));
 }
+

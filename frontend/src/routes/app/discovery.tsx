@@ -438,6 +438,11 @@ export function DiscoveryPage() {
   const currentRoute = routeQuery.isPlaceholderData ? undefined : routeQuery.data;
   const displayRoute = currentRoute ?? (routeQuery.isPlaceholderData ? routeQuery.data : undefined);
   const routeFailed = !routeLoading && routeQuery.isError;
+  // A failed request (network, a 422 for a missing pin handled elsewhere, a 500)
+  // is explained on the card the same way a server-side fallback is.
+  const routeErrorReason = routeFailed
+    ? `request_failed: ${routeQuery.error instanceof Error ? routeQuery.error.message : "the route request failed"}`
+    : null;
 
   // A new line, crane or tab starts from the server's recommended option.
   useEffect(() => {
@@ -513,6 +518,7 @@ export function DiscoveryPage() {
           : formatRouteDistance(selectedRoute.km, selectedRoute.durationMin),
         methodLabel: fallback ? "approx." : "road",
         fallback,
+        fallbackReason: fallback ? (currentRoute.reason ?? null) : null,
         loading: routeLoading,
         siteLabel: currentRoute.siteLabel || siteLabel,
         craneLabel: currentRoute.craneLabel || craneLabel,
@@ -538,6 +544,7 @@ export function DiscoveryPage() {
           ? "approx."
           : "road",
       fallback: routeFailed,
+      fallbackReason: routeErrorReason,
       loading: routeLoading,
       siteLabel,
       craneLabel,
@@ -552,6 +559,7 @@ export function DiscoveryPage() {
     selectedRoute,
     routeLoading,
     routeFailed,
+    routeErrorReason,
   ]);
 
   const mapRoute = useMemo<GoogleMapRoute | null>(() => {
@@ -1001,6 +1009,7 @@ export function DiscoveryPage() {
       crane={selectedCrane}
       route={lineId ? routeSummary : undefined}
       routeMissing={lineId ? routeMissing : undefined}
+      docked
       onClose={() => setSelectedCraneId(null)}
     />
   ) : null;
@@ -1050,7 +1059,7 @@ export function DiscoveryPage() {
             onSelect={selectFromMap}
           />
           {craneCard ? (
-            <div className="pointer-events-none absolute inset-x-4 bottom-4 z-[900] flex justify-center">
+            <div className="pointer-events-none absolute bottom-8 left-4 z-[900] w-[340px] max-w-[calc(100%-2rem)]">
               {craneCard}
             </div>
           ) : null}

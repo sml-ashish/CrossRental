@@ -739,7 +739,12 @@ export async function tryRoadRoutes(
     if (!isInsideIndia(origin) || !isInsideIndia(destination)) {
       return { ok: false, reason: "Both ends of the route must be inside India" };
     }
-    return await geo.roadRoutes(origin, destination);
+    const result = await geo.roadRoutes(origin, destination);
+    // A silent fallback is the hardest failure to diagnose, so every refusal is
+    // logged with Google's own status and message. The reason never contains
+    // the API key.
+    if (!result.ok) console.warn(`[geo] route unavailable: ${result.reason}`);
+    return result;
   } catch (err) {
     console.error("[geo] road route failed", err);
     return { ok: false, reason: "Route lookup failed" };

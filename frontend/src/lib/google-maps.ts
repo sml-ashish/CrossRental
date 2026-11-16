@@ -57,6 +57,44 @@ function googleNamespace(): typeof google | undefined {
   return (window as unknown as { google?: typeof google }).google;
 }
 
+/**
+ * Google reports a rejected key (billing not enabled, API not activated, a
+ * referrer that is not allowed, an invalid key) by calling the global
+ * `gm_authFailure`, *after* the script has loaded. The map then renders in a
+ * degraded "for development purposes only" mode with a popup, and nothing
+ * rejects, so the load promise alone cannot see it. This listener lets a map
+ * swap to its fallback and say so, instead of leaving a broken map on screen.
+ */
+type AuthFailureListener = () => void;
+
+const authFailureListeners = new Set<AuthFailureListener>();
+let authFailed = false;
+
+export function hasGoogleMapsAuthFailed(): boolean {
+  return authFailed;
+}
+
+/** Subscribes to a key rejection; returns the unsubscribe function. */
+export function onGoogleMapsAuthFailure(listener: AuthFailureListener): () => void {
+  authFailureListeners.add(listener);
+  return () => {
+    authFailureListeners.delete(listener);
+  };
+}
+
+function installAuthFailureHook(): void {
+  const win = window as unknown as { gm_authFailure?: () => void };
+  win.gm_authFailure = () => {
+    authFailed = true;
+    console.warn(
+      "[Google Maps] The browser key was rejected. Open the console line starting with " +
+        '"Google Maps JavaScript API error" for the exact cause (billing, API not enabled, ' +
+        "referrer not allowed or invalid key).",
+    );
+    for (const listener of authFailureListeners) listener();
+  };
+}
+
 export function googleMapsBrowserKey(): string {
   return (import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY ?? "").trim();
 }
@@ -156,6 +194,7 @@ export function loadGoogleMaps(): Promise<GoogleMapsApi> {
     );
   }
 
+  installAuthFailureHook();
   installBootstrap(key);
 
   const maps = googleNamespace()?.maps;
@@ -186,3 +225,4 @@ export function loadGoogleMaps(): Promise<GoogleMapsApi> {
 
   return pending;
 }
+

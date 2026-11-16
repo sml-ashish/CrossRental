@@ -50,12 +50,19 @@ export interface LineRoute {
   approximate: boolean;
   siteLabel: string;
   craneLabel: string;
+  /**
+   * Why the route is a straight line, or null for a real road route. One of
+   * `provider_stub`, `provider_disabled`, `route_polyline_off`, or
+   * `route_error: <what Google or the lookup said>`. Internal staff only see
+   * this endpoint, so the screen shows it to explain an approximation.
+   */
+  reason: string | null;
   /** Primary first. Exactly one option is primary; the fallback has one option. */
   routes: LineRouteOption[];
 }
 
 /** Geometry is cacheable; the labels are per line and per crane. */
-type RouteGeometry = Pick<LineRoute, "method" | "approximate" | "routes">;
+type RouteGeometry = Pick<LineRoute, "method" | "approximate" | "reason" | "routes">;
 
 const CACHE_MAX = 500;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -202,11 +209,12 @@ export async function getLineRoute(
   const cached = cacheGet(key);
   if (cached) return { ...cached, siteLabel, craneLabel };
 
-  const fallback = (): LineRoute => ({
+  const fallback = (reason: string): LineRoute => ({
     method: "straight_line",
     approximate: true,
     siteLabel,
     craneLabel,
+    reason,
     routes: [
       {
         id: "r0",
@@ -224,14 +232,22 @@ export async function getLineRoute(
   // The kill switch exists because the polyline field is a billed SKU. With it
   // off the screen still draws a labelled approximation and no Google call is
   // made at all.
-  if (!env.route.polyline) return fallback();
+  if (!env.route.polyline) return fallback("route_polyline_off");
 
   const road = await tryRoadRoutes(origin, destination);
-  if (!road.ok || road.routes.length === 0) return fallback();
+  if (!road.ok) {
+    if (env.geo.provider === "stub") return fallback("provider_stub");
+    if (env.geo.provider === "disabled") return fallback("provider_disabled");
+    return fallback(`route_error: ${road.reason}`);
+  }
+  if (road.routes.length === 0) {
+    return fallback("route_error: Google returned no drivable route between these points");
+  }
 
   const geometry: RouteGeometry = {
     method: "road",
     approximate: false,
+    reason: null,
     routes: road.routes.map((route, index) => ({
       id: route.id || `r${index}`,
       isPrimary: index === 0,
@@ -244,3 +260,4 @@ export async function getLineRoute(
   cacheSet(key, geometry);
   return { ...geometry, siteLabel, craneLabel };
 }
+

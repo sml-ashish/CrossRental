@@ -3,6 +3,8 @@ import {
   ArrowRight,
   Building2,
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
   MapPin,
   Ruler,
   X,
@@ -35,6 +37,8 @@ export interface RouteSummary {
   methodLabel: string;
   /** True only for the labelled straight-line fallback. */
   fallback: boolean;
+  /** Why the route is a straight line, shown beside the fallback label. */
+  fallbackReason?: string | null;
   /** True while a fresh route is in flight; the previous one stays visible. */
   loading: boolean;
   siteLabel: string;
@@ -46,11 +50,30 @@ export interface RouteSummary {
   onSelectRoute?: (routeId: string) => void;
 }
 
+/**
+ * A short, plain-English reading of the server's fallback reason, with the raw
+ * text kept after it so the cause (a Google status, a missing key) is never
+ * hidden from the staff who can fix it.
+ */
+function describeFallbackReason(reason: string): string {
+  if (reason === "provider_stub") {
+    return "the backend is running with GEO_PROVIDER=stub, which cannot draw roads (provider_stub)";
+  }
+  if (reason === "provider_disabled") {
+    return "the backend has GEO_PROVIDER=disabled (provider_disabled)";
+  }
+  if (reason === "route_polyline_off") {
+    return "route drawing is switched off with ROUTE_POLYLINE=false (route_polyline_off)";
+  }
+  return reason;
+}
+
 export function RouteCard({
   crane,
   route,
   routeMissing,
   compact = false,
+  docked = false,
   onClose,
 }: {
   crane: DisplayCrane;
@@ -58,13 +81,28 @@ export function RouteCard({
   route?: RouteSummary | null;
   routeMissing?: "site" | "crane" | null;
   compact?: boolean;
+  /**
+   * A small card parked in a corner of the map, so it never covers the route.
+   * With a route to read it starts collapsed to one summary line; the facts,
+   * alternatives and warnings open with the chevron. Without a route (a plain
+   * browse) it starts open, because the facts are the point.
+   */
+  docked?: boolean;
   onClose: () => void;
 }) {
   const [requestOpen, setRequestOpen] = useState(false);
+  const [expanded, setExpanded] = useState(() => !(docked && route !== undefined));
+  const showDetails = !docked || expanded;
+  const tight = compact || docked;
 
   return (
-    <div className="pointer-events-auto w-full max-w-[420px] overflow-hidden rounded-2xl border border-ink-700 bg-ink-850 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.85)]">
-      {compact ? null : (
+    <div
+      className={cn(
+        "pointer-events-auto w-full overflow-hidden rounded-2xl border border-ink-700 bg-ink-850 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.85)]",
+        docked ? "max-w-[340px]" : "max-w-[420px]",
+      )}
+    >
+      {tight ? null : (
         <div className="relative h-24 overflow-hidden border-b border-ink-800 bg-ink-900">
           <div
             aria-hidden
@@ -103,7 +141,13 @@ export function RouteCard({
         </div>
       )}
 
-      <div className={cn("p-4", compact && "p-3")}>
+      <div
+        className={cn(
+          "p-4",
+          tight && "p-3",
+          docked && expanded && "max-h-[calc(100dvh-18rem)] overflow-y-auto",
+        )}
+      >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold tracking-[0.14em] text-neutral-500 uppercase">
@@ -112,7 +156,7 @@ export function RouteCard({
             <h2
               className={cn(
                 "mt-0.5 truncate font-semibold tracking-tight text-white",
-                compact ? "text-base" : "text-xl",
+                tight ? "text-base" : "text-xl",
               )}
             >
               {crane.make} {crane.model}
@@ -122,19 +166,36 @@ export function RouteCard({
               {crane.yom > 0 ? crane.yom : "Year not recorded"}
             </p>
           </div>
-          {compact ? (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close crane details"
-              className="flex size-7 shrink-0 items-center justify-center rounded-full border border-ink-700 bg-ink-900/90 text-neutral-300 transition-colors hover:text-white"
-            >
-              <X className="size-3.5" aria-hidden />
-            </button>
+          {tight ? (
+            <div className="flex shrink-0 items-center gap-1.5">
+              {docked ? (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((value) => !value)}
+                  aria-expanded={expanded}
+                  aria-label={expanded ? "Hide crane details" : "Show crane details"}
+                  className="flex size-7 items-center justify-center rounded-full border border-ink-700 bg-ink-900/90 text-neutral-300 transition-colors hover:text-white"
+                >
+                  {expanded ? (
+                    <ChevronDown className="size-3.5" aria-hidden />
+                  ) : (
+                    <ChevronUp className="size-3.5" aria-hidden />
+                  )}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close crane details"
+                className="flex size-7 items-center justify-center rounded-full border border-ink-700 bg-ink-900/90 text-neutral-300 transition-colors hover:text-white"
+              >
+                <X className="size-3.5" aria-hidden />
+              </button>
+            </div>
           ) : null}
         </div>
 
-        {compact ? null : (
+        {compact || !showDetails ? null : (
           <dl className="mt-3.5 grid grid-cols-2 gap-x-3 gap-y-2.5">
             <CardFact icon={Building2} label="Vendor" value={crane.vendorName} />
             <CardFact
@@ -161,14 +222,18 @@ export function RouteCard({
           </p>
         ) : route ? (
           <div className="mt-3 rounded-xl border border-ink-800 bg-ink-950/50 px-3 py-2.5">
-            <p className="text-[10px] font-semibold tracking-[0.1em] text-neutral-500 uppercase">
-              Route
-            </p>
-            <p className="mt-1 truncate text-[11px] text-neutral-400">
-              {route.siteLabel}
-              <span className="mx-1 text-neutral-500">→</span>
-              {route.craneLabel}
-            </p>
+            {showDetails ? (
+              <>
+                <p className="text-[10px] font-semibold tracking-[0.1em] text-neutral-500 uppercase">
+                  Route
+                </p>
+                <p className="mt-1 truncate text-[11px] text-neutral-400">
+                  {route.siteLabel}
+                  <span className="mx-1 text-neutral-500">→</span>
+                  {route.craneLabel}
+                </p>
+              </>
+            ) : null}
             <div className="mt-1 flex items-baseline justify-between gap-2">
               <p
                 className={cn(
@@ -192,7 +257,7 @@ export function RouteCard({
             {route.via ? (
               <p className="mt-0.5 truncate text-[10px] text-neutral-500">via {route.via}</p>
             ) : null}
-            {route.alternatives && route.alternatives.length > 1 ? (
+            {showDetails && route.alternatives && route.alternatives.length > 1 ? (
               <ul className="mt-2 space-y-1">
                 {route.alternatives.map((alternative) => (
                   <li key={alternative.id}>
@@ -223,16 +288,22 @@ export function RouteCard({
             {route.fallback ? (
               <p className="mt-1.5 text-[10px] leading-snug text-amber-200/90">
                 Road route unavailable, showing straight-line approx.
+                {route.fallbackReason ? (
+                  <span className="mt-0.5 block break-words text-amber-200/70">
+                    Reason: {describeFallbackReason(route.fallbackReason)}
+                  </span>
+                ) : null}
               </p>
             ) : null}
-            {crane.estimatedMobilisationCost !== undefined &&
+            {showDetails &&
+            crane.estimatedMobilisationCost !== undefined &&
             crane.estimatedMobilisationCost !== null ? (
               <p className="mt-1 text-[10px] text-neutral-500">
                 Mobilisation &asymp; ₹
                 {Math.round(crane.estimatedMobilisationCost).toLocaleString("en-IN")}
               </p>
             ) : null}
-            {crane.boomWarnings && crane.boomWarnings.length > 0 ? (
+            {showDetails && crane.boomWarnings && crane.boomWarnings.length > 0 ? (
               <ul className="mt-1.5 space-y-0.5">
                 {crane.boomWarnings.map((warning) => (
                   <li key={warning} className="text-[10px] leading-snug text-amber-200/90">
@@ -241,10 +312,12 @@ export function RouteCard({
                 ))}
               </ul>
             ) : null}
-            <p className="mt-1.5 border-t border-ink-800 pt-1.5 text-[9px] leading-snug text-neutral-600">
-              Indicative road route for a standard vehicle. Heavy-haul / oversize routes can
-              differ.
-            </p>
+            {showDetails ? (
+              <p className="mt-1.5 border-t border-ink-800 pt-1.5 text-[9px] leading-snug text-neutral-600">
+                Indicative road route for a standard vehicle. Heavy-haul / oversize routes can
+                differ.
+              </p>
+            ) : null}
           </div>
         ) : null}
 
@@ -253,7 +326,7 @@ export function RouteCard({
           onClick={() => setRequestOpen(true)}
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-4 font-semibold text-white transition-colors hover:bg-accent-600",
-            compact ? "mt-2.5 py-2 text-[13px]" : "mt-4 py-2.5 text-sm",
+            tight ? "mt-2.5 py-2 text-[13px]" : "mt-4 py-2.5 text-sm",
           )}
         >
           Request this crane
@@ -321,3 +394,4 @@ function shortDate(iso: string | null): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" });
 }
+

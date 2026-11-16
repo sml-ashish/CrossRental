@@ -330,6 +330,12 @@ export interface LineRoute {
   approximate: boolean;
   siteLabel: string;
   craneLabel: string;
+  /**
+   * Why this is a straight line, or null for a real road route:
+   * `provider_stub`, `provider_disabled`, `route_polyline_off` or
+   * `route_error: <what Google said>`.
+   */
+  reason?: string | null;
   routes: LineRouteOption[];
 }
 
