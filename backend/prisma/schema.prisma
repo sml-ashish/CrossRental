@@ -100,6 +100,10 @@ enum CraneStatus {
   AVAILABLE
   ENGAGED
   UNDER_MAINTENANCE
+  // The crane is on site for an enquiry. Choosing it moves the crane's location
+  // to that enquiry's job site (services/crane.service.ts). For availability it
+  // behaves like ENGAGED: it needs an available-from date and comes back then.
+  DEPLOYED
   // Brief 6.1 as revised (phase B): the vendor dropdown never offers the last
   // two, and nothing new should write them once reservations land. They stay in
   // the enum only for rows written before the reservation rework.
@@ -1470,3 +1474,4 @@ model MobilisationRate {
   @@index([craneTypeCode])
   @@map("mobilisation_rates")
 }
+

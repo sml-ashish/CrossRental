@@ -15,12 +15,13 @@ import {
   listCranesQuerySchema,
   SYSTEM_ONLY_STATUSES,
   VENDOR_SELECTABLE_STATUSES,
+  isBusyStatus,
   type CreateCraneInput,
   type UpdateCraneInput,
   type QuickUpdateInput,
   type ListCranesQuery,
 } from "../validation/craneFields";
-import { CraneApprovalStatus, CraneStatus } from "../generated/prisma/client";
+import { CraneApprovalStatus, CraneStatus, ReservationStatus } from "../generated/prisma/client";
 import type { ValidatedUpload } from "../middleware/upload";
 
 /**
@@ -459,14 +460,14 @@ function assertNotSystemLocked(row: {
 /** A vendor may only ever write one of the three statuses they can choose. */
 function assertVendorStatus(status: CraneStatus) {
   if (!VENDOR_SELECTABLE_STATUSES.includes(status as never)) {
-    throw AppError.badRequest("Choose Available, Engaged or Under Maintenance");
+    throw AppError.badRequest("Choose Available, Engaged, Deployed or Under Maintenance");
   }
 }
 
 /**
  * Works out `availableFrom` from a requested status and date (brief 6.1).
  *
- * Engaged requires a date of today or later. Going back to Available clears it,
+ * Engaged and Deployed require a date of today or later. Going back to Available clears it,
  * because a crane that is free now has no future availability date to hold.
  */
 function resolveAvailableFrom(
@@ -474,7 +475,7 @@ function resolveAvailableFrom(
   requested: Date | null | undefined,
   existing: Date | null,
 ): Date | null {
-  if (status === CraneStatus.ENGAGED) {
+  if (isBusyStatus(status)) {
     const value = requested ?? existing;
     if (!value)
       throw AppError.badRequest("Give the date this crane becomes available");
@@ -688,6 +689,13 @@ export async function createCrane(
 
   const { vendorId, onBehalf } = await resolveWriteTarget(actor, input.vendorId);
   assertVendorStatus(input.currentStatus);
+  // A crane is deployed *to* an enquiry, and a crane that has just been added
+  // has none, so there is no site to move it to.
+  if (input.currentStatus === CraneStatus.DEPLOYED) {
+    throw AppError.badRequest(
+      "A new crane cannot be Deployed. Add it, then set Deployed once it is booked for an enquiry.",
+    );
+  }
   await assertReferences(input);
   await assertNoDuplicate(vendorId, input.serialRegistrationNo);
 
@@ -850,6 +858,60 @@ export async function getCraneDetail(actor: Actor, craneId: string) {
 // Update
 // ---------------------------------------------------------------------------
 
+/**
+ * The job site of the enquiry this crane is booked for.
+ *
+ * A crane reaches an enquiry through its reservations (an award creates one
+ * carrying the enquiry line). With several, the one running today wins, then the
+ * next to start, then the most recent. `null` when the crane has no booking that
+ * came from an enquiry, in which case there is nothing to move it to.
+ */
+async function enquirySiteFor(craneId: string) {
+  const rows = await prisma.reservation.findMany({
+    where: {
+      craneId,
+      status: ReservationStatus.ACTIVE,
+      enquiryLineId: { not: null },
+    },
+    orderBy: { startDate: "asc" },
+    select: {
+      startDate: true,
+      endDate: true,
+      enquiryLine: {
+        select: {
+          enquiry: {
+            select: {
+              enquiryNo: true,
+              siteLocation: true,
+              siteStateCode: true,
+              sitePincode: true,
+              siteLatitude: true,
+              siteLongitude: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const now = Date.now();
+  const pick =
+    rows.find((r) => r.startDate.getTime() <= now && r.endDate.getTime() >= now) ??
+    rows.find((r) => r.startDate.getTime() > now) ??
+    rows[rows.length - 1];
+
+  const enquiry = pick?.enquiryLine?.enquiry;
+  if (!enquiry) return null;
+  return {
+    enquiryNo: enquiry.enquiryNo,
+    location: enquiry.siteLocation,
+    stateCode: enquiry.siteStateCode,
+    pincode: enquiry.sitePincode ?? null,
+    latitude: enquiry.siteLatitude === null ? null : Number(enquiry.siteLatitude),
+    longitude: enquiry.siteLongitude === null ? null : Number(enquiry.siteLongitude),
+  };
+}
+
 export async function updateCrane(
   craneId: string,
   rawInput: unknown,
@@ -873,6 +935,28 @@ export async function updateCrane(
   );
 
   const nextStatus = input.currentStatus ?? existing.currentStatus;
+
+  // Deployed means "on site", so the crane's location becomes the enquiry's job
+  // site, whoever makes the change and whatever location they typed. It applies
+  // when the status *becomes* Deployed; an ordinary edit of a crane that is
+  // already Deployed leaves its location alone. The enquiry's pin is used as
+  // the crane's pin when it has one; otherwise the old pin is dropped so the
+  // new place is geocoded rather than left pointing at the old one. A crane with
+  // no enquiry booking keeps the location it was given.
+  if (
+    nextStatus === CraneStatus.DEPLOYED &&
+    existing.currentStatus !== CraneStatus.DEPLOYED
+  ) {
+    const site = await enquirySiteFor(craneId);
+    if (site) {
+      input.currentLocation = site.location;
+      input.stateCode = site.stateCode;
+      input.pincode = site.pincode;
+      input.latitude = site.latitude;
+      input.longitude = site.longitude;
+    }
+  }
+
   const availableFrom = resolveAvailableFrom(
     nextStatus,
     input.availableFrom,

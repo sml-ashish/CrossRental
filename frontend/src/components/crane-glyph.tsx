@@ -40,6 +40,7 @@ export const CRANE_VIEWBOX = {
 const FILLS: Record<string, string> = {
   AVAILABLE: "#3ecf8e",
   ENGAGED: "#f5a623",
+  DEPLOYED: "#5b8def",
   UNDER_MAINTENANCE: "#8a8d94",
 };
 
@@ -57,6 +58,8 @@ export function craneStatusLabel(status: string): string {
       return "Available";
     case "ENGAGED":
       return "Engaged";
+    case "DEPLOYED":
+      return "Deployed";
     case "UNDER_MAINTENANCE":
       return "Maintenance";
     default:

@@ -1130,7 +1130,7 @@ export function EnquiryIndexPage() {
                 )}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
               >
-                Find cranes for this
+                Find cranes for this enquiry
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
             </div>

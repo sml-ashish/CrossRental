@@ -55,6 +55,7 @@ const STATUS_CHIPS: Array<{ value: StatusChip; label: string }> = [
   { value: "all", label: "All" },
   { value: "AVAILABLE", label: "Available" },
   { value: "ENGAGED", label: "Engaged" },
+  { value: "DEPLOYED", label: "Deployed" },
   { value: "UNDER_MAINTENANCE", label: "Maintenance" },
   { value: "BOOKED_HIRED", label: "Booked/Hired" },
 ];
@@ -69,6 +70,7 @@ const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
 const STATUS_DOTS: Record<CraneStatus, string> = {
   AVAILABLE: "bg-emerald-400",
   ENGAGED: "bg-blue-400",
+  DEPLOYED: "bg-indigo-400",
   UNDER_MAINTENANCE: "bg-amber-400",
   BOOKED: "bg-slate-400",
   HIRED: "bg-slate-400",
@@ -285,7 +287,9 @@ export function FleetPage() {
   const noPinCount = activeCranes.filter((crane) => crane.locationUnverified).length;
 
   const availableCount = activeCranes.filter((c) => c.currentStatus === "AVAILABLE").length;
-  const engagedCount = activeCranes.filter((c) => c.currentStatus === "ENGAGED").length;
+  const engagedCount = activeCranes.filter(
+    (c) => c.currentStatus === "ENGAGED" || c.currentStatus === "DEPLOYED",
+  ).length;
   const maintenanceCount = activeCranes.filter(
     (c) => c.currentStatus === "UNDER_MAINTENANCE",
   ).length;
@@ -1298,6 +1302,3 @@ function FleetSkeleton() {
     </div>
   );
 }
-
-
-

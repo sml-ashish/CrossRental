@@ -16,20 +16,34 @@ export const CRANE_STATUS_VALUES = [
   CraneStatus.AVAILABLE,
   CraneStatus.ENGAGED,
   CraneStatus.UNDER_MAINTENANCE,
+  CraneStatus.DEPLOYED,
   CraneStatus.BOOKED,
   CraneStatus.HIRED,
 ] as const;
 
 /**
- * The three a vendor may choose (brief 6.1). BOOKED and HIRED exist in the enum
- * because the award flow sets them, but they are never offered here and never
- * accepted from a vendor payload.
+ * The four a vendor may choose (brief 6.1, plus Deployed). BOOKED and HIRED
+ * exist in the enum because the award flow sets them, but they are never offered
+ * here and never accepted from a vendor payload.
  */
 export const VENDOR_SELECTABLE_STATUSES = [
   CraneStatus.AVAILABLE,
   CraneStatus.ENGAGED,
   CraneStatus.UNDER_MAINTENANCE,
+  CraneStatus.DEPLOYED,
 ] as const;
+
+/**
+ * Statuses that mean "working, free again on `availableFrom`". Deployed is the
+ * same commitment as Engaged for everything about timing — it needs a release
+ * date, and it is admitted to an RFQ only if free by the start — so every rule
+ * that used to say Engaged says this instead.
+ */
+export const BUSY_STATUSES = [CraneStatus.ENGAGED, CraneStatus.DEPLOYED] as const;
+
+export function isBusyStatus(status: string | null | undefined): boolean {
+  return status === CraneStatus.ENGAGED || status === CraneStatus.DEPLOYED;
+}
 
 export const SYSTEM_ONLY_STATUSES: CraneStatus[] = [
   CraneStatus.BOOKED,
@@ -237,7 +251,7 @@ export const createCraneSchema = z
         message: "Enter a valid date",
       });
     }
-    if (value.currentStatus === CraneStatus.ENGAGED) {
+    if (isBusyStatus(value.currentStatus)) {
       if (!value.availableFrom) {
         ctx.addIssue({
           code: "custom",
@@ -312,7 +326,7 @@ export const updateCraneSchema = z
       });
     }
     if (
-      value.currentStatus === CraneStatus.ENGAGED &&
+      isBusyStatus(value.currentStatus) &&
       value.availableFrom !== undefined
     ) {
       if (value.availableFrom === null) {
@@ -393,7 +407,7 @@ export const quickUpdateSchema = z
       });
     }
 
-    if (value.currentStatus !== CraneStatus.ENGAGED) return;
+    if (!isBusyStatus(value.currentStatus)) return;
     if (value.availableFrom === undefined || value.availableFrom === null) {
       ctx.addIssue({
         code: "custom",

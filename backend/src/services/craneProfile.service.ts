@@ -1,4 +1,5 @@
 import { prisma } from "../lib/database";
+import { isBusyStatus } from "../validation/craneFields";
 import { AppError } from "../middleware/errorHandler";
 import { getCraneDetail, type Actor, type CraneView } from "./crane.service";
 import { bookingCalendar, deriveBookingBadge, type CalendarView } from "./reservations.service";
@@ -63,7 +64,7 @@ function nextAvailable(
   const candidates: number[] = [];
 
   if (crane.currentStatus === CraneStatus.AVAILABLE) candidates.push(todayMs);
-  if (crane.currentStatus === CraneStatus.ENGAGED && crane.availableFrom) {
+  if (isBusyStatus(crane.currentStatus) && crane.availableFrom) {
     candidates.push(Date.parse(crane.availableFrom));
   }
   if (crane.currentStatus === CraneStatus.UNDER_MAINTENANCE && crane.expectedReadyDate) {

@@ -422,6 +422,12 @@
   --color-purple-700: #7e22ce;
 }
 
+/* `--color-white` is the strong ink in light mode, so the red primary button —
+   which is `text-white` by default — has to be pinned back to real white. */
+.theme-light .btn-primary {
+  color: #ffffff;
+}
+
 /* Leaflet fallback map: no tile inversion, light chrome. */
 .theme-light .map-tiles-inverted .leaflet-tile-pane {
   filter: none;
@@ -568,4 +574,3 @@
     break-inside: avoid;
   }
 }
-

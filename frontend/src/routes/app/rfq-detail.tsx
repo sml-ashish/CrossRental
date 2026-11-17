@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, MoreHorizontal, UserPlus } from "lucide-react";
+import { CalendarClock, MoreHorizontal, Moon, Sun, UserPlus } from "lucide-react";
 import {
   DELIVERY_LABELS,
   RESPONSE_LABELS,
@@ -91,6 +91,38 @@ function StatusWord({ status }: { status: RfqStatus }) {
   );
 }
 
+type RfqTheme = "light" | "dark";
+const THEME_KEY = "crossrentel.rfq.theme";
+
+/**
+ * Light / dark for this screen. Dark stays the default so nobody's screen
+ * changes under them; the choice is remembered per browser, and a browser that
+ * blocks storage simply starts dark each time.
+ */
+function useRfqTheme(): [RfqTheme, () => void] {
+  const [theme, setTheme] = useState<RfqTheme>(() => {
+    try {
+      return window.localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
+    }
+  });
+
+  const toggle = () => {
+    setTheme((current) => {
+      const next: RfqTheme = current === "light" ? "dark" : "light";
+      try {
+        window.localStorage.setItem(THEME_KEY, next);
+      } catch {
+        /* unsaved is fine */
+      }
+      return next;
+    });
+  };
+
+  return [theme, toggle];
+}
+
 function readStoredMode(): CandidateMode {
   try {
     return window.localStorage.getItem("sml.rfq.picker.mode") === "distance"
@@ -114,6 +146,7 @@ function InternalRfqDetailPage() {
   // The picker's ranking is remembered per browser; the shortlist is not, so a
   // stale selection can never be sent days later by accident.
   const [mode, setMode] = useState<CandidateMode>(readStoredMode);
+  const [theme, toggleTheme] = useRfqTheme();
   const [addingVendors, setAddingVendors] = useState(false);
   const [actionForm, setActionForm] = useState<"cancel" | "extend" | null>(null);
   const [outcome, setOutcome] = useState<SendOutcome | null>(null);
@@ -224,361 +257,383 @@ function InternalRfqDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1360px] space-y-4 pb-24 min-[1100px]:pb-6">
-      <PageHeader
-        back={{ to: "/app/rfqs", label: "All RFQs" }}
-        title={rfq?.rfqNumber ?? "RFQ"}
-        mono
-        titleClassName="text-2xl"
-        description={
-          rfq ? (
-            <>
-              {craneTypeLabel(rfq.craneTypeRef?.name ?? rfq.craneType)} · {rfq.capacityT} t
-              {rfq.capacityRule === "AT_LEAST" ? "+" : ""} · qty {rfq.quantity} · {cityOf(rfq)}
-              {rfq.siteState ? `, ${titleCase(rfq.siteState.name)}` : ""}
-              <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px]">
-                <Link
-                  to="/app/enquiries"
-                  search={{ q: rfq.enquiryNo }}
-                  className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
-                >
-                  Enquiry {rfq.enquiryNo}/{rfq.lineNo}
-                </Link>
-                {rfq.enquiryLineId ? (
+    // The wrapper bleeds to the edges of the page so the light theme paints the
+    // whole canvas, not just the column. The app bar above keeps its own chrome.
+    <div
+      className={cn(
+        "-mx-4 -my-6 min-h-[calc(100dvh-3rem)] bg-slate-50 px-4 py-6 text-slate-700 sm:-mx-6 sm:px-6",
+        theme === "light" ? "theme-light" : "theme-dark",
+      )}
+    >
+      <div className="mx-auto w-full max-w-[1360px] space-y-4 pb-6">
+        <PageHeader
+          back={{ to: "/app/rfqs", label: "All RFQs" }}
+          title={rfq?.rfqNumber ?? "RFQ"}
+          mono
+          titleClassName="text-2xl"
+          description={
+            rfq ? (
+              <>
+                {craneTypeLabel(rfq.craneTypeRef?.name ?? rfq.craneType)} · {rfq.capacityT} t
+                {rfq.capacityRule === "AT_LEAST" ? "+" : ""} · qty {rfq.quantity} · {cityOf(rfq)}
+                {rfq.siteState ? `, ${titleCase(rfq.siteState.name)}` : ""}
+                <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px]">
                   <Link
-                    to="/app/enquiries/lines/$lineId/edit"
-                    params={{ lineId: rfq.enquiryLineId }}
+                    to="/app/enquiries"
+                    search={{ q: rfq.enquiryNo }}
                     className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
                   >
-                    Open line item
+                    Enquiry {rfq.enquiryNo}/{rfq.lineNo}
                   </Link>
-                ) : null}
-              </span>
-            </>
-          ) : undefined
-        }
-        meta={
-          rfq ? (
-            <>
-              <StatusWord status={rfq.status} />
-              {rfq.rollupStatus ? (
-                <span className="text-[15px] text-slate-500">
-                  {ROLLUPE_STATUS_LABELS[rfq.rollupStatus]}
+                  {rfq.enquiryLineId ? (
+                    <Link
+                      to="/app/enquiries/lines/$lineId/edit"
+                      params={{ lineId: rfq.enquiryLineId }}
+                      className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
+                    >
+                      Open line item
+                    </Link>
+                  ) : null}
                 </span>
-              ) : null}
-              <span aria-hidden className="text-slate-400">
-                ·
-              </span>
-              <span className="text-[15px] text-slate-500">
-                Created {dayMonth(rfq.createdAt)} by{" "}
-                {rfq.createdBy?.fullName ?? rfq.createdBy?.email ?? "—"}
-              </span>
-            </>
-          ) : null
-        }
-        actions={
-          rfq ? (
-            <div className="flex flex-col items-end gap-2">
-              <div className="text-right" title={formatDeadlineExact(rfq.submissionDeadline)}>
-                <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-                  Submission deadline
-                </p>
-                <p className="text-[17px] text-slate-900 tabular-nums">
-                  {formatDeadline(rfq.submissionDeadline)}
-                </p>
-                <p
-                  className={cn(
-                    "text-[14px]",
-                    relative?.tone === "overdue"
-                      ? "font-medium text-red-500"
-                      : relative?.tone === "soon"
-                        ? "font-medium text-amber-500"
-                        : "text-slate-500",
-                  )}
-                >
-                  {relative?.label} · {DEADLINE_ZONE_LABEL}
-                </p>
-                {deadlinePassed && isDraft ? (
-                  <p className="max-w-[240px] text-[14px] text-red-500">
-                    Deadline has passed. Edit the draft before sending.
+              </>
+            ) : undefined
+          }
+          meta={
+            rfq ? (
+              <>
+                <StatusWord status={rfq.status} />
+                {rfq.rollupStatus ? (
+                  <span className="text-[15px] text-slate-500">
+                    {ROLLUPE_STATUS_LABELS[rfq.rollupStatus]}
+                  </span>
+                ) : null}
+                <span aria-hidden className="text-slate-400">
+                  ·
+                </span>
+                <span className="text-[15px] text-slate-500">
+                  Created {dayMonth(rfq.createdAt)} by{" "}
+                  {rfq.createdBy?.fullName ?? rfq.createdBy?.email ?? "—"}
+                </span>
+              </>
+            ) : null
+          }
+          actions={
+            rfq ? (
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-right" title={formatDeadlineExact(rfq.submissionDeadline)}>
+                  <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                    Submission deadline
                   </p>
-                ) : null}
-                {isDraft ? (
-                  <Link
-                    to="/app/rfqs/$rfqId/edit"
-                    params={{ rfqId }}
-                    className="mt-1 inline-block text-[14px] font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
-                  >
-                    Edit deadline
-                  </Link>
-                ) : null}
-              </div>
-
-              <RfqHeaderActions
-                rfqId={rfqId}
-                isDraft={isDraft}
-                isSent={isSent}
-                isCancelled={isCancelled}
-                onCancel={() => setActionForm(actionForm === "cancel" ? null : "cancel")}
-                onExtend={() => setActionForm(actionForm === "extend" ? null : "extend")}
-              />
-            </div>
-          ) : null
-        }
-      />
-
-      {rfq ? (
-        <div className="border-y border-ink-800 py-2">
-          <LifecycleStepper
-            steps={steps}
-            current={stepIndex}
-            cancelled={isCancelled}
-          />
-          {isCancelled && rfq.cancelReason ? (
-            <p className="mt-1 text-[14px] text-slate-500">{rfq.cancelReason}</p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {actionForm === "cancel" ? (
-        <div className="ml-auto max-w-xl">
-          <CancelForm
-            rfqId={rfqId}
-            onDone={() => {
-              setActionForm(null);
-              invalidate();
-            }}
-          />
-        </div>
-      ) : null}
-      {actionForm === "extend" ? (
-        <div className="ml-auto max-w-xl">
-          <ExtendDeadlineForm
-            rfqId={rfqId}
-            onDone={() => {
-              setActionForm(null);
-              invalidate();
-            }}
-          />
-        </div>
-      ) : null}
-
-      {detail.isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <Spinner /> Loading the RFQ
-        </div>
-      ) : detail.error ? (
-        <Alert title="Could not load this RFQ">{(detail.error as Error).message}</Alert>
-      ) : !rfq ? null : (
-        <>
-          <div className="sticky top-[49px] z-20 bg-slate-50 pt-1">
-            <div
-              role="tablist"
-              aria-label="RFQ sections"
-              className="flex gap-5 overflow-x-auto border-b border-slate-200"
-            >
-              {DETAIL_TABS.map((entry) => {
-                const active = tab === entry.value;
-                const badge = tabBadge(entry.value);
-                return (
-                  <button
-                    key={entry.value}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setTab(entry.value)}
+                  <p className="text-[17px] text-slate-900 tabular-nums">
+                    {formatDeadline(rfq.submissionDeadline)}
+                  </p>
+                  <p
                     className={cn(
-                      "-mb-px shrink-0 border-b-2 pb-2.5 text-[15px] whitespace-nowrap transition-colors duration-150",
-                      active
-                        ? "border-accent-500 font-medium text-slate-900"
-                        : "border-transparent text-slate-500 hover:text-slate-900",
+                      "text-[14px]",
+                      relative?.tone === "overdue"
+                        ? "font-medium text-red-500"
+                        : relative?.tone === "soon"
+                          ? "font-medium text-amber-500"
+                          : "text-slate-500",
                     )}
                   >
-                    {entry.label}
-                    {badge ? (
-                      <span className="ml-1.5 text-[14px] text-slate-500 tabular-nums">
-                        {badge}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Every section stays mounted so a half-made vendor selection is not
-              thrown away by looking at the quotes and coming back. */}
-          <div className="space-y-5">
-            <div className={cn("space-y-5", tab !== "overview" && "hidden")}>
-              <Section title="Requirement">
-                <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <ReadOnlyValue label="Crane type" value={rfq.craneTypeRef?.name ?? rfq.craneType} />
-                  <ReadOnlyValue
-                    label="Capacity required"
-                    value={`${rfq.capacityT} t (${rfq.capacityRule === "EXACT" ? "exact" : "at least"})`}
-                  />
-                  <ReadOnlyValue label="Quantity" value={String(rfq.quantity)} />
-                  {rfq.capacityNote ? (
-                    <ReadOnlyValue label="Capacity note" value={rfq.capacityNote} />
-                  ) : null}
-                  {rfq.applicationDescription ? (
-                    <ReadOnlyValue label="Application" value={rfq.applicationDescription} />
-                  ) : null}
-                  {rfq.loadDescription ? (
-                    <ReadOnlyValue label="Load details" value={rfq.loadDescription} />
-                  ) : null}
-                  {rfq.mainBoomM !== null ? (
-                    <ReadOnlyValue label="Main boom required" value={`${rfq.mainBoomM} m`} />
-                  ) : null}
-                  {rfq.jibLengthM !== null ? (
-                    <ReadOnlyValue label="Jib length required" value={`${rfq.jibLengthM} m`} />
-                  ) : null}
-                  <ReadOnlyValue
-                    label="Job site"
-                    value={siteLabel(rfq)}
-                  />
-                  <ReadOnlyValue label="Pincode" value={rfq.sitePincode ?? "—"} mono />
-                  <ReadOnlyValue
-                    label="Required start"
-                    value={
-                      rfq.startDateTbc ? "To be confirmed" : formatCalendarDate(rfq.requiredStartDate)
-                    }
-                  />
-                  <ReadOnlyValue
-                    label="Duration"
-                    value={`${rfq.durationValue} ${rfq.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}`}
-                  />
-                  <ReadOnlyValue label="Configuration" value={rfq.configuration ?? "—"} />
-                  <ReadOnlyValue
-                    label="Sent"
-                    value={rfq.sentAt ? formatDateTime(rfq.sentAt) : "Not sent yet"}
-                  />
-                </dl>
-              </Section>
-
-              <Section title="Commercial terms">
-                <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <ReadOnlyValue label="OT charges" value={rfq.otCharges ?? "—"} />
-                  <ReadOnlyValue label="Breakdown charges" value={rfq.breakdownTerms ?? "—"} />
-                  <ReadOnlyValue label="Diesel scope" value={rfq.dieselScope ?? "—"} />
-                  <ReadOnlyValue label="Working hours / shift" value={rfq.workingHoursShift ?? "—"} />
-                  <ReadOnlyValue
-                    label="Crane age criteria"
-                    value={rfq.craneAgeCriteriaYears === null ? "—" : `${rfq.craneAgeCriteriaYears} years`}
-                  />
-                  <ReadOnlyValue
-                    label="Accommodation & conveyance"
-                    value={rfq.accommodationConveyance ?? "—"}
-                  />
-                  <ReadOnlyValue label="Payment terms" value={rfq.paymentTerms ?? "—"} />
-                  <ReadOnlyValue
-                    label="Mobilisation & demobilisation"
-                    value={rfq.mobilisationTerms ?? "—"}
-                  />
-                  <ReadOnlyValue label="Support crane" value={rfq.supportCrane ?? "—"} />
-                  <ReadOnlyValue
-                    label="Steel mats & ground prep"
-                    value={rfq.steelMatsGroundPrep ?? "—"}
-                  />
-                  <ReadOnlyValue label="EHS / HR requirements" value={rfq.ehsHrRequirements ?? "—"} />
-                  <ReadOnlyValue label="Insurance" value={rfq.insuranceTerms ?? "—"} />
-                  <ReadOnlyValue label="Extension clause" value={rfq.extensionClause ?? "—"} />
-                  <ReadOnlyValue label="Notes" value={rfq.notes ?? "—"} />
-                </dl>
-                <div className="border-t border-ink-800 pt-3">
-                  <p className="text-xs font-medium text-slate-500">SML contact</p>
-                  <p className="mt-0.5 text-sm text-slate-900">
-                    {rfq.smlContactName ?? "—"}
-                    {rfq.smlContactMobile ? ` · ${rfq.smlContactMobile}` : ""}
-                    {rfq.smlContactEmail ? ` · ${rfq.smlContactEmail}` : ""}
+                    {relative?.label} · {DEADLINE_ZONE_LABEL}
                   </p>
+                  {deadlinePassed && isDraft ? (
+                    <p className="max-w-[240px] text-[14px] text-red-500">
+                      Deadline has passed. Edit the draft before sending.
+                    </p>
+                  ) : null}
+                  {isDraft ? (
+                    <Link
+                      to="/app/rfqs/$rfqId/edit"
+                      params={{ rfqId }}
+                      className="mt-1 inline-block text-[14px] font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
+                    >
+                      Edit deadline
+                    </Link>
+                  ) : null}
                 </div>
-                {rfq.attachments.length > 0 ? (
-                  <div>
-                    <p className="text-xs font-medium text-slate-500">Attachments</p>
-                    <ul className="mt-1 space-y-0.5 text-sm text-slate-700">
-                      {rfq.attachments.map((file) => (
-                        <li key={file.id}>{file.fileName}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </Section>
+
+                <RfqHeaderActions
+                  rfqId={rfqId}
+                  isDraft={isDraft}
+                  isSent={isSent}
+                  isCancelled={isCancelled}
+                  onCancel={() => setActionForm(actionForm === "cancel" ? null : "cancel")}
+                  onExtend={() => setActionForm(actionForm === "extend" ? null : "extend")}
+                />
+              </div>
+            ) : null
+          }
+        />
+
+        {rfq ? (
+          <div className="border-y border-ink-800 py-2">
+            <LifecycleStepper
+              steps={steps}
+              current={stepIndex}
+              cancelled={isCancelled}
+            />
+            {isCancelled && rfq.cancelReason ? (
+              <p className="mt-1 text-[14px] text-slate-500">{rfq.cancelReason}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {actionForm === "cancel" ? (
+          <div className="ml-auto max-w-xl">
+            <CancelForm
+              rfqId={rfqId}
+              onDone={() => {
+                setActionForm(null);
+                invalidate();
+              }}
+            />
+          </div>
+        ) : null}
+        {actionForm === "extend" ? (
+          <div className="ml-auto max-w-xl">
+            <ExtendDeadlineForm
+              rfqId={rfqId}
+              onDone={() => {
+                setActionForm(null);
+                invalidate();
+              }}
+            />
+          </div>
+        ) : null}
+
+        {detail.isLoading ? (
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Spinner /> Loading the RFQ
+          </div>
+        ) : detail.error ? (
+          <Alert title="Could not load this RFQ">{(detail.error as Error).message}</Alert>
+        ) : !rfq ? null : (
+          <>
+            <div className="sticky top-[49px] z-20 bg-slate-50 pt-1">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                className="absolute right-0 bottom-1.5 z-10 inline-flex size-8 items-center justify-center rounded-lg border border-ink-800 bg-ink-850 text-slate-600 transition-colors hover:border-ink-700 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+              >
+                {theme === "light" ? (
+                  <Moon className="size-4" aria-hidden />
+                ) : (
+                  <Sun className="size-4" aria-hidden />
+                )}
+              </button>
+              <div
+                role="tablist"
+                aria-label="RFQ sections"
+                className="flex gap-5 overflow-x-auto border-b border-slate-200 pr-12"
+              >
+                {DETAIL_TABS.map((entry) => {
+                  const active = tab === entry.value;
+                  const badge = tabBadge(entry.value);
+                  return (
+                    <button
+                      key={entry.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setTab(entry.value)}
+                      className={cn(
+                        "-mb-px shrink-0 border-b-2 pb-2.5 text-[15px] whitespace-nowrap transition-colors duration-150",
+                        active
+                          ? "border-accent-500 font-medium text-slate-900"
+                          : "border-transparent text-slate-500 hover:text-slate-900",
+                      )}
+                    >
+                      {entry.label}
+                      {badge ? (
+                        <span className="ml-1.5 text-[14px] text-slate-500 tabular-nums">
+                          {badge}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className={cn("space-y-5", tab !== "vendors" && "hidden")}>
-              {showPicker ? (
-                <VendorPickerSection
-                  rfq={rfq}
-                  alreadySent={rfq.recipients.map((recipient) => recipient.vendorId)}
-                  disabled={isCancelled}
-                  sendBlockedReason={
-                    canDispatch ? null : "Your account cannot send RFQs."
-                  }
-                  mode={mode}
-                  onModeChange={setMode}
-                  candidates={candidates}
-                  onSent={handleSent}
-                  onPinConfirmed={invalidate}
-                />
-              ) : null}
+            {/* Every section stays mounted so a half-made vendor selection is not
+                thrown away by looking at the quotes and coming back. */}
+            <div className="space-y-5">
+              <div className={cn("space-y-5", tab !== "overview" && "hidden")}>
+                <Section title="Requirement">
+                  <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <ReadOnlyValue label="Crane type" value={rfq.craneTypeRef?.name ?? rfq.craneType} />
+                    <ReadOnlyValue
+                      label="Capacity required"
+                      value={`${rfq.capacityT} t (${rfq.capacityRule === "EXACT" ? "exact" : "at least"})`}
+                    />
+                    <ReadOnlyValue label="Quantity" value={String(rfq.quantity)} />
+                    {rfq.capacityNote ? (
+                      <ReadOnlyValue label="Capacity note" value={rfq.capacityNote} />
+                    ) : null}
+                    {rfq.applicationDescription ? (
+                      <ReadOnlyValue label="Application" value={rfq.applicationDescription} />
+                    ) : null}
+                    {rfq.loadDescription ? (
+                      <ReadOnlyValue label="Load details" value={rfq.loadDescription} />
+                    ) : null}
+                    {rfq.mainBoomM !== null ? (
+                      <ReadOnlyValue label="Main boom required" value={`${rfq.mainBoomM} m`} />
+                    ) : null}
+                    {rfq.jibLengthM !== null ? (
+                      <ReadOnlyValue label="Jib length required" value={`${rfq.jibLengthM} m`} />
+                    ) : null}
+                    <ReadOnlyValue
+                      label="Job site"
+                      value={siteLabel(rfq)}
+                    />
+                    <ReadOnlyValue label="Pincode" value={rfq.sitePincode ?? "—"} mono />
+                    <ReadOnlyValue
+                      label="Required start"
+                      value={
+                        rfq.startDateTbc ? "To be confirmed" : formatCalendarDate(rfq.requiredStartDate)
+                      }
+                    />
+                    <ReadOnlyValue
+                      label="Duration"
+                      value={`${rfq.durationValue} ${rfq.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}`}
+                    />
+                    <ReadOnlyValue label="Configuration" value={rfq.configuration ?? "—"} />
+                    <ReadOnlyValue
+                      label="Sent"
+                      value={rfq.sentAt ? formatDateTime(rfq.sentAt) : "Not sent yet"}
+                    />
+                  </dl>
+                </Section>
 
-              {outcome ? (
-                <Alert
-                  tone={outcome.failed > 0 ? "info" : "success"}
-                  title={`Sent to ${outcome.sent} vendor${outcome.sent === 1 ? "" : "s"}`}
-                >
-                  {outcome.failed > 0 ? (
-                    <>
-                      {outcome.failed} could not be delivered:
-                      <ul className="mt-1 list-disc space-y-0.5 pl-4">
-                        {outcome.failures.map((failure) => (
-                          <li key={`${failure.vendorName}-${failure.error}`}>
-                            {failure.vendorName} — {failure.error}
-                          </li>
+                <Section title="Commercial terms">
+                  <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <ReadOnlyValue label="OT charges" value={rfq.otCharges ?? "—"} />
+                    <ReadOnlyValue label="Breakdown charges" value={rfq.breakdownTerms ?? "—"} />
+                    <ReadOnlyValue label="Diesel scope" value={rfq.dieselScope ?? "—"} />
+                    <ReadOnlyValue label="Working hours / shift" value={rfq.workingHoursShift ?? "—"} />
+                    <ReadOnlyValue
+                      label="Crane age criteria"
+                      value={rfq.craneAgeCriteriaYears === null ? "—" : `${rfq.craneAgeCriteriaYears} years`}
+                    />
+                    <ReadOnlyValue
+                      label="Accommodation & conveyance"
+                      value={rfq.accommodationConveyance ?? "—"}
+                    />
+                    <ReadOnlyValue label="Payment terms" value={rfq.paymentTerms ?? "—"} />
+                    <ReadOnlyValue
+                      label="Mobilisation & demobilisation"
+                      value={rfq.mobilisationTerms ?? "—"}
+                    />
+                    <ReadOnlyValue label="Support crane" value={rfq.supportCrane ?? "—"} />
+                    <ReadOnlyValue
+                      label="Steel mats & ground prep"
+                      value={rfq.steelMatsGroundPrep ?? "—"}
+                    />
+                    <ReadOnlyValue label="EHS / HR requirements" value={rfq.ehsHrRequirements ?? "—"} />
+                    <ReadOnlyValue label="Insurance" value={rfq.insuranceTerms ?? "—"} />
+                    <ReadOnlyValue label="Extension clause" value={rfq.extensionClause ?? "—"} />
+                    <ReadOnlyValue label="Notes" value={rfq.notes ?? "—"} />
+                  </dl>
+                  <div className="border-t border-ink-800 pt-3">
+                    <p className="text-xs font-medium text-slate-500">SML contact</p>
+                    <p className="mt-0.5 text-sm text-slate-900">
+                      {rfq.smlContactName ?? "—"}
+                      {rfq.smlContactMobile ? ` · ${rfq.smlContactMobile}` : ""}
+                      {rfq.smlContactEmail ? ` · ${rfq.smlContactEmail}` : ""}
+                    </p>
+                  </div>
+                  {rfq.attachments.length > 0 ? (
+                    <div>
+                      <p className="text-xs font-medium text-slate-500">Attachments</p>
+                      <ul className="mt-1 space-y-0.5 text-sm text-slate-700">
+                        {rfq.attachments.map((file) => (
+                          <li key={file.id}>{file.fileName}</li>
                         ))}
                       </ul>
-                    </>
-                  ) : (
-                    "Every selected vendor was reached on every chosen channel."
-                  )}
-                </Alert>
-              ) : null}
+                    </div>
+                  ) : null}
+                </Section>
+              </div>
 
-              <RecipientsSection
-                rfqId={rfqId}
-                status={rfq.status}
-                recipients={rfq.recipients}
-                onDone={invalidate}
-                canAddMore={isSent && deadlinePassed === false}
-                adding={addingVendors}
-                onAddMore={() => {
-                  setAddingVendors(true);
-                  setOutcome(null);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                onStopAdding={() => setAddingVendors(false)}
-              />
-            </div>
+              <div className={cn("space-y-5", tab !== "vendors" && "hidden")}>
+                {showPicker ? (
+                  <VendorPickerSection
+                    rfq={rfq}
+                    alreadySent={rfq.recipients.map((recipient) => recipient.vendorId)}
+                    disabled={isCancelled}
+                    sendBlockedReason={
+                      canDispatch ? null : "Your account cannot send RFQs."
+                    }
+                    mode={mode}
+                    onModeChange={setMode}
+                    candidates={candidates}
+                    onSent={handleSent}
+                    onPinConfirmed={invalidate}
+                  />
+                ) : null}
 
-            <div className={cn("space-y-5", tab !== "replies" && "hidden")}>
-              <InboundRepliesSection rfqId={rfqId} />
-            </div>
+                {outcome ? (
+                  <Alert
+                    tone={outcome.failed > 0 ? "info" : "success"}
+                    title={`Sent to ${outcome.sent} vendor${outcome.sent === 1 ? "" : "s"}`}
+                  >
+                    {outcome.failed > 0 ? (
+                      <>
+                        {outcome.failed} could not be delivered:
+                        <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                          {outcome.failures.map((failure) => (
+                            <li key={`${failure.vendorName}-${failure.error}`}>
+                              {failure.vendorName} — {failure.error}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      "Every selected vendor was emailed."
+                    )}
+                  </Alert>
+                ) : null}
 
-            <div className={cn("space-y-5", tab !== "quotations" && "hidden")}>
-              <QuotationsSection
-                rfqId={rfqId}
-                quotations={rfq.quotations}
-                canAward={user?.role === "admin_user"}
-                closed={isCancelled || rfq.status === "CLOSED"}
-                startDateTbc={rfq.startDateTbc}
-                defaultStartDate={rfq.requiredStartDate?.slice(0, 10) ?? ""}
-                onDone={invalidate}
-              />
+                <RecipientsSection
+                  rfqId={rfqId}
+                  status={rfq.status}
+                  recipients={rfq.recipients}
+                  onDone={invalidate}
+                  canAddMore={isSent && deadlinePassed === false}
+                  adding={addingVendors}
+                  onAddMore={() => {
+                    setAddingVendors(true);
+                    setOutcome(null);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  onStopAdding={() => setAddingVendors(false)}
+                />
+              </div>
+
+              <div className={cn("space-y-5", tab !== "replies" && "hidden")}>
+                <InboundRepliesSection rfqId={rfqId} />
+              </div>
+
+              <div className={cn("space-y-5", tab !== "quotations" && "hidden")}>
+                <QuotationsSection
+                  rfqId={rfqId}
+                  quotations={rfq.quotations}
+                  canAward={user?.role === "admin_user"}
+                  closed={isCancelled || rfq.status === "CLOSED"}
+                  startDateTbc={rfq.startDateTbc}
+                  defaultStartDate={rfq.requiredStartDate?.slice(0, 10) ?? ""}
+                  onDone={invalidate}
+                />
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -907,7 +962,7 @@ function RecipientsSection({
               <THead>
                 <tr>
                   <TH>Vendor</TH>
-                  <TH>Delivery</TH>
+                  <TH>Email</TH>
                   <TH>Response</TH>
                   <TH>First viewed</TH>
                   <TH>Reminders</TH>
@@ -932,47 +987,15 @@ function RecipientsSection({
                       </p>
                     </TD>
                     <TD>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="w-16 shrink-0 text-[13px] tracking-[0.08em] text-slate-500 uppercase">
-                            Email
-                          </span>
-                          <ToneWord
-                            tone={DELIVERY_TONES[recipient.emailDeliveryStatus] ?? NEUTRAL_TONE}
-                            label={DELIVERY_LABELS[recipient.emailDeliveryStatus] ?? recipient.emailDeliveryStatus}
-                          />
-                        </div>
-                        {recipient.emailDeliveryError ? (
-                          <p className="pl-[4.5rem] text-[14px] text-red-600">
-                            {recipient.emailDeliveryError}
-                          </p>
-                        ) : null}
-                        <div className="flex items-center gap-2">
-                          <span className="w-16 shrink-0 text-[13px] tracking-[0.08em] text-slate-500 uppercase">
-                            WhatsApp
-                          </span>
-                          {recipient.whatsappDeliveryStatus ? (
-                            <ToneWord
-                              tone={
-                                DELIVERY_TONES[recipient.whatsappDeliveryStatus] ?? NEUTRAL_TONE
-                              }
-                              label={
-                                DELIVERY_LABELS[recipient.whatsappDeliveryStatus] ??
-                                recipient.whatsappDeliveryStatus
-                              }
-                            />
-                          ) : (
-                            <span className="text-[15px] text-slate-500">
-                              {recipient.whatsappPhones.length > 0 ? "Not used" : "No number"}
-                            </span>
-                          )}
-                        </div>
-                        {recipient.whatsappDeliveryError ? (
-                          <p className="pl-[4.5rem] text-[14px] text-red-600">
-                            {recipient.whatsappDeliveryError}
-                          </p>
-                        ) : null}
-                      </div>
+                      <ToneWord
+                        tone={DELIVERY_TONES[recipient.emailDeliveryStatus] ?? NEUTRAL_TONE}
+                        label={DELIVERY_LABELS[recipient.emailDeliveryStatus] ?? recipient.emailDeliveryStatus}
+                      />
+                      {recipient.emailDeliveryError ? (
+                        <p className="mt-1 text-[14px] text-red-600">
+                          {recipient.emailDeliveryError}
+                        </p>
+                      ) : null}
                     </TD>
                     <TD>
                       <ToneWord
@@ -1040,7 +1063,7 @@ function InboundRepliesSection({ rfqId }: { rfqId: string }) {
   return (
     <Section
       title="Inbound replies"
-      description="Every email and WhatsApp reply for this RFQ is shown here as it arrives."
+      description="Every email reply for this RFQ is shown here as it arrives."
     >
       {replies.isLoading ? (
         <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -1050,8 +1073,8 @@ function InboundRepliesSection({ rfqId }: { rfqId: string }) {
         <Alert tone="error">{(replies.error as Error).message}</Alert>
       ) : (replies.data?.replies.length ?? 0) === 0 ? (
         <p className="text-sm text-slate-500">
-          No replies yet. Email and WhatsApp answers from the invited vendors appear here
-          once they are matched to this RFQ.
+          No replies yet. Email answers from the invited vendors appear here once they are
+          matched to this RFQ.
         </p>
       ) : (
         <>
@@ -1073,7 +1096,7 @@ function InboundRepliesSection({ rfqId }: { rfqId: string }) {
                     </p>
                     <p className="text-xs text-slate-500">
                       {reply.subject ?? "No subject"} ·{" "}
-                      {reply.channel === "WHATSAPP" ? "WhatsApp" : "Email"} ·{" "}
+                      Email ·{" "}
                       {new Date(reply.receivedAt).toLocaleString("en-IN")}
                     </p>
                   </div>
@@ -1399,4 +1422,3 @@ function AwardControl({
     </div>
   );
 }
-

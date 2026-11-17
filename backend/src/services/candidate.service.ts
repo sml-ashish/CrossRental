@@ -1,4 +1,5 @@
 import { prisma } from "../lib/database";
+import { BUSY_STATUSES, isBusyStatus } from "../validation/craneFields";
 import { distancesTo, type Distance } from "./distance.service";
 import { getSettings } from "../utils/settings";
 import { reservationWindowForRfq } from "./reservations.service";
@@ -258,9 +259,9 @@ export async function candidatesForRfq(
       OR: [
         { currentStatus: CraneStatus.AVAILABLE },
         tbc
-          ? { currentStatus: CraneStatus.ENGAGED }
+          ? { currentStatus: { in: [...BUSY_STATUSES] } }
           : {
-              currentStatus: CraneStatus.ENGAGED,
+              currentStatus: { in: [...BUSY_STATUSES] },
               availableFrom: { lte: rfq.requiredStartDate },
             },
       ],
@@ -344,7 +345,7 @@ export async function candidatesForRfq(
       ownershipType: row.ownershipType as OwnershipType,
       availableInTime:
         tbc ||
-        row.currentStatus !== CraneStatus.ENGAGED ||
+        !isBusyStatus(row.currentStatus) ||
         (row.availableFrom !== null &&
           row.availableFrom.getTime() <= rfq.requiredStartDate.getTime()),
       latitude: num(row.latitude),

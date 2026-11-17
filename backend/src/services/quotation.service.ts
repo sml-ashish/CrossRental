@@ -1,4 +1,5 @@
 import { prisma } from "../lib/database";
+import { isBusyStatus } from "../validation/craneFields";
 import type { Prisma } from "../generated/prisma/client";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
@@ -544,7 +545,7 @@ export function computeWarnings(
   }
 
   if (
-    crane.currentStatus === CraneStatus.ENGAGED &&
+    isBusyStatus(crane.currentStatus) &&
     crane.availableFrom !== null &&
     crane.availableFrom.getTime() > rfq.requiredStartDate.getTime()
   ) {

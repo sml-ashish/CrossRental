@@ -30,7 +30,7 @@ import {
   EMPTY_CRANE_FORM,
   fetchReferenceData,
   listCranes,
-  VENDOR_STATUSES,
+  NEW_CRANE_STATUSES,
   type Crane,
   type CraneForm,
 } from "@/lib/fleet";
@@ -879,7 +879,7 @@ function InlineCraneAdd({
             id="inline-status"
             value={form.currentStatus}
             onChange={(value) => set("currentStatus", value)}
-            options={VENDOR_STATUSES.map((status) => ({
+            options={NEW_CRANE_STATUSES.map((status) => ({
               value: status,
               label: CRANE_STATUS_LABELS[status],
             }))}
@@ -1096,5 +1096,3 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 
   return settled;
 }
-
-

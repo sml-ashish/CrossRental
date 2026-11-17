@@ -167,7 +167,7 @@ export function AppLayout() {
               <span className="block h-4 w-[3px] -skew-x-[18deg] rounded-full bg-accent-500" />
               <span className="block h-4 w-[3px] -skew-x-[18deg] rounded-full bg-accent-500/60" />
             </span>
-            <span className="text-sm font-semibold tracking-tight text-white">crossrentel</span>
+            <span className="text-sm font-semibold tracking-tight text-white">crossrental</span>
           </Link>
 
           <nav

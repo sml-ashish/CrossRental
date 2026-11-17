@@ -275,6 +275,7 @@ export function fleetStats(data: VendorDashboard, cranes: Crane[] | null): Fleet
     { key: "HIRED", label: "on hire", dot: "bg-emerald-700" },
     { key: "BOOKED", label: "booked", dot: "bg-slate-600" },
     { key: "ENGAGED", label: "engaged", dot: "bg-slate-500" },
+    { key: "DEPLOYED", label: "deployed", dot: "bg-slate-500" },
     { key: "UNDER_MAINTENANCE", label: "under maintenance", dot: "bg-slate-400" },
   ]
     .map((segment) => ({ ...segment, count: counts[segment.key] ?? 0 }))

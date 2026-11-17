@@ -9,9 +9,21 @@ import { api, apiUpload, getStoredToken } from "@/lib/api";
  * sent anyway.
  */
 
-/** The three a vendor may set. BOOKED and HIRED are moved by SML, not the vendor. */
-export const VENDOR_STATUSES = ["AVAILABLE", "ENGAGED", "UNDER_MAINTENANCE"] as const;
+/**
+ * The four a vendor may set. BOOKED and HIRED are moved by SML, not the vendor.
+ * Setting DEPLOYED moves the crane to the job site of the enquiry it is booked
+ * for, so it is only offered on a crane that already exists.
+ */
+export const VENDOR_STATUSES = ["AVAILABLE", "ENGAGED", "UNDER_MAINTENANCE", "DEPLOYED"] as const;
 export type VendorCraneStatus = (typeof VENDOR_STATUSES)[number];
+
+/** Statuses that are "working, free again on a date", so they need `availableFrom`. */
+export function isBusyStatus(status: string | null | undefined): boolean {
+  return status === "ENGAGED" || status === "DEPLOYED";
+}
+
+/** What a new crane can start as: everything a vendor can set, except Deployed. */
+export const NEW_CRANE_STATUSES = VENDOR_STATUSES.filter((status) => status !== "DEPLOYED");
 
 /** The full enum, including the two system-only statuses, for display purposes. */
 export type CraneStatus = VendorCraneStatus | "BOOKED" | "HIRED";
@@ -20,6 +32,7 @@ export const CRANE_STATUS_LABELS: Record<CraneStatus, string> = {
   AVAILABLE: "Available",
   ENGAGED: "Engaged",
   UNDER_MAINTENANCE: "Under maintenance",
+  DEPLOYED: "Deployed",
   BOOKED: "Booked (SML)",
   HIRED: "Hired",
 };

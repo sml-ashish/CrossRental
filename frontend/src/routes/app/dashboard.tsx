@@ -16,6 +16,7 @@ import {
   listCranes,
   quickUpdateCrane,
   VENDOR_STATUSES,
+  isBusyStatus,
   type Crane,
 } from "@/lib/fleet";
 import { api } from "@/lib/api";
@@ -747,14 +748,14 @@ function UpdatePopover({ crane, onSaved }: { crane: Crane; onSaved: () => void }
 
   const save = useMutation({
     mutationFn: () => {
-      if (status === "ENGAGED" && !availableFrom) {
+      if (isBusyStatus(status) && !availableFrom) {
         throw new Error("Give the date this crane becomes available.");
       }
       return quickUpdateCrane(crane.id, {
         currentStatus: status,
         currentLocation: crane.currentLocation,
         stateCode: crane.stateCode,
-        availableFrom: status === "ENGAGED" ? availableFrom : null,
+        availableFrom: isBusyStatus(status) ? availableFrom : null,
       });
     },
     onSuccess: () => {
@@ -892,7 +893,11 @@ function UpdatePopover({ crane, onSaved }: { crane: Crane; onSaved: () => void }
               <Field
                 label="Available from"
                 htmlFor={availableId}
-                hint="Required when the status is Engaged."
+                hint={
+                  status === "DEPLOYED"
+                    ? "Required. Deployed also moves the crane to its enquiry's job site."
+                    : "Required when the status is Engaged."
+                }
               >
                 <input
                   id={availableId}
@@ -1177,4 +1182,3 @@ function FirstTimeState({
     </section>
   );
 }
-

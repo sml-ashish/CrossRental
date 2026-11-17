@@ -1,4 +1,5 @@
 import { prisma } from "../lib/database";
+import { BUSY_STATUSES } from "../validation/craneFields";
 import { AppError } from "../middleware/errorHandler";
 import { tryGeocode, type GeoPoint } from "../lib/geo";
 import { distancesTo, type Distance } from "./distance.service";
@@ -300,7 +301,13 @@ function discoveryWhere(query: DiscoveryQuery): Prisma.CraneWhereInput {
       ? { capacityT: capacityRule === "EXACT" ? { equals: capacity } : { gte: capacity } }
       : {}),
     ...(query.region ? { stateCode: query.region } : {}),
-    ...(availability ? { currentStatus: availability } : {}),
+    // "Engaged" on the browse filter means working, which includes Deployed.
+    ...(availability
+      ? {
+          currentStatus:
+            availability === CraneStatus.ENGAGED ? { in: [...BUSY_STATUSES] } : availability,
+        }
+      : {}),
     ...(window
       ? {
           AND: [
@@ -308,7 +315,7 @@ function discoveryWhere(query: DiscoveryQuery): Prisma.CraneWhereInput {
               OR: [
                 { currentStatus: CraneStatus.AVAILABLE },
                 {
-                  currentStatus: CraneStatus.ENGAGED,
+                  currentStatus: { in: [...BUSY_STATUSES] },
                   availableFrom: { lte: window.from },
                 },
                 {

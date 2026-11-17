@@ -12,7 +12,9 @@ import {
   previewLocationFromLink,
   updateCrane,
   VENDOR_STATUSES,
+  NEW_CRANE_STATUSES,
   CRANE_STATUS_LABELS,
+  isBusyStatus,
   type CraneForm,
   type LocationSuggestion,
 } from "@/lib/fleet";
@@ -37,9 +39,9 @@ import { Field, Section, Select, TextArea, TextInput } from "@/components/ui/for
 
 const LENGTH_HINT = "Metres. Leave blank or enter NA if this crane has none.";
 
-/** True when the vendor asked to be Engaged, which is what makes availableFrom required. */
+/** True when the vendor asked to be Engaged or Deployed, which is what makes availableFrom required. */
 function needsAvailableFrom(form: CraneForm): boolean {
-  return form.currentStatus === "ENGAGED";
+  return isBusyStatus(form.currentStatus);
 }
 
 /** Brief D4: the expected-ready date only applies while under maintenance. */
@@ -124,10 +126,11 @@ export function CraneFormPage() {
   const save = useMutation({
     mutationFn: () => {
       const payload = withAvailableFrom(form, availableFrom);
-      // On edit, only Engaged asserts a date and only Available clears it; Under
-      // Maintenance must omit the field so the date already on the crane stays.
+      // On edit, only Engaged and Deployed assert a date and only Available clears
+      // it; Under Maintenance must omit the field so the date already on the
+      // crane stays.
       const editAvailableFrom =
-        form.currentStatus === "ENGAGED"
+        isBusyStatus(form.currentStatus)
           ? availableFrom
           : form.currentStatus === "AVAILABLE"
             ? null
@@ -163,11 +166,11 @@ export function CraneFormPage() {
 
   const statusOptions = useMemo(
     () =>
-      VENDOR_STATUSES.map((status) => ({
+      (isEdit ? VENDOR_STATUSES : NEW_CRANE_STATUSES).map((status) => ({
         value: status,
         label: CRANE_STATUS_LABELS[status],
       })),
-    [],
+    [isEdit],
   );
 
   const craneTypeOptions = (reference.data?.craneTypes ?? []).map((c) => ({ value: c.code, label: c.name }));
@@ -410,7 +413,13 @@ export function CraneFormPage() {
               htmlFor="currentStatus"
               required
               error={fieldErrors.currentStatus}
-              hint={locked ? "Managed by SML for this crane." : undefined}
+              hint={
+                locked
+                  ? "Managed by SML for this crane."
+                  : form.currentStatus === "DEPLOYED"
+                    ? "On save, the location becomes the job site of the enquiry this crane is booked for."
+                    : undefined
+              }
             >
               <Select
                 id="currentStatus"

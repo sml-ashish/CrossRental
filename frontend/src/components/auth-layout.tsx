@@ -16,7 +16,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
             SML
           </div>
           <div className="leading-tight">
-            <p className="text-sm font-semibold tracking-tight text-slate-900">crossrentel</p>
+            <p className="text-sm font-semibold tracking-tight text-slate-900">crossrental</p>
             <p className="text-xs text-slate-500">Vendor portal</p>
           </div>
         </div>

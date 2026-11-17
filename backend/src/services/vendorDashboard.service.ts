@@ -1,4 +1,5 @@
 import { prisma } from "../lib/database";
+import { isBusyStatus } from "../validation/craneFields";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import { getSettings } from "../utils/settings";
@@ -175,7 +176,7 @@ export async function vendorDashboard(actor: DashboardActor): Promise<VendorDash
     currentStatus: string;
     availableFrom: Date | null;
   }) =>
-    c.currentStatus === CraneStatus.ENGAGED &&
+    isBusyStatus(c.currentStatus) &&
     c.availableFrom !== null &&
     c.availableFrom.getTime() < startOfUtcDay(now);
 

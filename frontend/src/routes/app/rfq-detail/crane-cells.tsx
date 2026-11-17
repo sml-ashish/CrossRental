@@ -30,7 +30,7 @@ export function craneAvailability(
     return { text: "Free now", tone: "ok" };
   }
   if (crane.availableInTime) {
-    return crane.currentStatus === "ENGAGED"
+    return crane.currentStatus === "ENGAGED" || crane.currentStatus === "DEPLOYED"
       ? { text: `Free by ${startLabel}`, tone: "ok" }
       : { text: "Free now", tone: "ok" };
   }

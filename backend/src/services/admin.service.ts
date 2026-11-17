@@ -1,4 +1,5 @@
 import { OnboardingStatus, UserRole } from "../generated/prisma/client";
+import { BUSY_STATUSES } from "../validation/craneFields";
 import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
@@ -100,7 +101,7 @@ export async function adminDashboard(): Promise<AdminDashboard> {
     prisma.crane.count({
       where: {
         isActive: true,
-        currentStatus: "ENGAGED",
+        currentStatus: { in: [...BUSY_STATUSES] },
         availableFrom: { lt: now },
       },
     }),
@@ -188,7 +189,7 @@ export async function adminDashboardItems(
       : kind === "unverified"
         ? { isActive: true, OR: [{ latitude: null }, { longitude: null }] }
         : kind === "lapsed"
-          ? { isActive: true, currentStatus: "ENGAGED", availableFrom: { lt: now } }
+          ? { isActive: true, currentStatus: { in: [...BUSY_STATUSES] }, availableFrom: { lt: now } }
           : { isActive: true, approvalStatus: "PENDING" };
 
   const orderBy: Prisma.CraneOrderByWithRelationInput =
