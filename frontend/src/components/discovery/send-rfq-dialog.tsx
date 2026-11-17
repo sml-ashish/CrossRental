@@ -6,7 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Field, TextInput } from "@/components/ui/form";
 import { ApiError } from "@/lib/api";
 import { createRfqFromLine } from "@/lib/enquiries";
-import { sendRfq, type SendResult } from "@/lib/rfqs";
+import { listApprovedVendors, sendRfq, type SendResult } from "@/lib/rfqs";
 import { addDays, todayDay } from "@/lib/enquiryDetail";
 import type { RecommendationCrane } from "@/lib/discovery";
 import { cn } from "@/lib/cn";
@@ -28,6 +28,8 @@ export interface SendRfqDialogProps {
   lineId: string;
   lineLabel: string;
   cranes: RecommendationCrane[];
+  /** Open with "all approved vendors" already ticked. */
+  startWithAll?: boolean;
   /** Called after a successful send so the screen can clear its ticks. */
   onSent: () => void;
 }
@@ -54,11 +56,14 @@ export function SendRfqDialog({
   lineId,
   lineLabel,
   cranes,
+  startWithAll = false,
   onSent,
 }: SendRfqDialogProps) {
   const queryClient = useQueryClient();
   const vendors = useMemo(() => groupByVendor(cranes), [cranes]);
   const [deadline, setDeadline] = useState(() => addDays(todayDay(), 7));
+  /** Email every approved vendor instead of only the vendors of the ticked cranes. */
+  const [allApproved, setAllApproved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** Set once the RFQ exists, so a failed send is retried without a duplicate. */
@@ -72,7 +77,8 @@ export function SendRfqDialog({
     setError(null);
     setRfq(null);
     setResult(null);
-  }, [open, lineId]);
+    setAllApproved(startWithAll);
+  }, [open, lineId, startWithAll]);
 
   async function submit() {
     setBusy(true);
@@ -84,11 +90,12 @@ export function SendRfqDialog({
         target = { id: created.rfq.id, rfqNumber: created.rfq.rfqNumber };
         setRfq(target);
       }
-      const sent = await sendRfq(
-        target.id,
-        vendors.map((vendor) => vendor.vendorId),
-        ["EMAIL"],
-      );
+      // Email is the only channel.
+      const vendorIds = allApproved
+        ? (await listApprovedVendors("")).vendors.map((vendor) => vendor.id)
+        : vendors.map((vendor) => vendor.vendorId);
+      if (vendorIds.length === 0) throw new ApiError(400, "no_vendors", "No approved vendors to send to.");
+      const sent = await sendRfq(target.id, vendorIds, ["EMAIL"]);
       setResult(sent.result);
       await queryClient.invalidateQueries({ queryKey: ["enquiries"] });
       onSent();
@@ -106,14 +113,18 @@ export function SendRfqDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Send RFQ to vendors"
-      description={`${lineLabel} · ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}, ${cranes.length} crane${cranes.length === 1 ? "" : "s"} selected`}
+      description={
+        allApproved
+          ? `${lineLabel} · every approved vendor, by email`
+          : `${lineLabel} · ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}, ${cranes.length} crane${cranes.length === 1 ? "" : "s"} selected`
+      }
       className="sm:max-w-[520px]"
       footer={
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-lg border border-ink-700 px-3 py-2 text-[13px] font-medium text-slate-600 transition-colors hover:bg-ink-850"
+            className="rounded-lg border border-ink-700 px-3 py-2 text-[15px] font-medium text-slate-600 transition-colors hover:bg-ink-850"
           >
             {done ? "Close" : "Cancel"}
           </button>
@@ -121,7 +132,7 @@ export function SendRfqDialog({
             <Link
               to="/app/rfqs/$rfqId"
               params={{ rfqId: rfq.id }}
-              className="rounded-lg bg-accent-500 px-3 py-2 text-[13px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
+              className="rounded-lg bg-accent-500 px-3 py-2 text-[15px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
             >
               Open {rfq.rfqNumber}
             </Link>
@@ -129,14 +140,16 @@ export function SendRfqDialog({
             <button
               type="button"
               onClick={() => void submit()}
-              disabled={busy || vendors.length === 0 || !deadline}
-              className="rounded-lg bg-accent-500 px-3 py-2 text-[13px] font-semibold text-[#fff] transition-colors hover:bg-accent-600 disabled:opacity-50"
+              disabled={busy || (!allApproved && vendors.length === 0) || !deadline}
+              className="rounded-lg bg-accent-500 px-3 py-2 text-[15px] font-semibold text-[#fff] transition-colors hover:bg-accent-600 disabled:opacity-50"
             >
               {busy
                 ? "Sending…"
                 : rfq
                   ? "Retry sending"
-                  : `Send RFQ to ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`}
+                  : allApproved
+                    ? "Email all approved vendors"
+                    : `Email ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`}
             </button>
           )}
         </div>
@@ -168,11 +181,25 @@ export function SendRfqDialog({
           </Alert>
         ) : (
           <>
-            <ul className="divide-y divide-ink-800 rounded-xl border border-ink-800">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-ink-800 px-3.5 py-3 text-[15px] text-slate-800">
+              <input
+                type="checkbox"
+                checked={allApproved}
+                onChange={(event) => setAllApproved(event.target.checked)}
+                className="mt-1 accent-accent-500"
+              />
+              <span>
+                <span className="font-semibold">Send to all approved vendors</span>
+                <span className="mt-0.5 block text-slate-500">
+                  Emails every approved vendor, not just the ones with ticked cranes.
+                </span>
+              </span>
+            </label>
+            <ul className={cn("divide-y divide-ink-800 rounded-xl border border-ink-800", allApproved && "opacity-50")}>
               {vendors.map((vendor) => (
                 <li key={vendor.vendorId} className="px-3.5 py-2.5">
-                  <p className="text-[13px] font-semibold text-slate-900">{vendor.vendorName}</p>
-                  <p className="mt-0.5 text-[12px] text-slate-500">
+                  <p className="text-[15px] font-semibold text-slate-900">{vendor.vendorName}</p>
+                  <p className="mt-0.5 text-[14px] text-slate-500">
                     {vendor.cranes
                       .map((crane) => `${crane.make} ${crane.model} (${Math.round(crane.capacityT)} t)`)
                       .join(" · ")}
@@ -199,7 +226,7 @@ export function SendRfqDialog({
                     disabled={Boolean(rfq)}
                     onClick={() => setDeadline(addDays(todayDay(), days))}
                     className={cn(
-                      "rounded-lg border px-2.5 py-2 text-[12px] font-medium transition-colors disabled:opacity-50",
+                      "rounded-lg border px-2.5 py-2 text-[14px] font-medium transition-colors disabled:opacity-50",
                       deadline === addDays(todayDay(), days)
                         ? "border-accent-500 bg-accent-500/10 text-accent-400"
                         : "border-ink-800 bg-ink-850 text-slate-500 hover:border-ink-700 hover:text-slate-800",
@@ -211,7 +238,7 @@ export function SendRfqDialog({
               </div>
             </div>
 
-            <p className="text-[12px] text-slate-500">
+            <p className="text-[14px] text-slate-500">
               One RFQ is raised from this enquiry line and emailed only to the vendors above.
               Customer name, address and the internal budget are never sent.
             </p>
@@ -221,3 +248,4 @@ export function SendRfqDialog({
     </Dialog>
   );
 }
+

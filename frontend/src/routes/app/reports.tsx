@@ -156,7 +156,7 @@ function InfoTip({ label, text }: { label: string; text: string }) {
       <span
         role="tooltip"
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-8 z-40 rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[12px] leading-relaxed text-slate-700 opacity-0 shadow-xl transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-x-0 top-8 z-40 rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[14px] leading-relaxed text-slate-700 opacity-0 shadow-xl transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
       >
         {text}
       </span>
@@ -203,16 +203,16 @@ function KpiTile({
   return (
     <div className="card relative flex h-full flex-col px-4 py-3.5">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[13px] font-medium leading-5 text-slate-600">{spec.label}</p>
+        <p className="text-[15px] font-medium leading-5 text-slate-600">{spec.label}</p>
         <InfoTip label={spec.label} text={spec.definition} />
       </div>
       <p className="mt-1 text-[26px] font-semibold leading-none tracking-tight tabular-nums text-slate-900">
         {formatMetric(value, spec.format)}
       </p>
-      <p className="mt-1.5 min-h-[16px] text-[12px] leading-4 text-slate-500">
+      <p className="mt-1.5 min-h-[16px] text-[14px] leading-4 text-slate-500">
         {value === null ? "No data in this period" : hint}
       </p>
-      <div className="mt-auto pt-2 text-[12px] leading-4">
+      <div className="mt-auto pt-2 text-[14px] leading-4">
         {delta ? (
           <DeltaLine delta={delta} />
         ) : (
@@ -241,7 +241,7 @@ function ChartTooltip({
       ? `${formatNumber(point.value)}%`
       : plural(point.value, noun, `${noun}s`);
   return (
-    <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[12px] shadow-xl">
+    <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[14px] shadow-xl">
       <p className="font-medium text-slate-900">{point.label}</p>
       <p className="mt-0.5 tabular-nums text-slate-700">{amount}</p>
       {point.meta ? <p className="mt-0.5 text-slate-500">{point.meta}</p> : null}
@@ -257,7 +257,7 @@ function ChartEmpty({ title }: { title: string }) {
   return (
     <div className="flex h-[260px] flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-ink-800 text-center">
       <p className="text-sm text-slate-600">{title}</p>
-      <p className="text-[12px] text-slate-500">Try a wider period or clear the filters.</p>
+      <p className="text-[14px] text-slate-500">Try a wider period or clear the filters.</p>
     </div>
   );
 }
@@ -332,7 +332,7 @@ function ReportChart({ report, range }: { report: Report; range: ResolvedPeriod 
         <h2 id="report-chart-title" className="text-base font-semibold text-slate-900">
           {title}
         </h2>
-        <p className="mt-0.5 text-[13px] text-slate-500">{description}</p>
+        <p className="mt-0.5 text-[15px] text-slate-500">{description}</p>
       </div>
 
       {empty ? (
@@ -525,7 +525,7 @@ function VendorCards({ rows }: { rows: Report["rows"] }) {
             <div className="mt-1.5">
               <WinRateBar value={value} wide />
             </div>
-            <dl className="mt-2.5 grid grid-cols-3 gap-x-3 gap-y-1.5 text-[12px]">
+            <dl className="mt-2.5 grid grid-cols-3 gap-x-3 gap-y-1.5 text-[14px]">
               {VENDOR_CARD_FIELDS.map((field) => (
                 <div key={field.key}>
                   <dt className="text-slate-500">{field.label}</dt>
@@ -607,7 +607,7 @@ function DetailTable({
             onChange={(event) => onQuery(event.target.value)}
             placeholder="Search rows"
             aria-label="Search report rows"
-            className="field-input w-44 py-1.5 pl-8 pr-8 text-[13px] sm:w-56"
+            className="field-input w-44 py-1.5 pl-8 pr-8 text-[15px] sm:w-56"
           />
           {query ? (
             <button
@@ -669,7 +669,7 @@ function DetailTable({
                             : undefined
                         }
                         className={cn(
-                          "sticky top-0 z-20 bg-ink-900 text-[12px]",
+                          "sticky top-0 z-20 bg-ink-900 text-[14px]",
                           index === 0 && "left-0 z-30 border-r border-ink-800",
                         )}
                       >
@@ -754,20 +754,20 @@ function DetailTable({
           {report.view === "vendor" ? <VendorCards rows={pageRows} /> : null}
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 px-4 py-3 print:hidden">
-            <p className="text-[12px] text-slate-500">
+            <p className="text-[14px] text-slate-500">
               Showing {formatNumber(pageRows.length)} of {formatNumber(rows.length)} rows · Export
               includes all rows for this report
               {regionFiltered ? " · Region is not applied to the export" : ""}
             </p>
             <div className="flex items-center gap-2 print:hidden">
-              <label htmlFor="report-page-size" className="text-[12px] text-slate-500">
+              <label htmlFor="report-page-size" className="text-[14px] text-slate-500">
                 Rows
               </label>
               <select
                 id="report-page-size"
                 value={pageSize}
                 onChange={(event) => onPageSize(Number(event.target.value))}
-                className="field-input w-auto py-1 text-[13px]"
+                className="field-input w-auto py-1 text-[15px]"
               >
                 {[25, 50, 100].map((size) => (
                   <option key={size} value={size}>
@@ -784,7 +784,7 @@ function DetailTable({
               >
                 <ChevronLeft className="size-4" aria-hidden />
               </button>
-              <span className="text-[12px] tabular-nums text-slate-500">
+              <span className="text-[14px] tabular-nums text-slate-500">
                 Page {page} of {totalPages}
               </span>
               <button
@@ -1187,20 +1187,20 @@ export function ReportsPage() {
         </div>
       ) : null}
       {notice ? (
-        <p role="status" className="mt-2 text-[12px] text-slate-500 print:hidden">
+        <p role="status" className="mt-2 text-[14px] text-slate-500 print:hidden">
           {notice}
         </p>
       ) : null}
 
       <section className="card mt-4 px-4 py-3 print:hidden" aria-label="Report filters">
         <div className="flex items-center justify-between gap-3 min-[1000px]:hidden">
-          <p className="min-w-0 text-[12px] leading-4 text-slate-500">{filterSummary}</p>
+          <p className="min-w-0 text-[14px] leading-4 text-slate-500">{filterSummary}</p>
           <button
             type="button"
             onClick={() => setFiltersOpen((open) => !open)}
             aria-expanded={filtersOpen}
             aria-controls="report-filter-fields"
-            className="btn-secondary shrink-0 px-3 py-1.5 text-[13px]"
+            className="btn-secondary shrink-0 px-3 py-1.5 text-[15px]"
           >
             <SlidersHorizontal className="size-3.5" aria-hidden />
             Filters
@@ -1215,7 +1215,7 @@ export function ReportsPage() {
           )}
         >
           <div className="min-w-[150px]">
-            <label htmlFor="report-period" className="field-label text-[13px]">
+            <label htmlFor="report-period" className="field-label text-[15px]">
               Period
             </label>
             <select
@@ -1235,7 +1235,7 @@ export function ReportsPage() {
           {state.period === "custom" ? (
             <>
               <div className="min-w-[150px]">
-                <label htmlFor="report-from" className="field-label text-[13px]">
+                <label htmlFor="report-from" className="field-label text-[15px]">
                   From
                 </label>
                 <input
@@ -1247,7 +1247,7 @@ export function ReportsPage() {
                 />
               </div>
               <div className="min-w-[150px]">
-                <label htmlFor="report-to" className="field-label text-[13px]">
+                <label htmlFor="report-to" className="field-label text-[15px]">
                   To
                 </label>
                 <input
@@ -1262,7 +1262,7 @@ export function ReportsPage() {
           ) : null}
 
           <div className="min-w-[170px]">
-            <label htmlFor="report-category" className="field-label text-[13px]">
+            <label htmlFor="report-category" className="field-label text-[15px]">
               Crane category
             </label>
             <Select
@@ -1277,7 +1277,7 @@ export function ReportsPage() {
           </div>
 
           <div className="min-w-[150px]">
-            <label htmlFor="report-region" className="field-label text-[13px]">
+            <label htmlFor="report-region" className="field-label text-[15px]">
               Region
             </label>
             <Select
@@ -1292,7 +1292,7 @@ export function ReportsPage() {
           </div>
 
           <div className="ml-auto flex items-center gap-2 pb-0.5">
-            <span className="text-[12px] text-slate-500">
+            <span className="text-[14px] text-slate-500">
               {report
                 ? `Generated ${formatTimestamp(report.generatedAt)}`
                 : reportQuery.isError
@@ -1314,7 +1314,7 @@ export function ReportsPage() {
           </div>
         </div>
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-slate-500">
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-slate-500">
           <span className="font-medium text-slate-600">{formatRange(range.from, range.to)}</span>
           <span aria-hidden>·</span>
           <span>{comparisonText}</span>
@@ -1468,3 +1468,4 @@ export function ReportsPage() {
     </div>
   );
 }
+

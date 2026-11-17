@@ -167,17 +167,17 @@ export function StaffSection({
   return (
     <section id="sml-users" className="scroll-mt-20">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-[16px] leading-6 font-semibold text-slate-900">
+        <h2 className="text-[17px] leading-6 font-semibold text-slate-900">
           Staff
           {users ? (
-            <span className="ml-2 text-[13px] font-normal tabular-nums text-slate-500">
+            <span className="ml-2 text-[15px] font-normal tabular-nums text-slate-500">
               {users.length}
             </span>
           ) : null}
         </h2>
         <button
           type="button"
-          className="btn-secondary h-9 px-3 py-0 text-[13px]"
+          className="btn-secondary h-9 px-3 py-0 text-[15px]"
           onClick={openDrawer}
         >
           Add user
@@ -189,7 +189,7 @@ export function StaffSection({
           <p
             role="status"
             aria-live="polite"
-            className="mb-3 inline-flex items-center gap-1.5 text-[13px] text-slate-500"
+            className="mb-3 inline-flex items-center gap-1.5 text-[15px] text-slate-500"
           >
             <Check className="size-3.5" aria-hidden />
             {notice}
@@ -228,7 +228,7 @@ export function StaffSection({
           <Alert tone="error">{error.message}</Alert>
         ) : (
           <>
-            <div className="hidden grid-cols-[minmax(0,1fr)_132px_80px_36px] gap-x-2 border-b border-ink-800 py-2 text-[12px] text-slate-500 sm:grid">
+            <div className="hidden grid-cols-[minmax(0,1fr)_132px_80px_36px] gap-x-2 border-b border-ink-800 py-2 text-[14px] text-slate-500 sm:grid">
               <span>Name</span>
               <span>Role</span>
               <span>Last sign-in</span>
@@ -236,7 +236,7 @@ export function StaffSection({
             </div>
 
             {filtered.length === 0 ? (
-              <p className="py-10 text-center text-[14px] text-slate-500">
+              <p className="py-10 text-center text-[16px] text-slate-500">
                 {allUsers.length === 0
                   ? "No staff accounts yet. Add the first one."
                   : `No one matches “${search.trim()}”.`}
@@ -258,11 +258,11 @@ export function StaffSection({
                       )}
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-[14px] leading-5 font-medium text-slate-900">
+                        <p className="truncate text-[16px] leading-5 font-medium text-slate-900">
                           {displayName}
                         </p>
                         <p
-                          className="mt-0.5 truncate text-[13px] leading-5 text-slate-500"
+                          className="mt-0.5 truncate text-[15px] leading-5 text-slate-500"
                           title={row.email}
                         >
                           {row.email}
@@ -307,7 +307,7 @@ export function StaffSection({
           </>
         )}
 
-        <p className="mt-4 text-[13px] leading-5 text-slate-500">
+        <p className="mt-4 text-[15px] leading-5 text-slate-500">
           Staff sign in with a one-time code sent to their email. Disabling an account ends its
           sessions immediately.
         </p>
@@ -366,7 +366,7 @@ function RoleControl({
         onChange={(event) => onChange(event.target.value as InternalRole)}
         disabled={busy}
         aria-label={`Role for ${row.email}`}
-        className="peer -ml-2 h-9 max-w-[132px] cursor-pointer appearance-none rounded-md border border-transparent bg-transparent py-0 pr-6 pl-2 text-[12px] text-slate-600 transition-colors hover:border-ink-800 hover:bg-ink-850 hover:text-white focus:border-ink-700 focus:bg-ink-850 focus:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+        className="peer -ml-2 h-9 max-w-[132px] cursor-pointer appearance-none rounded-md border border-transparent bg-transparent py-0 pr-6 pl-2 text-[14px] text-slate-600 transition-colors hover:border-ink-800 hover:bg-ink-850 hover:text-white focus:border-ink-700 focus:bg-ink-850 focus:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
       >
         {!known ? (
           <option value={value} disabled>
@@ -383,7 +383,7 @@ function RoleControl({
         className="pointer-events-none absolute right-1.5 size-3.5 text-slate-500 opacity-0 transition-opacity group-hover/role:opacity-100 peer-focus:opacity-100"
         aria-hidden
       />
-      {saved ? <span className="ml-2 text-[12px] text-slate-500">Saved</span> : null}
+      {saved ? <span className="ml-2 text-[14px] text-slate-500">Saved</span> : null}
     </div>
   );
 }
@@ -395,17 +395,17 @@ function SignInCell({ row, now }: { row: AdminUser; now: number }) {
   return (
     <div className="sm:col-start-3 sm:row-start-1">
       {!row.isActive ? (
-        <span className="text-[12px] text-slate-500">Disabled</span>
+        <span className="text-[14px] text-slate-500">Disabled</span>
       ) : signedIn && valid ? (
         <time
           dateTime={signedIn.toISOString()}
           title={signedIn.toLocaleString()}
-          className="text-[12px] whitespace-nowrap text-slate-500 tabular-nums"
+          className="text-[14px] whitespace-nowrap text-slate-500 tabular-nums"
         >
           {relativeTime(signedIn.getTime(), now)}
         </time>
       ) : (
-        <span className="text-[12px] whitespace-nowrap text-slate-500">Never signed in</span>
+        <span className="text-[14px] whitespace-nowrap text-slate-500">Never signed in</span>
       )}
     </div>
   );
@@ -566,7 +566,7 @@ function MenuAction({
         disabled={disabled}
         onClick={onSelect}
         className={cn(
-          "flex w-full items-center rounded-md px-2.5 py-2 text-left text-[13px] transition-colors",
+          "flex w-full items-center rounded-md px-2.5 py-2 text-left text-[15px] transition-colors",
           "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-500",
           disabled
             ? "cursor-not-allowed text-slate-500 opacity-50"
@@ -700,7 +700,7 @@ function AddUserDrawer({
         )}
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-ink-800 px-6 py-4">
-          <h2 id="add-user-title" className="text-[16px] leading-6 font-semibold text-slate-900">
+          <h2 id="add-user-title" className="text-[17px] leading-6 font-semibold text-slate-900">
             Add user
           </h2>
           <button
@@ -755,7 +755,7 @@ function AddUserDrawer({
               />
             </Field>
 
-            <p className="text-[13px] leading-5 text-slate-500">
+            <p className="text-[15px] leading-5 text-slate-500">
               They&rsquo;ll receive a one-time sign-in code. No password is created.
             </p>
           </div>
@@ -763,14 +763,14 @@ function AddUserDrawer({
           <div className="flex shrink-0 items-center justify-end gap-2 border-t border-ink-800 px-6 py-4">
             <button
               type="button"
-              className="btn-secondary h-9 px-3 py-0 text-[13px]"
+              className="btn-secondary h-9 px-3 py-0 text-[15px]"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-primary h-9 px-3.5 py-0 text-[13px]"
+              className="btn-primary h-9 px-3.5 py-0 text-[15px]"
               disabled={pending || !email.trim()}
             >
               {pending ? "Adding…" : "Add user"}
@@ -781,3 +781,4 @@ function AddUserDrawer({
     </div>
   );
 }
+

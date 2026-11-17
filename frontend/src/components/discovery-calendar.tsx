@@ -96,7 +96,7 @@ export function DiscoveryCalendar({ filters }: { filters: DiscoveryFilters }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-800 bg-ink-900/50 px-4 py-2.5">
-        <span className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+        <span className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
           Legend
         </span>
         {LEGEND.map((state) => (
@@ -105,7 +105,7 @@ export function DiscoveryCalendar({ filters }: { filters: DiscoveryFilters }) {
             {DAY_STATE_LABELS[state]}
           </span>
         ))}
-        <span className="ml-auto text-[11px] text-slate-400">
+        <span className="ml-auto text-[13px] text-slate-400">
           A reservation wins the day; the crane&apos;s own status fills the rest.
         </span>
       </div>
@@ -174,3 +174,4 @@ function IconButton({
     </button>
   );
 }
+

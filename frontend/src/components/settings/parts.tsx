@@ -128,7 +128,7 @@ export function SettingsSection({
             {title}
           </h2>
           {summary ? (
-            <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">{summary}</p>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-slate-500">{summary}</p>
           ) : null}
         </div>
         {actions ? (
@@ -187,7 +187,7 @@ export function SectionActions({
         role="status"
         aria-live="polite"
         className={cn(
-          "inline-flex items-center gap-1.5 text-[13px]",
+          "inline-flex items-center gap-1.5 text-[15px]",
           error ? "text-red-600" : savedAt && !dirty ? "text-emerald-600" : "text-slate-500",
         )}
       >
@@ -209,7 +209,7 @@ export function SectionActions({
       {dirty ? (
         <button
           type="button"
-          className="btn-secondary px-3 py-1.5 text-[13px]"
+          className="btn-secondary px-3 py-1.5 text-[15px]"
           onClick={onDiscard}
           disabled={pending}
         >
@@ -219,7 +219,7 @@ export function SectionActions({
 
       <button
         type="button"
-        className="btn-primary px-3.5 py-1.5 text-[13px]"
+        className="btn-primary px-3.5 py-1.5 text-[15px]"
         onClick={onSave}
         disabled={!dirty || pending || !canSave}
       >
@@ -232,7 +232,7 @@ export function SectionActions({
 /** A quiet amber note: something an admin should read before saving. */
 export function Callout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-amber-800">
+    <div className="flex gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[15px] leading-relaxed text-amber-800">
       <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="min-w-0">{children}</div>
     </div>
@@ -270,7 +270,7 @@ export function LoadFailure({
       <p>{error?.message ?? "The server did not answer. Please try again."}</p>
       <button
         type="button"
-        className="btn-secondary mt-2.5 px-3 py-1.5 text-[13px]"
+        className="btn-secondary mt-2.5 px-3 py-1.5 text-[15px]"
         onClick={onRetry}
       >
         Retry
@@ -359,7 +359,7 @@ export function NumberStepper({
       <label htmlFor={id} className="block text-sm font-medium text-slate-900">
         {label}
       </label>
-      <p id={hintId} className="mt-1 max-w-[58ch] text-[13px] leading-relaxed text-slate-500">
+      <p id={hintId} className="mt-1 max-w-[58ch] text-[15px] leading-relaxed text-slate-500">
         {hint}
       </p>
 
@@ -403,7 +403,7 @@ export function NumberStepper({
             +
           </button>
         </div>
-        <span className="text-[13px] text-slate-500">{unit}</span>
+        <span className="text-[15px] text-slate-500">{unit}</span>
         <span className="text-xs text-slate-500">
           Between {min} and {max}
         </span>
@@ -442,12 +442,12 @@ export function SwitchField({
         <span id={labelId} className="block text-sm font-medium text-slate-900">
           {label}
         </span>
-        <p id={hintId} className="mt-1 max-w-[58ch] text-[13px] leading-relaxed text-slate-500">
+        <p id={hintId} className="mt-1 max-w-[58ch] text-[15px] leading-relaxed text-slate-500">
           {hint}
         </p>
       </div>
       <div className="mt-0.5 flex shrink-0 items-center gap-2.5">
-        <span id={`${id}-state`} className="text-[13px] text-slate-500">
+        <span id={`${id}-state`} className="text-[15px] text-slate-500">
           {checked ? "On" : "Off"}
         </span>
         <button
@@ -583,23 +583,23 @@ export function ConfirmDialog({
         aria-describedby={bodyId}
         className="relative w-full max-w-md rounded-xl border border-ink-700 bg-ink-900 p-5 shadow-2xl"
       >
-        <h3 id={titleId} className="text-[15px] font-semibold text-slate-900">
+        <h3 id={titleId} className="text-[17px] font-semibold text-slate-900">
           {title}
         </h3>
-        <div id={bodyId} className="mt-2 text-[13px] leading-relaxed text-slate-500">
+        <div id={bodyId} className="mt-2 text-[15px] leading-relaxed text-slate-500">
           {children}
         </div>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            className="btn-secondary px-3 py-1.5 text-[13px]"
+            className="btn-secondary px-3 py-1.5 text-[15px]"
             onClick={onCancel}
           >
             {cancelLabel}
           </button>
           <button
             type="button"
-            className="btn-primary px-3.5 py-1.5 text-[13px]"
+            className="btn-primary px-3.5 py-1.5 text-[15px]"
             onClick={onConfirm}
           >
             {confirmLabel}
@@ -609,3 +609,4 @@ export function ConfirmDialog({
     </div>
   );
 }
+

@@ -22,7 +22,7 @@ export function AccessSection() {
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-slate-500" aria-hidden />
           <div className="min-w-0">
             <p className="text-sm font-medium text-slate-900">Admins only</p>
-            <p className="mt-1 max-w-[62ch] text-[13px] leading-relaxed text-slate-500">
+            <p className="mt-1 max-w-[62ch] text-[15px] leading-relaxed text-slate-500">
               This page is limited to admin users. Sales, operations and vendors never see it, and
               the API refuses a settings change from anyone else even if the request is made by
               hand. Staff accounts, roles and deactivation live in the admin console.
@@ -31,7 +31,7 @@ export function AccessSection() {
         </div>
         <Link
           to="/app/admin"
-          className="btn-secondary shrink-0 px-3 py-1.5 text-[13px]"
+          className="btn-secondary shrink-0 px-3 py-1.5 text-[15px]"
         >
           Open the admin console
           <ArrowRight className="size-3.5" aria-hidden />
@@ -40,3 +40,4 @@ export function AccessSection() {
     </SettingsSection>
   );
 }
+

@@ -523,7 +523,7 @@ export function VendorPickerSection({
         <Alert title="Could not load candidates">{(candidates.error as Error).message}</Alert>
         <button
           type="button"
-          className="btn-secondary px-3 py-2 text-[13px]"
+          className="btn-secondary px-3 py-2 text-[15px]"
           onClick={() => void candidates.refetch()}
         >
           Retry
@@ -555,12 +555,12 @@ export function VendorPickerSection({
                 <button
                   type="button"
                   onClick={() => setView("recommended")}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[12px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[14px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                 >
                   <ChevronLeft className="size-3" aria-hidden />
                   Back to crane matches
                 </button>
-                <p className="text-[13px] text-slate-500">
+                <p className="text-[15px] text-slate-500">
                   {approvedGroups.filter((entry) => entry.sendable).length} can receive an RFQ
                 </p>
               </div>
@@ -576,7 +576,7 @@ export function VendorPickerSection({
               </div>
 
               {approved.isLoading ? (
-                <p className="mt-3 text-[13px] text-slate-500">Loading vendors…</p>
+                <p className="mt-3 text-[15px] text-slate-500">Loading vendors…</p>
               ) : approved.isError ? (
                 <div className="mt-3">
                   <Alert title="Could not load approved vendors">
@@ -605,12 +605,12 @@ export function VendorPickerSection({
                           className="mt-1 size-4 cursor-pointer rounded border-slate-600 bg-ink-900 accent-accent-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-[15px] font-semibold text-slate-900">{vendor.name}</p>
-                          <p className="mt-0.5 text-[13px] text-slate-600">
+                          <p className="text-[17px] font-semibold text-slate-900">{vendor.name}</p>
+                          <p className="mt-0.5 text-[15px] text-slate-600">
                             {vendor.operatingRegions.map((region) => region.state.name).join(", ") ||
                               "No operating regions set"}
                           </p>
-                          <p className="mt-0.5 text-[12px] text-slate-500">
+                          <p className="mt-0.5 text-[14px] text-slate-500">
                             {!sendable
                               ? "No active user — cannot be sent to"
                               : !hasCrane
@@ -621,20 +621,20 @@ export function VendorPickerSection({
                           </p>
                         </div>
                         {!hasCrane && sendable && !already ? (
-                          <span className="shrink-0 text-[12px] text-amber-600">Send anyway?</span>
+                          <span className="shrink-0 text-[14px] text-amber-600">Send anyway?</span>
                         ) : null}
                       </li>
                     );
                   })}
                   {approvedGroups.length === 0 && !approved.isLoading ? (
-                    <li className="px-2 py-4 text-[13px] text-slate-500">
+                    <li className="px-2 py-4 text-[15px] text-slate-500">
                       No approved vendor matches that search.
                     </li>
                   ) : null}
                 </ul>
               )}
 
-              <p className="mt-2 text-[12px] text-slate-500">
+              <p className="mt-2 text-[14px] text-slate-500">
                 Selections carry across both views; {selectedApproved.length} of {selected.length}{" "}
                 selected {selected.length === 1 ? "vendor is" : "vendors are"} from this list.
               </p>
@@ -655,7 +655,7 @@ export function VendorPickerSection({
                 <button
                   type="button"
                   onClick={() => setView("approved")}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[12px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[14px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                 >
                   All approved vendors
                   <ChevronRight className="size-3" aria-hidden />
@@ -685,7 +685,7 @@ export function VendorPickerSection({
                   aria-label="Sort vendors"
                   value={sort}
                   onChange={(event) => setSort(event.target.value as SortMode)}
-                  className="field-input w-36 py-1 text-[12px]"
+                  className="field-input w-36 py-1 text-[14px]"
                 >
                   {(Object.keys(SORT_LABELS) as SortMode[]).map((key) => (
                     <option key={key} value={key}>
@@ -705,7 +705,7 @@ export function VendorPickerSection({
                         band: Number(event.target.value) as DistanceBand,
                       }))
                     }
-                    className="field-input w-32 py-1 text-[12px]"
+                    className="field-input w-32 py-1 text-[14px]"
                   >
                     <option value="0">Any distance</option>
                     {DISTANCE_BANDS.filter((band) => band !== 0).map((band) => (
@@ -715,7 +715,7 @@ export function VendorPickerSection({
                     ))}
                   </select>
                 ) : (
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/5 px-2.5 py-1 text-[12px] text-amber-700">
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/5 px-2.5 py-1 text-[14px] text-amber-700">
                     No site pin, distances hidden
                   </span>
                 )}
@@ -727,7 +727,7 @@ export function VendorPickerSection({
                     onChange={(event) =>
                       setFilters((previous) => ({ ...previous, state: event.target.value }))
                     }
-                    className="field-input w-32 py-1 text-[12px]"
+                    className="field-input w-32 py-1 text-[14px]"
                   >
                     <option value="">Any state</option>
                     {states.map((state) => (
@@ -775,13 +775,13 @@ export function VendorPickerSection({
               </div>
 
               {notice ? (
-                <p className="mt-2 rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[12px] text-slate-600">
+                <p className="mt-2 rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[14px] text-slate-600">
                   {notice}
                 </p>
               ) : null}
 
               {/* --- result line ------------------------------------------- */}
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[13px]">
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[15px]">
                 <p className="text-slate-600 tabular-nums">
                   {visible.length} vendor{visible.length === 1 ? "" : "s"} · {shownCranes} crane
                   {shownCranes === 1 ? "" : "s"}
@@ -796,7 +796,7 @@ export function VendorPickerSection({
                       setFilters(EMPTY_FILTERS);
                       setSearch("");
                     }}
-                    className="inline-flex items-center gap-1 text-[12px] text-slate-500 transition-colors hover:text-white"
+                    className="inline-flex items-center gap-1 text-[14px] text-slate-500 transition-colors hover:text-white"
                   >
                     <RotateCcw className="size-3" aria-hidden />
                     Clear filters
@@ -806,7 +806,7 @@ export function VendorPickerSection({
 
               {noCandidates ? (
                 <div className="mt-3 rounded-lg border border-ink-800 bg-ink-900 px-4 py-5">
-                  <p className="text-[13px] text-slate-700">
+                  <p className="text-[15px] text-slate-700">
                     {mode === "technical"
                       ? `No approved vendor has a crane of this type with ${rfq.capacityT} t or more.`
                       : "No approved vendor has a crane of this type on record."}
@@ -815,7 +815,7 @@ export function VendorPickerSection({
                     {mode === "technical" ? (
                       <button
                         type="button"
-                        className="btn-secondary px-3 py-1.5 text-[12px]"
+                        className="btn-secondary px-3 py-1.5 text-[14px]"
                         onClick={() => onModeChange("distance")}
                       >
                         Switch to Distance based
@@ -823,7 +823,7 @@ export function VendorPickerSection({
                     ) : null}
                     <button
                       type="button"
-                      className="btn-secondary px-3 py-1.5 text-[12px]"
+                      className="btn-secondary px-3 py-1.5 text-[14px]"
                       onClick={() => setView("approved")}
                     >
                       Choose from all approved vendors
@@ -833,7 +833,7 @@ export function VendorPickerSection({
               ) : null}
 
               {!noCandidates && visible.length === 0 ? (
-                <p className="mt-3 rounded-lg border border-ink-800 bg-ink-900 px-4 py-4 text-[13px] text-slate-500">
+                <p className="mt-3 rounded-lg border border-ink-800 bg-ink-900 px-4 py-4 text-[15px] text-slate-500">
                   Nothing matches these filters. Clear them, or switch to all approved vendors.
                 </p>
               ) : null}
@@ -841,7 +841,7 @@ export function VendorPickerSection({
               {visible.length > 0 ? (
                 <>
                   {showRecommendedLine ? (
-                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px]">
                       <p className="text-slate-600">
                         {recommendedIds.length} recommended vendor
                         {recommendedIds.length === 1 ? "" : "s"} selected.{" "}
@@ -858,7 +858,7 @@ export function VendorPickerSection({
                       <button
                         type="button"
                         onClick={clearSelection}
-                        className="text-[12px] font-medium text-slate-500 transition-colors hover:text-white"
+                        className="text-[14px] font-medium text-slate-500 transition-colors hover:text-white"
                       >
                         Clear selection
                       </button>
@@ -884,7 +884,7 @@ export function VendorPickerSection({
                             <Minus className="size-3" aria-hidden />
                           ) : null}
                         </button>
-                        <p className="text-[13px] text-slate-600 tabular-nums">
+                        <p className="text-[15px] text-slate-600 tabular-nums">
                           {selectedVisible.length} of {selectableIds.length} selected
                           {alreadySent.length > 0 ? (
                             <span className="text-slate-500">
@@ -897,14 +897,14 @@ export function VendorPickerSection({
                           <button
                             type="button"
                             onClick={() => setAllExpanded(true)}
-                            className="rounded-md px-2 py-1 text-[12px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
+                            className="rounded-md px-2 py-1 text-[14px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
                           >
                             Expand all
                           </button>
                           <button
                             type="button"
                             onClick={() => setAllExpanded(false)}
-                            className="rounded-md px-2 py-1 text-[12px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
+                            className="rounded-md px-2 py-1 text-[14px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
                           >
                             Collapse all
                           </button>
@@ -934,15 +934,15 @@ export function VendorPickerSection({
                   ) : (
                     <>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-b border-ink-800 pb-2">
-                        <p className="text-[13px] font-medium text-slate-700 tabular-nums">
+                        <p className="text-[15px] font-medium text-slate-700 tabular-nums">
                           {inPlay.vendors} vendor{inPlay.vendors === 1 ? "" : "s"} ·{" "}
                           {inPlay.cranes} crane{inPlay.cranes === 1 ? "" : "s"} in play
                         </p>
-                        <p className="text-[12px] text-slate-500 tabular-nums">
+                        <p className="text-[14px] text-slate-500 tabular-nums">
                           {craneList.length} crane{craneList.length === 1 ? "" : "s"} shown
                         </p>
                       </div>
-                      <p className="mt-1 text-[12px] text-slate-500">
+                      <p className="mt-1 text-[14px] text-slate-500">
                         The RFQ goes to the vendor, who chooses which crane to quote.
                       </p>
                       <AllCranesTable
@@ -965,7 +965,7 @@ export function VendorPickerSection({
               ) : null}
 
               {contactedIndex.otherDrafts.length > 0 ? (
-                <p className="mt-3 text-[12px] text-slate-500">
+                <p className="mt-3 text-[14px] text-slate-500">
                   {contactedIndex.otherDrafts.length} other draft
                   {contactedIndex.otherDrafts.length === 1 ? " exists" : "s exist"} for this enquiry
                   line: {contactedIndex.otherDrafts.map((row) => row.rfqNumber).join(", ")}. Only
@@ -1079,7 +1079,7 @@ function FilterPopover({
         title={label}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[12px] font-medium transition-colors",
+          "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[14px] font-medium transition-colors",
           open
             ? "border-accent-500/60 bg-accent-500/10 text-slate-900"
             : "border-ink-800 text-slate-600 hover:border-ink-700 hover:text-white",
@@ -1088,7 +1088,7 @@ function FilterPopover({
         {icon}
         {iconOnly ? null : <span>{label}</span>}
         {badge ? (
-          <span className="rounded-full bg-accent-500/20 px-1.5 text-[11px] text-accent-300 tabular-nums">
+          <span className="rounded-full bg-accent-500/20 px-1.5 text-[13px] text-accent-300 tabular-nums">
             {badge}
           </span>
         ) : null}
@@ -1131,10 +1131,10 @@ function CraneFilters({
 }) {
   return (
     <div className="space-y-2">
-      <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+      <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
         Crane filters
       </p>
-      <label className="flex items-center justify-between gap-2 text-[13px] text-slate-600">
+      <label className="flex items-center justify-between gap-2 text-[15px] text-slate-600">
         Minimum capacity
         <span className="inline-flex items-center gap-1">
           <input
@@ -1150,12 +1150,12 @@ function CraneFilters({
             }
             placeholder="Any"
             aria-label="Minimum crane capacity in tonnes"
-            className="field-input w-20 py-1 text-[12px]"
+            className="field-input w-20 py-1 text-[14px]"
           />
-          <span className="text-[12px] text-slate-500">t</span>
+          <span className="text-[14px] text-slate-500">t</span>
         </span>
       </label>
-      <label className="flex items-center justify-between gap-2 text-[13px] text-slate-600">
+      <label className="flex items-center justify-between gap-2 text-[15px] text-slate-600">
         Year from
         <input
           type="number"
@@ -1170,10 +1170,10 @@ function CraneFilters({
           }
           placeholder="Any"
           aria-label="Crane year from"
-          className="field-input w-24 py-1 text-[12px]"
+          className="field-input w-24 py-1 text-[14px]"
         />
       </label>
-      <label className="flex items-center gap-2 text-[13px] text-slate-600">
+      <label className="flex items-center gap-2 text-[15px] text-slate-600">
         <input
           type="checkbox"
           checked={filters.availableOnly}
@@ -1183,9 +1183,9 @@ function CraneFilters({
           className="size-4 rounded border-slate-600 bg-ink-900 accent-accent-500"
         />
         Available before start
-        <span className="text-[12px] text-slate-500">({startLabel})</span>
+        <span className="text-[14px] text-slate-500">({startLabel})</span>
       </label>
-      <label className="flex items-center gap-2 text-[13px] text-slate-600">
+      <label className="flex items-center gap-2 text-[15px] text-slate-600">
         <input
           type="checkbox"
           checked={filters.chartOnly}
@@ -1196,7 +1196,7 @@ function CraneFilters({
         />
         Load chart on file
       </label>
-      <label className="flex items-center gap-2 text-[13px] text-slate-600">
+      <label className="flex items-center gap-2 text-[15px] text-slate-600">
         <input
           type="checkbox"
           checked={filters.hideStale}
@@ -1220,7 +1220,7 @@ function CraneFilters({
               hideStale: false,
             }))
           }
-          className="inline-flex items-center gap-1 text-[12px] text-slate-500 transition-colors hover:text-white"
+          className="inline-flex items-center gap-1 text-[14px] text-slate-500 transition-colors hover:text-white"
         >
           <RotateCcw className="size-3" aria-hidden />
           Clear crane filters
@@ -1249,7 +1249,7 @@ function PresetMenu({
   onClear: () => void;
 }) {
   const item =
-    "block w-full rounded-md px-2 py-1.5 text-left text-[13px] text-slate-600 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-accent-500";
+    "block w-full rounded-md px-2 py-1.5 text-left text-[15px] text-slate-600 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-accent-500";
   return (
     <>
       {distancesAvailable ? (
@@ -1314,7 +1314,7 @@ function UnverifiedSection({
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-2 text-left"
       >
-        <span className="text-[13px] font-medium text-slate-700">
+        <span className="text-[15px] font-medium text-slate-700">
           Cranes without a verified location ({cranes.length})
         </span>
         <ChevronDown
@@ -1322,7 +1322,7 @@ function UnverifiedSection({
           aria-hidden
         />
       </button>
-      <p className="mt-1 text-[12px] text-slate-500">
+      <p className="mt-1 text-[14px] text-slate-500">
         No pin on file, so no distance can be shown. {byVendor.size} vendor
         {byVendor.size === 1 ? "" : "s"}, listed separately so they are not silently hidden.
       </p>
@@ -1339,7 +1339,7 @@ function UnverifiedSection({
                   className="mt-1 size-4 cursor-pointer rounded border-slate-600 bg-ink-900 accent-accent-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-medium text-slate-800">
+                  <span className="block text-[15px] font-medium text-slate-800">
                     {list[0]?.vendorName}
                     <span className="ml-1.5 font-normal text-slate-500">
                       · {list.length} crane{list.length === 1 ? "" : "s"}
@@ -1347,13 +1347,13 @@ function UnverifiedSection({
                   </span>
                   <span className="mt-0.5 block space-y-0.5">
                     {list.map((crane) => (
-                      <span key={crane.craneId} className="block text-[12px] text-slate-600">
+                      <span key={crane.craneId} className="block text-[14px] text-slate-600">
                         {crane.make} {crane.model} · {crane.capacityT} t · {crane.currentLocation},{" "}
                         {crane.stateName}
                       </span>
                     ))}
                   </span>
-                  <span className="mt-0.5 block text-[12px] text-slate-500">
+                  <span className="mt-0.5 block text-[14px] text-slate-500">
                     Distance unavailable · location unverified
                   </span>
                 </span>
@@ -1396,7 +1396,7 @@ function MobileChrome({
           type="button"
           onClick={() => setMapOpen((value) => !value)}
           aria-expanded={mapOpen}
-          className="flex w-full items-center justify-between gap-2 text-[13px] text-slate-600"
+          className="flex w-full items-center justify-between gap-2 text-[15px] text-slate-600"
         >
           <span className="inline-flex items-center gap-1.5">
             <SlidersHorizontal className="size-3.5" aria-hidden />
@@ -1417,12 +1417,12 @@ function MobileChrome({
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-800 bg-ink-900/95 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-medium text-slate-900 tabular-nums">
+            <p className="text-[15px] font-medium text-slate-900 tabular-nums">
               {selected.length} vendor{selected.length === 1 ? "" : "s"} selected
             </p>
             <p
               className={cn(
-                "text-[12px]",
+                "text-[14px]",
                 deadlinePassed
                   ? "text-red-500"
                   : relative.tone === "soon"
@@ -1442,7 +1442,7 @@ function MobileChrome({
           <button
             type="button"
             onClick={onReview}
-            className="btn-primary shrink-0 px-3 py-2 text-[13px]"
+            className="btn-primary shrink-0 px-3 py-2 text-[15px]"
             aria-haspopup="dialog"
           >
             <Send className="size-3.5" aria-hidden />
@@ -1453,3 +1453,4 @@ function MobileChrome({
     </div>
   );
 }
+

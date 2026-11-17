@@ -60,7 +60,7 @@ export function ConfirmPinCard({
 
   return (
     <div className={cn("rounded-lg border border-amber-500/30 bg-amber-500/5", compact ? "p-3" : "p-4")}>
-      <p className="text-[13px] text-amber-700">
+      <p className="text-[15px] text-amber-700">
         The job site has no confirmed pin, so no distance can be shown for any crane.
         Enter the coordinates to switch the candidate list to a distance ranking.
       </p>
@@ -79,7 +79,7 @@ export function ConfirmPinCard({
         </Field>
         <button
           type="submit"
-          className="btn-secondary px-3 py-2 text-[13px]"
+          className="btn-secondary px-3 py-2 text-[15px]"
           disabled={confirm.isPending || lat === "" || lng === ""}
         >
           {confirm.isPending ? <Spinner /> : null}
@@ -138,7 +138,7 @@ export function SiteCard({
         label={`Job site map for ${siteLabel(rfq)}`}
         className="h-[220px] overflow-hidden rounded-lg border border-ink-800"
       />
-      <div className="flex items-start gap-1.5 text-[12px] text-slate-500">
+      <div className="flex items-start gap-1.5 text-[14px] text-slate-500">
         <MapPin className="mt-0.5 size-3 shrink-0" aria-hidden />
         <p>
           {siteLabel(rfq)} ·{" "}
@@ -166,20 +166,20 @@ function InPlay({ selected, contacted }: { selected: CandidateGroup[]; contacted
   if (selected.length === 0) {
     return (
       <section aria-label="In play" className="border-t border-ink-800 pt-3">
-        <p className="text-[13px] text-slate-500">Tick vendors in the list, or use a preset.</p>
+        <p className="text-[15px] text-slate-500">Tick vendors in the list, or use a preset.</p>
       </section>
     );
   }
 
   return (
     <section aria-label="In play" className="border-t border-ink-800 pt-3">
-      <p className="text-[15px] font-semibold text-slate-900 tabular-nums">
+      <p className="text-[17px] font-semibold text-slate-900 tabular-nums">
         {stats.vendors} vendor{stats.vendors === 1 ? "" : "s"} · {stats.cranes} crane
         {stats.cranes === 1 ? "" : "s"} in play
       </p>
       <ul className="mt-1 space-y-0.5">
         {selected.map((group) => (
-          <li key={group.vendorId} className="text-[12px] text-slate-600">
+          <li key={group.vendorId} className="text-[14px] text-slate-600">
             {group.vendorName}
             {stats.farNames.includes(group.vendorName) ? (
               <span className="text-slate-500"> · far from site</span>
@@ -188,7 +188,7 @@ function InPlay({ selected, contacted }: { selected: CandidateGroup[]; contacted
         ))}
       </ul>
       {stats.nearestKm !== null ? (
-        <p className="mt-1 text-[12px] text-slate-500 tabular-nums">
+        <p className="mt-1 text-[14px] text-slate-500 tabular-nums">
           Nearest {shortDistance(stats.nearestKm, stats.approximate)}
           {stats.farthestKm !== null && stats.farthestKm !== stats.nearestKm
             ? ` · Farthest ${shortDistance(stats.farthestKm, stats.approximate)}`
@@ -196,7 +196,7 @@ function InPlay({ selected, contacted }: { selected: CandidateGroup[]; contacted
         </p>
       ) : null}
       {contacted.length > 0 || stats.farNames.length > 0 ? (
-        <p className="mt-1.5 rounded-md border border-amber-500/30 bg-amber-500/5 px-2.5 py-1.5 text-[12px] text-amber-700">
+        <p className="mt-1.5 rounded-md border border-amber-500/30 bg-amber-500/5 px-2.5 py-1.5 text-[14px] text-amber-700">
           {contacted.length > 0 ? (
             <>
               Re-send: {contacted.join(", ")} already received an RFQ for this line.{" "}
@@ -227,7 +227,7 @@ function ChecklistRow({ item }: { item: ChecklistItem }) {
         )}
         aria-hidden
       />
-      <span className="min-w-0 text-[13px] text-slate-600">
+      <span className="min-w-0 text-[15px] text-slate-600">
         {item.label}
         {item.detail ? <span className="text-slate-500"> — {item.detail}</span> : null}
       </span>
@@ -273,7 +273,7 @@ function ChannelToggle({
         onClick={onToggle}
         title={disabledReason ?? undefined}
         className={cn(
-          "flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-[13px] font-medium transition-colors",
+          "flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-[15px] font-medium transition-colors",
           disabled && "cursor-not-allowed opacity-50",
           active
             ? "border-accent-500/60 bg-accent-500/10 text-slate-900"
@@ -284,7 +284,7 @@ function ChannelToggle({
         {channel.label}
         {active ? <Check className="ml-auto size-3.5 text-accent-400" aria-hidden /> : null}
       </button>
-      <p className="mt-1 text-[12px] leading-snug text-slate-500">
+      <p className="mt-1 text-[14px] leading-snug text-slate-500">
         {disabled && disabledReason ? disabledReason : channel.ready}
       </p>
     </div>
@@ -312,7 +312,7 @@ function VendorPreview({ rfq }: { rfq: RfqDetail }) {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 py-1 text-left text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase transition-colors hover:text-slate-800"
+        className="flex w-full items-center justify-between gap-2 py-1 text-left text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase transition-colors hover:text-slate-800"
       >
         What vendors will see
         <ChevronDown
@@ -345,7 +345,7 @@ function VendorPreview({ rfq }: { rfq: RfqDetail }) {
               ],
               ["Quote by", formatDeadline(rfq.submissionDeadline)],
             ].map(([label, value]) => (
-              <div key={label} className="flex items-baseline justify-between gap-3 text-[13px]">
+              <div key={label} className="flex items-baseline justify-between gap-3 text-[15px]">
                 <dt className="text-slate-500">{label}</dt>
                 <dd className="text-right text-slate-700">{value}</dd>
               </div>
@@ -353,10 +353,10 @@ function VendorPreview({ rfq }: { rfq: RfqDetail }) {
           </dl>
           {terms.length > 0 ? (
             <div className="border-t border-ink-800 pt-2">
-              <p className="text-[12px] text-slate-500">Key commercial terms</p>
+              <p className="text-[14px] text-slate-500">Key commercial terms</p>
               <dl className="mt-1 space-y-1">
                 {terms.map(([label, value]) => (
-                  <div key={label} className="flex items-baseline justify-between gap-3 text-[13px]">
+                  <div key={label} className="flex items-baseline justify-between gap-3 text-[15px]">
                     <dt className="text-slate-500">{label}</dt>
                     <dd className="text-right text-slate-700">{value}</dd>
                   </div>
@@ -365,8 +365,8 @@ function VendorPreview({ rfq }: { rfq: RfqDetail }) {
             </div>
           ) : null}
           {rfq.smlContactName || rfq.smlContactMobile || rfq.smlContactEmail ? (
-            <div className="border-t border-ink-800 pt-2 text-[13px]">
-              <p className="text-[12px] text-slate-500">SML contact</p>
+            <div className="border-t border-ink-800 pt-2 text-[15px]">
+              <p className="text-[14px] text-slate-500">SML contact</p>
               <p className="text-slate-700">
                 {[rfq.smlContactName, rfq.smlContactMobile, rfq.smlContactEmail]
                   .filter(Boolean)
@@ -374,7 +374,7 @@ function VendorPreview({ rfq }: { rfq: RfqDetail }) {
               </p>
             </div>
           ) : null}
-          <p className="border-t border-ink-800 pt-2 text-[12px] text-slate-500">
+          <p className="border-t border-ink-800 pt-2 text-[14px] text-slate-500">
             Customer name, site address and budget are not shared.
           </p>
         </div>
@@ -453,10 +453,10 @@ function SendConfirm({
         aria-labelledby="send-confirm-title"
         className="relative w-full max-w-md rounded-xl border border-ink-800 bg-ink-900 p-4 shadow-2xl"
       >
-        <h2 id="send-confirm-title" className="text-[15px] font-semibold text-slate-900">
+        <h2 id="send-confirm-title" className="text-[17px] font-semibold text-slate-900">
           Send this RFQ to {selected.length} vendor{selected.length === 1 ? "" : "s"}?
         </h2>
-        <p className="mt-1 text-[13px] text-slate-500">
+        <p className="mt-1 text-[15px] text-slate-500">
           Through {channelText}. The deadline in the message is {formatDeadline(deadline)} (
           {DEADLINE_ZONE_LABEL}).
         </p>
@@ -465,7 +465,7 @@ function SendConfirm({
           {selected.map((group) => (
             <li
               key={group.vendorId}
-              className="flex items-baseline justify-between gap-3 border-b border-ink-800 px-3 py-2 text-[13px] last:border-b-0"
+              className="flex items-baseline justify-between gap-3 border-b border-ink-800 px-3 py-2 text-[15px] last:border-b-0"
             >
               <span className="text-slate-800">{group.vendorName}</span>
               <span className="text-slate-500 tabular-nums">
@@ -476,20 +476,20 @@ function SendConfirm({
         </ul>
 
         {contacted.length > 0 ? (
-          <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[12px] text-amber-700">
+          <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[14px] text-amber-700">
             {contacted.join(", ")} {contacted.length === 1 ? "was" : "were"} already sent an RFQ
             for this enquiry line. Sending again will add a second message.
           </p>
         ) : null}
 
         <div className="mt-4 flex items-center justify-end gap-2">
-          <button type="button" className="btn-secondary px-3 py-2 text-[13px]" onClick={onCancel}>
+          <button type="button" className="btn-secondary px-3 py-2 text-[15px]" onClick={onCancel}>
             Cancel
           </button>
           <button
             type="button"
             autoFocus
-            className="btn-primary px-4 py-2 text-[13px]"
+            className="btn-primary px-4 py-2 text-[15px]"
             onClick={onConfirm}
             disabled={pending}
           >
@@ -562,7 +562,7 @@ export function SendRail({
       )}
     >
       <div className="flex items-center justify-between gap-2 pb-2 min-[1100px]:hidden">
-        <p className="text-[13px] font-medium text-slate-800">Review and send</p>
+        <p className="text-[15px] font-medium text-slate-800">Review and send</p>
         <button
           type="button"
           onClick={onCloseMobile}
@@ -579,7 +579,7 @@ export function SendRail({
         <InPlay selected={selected} contacted={contacted} />
 
         <section aria-label="Send through" className="border-t border-ink-800 pt-3">
-          <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+          <p className="text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             Send through
           </p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2 min-[1100px]:grid-cols-1">
@@ -597,7 +597,7 @@ export function SendRail({
         </section>
 
         <section aria-label="Readiness" className="border-t border-ink-800 pt-3">
-          <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+          <p className="text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             Before you send
           </p>
           <ul className="mt-1.5">
@@ -620,7 +620,7 @@ export function SendRail({
         ) : null}
         <button
           type="button"
-          className="btn-primary w-full justify-center px-4 py-2.5 text-[14px]"
+          className="btn-primary w-full justify-center px-4 py-2.5 text-[16px]"
           onClick={() => setConfirming(true)}
           disabled={!canSend || pending}
         >
@@ -630,9 +630,9 @@ export function SendRail({
             : `Send to ${selected.length} vendor${selected.length === 1 ? "" : "s"}`}
         </button>
         {blockReason ? (
-          <p className="mt-1.5 text-[12px] text-slate-500">{blockReason}</p>
+          <p className="mt-1.5 text-[14px] text-slate-500">{blockReason}</p>
         ) : (
-          <p className="mt-1.5 text-[12px] text-slate-500">
+          <p className="mt-1.5 text-[14px] text-slate-500">
             Every selected vendor is attempted on every chosen channel.
           </p>
         )}
@@ -655,3 +655,4 @@ export function SendRail({
     </div>
   );
 }
+

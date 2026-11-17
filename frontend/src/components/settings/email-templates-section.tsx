@@ -265,7 +265,7 @@ export function EmailTemplatesSection() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search templates"
-                className="field-input py-1.5 pl-8 text-[13px]"
+                className="field-input py-1.5 pl-8 text-[15px]"
               />
             </div>
 
@@ -288,7 +288,7 @@ export function EmailTemplatesSection() {
                       )}
                     >
                       <span className="flex items-center gap-2">
-                        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+                        <span className="min-w-0 flex-1 truncate text-[15px] font-medium">
                           {friendlyTemplateName(row.key)}
                         </span>
                         {active && dirty ? (
@@ -305,7 +305,7 @@ export function EmailTemplatesSection() {
                 );
               })}
               {filtered.length === 0 ? (
-                <li className="px-2.5 py-3 text-[13px] text-slate-500">
+                <li className="px-2.5 py-3 text-[15px] text-slate-500">
                   No template matches “{search.trim()}”.
                 </li>
               ) : null}
@@ -328,7 +328,7 @@ export function EmailTemplatesSection() {
                     aria-pressed={pane === "edit"}
                     onClick={() => setPane("edit")}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[13px]",
+                      "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[15px]",
                       pane === "edit"
                         ? "border-ink-700 bg-ink-800 text-white"
                         : "border-ink-800 text-slate-500",
@@ -342,7 +342,7 @@ export function EmailTemplatesSection() {
                     aria-pressed={pane === "preview"}
                     onClick={() => setPane("preview")}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[13px]",
+                      "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[15px]",
                       pane === "preview"
                         ? "border-ink-700 bg-ink-800 text-white"
                         : "border-ink-800 text-slate-500",
@@ -354,7 +354,7 @@ export function EmailTemplatesSection() {
                 </div>
               </div>
 
-              <p className="mt-2 max-w-[62ch] text-[13px] leading-relaxed text-slate-500">
+              <p className="mt-2 max-w-[62ch] text-[15px] leading-relaxed text-slate-500">
                 Saving changes this email for every recipient from now on. Emails already sent keep
                 the wording they were sent with.
               </p>
@@ -408,7 +408,7 @@ export function EmailTemplatesSection() {
                       aria-invalid={Boolean(bodyError) || undefined}
                       aria-describedby={bodyError ? "template-body-error" : undefined}
                       className={cn(
-                        "field-input resize-y font-mono text-[12px] leading-relaxed",
+                        "field-input resize-y font-mono text-[14px] leading-relaxed",
                         bodyError && "border-red-300 focus:border-red-400",
                       )}
                     />
@@ -424,7 +424,7 @@ export function EmailTemplatesSection() {
                   </div>
 
                   <div className="border-t border-ink-800 pt-4">
-                    <p className="text-[13px] font-medium text-slate-900">
+                    <p className="text-[15px] font-medium text-slate-900">
                       Variables in this template
                     </p>
                     {originalVariables.length === 0 ? (
@@ -471,7 +471,7 @@ export function EmailTemplatesSection() {
                 {/* preview */}
                 <div className={cn("min-w-0", pane === "edit" && "hidden lg:block")}>
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-[13px] font-medium text-slate-900">Preview</p>
+                    <p className="text-[15px] font-medium text-slate-900">Preview</p>
                     <p className="text-xs text-slate-500">Sample values · no scripts run</p>
                   </div>
                   <div className="mt-2 overflow-hidden rounded-xl border border-ink-800 bg-white">
@@ -538,3 +538,4 @@ export function EmailTemplatesSection() {
 function sameDraft(a: Draft, b: Draft): boolean {
   return a.subject === b.subject && a.body === b.body;
 }
+

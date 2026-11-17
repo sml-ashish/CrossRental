@@ -19,9 +19,9 @@ const RAW_SAMPLES: Record<string, string> = {
   alertItems:
     "<li>2 RFQs are past their response SLA.</li><li>1 quotation expires this week.</li><li>1 booking starts next week without confirmed availability.</li>",
   warningsBlock:
-    '<div style="margin:0 0 16px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#78350f"><strong>Advisories (not blocking)</strong><br/>The offered crane is older than the customer asked for.</div>',
+    '<div style="margin:0 0 16px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:14px;color:#78350f"><strong>Advisories (not blocking)</strong><br/>The offered crane is older than the customer asked for.</div>',
   reasonBlock:
-    '<div style="margin:0 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#334155"><strong>Reason</strong><br/>Competitive price and an earlier mobilisation date.</div>',
+    '<div style="margin:0 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;color:#334155"><strong>Reason</strong><br/>Competitive price and an earlier mobilisation date.</div>',
 };
 
 /**
@@ -124,7 +124,7 @@ function escapeHtml(value: string): string {
 }
 
 function tokenMarkup(raw: string): string {
-  return `<span style="display:inline-block;border:1px dashed #d97706;border-radius:4px;padding:0 3px;font-size:12px;line-height:1.5;color:#92400e;background:#fffbeb;font-family:ui-monospace,monospace">${escapeHtml(raw)}</span>`;
+  return `<span style="display:inline-block;border:1px dashed #d97706;border-radius:4px;padding:0 3px;font-size:14px;line-height:1.5;color:#92400e;background:#fffbeb;font-family:ui-monospace,monospace">${escapeHtml(raw)}</span>`;
 }
 
 /**
@@ -175,3 +175,4 @@ export function friendlyTemplateName(key: string): string {
   const words = key.replaceAll("_", " ").trim();
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
+

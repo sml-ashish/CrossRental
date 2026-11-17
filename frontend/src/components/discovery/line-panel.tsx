@@ -14,15 +14,12 @@ import {
   X,
 } from "lucide-react";
 import {
-  TRAIL_LABELS,
   listRaisableLines,
-  type EnquiryLineTrailStatus,
   type RaisableLine,
 } from "@/lib/enquiries";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatusPill, type StatusPillTone } from "@/components/ui/status-pill";
 import { cn } from "@/lib/cn";
 import type { DiscoveryTheme } from "@/lib/discoveryTheme";
 
@@ -82,29 +79,6 @@ function startText(line: Pick<RaisableLine, "startDateTbc" | "requiredStartDate"
 
 function hasPin(line: Pick<RaisableLine, "siteLatitude" | "siteLongitude">): boolean {
   return typeof line.siteLatitude === "number" && typeof line.siteLongitude === "number";
-}
-
-function trailTone(status: EnquiryLineTrailStatus): StatusPillTone {
-  switch (status) {
-    case "NEW":
-      return "neutral";
-    case "CLOSED":
-      return "muted";
-    case "CANCELLED":
-      return "red";
-    case "VENDOR_FINALISED":
-    case "BOOKED":
-    case "FULFILLED_INTERNALLY":
-      return "emerald";
-    case "RFQ_SENT":
-    case "AWAITING_QUOTES":
-    case "QUOTES_RECEIVED":
-    case "UNDER_EVALUATION":
-      return "amber";
-    case "AVAILABILITY_CHECK":
-    case "VENDOR_SHORTLISTED":
-      return "blue";
-  }
 }
 
 /** Sun/moon switch for the workspace theme. Shows the mode you would switch TO. */
@@ -265,7 +239,7 @@ export function LinePanel({
         >
           <Search className="size-4" aria-hidden />
         </button>
-        <span className="mt-1 text-[11px] font-semibold text-neutral-500 tabular-nums">
+        <span className="mt-1 text-[13px] font-semibold text-neutral-500 tabular-nums">
           {lines?.length ?? 0}
         </span>
         <ThemeToggle theme={theme} onToggle={onToggleTheme} className="mt-auto" />
@@ -278,7 +252,7 @@ export function LinePanel({
       <div className="shrink-0 px-5 pt-5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-[12px] text-neutral-500">
+            <p className="truncate text-[14px] text-neutral-500">
               {greeting}, <span className="text-neutral-300">{displayName}</span>
             </p>
             <h1 className="mt-0.5 truncate text-[22px] leading-none font-semibold tracking-tight text-white">
@@ -311,7 +285,7 @@ export function LinePanel({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Enquiry no., site or crane type"
             aria-label="Search enquiry lines"
-            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
           />
         </div>
 
@@ -326,7 +300,7 @@ export function LinePanel({
             onChange={(event) => onToChange(event.target.value)}
             placeholder="To: enquiry site, e.g. Vadodara"
             aria-label="To: show enquiries for this site"
-            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-8 pl-9 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-8 pl-9 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
           />
           {toText ? (
             <button
@@ -341,7 +315,7 @@ export function LinePanel({
         </div>
 
         {toText.trim() ? (
-          <p className="mt-2 px-0.5 text-[12px] text-neutral-400" aria-live="polite">
+          <p className="mt-2 px-0.5 text-[14px] text-neutral-400" aria-live="polite">
             <span className="font-semibold text-white tabular-nums">{matches.length}</span>{" "}
             enquiry line{matches.length === 1 ? "" : "s"} to {toText.trim()}
           </p>
@@ -355,7 +329,7 @@ export function LinePanel({
               onClick={() => setFilter(option.value)}
               aria-pressed={filter === option.value}
               className={cn(
-                "rounded-full px-3 py-1 text-[12px] font-medium transition-colors",
+                "rounded-full px-3 py-1 text-[14px] font-medium transition-colors",
                 filter === option.value
                   ? "bg-white text-ink-950"
                   : "border border-ink-700 text-neutral-400 hover:text-white",
@@ -368,7 +342,7 @@ export function LinePanel({
             <button
               type="button"
               onClick={onClear}
-              className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+              className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-[13px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
             >
               <X className="size-3" aria-hidden />
               Browse all
@@ -385,7 +359,7 @@ export function LinePanel({
               <button
                 type="button"
                 onClick={onRetry}
-                className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[12px] font-medium text-red-700 hover:bg-red-500/10"
+                className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[14px] font-medium text-red-700 hover:bg-red-500/10"
               >
                 Try again
               </button>
@@ -411,7 +385,7 @@ export function LinePanel({
         ) : (
           groups.map((group) => (
             <section key={group.enquiryNo} className="mb-4">
-              <p className="px-2 pt-2 pb-1.5 text-[11px] font-semibold tracking-[0.1em] text-neutral-500 uppercase">
+              <p className="px-2 pt-2 pb-1.5 text-[13px] font-semibold tracking-[0.1em] text-neutral-500 uppercase">
                 {group.enquiryNo}
               </p>
               <ul className="space-y-1.5">
@@ -467,28 +441,25 @@ function LineRow({
         <span className="flex items-center justify-between gap-2">
           <span
             className={cn(
-              "truncate text-[13px] font-semibold",
+              "truncate text-[15px] font-semibold",
               selected ? "text-white" : "text-neutral-100",
             )}
           >
             {lineReference(line)}
           </span>
-          <StatusPill tone={trailTone(line.trailStatus)} className="shrink-0 px-2 text-[11px]">
-            {TRAIL_LABELS[line.trailStatus]}
-          </StatusPill>
         </span>
 
-        <span className="mt-1 block truncate text-[12px] text-neutral-400">
+        <span className="mt-1 block truncate text-[14px] text-neutral-400">
           {line.craneTypeName ?? line.craneTypeCode ?? "Crane type not set"} ·{" "}
           {capacityText(line)}
         </span>
 
-        <span className="mt-1.5 flex items-center gap-1.5 text-[12px] text-neutral-500">
+        <span className="mt-1.5 flex items-center gap-1.5 text-[14px] text-neutral-500">
           <MapPin className="size-3.5 shrink-0" aria-hidden />
           <span className="truncate">{place}</span>
         </span>
 
-        <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-neutral-500">
+        <span className="mt-0.5 flex items-center gap-1.5 text-[14px] text-neutral-500">
           <CalendarDays className="size-3.5 shrink-0" aria-hidden />
           <span className="truncate">
             {startText(line)} · {rfqText}
@@ -498,10 +469,10 @@ function LineRow({
 
       {selected ? (
         <div className="border-t border-accent-500/25 px-3.5 py-3">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+          <p className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
             Requirement
           </p>
-          <dl className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-3 text-[12px]">
+          <dl className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-3 text-[14px]">
             <Fact icon={Ruler} label="Crane" value={line.craneTypeName ?? "Not set"} />
             <Fact icon={Ruler} label="Capacity" value={capacityText(line)} />
             <Fact icon={CalendarDays} label="Start" value={startText(line)} />
@@ -512,7 +483,7 @@ function LineRow({
                 <span className="block truncate text-neutral-300">{place}</span>
                 <span
                   className={cn(
-                    "mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0 text-[11px] font-medium",
+                    "mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0 text-[13px] font-medium",
                     hasPin(line)
                       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                       : "border-amber-200 bg-amber-50 text-amber-700",
@@ -540,7 +511,7 @@ function Fact({
 }) {
   return (
     <div className="min-w-0">
-      <dt className="flex items-center gap-1 text-[11px] tracking-[0.06em] text-neutral-500 uppercase">
+      <dt className="flex items-center gap-1 text-[13px] tracking-[0.06em] text-neutral-500 uppercase">
         <Icon className="size-2.5" aria-hidden />
         {label}
       </dt>
@@ -548,4 +519,5 @@ function Fact({
     </div>
   );
 }
+
 

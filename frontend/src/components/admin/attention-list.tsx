@@ -293,7 +293,7 @@ export function AttentionList({
   return (
     <>
       {items.length === 0 ? (
-        <p className="py-6 text-[14px] leading-5 text-slate-600">
+        <p className="py-6 text-[16px] leading-5 text-slate-600">
           All clear. Nothing needs your attention.
         </p>
       ) : (
@@ -312,7 +312,7 @@ export function AttentionList({
 
       {clearChecks.length > 0 ? (
         <details className="group mt-5">
-          <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-sm text-[13px] text-slate-500 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 [&::-webkit-details-marker]:hidden">
+          <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-sm text-[15px] text-slate-500 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 [&::-webkit-details-marker]:hidden">
             <Check className="size-3.5 text-emerald-600" aria-hidden />
             <span>
               {clearChecks.length} other check{clearChecks.length === 1 ? " is" : "s are"} clear
@@ -324,7 +324,7 @@ export function AttentionList({
           </summary>
           <ul className="mt-3 space-y-2 pl-5">
             {clearChecks.map((check) => (
-              <li key={check.id} className="flex items-center gap-2 text-[13px] text-slate-600">
+              <li key={check.id} className="flex items-center gap-2 text-[15px] text-slate-600">
                 <Check className="size-3.5 shrink-0 text-emerald-600" aria-hidden />
                 {check.label}
               </li>
@@ -333,7 +333,7 @@ export function AttentionList({
         </details>
       ) : null}
 
-      <p className="mt-6 text-[13px] leading-5 text-slate-500">
+      <p className="mt-6 text-[15px] leading-5 text-slate-500">
         Alerts use your thresholds: fleet stale after {resolved.staleFlagDays} days, RFQ replies
         after {resolved.alertRfqSlaHours} h, quotations expiring within{" "}
         {resolved.alertQuotationExpiryDays} days, bookings starting within{" "}
@@ -379,16 +379,16 @@ function AttentionRow({
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-[14px] leading-5 text-slate-800">{item.sentence}</span>
+        <span className="block text-[16px] leading-5 text-slate-800">{item.sentence}</span>
         <span
-          className="mt-1 line-clamp-1 block text-[13px] leading-5 text-slate-500"
+          className="mt-1 line-clamp-1 block text-[15px] leading-5 text-slate-500"
           title={item.action}
         >
           {item.action}
         </span>
       </span>
 
-      <span className="ml-auto inline-flex shrink-0 items-center gap-1 self-center text-[13px] font-medium text-slate-500 transition-colors group-hover:text-white">
+      <span className="ml-auto inline-flex shrink-0 items-center gap-1 self-center text-[15px] font-medium text-slate-500 transition-colors group-hover:text-white">
         Review
         <ArrowRight className="size-3.5" aria-hidden />
       </span>
@@ -423,3 +423,4 @@ function AttentionRow({
     </Link>
   );
 }
+

@@ -45,6 +45,9 @@ import type { Actor } from "./rfq.service";
  * so a synthetic figure is never mistaken for a real one later.
  */
 
+/** A recommendation is a shortlist, not the whole fleet: the ten best cranes. */
+export const MAX_RECOMMENDED_CRANES = 10;
+
 /** A candidate crane with its cost and warning detail added (P2). */
 export interface RecommendedCrane extends CandidateCrane {
   estimatedMobilisationCost: number | null;
@@ -303,6 +306,33 @@ export async function participationByVendor(
 }
 
 /**
+ * Keep only the top ten cranes, in the order the candidate picker produced.
+ *
+ * The list is already ranked (smallest adequate capacity then nearest, or
+ * nearest first), so slicing the flattened order is the ranking. Groups are
+ * trimmed rather than dropped whole: a vendor whose fourth crane falls past the
+ * cut keeps the cranes above it. Unlocated cranes fill any places left over.
+ */
+function limitRecommendation(
+  groups: RecommendedGroup[],
+  unverified: RecommendedCrane[],
+): { groups: RecommendedGroup[]; unverified: RecommendedCrane[] } {
+  let remaining = MAX_RECOMMENDED_CRANES;
+  const kept: RecommendedGroup[] = [];
+  for (const group of groups) {
+    if (remaining <= 0) break;
+    const cranes = group.cranes.slice(0, remaining);
+    if (cranes.length === 0) continue;
+    remaining -= cranes.length;
+    kept.push({ ...group, cranes });
+  }
+  return {
+    groups: kept,
+    unverified: unverified.slice(0, Math.max(0, remaining)),
+  };
+}
+
+/**
  * Build a recommendation result. Does not persist it — `evaluateAndStore` is
  * the writer, and `refreshRecommendations` calls both.
  */
@@ -399,6 +429,8 @@ async function buildRecommendation(
     cranes: group.cranes.map(enrich),
   }));
 
+  const shortlist = limitRecommendation(groups, candidates.unverified.map(enrich));
+
   return {
     trigger: "initial",
     provider: getGeoProvider().name,
@@ -417,8 +449,8 @@ async function buildRecommendation(
     sml: emptySml,
     vendor: {
       ownership: OwnershipType.VENDOR,
-      groups,
-      unverified: candidates.unverified.map(enrich),
+      groups: shortlist.groups,
+      unverified: shortlist.unverified,
     },
   };
 }
@@ -442,6 +474,9 @@ function fromSnapshot(row: {
     notice: string | null;
   };
   const smlSet = row.smlSet as RecommendationResult["sml"];
+  // Old snapshots may predate the ten-crane cap; the screen still shows a
+  // shortlist, so the read applies the same rule as a fresh evaluation.
+  const shortlist = limitRecommendation(vendorSet.groups, vendorSet.unverified);
   return {
     lineId: row.enquiryLineId,
     snapshotId: row.id,
@@ -456,8 +491,8 @@ function fromSnapshot(row: {
     sml: smlSet,
     vendor: {
       ownership: OwnershipType.VENDOR,
-      groups: vendorSet.groups,
-      unverified: vendorSet.unverified,
+      groups: shortlist.groups,
+      unverified: shortlist.unverified,
     },
   };
 }

@@ -419,10 +419,21 @@ export function cranesLocatedIn<T extends { currentLocation: string; stateName?:
  * Cranes with no distance (location unverified) always sit last. This only orders
  * rows for display; every figure on a row still comes from the server.
  */
+/**
+ * Distance view: a 300 t line shows nothing under 250 t. The floor is a sixth
+ * below the requirement, so a small line is not asked to take a crane that is
+ * half its size.
+ */
+export function capacityFloorT(requiredT: number | null | undefined): number | null {
+  return typeof requiredT === "number" && requiredT > 0 ? Math.floor((requiredT * 5) / 6) : null;
+}
+
 export function orderedRecommendationCranes(
   recommendations: LineRecommendations | undefined,
   mode: RecommendationMode,
+  requiredT?: number | null,
 ): RecommendationCrane[] {
+  const floor = mode === "distance" ? capacityFloorT(requiredT) : null;
   const km = (crane: RecommendationCrane) =>
     crane.distanceKm !== null && Number.isFinite(crane.distanceKm) && crane.distanceKm > 0
       ? crane.distanceKm
@@ -433,11 +444,28 @@ export function orderedRecommendationCranes(
     if (x === y) return 0;
     return x < y ? -1 : 1;
   };
-  return [...recommendationCranes(recommendations)].sort((a, b) => {
+  return [...recommendationCranes(recommendations)]
+    .filter((crane) => floor === null || crane.capacityT >= floor)
+    .sort((a, b) => {
     if (mode === "technical" && a.capacityT !== b.capacityT) return a.capacityT - b.capacityT;
     return byDistance(a, b) || a.vendorName.localeCompare(b.vendorName);
   });
 }
+
+/** Extra filters on the recommended list: free in time, and a make/model/vendor search. */
+export function filterRecommended<
+  T extends { availableInTime: boolean; make: string; model: string; vendorName: string },
+>(list: T[], availableOnly: boolean, query: string): T[] {
+  const needle = query.trim().toLowerCase();
+  return list.filter(
+    (crane) =>
+      (!availableOnly || crane.availableInTime) &&
+      (!needle || `${crane.make} ${crane.model} ${crane.vendorName}`.toLowerCase().includes(needle)),
+  );
+}
+
+/** Only the best ten recommended cranes are shown and drawn. */
+export const TOP_RECOMMENDED_CRANES = 10;
 
 /** `412 km` — whole kilometres once the number is big enough to stop caring. */
 export function formatKm(km: number | null): string {
@@ -466,3 +494,4 @@ export function formatRouteDistance(
   const drive = formatDriveTime(durationMin);
   return drive ? `${distance} · about ${drive}` : distance;
 }
+

@@ -50,7 +50,7 @@ export function StatTile({
 
   const body = (
     <>
-      <span className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+      <span className="flex items-center gap-1.5 text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
         {dot ? <span className={cn("size-1.5 rounded-full", dot)} aria-hidden /> : null}
         {icon}
         {label}
@@ -58,7 +58,7 @@ export function StatTile({
       <span className={cn("mt-1 block text-2xl font-semibold tabular-nums", valueTone)}>
         {value}
       </span>
-      {hint ? <span className="mt-0.5 block text-[11px] text-slate-500">{hint}</span> : null}
+      {hint ? <span className="mt-0.5 block text-[13px] text-slate-500">{hint}</span> : null}
     </>
   );
 
@@ -102,3 +102,4 @@ export function StatGrid({ children, className }: { children: ReactNode; classNa
     </section>
   );
 }
+

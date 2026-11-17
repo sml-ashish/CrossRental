@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -73,10 +74,10 @@ const PRIMARY_BUTTON =
   "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400 sm:w-auto";
 
 const PRIMARY_BUTTON_SMALL =
-  "inline-flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-3 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400";
+  "inline-flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-3 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400";
 
 const ROW_BUTTON =
-  "btn-secondary px-3 py-1.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-60";
+  "btn-secondary px-3 py-1.5 text-[15px] font-medium disabled:cursor-not-allowed disabled:opacity-60";
 
 export function VendorDashboardPage() {
   const { user } = useAuth();
@@ -240,7 +241,7 @@ function DashboardHeader({
         <Link
           to="/app/fleet/new"
           search={{ duplicate: undefined, vendorId: undefined }}
-          className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg px-1 py-1 text-[13px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
+          className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg px-1 py-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
         >
           <Plus className="size-3.5" aria-hidden />
           Add a crane
@@ -263,7 +264,7 @@ function SectionHeading({
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0">
         <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        {hint ? <p className="mt-0.5 text-[13px] text-slate-500">{hint}</p> : null}
+        {hint ? <p className="mt-0.5 text-[15px] text-slate-500">{hint}</p> : null}
       </div>
       {action}
     </div>
@@ -295,7 +296,7 @@ function WaitingSection({
         action={
           <Link
             to="/app/rfqs"
-            className="text-[13px] font-medium text-slate-600 transition-colors hover:text-slate-900"
+            className="text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900"
           >
             All RFQs
           </Link>
@@ -318,7 +319,7 @@ function WaitingSection({
             title="No RFQs waiting for you."
             description="We'll email you when one arrives."
             action={
-              <Link to="/app/rfqs" className="btn-secondary py-[7px] text-[13px]">
+              <Link to="/app/rfqs" className="btn-secondary py-[7px] text-[15px]">
                 See all RFQs
               </Link>
             }
@@ -329,7 +330,7 @@ function WaitingSection({
       {closed.length > 0 ? (
         <div className="pt-1">
           <div className="flex items-center gap-3">
-            <h3 className="text-[13px] font-medium text-slate-500">Closed</h3>
+            <h3 className="text-[15px] font-medium text-slate-500">Closed</h3>
             <div className="h-px flex-1 bg-ink-800" />
           </div>
           <div className="mt-3 space-y-3">
@@ -374,7 +375,7 @@ function RfqCard({
     <article className="card p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h3 className="text-[15px] font-semibold text-slate-900">
+          <h3 className="text-[17px] font-semibold text-slate-900">
             <Link
               to="/app/rfqs/$rfqId"
               params={{ rfqId: row.rfqId }}
@@ -391,7 +392,7 @@ function RfqCard({
 
         <span
           className={cn(
-            "inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium",
+            "inline-flex shrink-0 items-center gap-1.5 text-[15px] font-medium",
             deadline.tone === "closed"
               ? "text-red-600"
               : deadline.tone === "soon"
@@ -415,10 +416,10 @@ function RfqCard({
         </span>
       </div>
 
-      <p className="mt-3 text-[13px] text-slate-600">{quoteStatusText(row)}</p>
+      <p className="mt-3 text-[15px] text-slate-600">{quoteStatusText(row)}</p>
 
       {suggestion && !deadline.closed ? (
-        <p className="mt-1 text-[13px] text-slate-600">{suggestionText(suggestion)}</p>
+        <p className="mt-1 text-[15px] text-slate-600">{suggestionText(suggestion)}</p>
       ) : null}
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -435,7 +436,7 @@ function RfqCard({
         <Link
           to="/app/rfqs/$rfqId"
           params={{ rfqId: row.rfqId }}
-          className="inline-flex items-center justify-center rounded-lg px-1 py-1 text-[13px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
+          className="inline-flex items-center justify-center rounded-lg px-1 py-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
         >
           {canDecline ? "Can't do this" : "View RFQ"}
         </Link>
@@ -490,7 +491,7 @@ function CranesSection({
         action={
           <Link
             to="/app/fleet"
-            className="text-[13px] font-medium text-slate-600 transition-colors hover:text-slate-900"
+            className="text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900"
           >
             My fleet
           </Link>
@@ -502,7 +503,7 @@ function CranesSection({
       {notice ? (
         <p
           role="status"
-          className="flex items-center gap-2 px-1 text-[13px] font-medium text-emerald-700"
+          className="flex items-center gap-2 px-1 text-[15px] font-medium text-emerald-700"
         >
           <Check className="size-3.5 shrink-0" aria-hidden />
           {notice}
@@ -553,7 +554,7 @@ function FleetBar({ stats, hasCranes }: { stats: FleetStats; hasCranes: boolean 
       </div>
 
       {hasCranes ? (
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-600">
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-slate-600">
           <span>
             <span className="font-medium tabular-nums text-slate-900">{stats.total}</span>{" "}
             {stats.total === 1 ? "crane" : "cranes"}
@@ -592,7 +593,7 @@ function FleetBar({ stats, hasCranes }: { stats: FleetStats; hasCranes: boolean 
           ) : null}
         </p>
       ) : (
-        <p className="mt-3 text-[13px] text-slate-600">
+        <p className="mt-3 text-[15px] text-slate-600">
           No cranes yet.{" "}
           <Link to="/app/fleet/new" search={{ duplicate: undefined, vendorId: undefined }} className="font-medium text-slate-900 underline-offset-2 hover:underline">
             Add your first crane
@@ -652,13 +653,13 @@ function QuickCheckRow({
     <div className="p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="text-[15px] font-semibold text-slate-900">{name}</p>
-          <p className="mt-0.5 text-[13px] text-slate-600">
+          <p className="text-[17px] font-semibold text-slate-900">{name}</p>
+          <p className="mt-0.5 text-[15px] text-slate-600">
             {reason.lead}
             {reason.details.length > 0 ? ` ${reason.details.join(" ")}` : ""}
           </p>
           {error ? (
-            <p role="alert" className="mt-1 text-[13px] text-red-600">
+            <p role="alert" className="mt-1 text-[15px] text-red-600">
               {error}
             </p>
           ) : null}
@@ -666,7 +667,7 @@ function QuickCheckRow({
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {updated ? (
-            <span className="inline-flex items-center gap-1 text-[13px] font-medium text-emerald-700">
+            <span className="inline-flex items-center gap-1 text-[15px] font-medium text-emerald-700">
               <Check className="size-3.5" aria-hidden />
               Updated
             </span>
@@ -904,7 +905,7 @@ function UpdatePopover({ crane, onSaved }: { crane: Crane; onSaved: () => void }
               </Field>
 
               {error ? (
-                <p role="alert" className="text-[13px] text-red-600">
+                <p role="alert" className="text-[15px] text-red-600">
                   {error}
                 </p>
               ) : null}
@@ -912,7 +913,7 @@ function UpdatePopover({ crane, onSaved }: { crane: Crane; onSaved: () => void }
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
-                  className="btn-secondary flex-1 px-3 py-2 text-[13px]"
+                  className="btn-secondary flex-1 px-3 py-2 text-[15px]"
                   onClick={() => close()}
                   disabled={save.isPending}
                 >
@@ -944,7 +945,7 @@ function ComingUpSection({ data, now }: { data: VendorDashboard; now: number }) 
         <h2 className="text-base font-semibold text-slate-900">Coming up</h2>
         <Link
           to="/app/calendar"
-          className="inline-flex items-center gap-1 text-[13px] font-medium text-slate-600 transition-colors hover:text-slate-900"
+          className="inline-flex items-center gap-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900"
         >
           Open calendar
           <ArrowRight className="size-3.5" aria-hidden />
@@ -952,7 +953,7 @@ function ComingUpSection({ data, now }: { data: VendorDashboard; now: number }) 
       </div>
 
       {thisWeek.length === 0 && later.length === 0 ? (
-        <p className="mt-3 text-[13px] text-slate-500">
+        <p className="mt-3 text-[15px] text-slate-500">
           Nothing scheduled in the next 30 days.
         </p>
       ) : (
@@ -976,12 +977,12 @@ function ComingUpGroup({
 }) {
   return (
     <div>
-      <p className="text-[13px] font-medium text-slate-500">{title}</p>
+      <p className="text-[15px] font-medium text-slate-500">{title}</p>
       <ul className="mt-2 space-y-2.5">
         {items.map((item) => (
           <li key={item.key} className="flex gap-3">
             <span
-              className="w-20 shrink-0 text-[13px] tabular-nums text-slate-500"
+              className="w-20 shrink-0 text-[15px] tabular-nums text-slate-500"
               title={item.full}
             >
               {item.dateLabel}
@@ -1041,7 +1042,7 @@ function GetFoundSection({
   return (
     <section className="card p-4">
       <h2 className="text-base font-semibold text-slate-900">Get found</h2>
-      <p className="mt-0.5 text-[13px] text-slate-500">
+      <p className="mt-0.5 text-[15px] text-slate-500">
         A few fixes that help SML match you to jobs.
       </p>
       <ul className="mt-3 space-y-2">
@@ -1052,7 +1053,7 @@ function GetFoundSection({
               className="group flex items-start justify-between gap-3 text-sm text-slate-700 transition-colors hover:text-slate-900"
             >
               <span className="min-w-0">{item.text}</span>
-              <span className="inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-slate-600 group-hover:text-slate-900">
+              <span className="inline-flex shrink-0 items-center gap-1 text-[15px] font-medium text-slate-600 group-hover:text-slate-900">
                 {item.linkLabel}
                 <ArrowRight className="size-3.5" aria-hidden />
               </span>
@@ -1068,13 +1069,13 @@ function WonSection({ count }: { count: number }) {
   return (
     <section className="card p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-2 text-[15px] font-semibold text-slate-900">
+        <p className="flex items-center gap-2 text-[17px] font-semibold text-slate-900">
           <CheckCircle2 className="size-4 shrink-0 text-emerald-600" aria-hidden />
           You've won {count} {count === 1 ? "job" : "jobs"}
         </p>
         <Link
           to="/app/quotes"
-          className="inline-flex items-center gap-1 text-[13px] font-medium text-slate-600 transition-colors hover:text-slate-900"
+          className="inline-flex items-center gap-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900"
         >
           Quotations
           <ArrowRight className="size-3.5" aria-hidden />
@@ -1148,18 +1149,18 @@ function FirstTimeState({
               )}
             </span>
             <div className="min-w-0">
-              <p className="flex flex-wrap items-center gap-2 text-[15px] font-semibold text-slate-900">
+              <p className="flex flex-wrap items-center gap-2 text-[17px] font-semibold text-slate-900">
                 {step.title}
                 {step.done ? (
-                  <span className="text-[13px] font-medium text-emerald-700">Done</span>
+                  <span className="text-[15px] font-medium text-emerald-700">Done</span>
                 ) : null}
               </p>
-              <p className="text-[13px] text-slate-500">{step.description}</p>
+              <p className="text-[15px] text-slate-500">{step.description}</p>
               {!step.done ? (
                 <Link
                   to={step.to}
                   search={step.search}
-                  className="mt-1 inline-flex items-center gap-1 text-[13px] font-medium text-slate-900 underline-offset-2 hover:underline"
+                  className="mt-1 inline-flex items-center gap-1 text-[15px] font-medium text-slate-900 underline-offset-2 hover:underline"
                 >
                   {step.linkLabel}
                   <ArrowRight className="size-3.5" aria-hidden />
@@ -1176,3 +1177,4 @@ function FirstTimeState({
     </section>
   );
 }
+

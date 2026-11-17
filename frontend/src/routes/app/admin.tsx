@@ -120,7 +120,7 @@ export function AdminPage() {
           <p
             role="status"
             aria-live="polite"
-            className="mt-1.5 flex items-center gap-2 text-[14px] leading-5 text-slate-600"
+            className="mt-1.5 flex items-center gap-2 text-[16px] leading-5 text-slate-600"
           >
             {status.dot ? (
               <span
@@ -134,7 +134,7 @@ export function AdminPage() {
 
         <div className="flex shrink-0 items-center gap-2 pt-1">
           <span
-            className="text-[13px] text-slate-500"
+            className="text-[15px] text-slate-500"
             title={
               dashboard.dataUpdatedAt
                 ? new Date(dashboard.dataUpdatedAt).toLocaleString()
@@ -167,7 +167,7 @@ export function AdminPage() {
         >
           <h2
             id="attention-title"
-            className="text-[16px] leading-6 font-semibold text-slate-900"
+            className="text-[17px] leading-6 font-semibold text-slate-900"
           >
             Needs attention
           </h2>
@@ -213,3 +213,4 @@ export function AdminPage() {
     </div>
   );
 }
+

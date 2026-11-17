@@ -51,7 +51,7 @@ export function Dialog({
                   {title}
                 </BaseDialog.Title>
                 {description ? (
-                  <BaseDialog.Description className="mt-1 text-[13px] leading-5 text-slate-500">
+                  <BaseDialog.Description className="mt-1 text-[15px] leading-5 text-slate-500">
                     {description}
                   </BaseDialog.Description>
                 ) : null}
@@ -84,3 +84,4 @@ export function Dialog({
     </BaseDialog.Root>
   );
 }
+

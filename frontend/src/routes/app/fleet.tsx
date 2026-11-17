@@ -400,13 +400,13 @@ export function FleetPage() {
       />
 
       {!fleet.isError ? (
-        <p className="mt-4 text-[14px] text-slate-700">
+        <p className="mt-4 text-[16px] text-slate-700">
           {fleet.isLoading ? "Loading your cranes…" : summary}
         </p>
       ) : null}
 
       {notice ? (
-        <div className="mt-4 flex items-start justify-between gap-3 border-l-2 border-emerald-400/60 bg-emerald-500/10 px-3 py-2 text-[13px] text-emerald-800">
+        <div className="mt-4 flex items-start justify-between gap-3 border-l-2 border-emerald-400/60 bg-emerald-500/10 px-3 py-2 text-[15px] text-emerald-800">
           <span>{notice}</span>
           <button
             type="button"
@@ -420,7 +420,7 @@ export function FleetPage() {
       ) : null}
 
       {actionError ? (
-        <div className="mt-4 flex items-start justify-between gap-3 border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-[13px] text-rose-100">
+        <div className="mt-4 flex items-start justify-between gap-3 border-l-2 border-rose-400/60 bg-rose-500/10 px-3 py-2 text-[15px] text-rose-100">
           <span>{actionError}</span>
           <button
             type="button"
@@ -473,7 +473,7 @@ export function FleetPage() {
               type="button"
               onClick={() => void confirmAll()}
               disabled={confirmingAll}
-              className="shrink-0 rounded-full border border-white/15 px-3 py-1 text-[13px] whitespace-nowrap text-slate-700 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 disabled:text-slate-500"
+              className="shrink-0 rounded-full border border-white/15 px-3 py-1 text-[15px] whitespace-nowrap text-slate-700 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 disabled:text-slate-500"
             >
               {confirmingAll ? "Confirming…" : "Confirm all are up to date"}
             </button>
@@ -498,7 +498,7 @@ export function FleetPage() {
               aria-pressed={statusChip === chip.value}
               onClick={() => setStatusChip(chip.value)}
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
+                "rounded-full border px-2.5 py-1 text-[15px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
                 statusChip === chip.value
                   ? "border-white/15 bg-white/10 text-slate-900"
                   : "border-transparent text-slate-500 hover:text-slate-800",
@@ -515,7 +515,7 @@ export function FleetPage() {
             aria-expanded={filtersOpen}
             aria-haspopup="dialog"
             onClick={() => setFiltersOpen((open) => !open)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[13px] text-slate-700 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[15px] text-slate-700 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
           >
             <Filter className="size-3.5" aria-hidden /> Filters
           </button>
@@ -537,7 +537,7 @@ export function FleetPage() {
           aria-pressed={showDeactivated}
           onClick={() => setShowDeactivated((show) => !show)}
           className={cn(
-            "rounded-full border px-2.5 py-1 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
+            "rounded-full border px-2.5 py-1 text-[15px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
             showDeactivated
               ? "border-white/15 bg-white/10 text-slate-900"
               : "border-transparent text-slate-500 hover:text-slate-800",
@@ -546,13 +546,13 @@ export function FleetPage() {
           Deactivated{inactiveCount > 0 ? ` (${inactiveCount})` : ""}
         </button>
 
-        <label className="ml-auto flex items-center gap-2 text-[13px] text-slate-500">
+        <label className="ml-auto flex items-center gap-2 text-[15px] text-slate-500">
           <span className="sr-only">Sort cranes</span>
           <select
             aria-label="Sort cranes"
             value={sort}
             onChange={(event) => setSort(event.target.value as SortKey)}
-            className="rounded-md border border-white/10 bg-transparent px-2 py-1 text-[13px] text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+            className="rounded-md border border-white/10 bg-transparent px-2 py-1 text-[15px] text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
           >
             {SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -568,18 +568,18 @@ export function FleetPage() {
           <FleetSkeleton />
         ) : fleet.isError ? (
           <div className="py-10">
-            <p className="text-[14px] text-slate-700">Could not load your fleet.</p>
+            <p className="text-[16px] text-slate-700">Could not load your fleet.</p>
             <button
               type="button"
               onClick={() => void fleet.refetch()}
-              className="mt-3 rounded-md border border-rose-400/30 px-3 py-1.5 text-[13px] text-rose-200 hover:bg-rose-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+              className="mt-3 rounded-md border border-rose-400/30 px-3 py-1.5 text-[15px] text-rose-200 hover:bg-rose-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
             >
               Retry
             </button>
           </div>
         ) : allCranes.length === 0 && !hasFilters ? (
           <div className="py-12 text-center">
-            <p className="text-[14px] text-slate-700">
+            <p className="text-[16px] text-slate-700">
               Add your first crane so SML can offer it to customers.
             </p>
             <button
@@ -597,12 +597,12 @@ export function FleetPage() {
           </div>
         ) : visibleCranes.length === 0 ? (
           <div className="py-12 text-center">
-            <p className="text-[14px] text-slate-700">No cranes match.</p>
+            <p className="text-[16px] text-slate-700">No cranes match.</p>
             {hasFilters ? (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-3 text-[13px] text-slate-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                className="mt-3 text-[15px] text-slate-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
               >
                 Clear filters
               </button>
@@ -666,7 +666,7 @@ function TodoChip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "shrink-0 rounded-full border px-2.5 py-1 text-[13px] whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
+        "shrink-0 rounded-full border px-2.5 py-1 text-[15px] whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
         active
           ? "border-amber-400/50 bg-amber-500/20 text-amber-800"
           : "border-amber-400/30 bg-amber-500/10 text-amber-700 hover:bg-amber-500/15",
@@ -710,7 +710,7 @@ function FilterPopover({
         aria-label="Filters"
         className="absolute top-full left-0 z-30 mt-2 w-72 rounded-lg border border-white/10 bg-ink-900 p-3 shadow-xl"
       >
-        <p className="text-[12px] text-slate-500">Type</p>
+        <p className="text-[14px] text-slate-500">Type</p>
         <Select
           id="fleet-filter-type"
           value={typeOfCraneCode}
@@ -719,7 +719,7 @@ function FilterPopover({
           options={craneTypes.map((type) => ({ value: type.code, label: type.name }))}
           placeholder="Any type"
         />
-        <p className="mt-3 text-[12px] text-slate-500">State</p>
+        <p className="mt-3 text-[14px] text-slate-500">State</p>
         <Select
           id="fleet-filter-state"
           value={stateCode}
@@ -732,7 +732,7 @@ function FilterPopover({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-[13px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+            className="rounded-md px-2 py-1 text-[15px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
           >
             Done
           </button>
@@ -745,12 +745,12 @@ function FilterPopover({
 function LocationCell({ crane }: { crane: Crane }) {
   return (
     <div className="min-w-0">
-      <p className="truncate text-[13px] text-slate-700">
+      <p className="truncate text-[15px] text-slate-700">
         {crane.currentLocation}
         {crane.state ? `, ${titleCase(crane.state.name)}` : ""}
       </p>
       {crane.locationUnverified ? (
-        <span className="text-[12px] text-amber-700">No map pin</span>
+        <span className="text-[14px] text-amber-700">No map pin</span>
       ) : null}
     </div>
   );
@@ -769,14 +769,14 @@ function FreshnessCell({
     const days = crane.freshness.daysSinceUpdate;
     return (
       <div className="flex flex-col items-start gap-0.5">
-        <span className="text-[13px] font-semibold text-amber-700">
+        <span className="text-[15px] font-semibold text-amber-700">
           Not confirmed for {days} {days === 1 ? "day" : "days"}
         </span>
         <button
           type="button"
           onClick={onConfirm}
           disabled={busy}
-          className="text-[12px] text-amber-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 disabled:text-slate-500"
+          className="text-[14px] text-amber-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 disabled:text-slate-500"
         >
           Confirm
         </button>
@@ -785,7 +785,7 @@ function FreshnessCell({
   }
 
   return (
-    <span className="text-[13px] text-slate-500">
+    <span className="text-[15px] text-slate-500">
       {confirmedLabel(crane.freshness.daysSinceUpdate)}
     </span>
   );
@@ -806,7 +806,7 @@ function LoadChartCell({
         type="button"
         onClick={onDownload}
         title={`Download ${crane.loadChart.fileName}`}
-        className="inline-flex items-center gap-1 text-[13px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+        className="inline-flex items-center gap-1 text-[15px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
       >
         <Check className="size-3.5 text-emerald-700" aria-hidden /> Load chart
       </button>
@@ -814,7 +814,7 @@ function LoadChartCell({
   }
 
   return (
-    <label className="cursor-pointer text-[13px] text-slate-500 hover:text-slate-800 focus-within:outline-none focus-within:ring-2 focus-within:ring-rose-400/40">
+    <label className="cursor-pointer text-[15px] text-slate-500 hover:text-slate-800 focus-within:outline-none focus-within:ring-2 focus-within:ring-rose-400/40">
       Add load chart
       <input
         type="file"
@@ -845,7 +845,7 @@ function MenuItem({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none",
+        "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[15px] transition-colors hover:bg-white/5 focus-visible:bg-white/5 focus-visible:outline-none",
         danger ? "text-rose-200" : "text-slate-800",
       )}
     >
@@ -874,13 +874,13 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
         <span
           tabIndex={0}
           title="Set by SML when a quotation is awarded"
-          className="inline-flex items-center gap-1.5 text-[13px] text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+          className="inline-flex items-center gap-1.5 text-[15px] text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
         >
           <Lock className="size-3.5 text-slate-500" aria-hidden />
           {CRANE_STATUS_LABELS[crane.currentStatus]}
         </span>
         {crane.availableFrom ? (
-          <p className="mt-0.5 text-[12px] text-slate-500">
+          <p className="mt-0.5 text-[14px] text-slate-500">
             From {formatDate(crane.availableFrom)}
           </p>
         ) : null}
@@ -927,7 +927,7 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
           aria-haspopup="dialog"
           aria-expanded={open}
           onClick={() => (open ? close() : openEditor())}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-0.5 text-[13px] whitespace-nowrap text-slate-800 transition-colors hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-0.5 text-[15px] whitespace-nowrap text-slate-800 transition-colors hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
         >
           <span
             className={cn("size-1.5 rounded-full", STATUS_DOTS[crane.currentStatus])}
@@ -937,12 +937,12 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
           <ChevronDown className="size-3 text-slate-500" aria-hidden />
         </button>
         {updated && !open ? (
-          <span className="text-[12px] text-emerald-700">Updated</span>
+          <span className="text-[14px] text-emerald-700">Updated</span>
         ) : null}
       </div>
 
       {crane.availableFrom && crane.currentStatus !== "AVAILABLE" ? (
-        <p className="mt-0.5 text-[12px] text-slate-500">
+        <p className="mt-0.5 text-[14px] text-slate-500">
           From {formatDate(crane.availableFrom)}
         </p>
       ) : null}
@@ -961,7 +961,7 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
             }}
             className="absolute top-full left-0 z-30 mt-2 w-64 rounded-lg border border-white/10 bg-ink-900 p-3 shadow-xl"
           >
-            <p className="text-[12px] text-slate-500">Status</p>
+            <p className="text-[14px] text-slate-500">Status</p>
             <div role="radiogroup" aria-label="Status" className="mt-1.5 space-y-0.5">
               {VENDOR_STATUSES.map((status) => (
                 <button
@@ -972,7 +972,7 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
                   autoFocus={draftStatus === status}
                   onClick={() => setDraftStatus(status)}
                   className={cn(
-                    "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
+                    "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[15px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40",
                     draftStatus === status
                       ? "bg-white/10 text-slate-900"
                       : "text-slate-700 hover:bg-white/5",
@@ -988,24 +988,24 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
             </div>
 
             {draftStatus !== "AVAILABLE" ? (
-              <label className="mt-3 block text-[12px] text-slate-500">
+              <label className="mt-3 block text-[14px] text-slate-500">
                 Available from
                 <input
                   type="date"
                   value={draftFrom}
                   onChange={(event) => setDraftFrom(event.target.value)}
-                  className="mt-1 w-full rounded-md border border-white/10 bg-transparent px-2 py-1 text-[13px] text-slate-800 [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                  className="mt-1 w-full rounded-md border border-white/10 bg-transparent px-2 py-1 text-[15px] text-slate-800 [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
                 />
               </label>
             ) : null}
 
-            {error ? <p className="mt-2 text-[12px] text-rose-200">{error}</p> : null}
+            {error ? <p className="mt-2 text-[14px] text-rose-200">{error}</p> : null}
 
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={close}
-                className="rounded-md px-2 py-1 text-[13px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                className="rounded-md px-2 py-1 text-[15px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
               >
                 Cancel
               </button>
@@ -1013,7 +1013,7 @@ function StatusControl({ crane, actions }: { crane: Crane; actions: CraneActions
                 type="button"
                 onClick={() => void save()}
                 disabled={saving}
-                className="btn-primary px-3 py-1 text-[13px]"
+                className="btn-primary px-3 py-1 text-[15px]"
               >
                 {saving ? "Saving…" : "Save"}
               </button>
@@ -1155,18 +1155,18 @@ function FleetRow({ crane, actions }: { crane: Crane; actions: CraneActions }) {
           <Link
             to="/app/fleet/$craneId/edit"
             params={{ craneId: crane.id }}
-            className="truncate text-[14px] font-medium text-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+            className="truncate text-[16px] font-medium text-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
           >
             {craneName(crane)}
           </Link>
           {!crane.isActive ? (
-            <span className="shrink-0 rounded-full border border-white/10 px-1.5 py-0.5 text-[12px] text-slate-500">
+            <span className="shrink-0 rounded-full border border-white/10 px-1.5 py-0.5 text-[14px] text-slate-500">
               Deactivated
             </span>
           ) : null}
         </div>
-        <p className="mt-0.5 truncate text-[13px] text-slate-500">{detailLine(crane)}</p>
-        <p className="truncate text-[12px] text-slate-500">
+        <p className="mt-0.5 truncate text-[15px] text-slate-500">{detailLine(crane)}</p>
+        <p className="truncate text-[14px] text-slate-500">
           {crane.serialRegistrationNo}
         </p>
       </div>
@@ -1200,7 +1200,7 @@ function FleetTable({
       <div
         className={cn(
           ROW_GRID,
-          "border-b border-white/10 pb-2 text-[12px] text-slate-500",
+          "border-b border-white/10 pb-2 text-[14px] text-slate-500",
         )}
       >
         <span>Crane</span>
@@ -1239,18 +1239,18 @@ function MobileFleetList({
                 <Link
                   to="/app/fleet/$craneId/edit"
                   params={{ craneId: crane.id }}
-                  className="truncate text-[14px] font-medium text-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+                  className="truncate text-[16px] font-medium text-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
                 >
                   {craneName(crane)}
                 </Link>
                 {!crane.isActive ? (
-                  <span className="shrink-0 rounded-full border border-white/10 px-1.5 py-0.5 text-[12px] text-slate-500">
+                  <span className="shrink-0 rounded-full border border-white/10 px-1.5 py-0.5 text-[14px] text-slate-500">
                     Deactivated
                   </span>
                 ) : null}
               </div>
-              <p className="mt-0.5 text-[13px] text-slate-500">{detailLine(crane)}</p>
-              <p className="text-[12px] text-slate-500">{crane.serialRegistrationNo}</p>
+              <p className="mt-0.5 text-[15px] text-slate-500">{detailLine(crane)}</p>
+              <p className="text-[14px] text-slate-500">{crane.serialRegistrationNo}</p>
             </div>
             <RowMenu crane={crane} actions={actions} />
           </div>
@@ -1298,5 +1298,6 @@ function FleetSkeleton() {
     </div>
   );
 }
+
 
 

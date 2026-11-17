@@ -36,7 +36,7 @@ export function CountdownChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap tabular-nums",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[13px] font-medium whitespace-nowrap tabular-nums",
         palette,
         urgent && "ring-1 ring-amber-500/40",
         className,
@@ -53,3 +53,4 @@ export function CountdownChip({
     </span>
   );
 }
+

@@ -152,7 +152,7 @@ export function QuotationsSection({ query }: { query: SettingsQuery }) {
                             </span>
                           ) : null}
                         </span>
-                        <span className="mt-1 block text-[13px] leading-relaxed text-slate-500">
+                        <span className="mt-1 block text-[15px] leading-relaxed text-slate-500">
                           {option.explanation}
                         </span>
                       </span>
@@ -168,7 +168,7 @@ export function QuotationsSection({ query }: { query: SettingsQuery }) {
 
             <WorkedExample basis={basis} />
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-ink-800 pt-4 text-[13px]">
+            <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-ink-800 pt-4 text-[15px]">
               <Lock className="size-3.5 shrink-0 text-slate-500" aria-hidden />
               <span className="text-slate-500">Quotes are ranked by</span>
               <span className="font-medium text-slate-900">
@@ -233,7 +233,7 @@ function WorkedExample({ basis }: { basis: RateDayBasis }) {
   return (
     <div className="mt-6 rounded-xl border border-ink-800 bg-ink-900 p-4">
       <h3 className="text-sm font-medium text-slate-900">Worked example</h3>
-      <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
+      <p className="mt-1 text-[15px] leading-relaxed text-slate-500">
         A vendor quotes{" "}
         <span className="font-medium text-slate-700">
           {formatRupees(WORKED_EXAMPLE.ratePerDay)} per day
@@ -241,7 +241,7 @@ function WorkedExample({ basis }: { basis: RateDayBasis }) {
         for a {WORKED_EXAMPLE.months}-month hire.
       </p>
 
-      <table className="mt-3 w-full text-[13px]">
+      <table className="mt-3 w-full text-[15px]">
         <caption className="sr-only">
           Rental charge for the same per-day quote under each day basis
         </caption>
@@ -296,3 +296,4 @@ function WorkedExample({ basis }: { basis: RateDayBasis }) {
     </div>
   );
 }
+

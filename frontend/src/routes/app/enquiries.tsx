@@ -311,10 +311,10 @@ function KpiStat({
           {shown}
         </span>
       )}
-      <span className="mt-2 flex flex-wrap items-baseline gap-x-2 text-[13px] text-slate-500 transition-colors group-hover:text-slate-700">
+      <span className="mt-2 flex flex-wrap items-baseline gap-x-2 text-[15px] text-slate-500 transition-colors group-hover:text-slate-700">
         {label}
         {delta > 0 ? (
-          <span className="text-[12px] text-slate-500 tabular-nums">{delta} new today</span>
+          <span className="text-[14px] text-slate-500 tabular-nums">{delta} new today</span>
         ) : null}
       </span>
       <span
@@ -639,23 +639,23 @@ export function EnquiryIndexPage() {
             the top, site/progress/status beneath. From lg it is the table. */}
         <div className="pointer-events-none relative grid grid-cols-1 gap-x-6 gap-y-2 py-3 pr-3 pl-3 sm:pl-4 md:grid-cols-[minmax(0,160px)_minmax(0,1fr)_140px] md:items-center lg:grid-cols-[minmax(0,1fr)_220px_260px_150px]">
           <div className="min-w-0 md:col-span-3 md:row-start-1 lg:col-span-1 lg:col-start-1">
-            <p className="font-mono text-[12px] leading-tight text-slate-500">{row.enquiryNo}</p>
+            <p className="font-mono text-[14px] leading-tight text-slate-500">{row.enquiryNo}</p>
             <p
-              className="mt-0.5 truncate text-[15px] leading-tight font-semibold text-white"
+              className="mt-0.5 truncate text-[17px] leading-tight font-semibold text-white"
               title={row.customerName}
             >
               {row.customerName}
             </p>
-            <p className="truncate text-[13px] leading-tight text-slate-500" title={project}>
+            <p className="truncate text-[15px] leading-tight text-slate-500" title={project}>
               {project}
             </p>
           </div>
 
-          <div className="min-w-0 text-[13px] leading-tight md:col-start-1 md:row-start-2 lg:col-start-2 lg:row-start-1">
+          <div className="min-w-0 text-[15px] leading-tight md:col-start-1 md:row-start-2 lg:col-start-2 lg:row-start-1">
             <p className="truncate text-slate-600" title={site}>
               {site}
             </p>
-            <p className="mt-0.5 text-[12px] leading-tight text-slate-500 tabular-nums">
+            <p className="mt-0.5 text-[14px] leading-tight text-slate-500 tabular-nums">
               {row.craneCount} {row.craneCount === 1 ? "crane" : "cranes"} · {row.lineCount}{" "}
               {row.lineCount === 1 ? "line" : "lines"}
             </p>
@@ -663,7 +663,7 @@ export function EnquiryIndexPage() {
 
           <div className="min-w-0 md:col-start-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
             <ProgressBar row={row} />
-            <p className="mt-1.5 text-[12px] leading-tight text-slate-500 tabular-nums">
+            <p className="mt-1.5 text-[14px] leading-tight text-slate-500 tabular-nums">
               {row.sourcedPercent === 0 ? "Nothing sourced yet" : `${row.sourcedPercent}% sourced`}
               <span aria-hidden> · </span>
               <span title={`Raised ${fullDate(row.enquiryDate)}`}>
@@ -671,7 +671,7 @@ export function EnquiryIndexPage() {
               </span>
             </p>
             {urgent ? (
-              <p className="mt-0.5 text-[12px] font-medium text-amber-600">
+              <p className="mt-0.5 text-[14px] font-medium text-amber-600">
                 {days === 0 ? "Starts today" : `Starts in ${days} ${days === 1 ? "day" : "days"}`}
               </p>
             ) : null}
@@ -679,7 +679,7 @@ export function EnquiryIndexPage() {
 
           <div className="flex items-center gap-2 md:col-start-3 md:row-start-2 lg:col-start-4 lg:row-start-1">
             <span className={cn("size-1.5 shrink-0 rounded-full", tone.dot)} aria-hidden />
-            <span className={cn("truncate text-[13px] font-medium", tone.text)}>
+            <span className={cn("truncate text-[15px] font-medium", tone.text)}>
               {STATUS_LABEL[row.overallStatus]}
             </span>
             {/* With no side panel below 1280 there is nothing to select into,
@@ -688,7 +688,7 @@ export function EnquiryIndexPage() {
               to="/app/enquiries/$enquiryId"
               params={{ enquiryId: row.id }}
               onClick={(event) => event.stopPropagation()}
-              className="pointer-events-auto ml-auto inline-flex shrink-0 items-center gap-1 text-[13px] text-slate-500 transition-colors hover:text-white xl:hidden"
+              className="pointer-events-auto ml-auto inline-flex shrink-0 items-center gap-1 text-[15px] text-slate-500 transition-colors hover:text-white xl:hidden"
             >
               Open
               <ArrowRight className="size-3.5" aria-hidden />
@@ -702,7 +702,7 @@ export function EnquiryIndexPage() {
           <Link
             {...findCranesHref(row, null)}
             onClick={(event) => event.stopPropagation()}
-            className="inline-flex items-center gap-1 text-[13px] text-slate-500 transition-colors hover:text-white"
+            className="inline-flex items-center gap-1 text-[15px] text-slate-500 transition-colors hover:text-white"
           >
             Find cranes
             <ArrowRight className="size-4" aria-hidden />
@@ -710,7 +710,7 @@ export function EnquiryIndexPage() {
           <Link
             to="/app/enquiries/$enquiryId"
             params={{ enquiryId: row.id }}
-            className="inline-flex items-center gap-1 text-[13px] font-medium text-white"
+            className="inline-flex items-center gap-1 text-[15px] font-medium text-white"
           >
             Open
             <ArrowRight className="size-4" aria-hidden />
@@ -726,7 +726,7 @@ export function EnquiryIndexPage() {
       <section className="flex min-w-0 flex-1 flex-col">
         <div className="shrink-0 px-4 pt-5 sm:px-8">
           <div className="w-full max-w-[1180px]">
-            <p className="text-[13px] text-slate-500">
+            <p className="text-[15px] text-slate-500">
               {greeting()}
               {user?.fullName ? `, ${user.fullName.split(" ")[0]}` : ""}
               {counts
@@ -740,10 +740,10 @@ export function EnquiryIndexPage() {
               </h1>
               {canCreate ? (
                 <div className="flex items-center gap-1">
-                  <EnquiryBulkUpload triggerClassName="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500" />
+                  <EnquiryBulkUpload triggerClassName="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500" />
                   <Link
                     to="/app/enquiries/new"
-                    className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                    className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                   >
                     <Plus className="size-4" aria-hidden />
                     New enquiry
@@ -780,7 +780,7 @@ export function EnquiryIndexPage() {
                   onChange={(event) => setSearchInput(event.target.value)}
                   placeholder="Enquiry no, customer, reference"
                   aria-label="Search enquiries"
-                  className="field-input h-9 py-0 pl-10 text-[13px]"
+                  className="field-input h-9 py-0 pl-10 text-[15px]"
                 />
                 {searchInput ? (
                   <button
@@ -804,7 +804,7 @@ export function EnquiryIndexPage() {
                 id="enquiry-sort"
                 value={sort}
                 onChange={(event) => setSort(event.target.value as EnquirySort)}
-                className="field-input ml-auto h-9 w-auto py-0 pr-8 text-[13px]"
+                className="field-input ml-auto h-9 w-auto py-0 pr-8 text-[15px]"
               >
                 {SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -831,7 +831,7 @@ export function EnquiryIndexPage() {
                       aria-selected={active}
                       onClick={() => setStatus(filter.value)}
                       className={cn(
-                        "-mb-px shrink-0 border-b-2 pb-2.5 text-[13px] whitespace-nowrap transition-colors duration-150",
+                        "-mb-px shrink-0 border-b-2 pb-2.5 text-[15px] whitespace-nowrap transition-colors duration-150",
                         active
                           ? "border-accent-500 font-medium text-white"
                           : "border-transparent text-slate-500 hover:text-white",
@@ -839,7 +839,7 @@ export function EnquiryIndexPage() {
                     >
                       {filter.label}
                       {typeof count === "number" ? (
-                        <span className="ml-1.5 text-[12px] text-slate-500 tabular-nums">
+                        <span className="ml-1.5 text-[14px] text-slate-500 tabular-nums">
                           {count}
                         </span>
                       ) : null}
@@ -847,7 +847,7 @@ export function EnquiryIndexPage() {
                   );
                 })}
               </div>
-              <span className="hidden shrink-0 pb-2.5 text-[12px] text-slate-500 tabular-nums sm:block">
+              <span className="hidden shrink-0 pb-2.5 text-[14px] text-slate-500 tabular-nums sm:block">
                 {rows.length} shown
               </span>
             </div>
@@ -878,7 +878,7 @@ export function EnquiryIndexPage() {
                 <button
                   type="button"
                   onClick={() => void list.refetch()}
-                  className="btn-secondary mt-3 py-1.5 text-[13px]"
+                  className="btn-secondary mt-3 py-1.5 text-[15px]"
                 >
                   <RotateCcw className="size-4" aria-hidden />
                   Retry
@@ -887,10 +887,10 @@ export function EnquiryIndexPage() {
             ) : rows.length === 0 ? (
               <div className="flex flex-col items-center px-6 py-24 text-center">
                 <Inbox className="size-6 text-slate-600" aria-hidden />
-                <p className="mt-3 text-[15px] font-medium text-white">
+                <p className="mt-3 text-[17px] font-medium text-white">
                   {nothingAtAll ? "No enquiries yet" : "No enquiries match your filters"}
                 </p>
-                <p className="mt-1 max-w-sm text-[13px] leading-relaxed text-slate-500">
+                <p className="mt-1 max-w-sm text-[15px] leading-relaxed text-slate-500">
                   {nothingAtAll
                     ? "Raise the first requirement and it will appear here, ready to source."
                     : "Clear the search and status filters, or pick another view."}
@@ -898,7 +898,7 @@ export function EnquiryIndexPage() {
                 {nothingAtAll && canCreate ? (
                   <Link
                     to="/app/enquiries/new"
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-600"
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
                   >
                     <Plus className="size-4" aria-hidden />
                     Raise your first enquiry
@@ -907,7 +907,7 @@ export function EnquiryIndexPage() {
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-ink-800 px-4 py-2 text-[13px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-ink-800 px-4 py-2 text-[15px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
                   >
                     Clear filters
                   </button>
@@ -918,7 +918,7 @@ export function EnquiryIndexPage() {
                 {groups ? (
                   groups.map((group) => (
                     <section key={group.key} aria-label={group.label}>
-                      <h2 className="flex items-baseline justify-between gap-4 pt-5 pb-2 text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                      <h2 className="flex items-baseline justify-between gap-4 pt-5 pb-2 text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
                         {group.label}
                         <span className="tabular-nums">{group.rows.length}</span>
                       </h2>
@@ -933,7 +933,7 @@ export function EnquiryIndexPage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between gap-4 border-t border-ink-800 py-3 text-[12px] text-slate-500 tabular-nums">
+                <div className="flex items-center justify-between gap-4 border-t border-ink-800 py-3 text-[14px] text-slate-500 tabular-nums">
                   <span>
                     {rows.length} {rows.length === 1 ? "enquiry" : "enquiries"}
                     {hiddenClosed > 0 ? ` · ${hiddenClosed} closed hidden` : ""}
@@ -966,8 +966,8 @@ export function EnquiryIndexPage() {
         ) : !enquiry ? (
           <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
             <Compass className="size-6 text-slate-600" aria-hidden />
-            <p className="mt-3 text-[15px] font-medium text-white">Nothing selected</p>
-            <p className="mt-1 text-[13px] text-slate-500">
+            <p className="mt-3 text-[17px] font-medium text-white">Nothing selected</p>
+            <p className="mt-1 text-[15px] text-slate-500">
               Select an enquiry to see its crane requirements.
             </p>
           </div>
@@ -992,7 +992,7 @@ export function EnquiryIndexPage() {
                 <button
                   type="button"
                   onClick={() => void navigate(findCranesHref(selectedRow, null))}
-                  className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-black/65 px-2 py-1 text-[12px] text-neutral-200 backdrop-blur-sm transition-colors hover:bg-black/80"
+                  className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-black/65 px-2 py-1 text-[14px] text-neutral-200 backdrop-blur-sm transition-colors hover:bg-black/80"
                 >
                   <MapPin className="size-4 text-accent-400" aria-hidden />
                   {cityOf(enquiry)}
@@ -1001,17 +1001,17 @@ export function EnquiryIndexPage() {
 
               {/* summary */}
               <div className="px-6 py-5">
-                <p className="font-mono text-[12px] text-slate-500">{enquiry.enquiryNo}</p>
+                <p className="font-mono text-[14px] text-slate-500">{enquiry.enquiryNo}</p>
                 <h2 className="mt-1 text-[22px] leading-tight font-semibold text-white">
                   {enquiry.customerName}
                 </h2>
                 <p
-                  className="mt-1 truncate text-[14px] text-slate-500"
+                  className="mt-1 truncate text-[16px] text-slate-500"
                   title={selectedRow?.project ?? enquiry.siteLocation}
                 >
                   {selectedRow?.project ?? enquiry.siteLocation}
                 </p>
-                <p className="mt-2 text-[13px] text-slate-500">
+                <p className="mt-2 text-[15px] text-slate-500">
                   {cityOf(enquiry)}
                   <span aria-hidden> · </span>
                   Raised {shortDate(enquiry.enquiryDate)}
@@ -1020,12 +1020,12 @@ export function EnquiryIndexPage() {
 
               {/* requirements */}
               <div className="border-t border-ink-800 px-6 py-5">
-                <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                <p className="text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
                   Crane requirements
                 </p>
 
                 {enquiry.lines.length === 0 ? (
-                  <p className="py-8 text-center text-[13px] text-slate-500">
+                  <p className="py-8 text-center text-[15px] text-slate-500">
                     This enquiry has no lines yet.
                   </p>
                 ) : (
@@ -1033,20 +1033,20 @@ export function EnquiryIndexPage() {
                     {enquiry.lines.map((line) => {
                       const action = lineAction(line);
                       const actionClass =
-                        "inline-flex items-center gap-1 text-[13px] font-medium text-accent-400 transition-colors hover:text-accent-300";
+                        "inline-flex items-center gap-1 text-[15px] font-medium text-accent-400 transition-colors hover:text-accent-300";
                       return (
                         <li key={line.id} className="py-4">
                           <div className="flex items-start justify-between gap-3">
-                            <p className="min-w-0 text-[15px] font-medium text-white">
+                            <p className="min-w-0 text-[17px] font-medium text-white">
                               {line.quantity} × {craneTypeLabel(line.craneTypeName)} ·{" "}
                               {line.capacityT !== null ? `${line.capacityT} t` : "capacity TBC"}
                             </p>
-                            <span className="shrink-0 text-[12px] text-slate-500">
+                            <span className="shrink-0 text-[14px] text-slate-500">
                               Line {line.lineNo}
                             </span>
                           </div>
 
-                          <p className="mt-1 text-[13px] text-slate-500">
+                          <p className="mt-1 text-[15px] text-slate-500">
                             {line.requiredStartDate
                               ? `From ${shortDate(line.requiredStartDate)}`
                               : "Start date TBC"}
@@ -1055,7 +1055,7 @@ export function EnquiryIndexPage() {
                           </p>
 
                           <div className="mt-3 flex items-center justify-between gap-3">
-                            <span className="inline-flex items-center gap-2 text-[13px] text-slate-600">
+                            <span className="inline-flex items-center gap-2 text-[15px] text-slate-600">
                               <span
                                 className={cn("size-1.5 rounded-full", lineDot(line.trailStatus))}
                                 aria-hidden
@@ -1103,7 +1103,7 @@ export function EnquiryIndexPage() {
 
                           <Link
                             {...findCranesHref(selectedRow, line)}
-                            className="mt-2 inline-flex items-center gap-1.5 text-[13px] text-slate-500 transition-colors hover:text-white"
+                            className="mt-2 inline-flex items-center gap-1.5 text-[15px] text-slate-500 transition-colors hover:text-white"
                           >
                             <Compass className="size-4" aria-hidden />
                             Find cranes for this line
@@ -1128,7 +1128,7 @@ export function EnquiryIndexPage() {
                     enquiry.lines[0] ??
                     null,
                 )}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-600"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
               >
                 Find cranes for this
                 <ArrowRight className="size-4" aria-hidden />
@@ -1156,7 +1156,7 @@ export function EnquiryIndexPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[17px] font-semibold text-white">Create RFQ</h2>
-                <p className="mt-1 text-[13px] text-slate-500">
+                <p className="mt-1 text-[15px] text-slate-500">
                   Line {rfqLine.lineNo} · {rfqLine.quantity} ×{" "}
                   {craneTypeLabel(rfqLine.craneTypeName)}
                   {rfqLine.capacityT !== null ? ` · ${rfqLine.capacityT} t` : ""}
@@ -1183,7 +1183,7 @@ export function EnquiryIndexPage() {
               className="field-input"
             />
 
-            <p className="mt-2 text-[13px] leading-relaxed text-slate-500">
+            <p className="mt-2 text-[15px] leading-relaxed text-slate-500">
               The RFQ is prefilled from this line. The customer, address and budget are never sent
               to vendors.
             </p>
@@ -1201,14 +1201,14 @@ export function EnquiryIndexPage() {
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
                 type="button"
-                className="rounded-lg border border-ink-800 px-4 py-2 text-[13px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
+                className="rounded-lg border border-ink-800 px-4 py-2 text-[15px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
                 onClick={() => setRfqLine(null)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="rounded-lg bg-accent-500 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-lg bg-accent-500 px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={!deadline || createRfq.isPending}
                 onClick={() => {
                   if (!rfqLine) return;
@@ -1227,3 +1227,4 @@ export function EnquiryIndexPage() {
     </div>
   );
 }
+

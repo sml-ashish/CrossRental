@@ -135,7 +135,7 @@ export function Menu({
                   close(false);
                 }}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors",
+                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[15px] transition-colors",
                   "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-500",
                   item.tone === "danger"
                     ? "text-red-600 hover:bg-red-50"
@@ -153,3 +153,4 @@ export function Menu({
     </div>
   );
 }
+

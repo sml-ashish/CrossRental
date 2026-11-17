@@ -44,7 +44,7 @@ export function ToolbarField({
     <div className="flex min-w-0 flex-col gap-1">
       <label
         htmlFor={htmlFor}
-        className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase"
+        className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase"
       >
         {label}
       </label>
@@ -135,3 +135,4 @@ export function Segmented<T extends string>({
     </div>
   );
 }
+

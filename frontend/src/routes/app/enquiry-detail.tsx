@@ -395,13 +395,13 @@ export function EnquiryDetailPage() {
 
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-mono text-[12px] text-slate-500">{data.enquiryNo}</p>
+            <p className="font-mono text-[14px] text-slate-500">{data.enquiryNo}</p>
             <h1 className="mt-0.5 text-[28px] leading-tight font-semibold tracking-tight text-slate-900">
               {data.customerName}
             </h1>
             <p className="mt-1 text-sm text-slate-500">{site}</p>
 
-            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-slate-500">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-slate-500">
               <span className="inline-flex items-center gap-1.5">
                 <span
                   className={cn("size-2 rounded-full", statusDot(data.overallStatus))}
@@ -442,7 +442,7 @@ export function EnquiryDetailPage() {
               <span
                 role="status"
                 className={cn(
-                  "text-[12px]",
+                  "text-[14px]",
                   copyState === "copied" ? "text-emerald-600" : "text-red-600",
                 )}
               >
@@ -551,7 +551,7 @@ export function EnquiryDetailPage() {
                           >
                             {lineTitle(line)}
                           </h3>
-                          <p className="mt-1 text-[13px] text-slate-500">
+                          <p className="mt-1 text-[15px] text-slate-500">
                             {lineFacts(line, city)}
                             {urgency ? (
                               <span
@@ -601,7 +601,7 @@ export function EnquiryDetailPage() {
                       </div>
 
                       {hint !== undefined && window ? (
-                        <p className="mt-1 text-[12px] text-slate-500">
+                        <p className="mt-1 text-[14px] text-slate-500">
                           {hint > 0
                             ? `${hint} ${plural(hint, "crane")} match and ${
                                 hint === 1 ? "is" : "are"
@@ -629,13 +629,13 @@ export function EnquiryDetailPage() {
                             </p>
                           ) : null}
                           {lift ? (
-                            <p className="mt-0.5 text-[13px] text-slate-500">{lift}</p>
+                            <p className="mt-0.5 text-[15px] text-slate-500">{lift}</p>
                           ) : null}
                         </div>
                       ) : null}
 
                       {stage.cancelled ? (
-                        <p className="mt-3 flex items-start gap-1.5 text-[13px] text-slate-500">
+                        <p className="mt-3 flex items-start gap-1.5 text-[15px] text-slate-500">
                           <X className="mt-0.5 size-3.5 shrink-0" aria-hidden />
                           <span>
                             Cancelled on {formatLongDate(line.cancelledAt)}
@@ -646,7 +646,7 @@ export function EnquiryDetailPage() {
                         <>
                           <StageTrail line={line} />
 
-                          <p className="mt-2 text-[13px] text-slate-500">
+                          <p className="mt-2 text-[15px] text-slate-500">
                             {sentence ? (
                               <>
                                 {sentence.count > 1
@@ -709,10 +709,10 @@ export function EnquiryDetailPage() {
 
                           {rfqFor === line.id ? (
                             <div className="mt-4 rounded-lg border border-ink-800 bg-ink-900 p-4">
-                              <p className="text-[13px] font-medium text-slate-900">
+                              <p className="text-[15px] font-medium text-slate-900">
                                 Raise an RFQ for {lineShort(line)}
                               </p>
-                              <p className="mt-1 text-[12px] text-slate-500">
+                              <p className="mt-1 text-[14px] text-slate-500">
                                 The vendor-safe fields are copied from this line. Customer
                                 name, address and the internal budget are never sent.
                               </p>
@@ -738,7 +738,7 @@ export function EnquiryDetailPage() {
                                         setRfqDeadline(addDays(todayDay(), days))
                                       }
                                       className={cn(
-                                        "rounded-lg border px-2.5 py-2 text-[12px] font-medium transition-colors",
+                                        "rounded-lg border px-2.5 py-2 text-[14px] font-medium transition-colors",
                                         rfqDeadline === addDays(todayDay(), days)
                                           ? "border-accent-500 bg-accent-500/10 text-accent-400"
                                           : "border-ink-800 bg-ink-850 text-slate-500 hover:border-ink-700 hover:text-slate-800",
@@ -750,7 +750,7 @@ export function EnquiryDetailPage() {
                                 </div>
                               </div>
 
-                              <p className="mt-2 text-[12px] text-slate-500">
+                              <p className="mt-2 text-[14px] text-slate-500">
                                 {Math.max(0, daysUntil(rfqDeadline))}{" "}
                                 {plural(Math.max(0, daysUntil(rfqDeadline)), "day")} to
                                 respond
@@ -817,7 +817,7 @@ export function EnquiryDetailPage() {
 
                           {groups.length > 0 ? (
                             <details className="group mt-3 border-t border-ink-800 pt-3">
-                              <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[13px] font-medium text-slate-500 transition-colors hover:text-slate-800 [&::-webkit-details-marker]:hidden">
+                              <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[15px] font-medium text-slate-500 transition-colors hover:text-slate-800 [&::-webkit-details-marker]:hidden">
                                 <ChevronDown
                                   className="size-3.5 transition-transform group-open:rotate-180"
                                   aria-hidden
@@ -827,21 +827,21 @@ export function EnquiryDetailPage() {
                               <div className="mt-3 grid gap-5 sm:grid-cols-2">
                                 {groups.map((group) => (
                                   <section key={group.title}>
-                                    <h4 className="text-[12px] font-medium tracking-wide text-slate-500 uppercase">
+                                    <h4 className="text-[14px] font-medium tracking-wide text-slate-500 uppercase">
                                       {group.title}
                                     </h4>
                                     <dl className="mt-2 space-y-2">
                                       {group.items.map((item) => (
                                         <div key={item.label}>
-                                          <dt className="text-[12px] text-slate-500">
+                                          <dt className="text-[14px] text-slate-500">
                                             {item.label}
                                             {item.internal ? (
-                                              <span className="ml-1.5 rounded border border-ink-700 px-1 py-px text-[12px] tracking-wide text-slate-400 uppercase">
+                                              <span className="ml-1.5 rounded border border-ink-700 px-1 py-px text-[14px] tracking-wide text-slate-400 uppercase">
                                                 Internal
                                               </span>
                                             ) : null}
                                           </dt>
-                                          <dd className="mt-0.5 text-[13px] whitespace-pre-wrap text-slate-600">
+                                          <dd className="mt-0.5 text-[15px] whitespace-pre-wrap text-slate-600">
                                             {item.value}
                                           </dd>
                                         </div>
@@ -873,7 +873,7 @@ export function EnquiryDetailPage() {
                 <Link
                   to="/app/enquiries/$enquiryId/history"
                   params={{ enquiryId: data.id }}
-                  className="inline-flex items-center gap-1 text-[13px] font-medium text-accent-400 transition-colors hover:text-accent-300"
+                  className="inline-flex items-center gap-1 text-[15px] font-medium text-accent-400 transition-colors hover:text-accent-300"
                 >
                   View full history
                   <ArrowRight className="size-3.5" aria-hidden />
@@ -883,7 +883,7 @@ export function EnquiryDetailPage() {
                 {activity.map((item) => (
                   <li
                     key={item.id}
-                    className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 py-2 text-[13px]"
+                    className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 py-2 text-[15px]"
                   >
                     <span className="w-14 shrink-0 text-slate-500">
                       {formatShortDate(item.at)}
@@ -935,7 +935,7 @@ function NextStepBanner({
   if (!step) return null;
 
   if (step.muted) {
-    return <p className="text-[13px] text-slate-500">{step.text}</p>;
+    return <p className="text-[15px] text-slate-500">{step.text}</p>;
   }
 
   return (
@@ -948,7 +948,7 @@ function NextStepBanner({
           <ArrowRight className="size-4" aria-hidden />
         </span>
         <div className="min-w-0">
-          <p className="text-[12px] font-medium tracking-wide text-accent-400 uppercase">
+          <p className="text-[14px] font-medium tracking-wide text-accent-400 uppercase">
             Next step
           </p>
           <p className="mt-0.5 text-sm text-slate-800">{step.text}</p>
@@ -983,7 +983,7 @@ function LineActionButton({
   className?: string;
 }) {
   const classes = cn(
-    variant === "primary" ? "btn-primary" : "btn-secondary px-3 py-2 text-[13px]",
+    variant === "primary" ? "btn-primary" : "btn-secondary px-3 py-2 text-[15px]",
     className,
   );
 
@@ -1053,7 +1053,7 @@ function StageTrail({ line }: { line: EnquiryLine }) {
 
   return (
     <div className="mt-4">
-      <p className="text-[13px] text-slate-500 sm:hidden">
+      <p className="text-[15px] text-slate-500 sm:hidden">
         Step {stage.completed ? 5 : stage.index + 1} of 5:{" "}
         <span className="font-medium text-slate-900">{currentLabel}</span>
         {stage.completed && stage.note ? ` · ${stage.note}` : ""}
@@ -1075,7 +1075,7 @@ function StageTrail({ line }: { line: EnquiryLine }) {
               <span
                 aria-hidden
                 className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded-full border text-[12px] leading-none font-medium",
+                  "flex size-5 shrink-0 items-center justify-center rounded-full border text-[14px] leading-none font-medium",
                   done
                     ? "border-emerald-300 bg-emerald-100 text-emerald-700"
                     : current
@@ -1087,7 +1087,7 @@ function StageTrail({ line }: { line: EnquiryLine }) {
               </span>
               <span
                 className={cn(
-                  "ml-1.5 text-[12px]",
+                  "ml-1.5 text-[14px]",
                   done
                     ? "text-emerald-600"
                     : current
@@ -1113,7 +1113,7 @@ function StageTrail({ line }: { line: EnquiryLine }) {
         })}
       </ol>
 
-      <p className="mt-2 text-[12px] text-slate-500">
+      <p className="mt-2 text-[14px] text-slate-500">
         {stage.note ?? lineStatusWord(line)}
       </p>
     </div>
@@ -1179,42 +1179,42 @@ function JobDetails({
       ) : (
         <div className="flex h-[180px] flex-col items-center justify-center gap-1.5 rounded-lg border border-ink-800 bg-ink-900 text-slate-500">
           <MapPin className="size-5" aria-hidden />
-          <span className="text-[13px]">Location not pinned</span>
+          <span className="text-[15px]">Location not pinned</span>
         </div>
       )}
 
       <dl className="space-y-3">
         <div>
-          <dt className="text-[12px] text-slate-500">Customer</dt>
-          <dd className="mt-0.5 text-[13px] text-slate-800">{data.customerName}</dd>
+          <dt className="text-[14px] text-slate-500">Customer</dt>
+          <dd className="mt-0.5 text-[15px] text-slate-800">{data.customerName}</dd>
         </div>
         <div>
-          <dt className="text-[12px] text-slate-500">Customer address</dt>
-          <dd className="mt-0.5 text-[13px] text-slate-800">
+          <dt className="text-[14px] text-slate-500">Customer address</dt>
+          <dd className="mt-0.5 text-[15px] text-slate-800">
             <CopyValue value={data.customerAddress} label="Customer address" />
           </dd>
         </div>
         <div>
-          <dt className="text-[12px] text-slate-500">Site</dt>
-          <dd className="mt-0.5 text-[13px] text-slate-800">
+          <dt className="text-[14px] text-slate-500">Site</dt>
+          <dd className="mt-0.5 text-[15px] text-slate-800">
             <CopyValue value={site} label="Site" />
           </dd>
         </div>
         <div>
-          <dt className="text-[12px] text-slate-500">Pincode</dt>
-          <dd className="mt-0.5 text-[13px] text-slate-800">
+          <dt className="text-[14px] text-slate-500">Pincode</dt>
+          <dd className="mt-0.5 text-[15px] text-slate-800">
             {data.sitePincode || "—"}
           </dd>
         </div>
         <div>
-          <dt className="text-[12px] text-slate-500">Region</dt>
-          <dd className="mt-0.5 text-[13px] text-slate-800">
+          <dt className="text-[14px] text-slate-500">Region</dt>
+          <dd className="mt-0.5 text-[15px] text-slate-800">
             {data.region || data.siteStateName || data.siteStateCode || "—"}
           </dd>
         </div>
         <div>
-          <dt className="text-[12px] text-slate-500">Enquiry date</dt>
-          <dd className="mt-0.5 text-[13px] text-slate-800">
+          <dt className="text-[14px] text-slate-500">Enquiry date</dt>
+          <dd className="mt-0.5 text-[15px] text-slate-800">
             {formatLongDate(data.enquiryDate)}
           </dd>
         </div>
@@ -1225,7 +1225,7 @@ function JobDetails({
           href={href}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 text-[13px] font-medium text-accent-400 transition-colors hover:text-accent-300"
+          className="inline-flex items-center gap-1 text-[15px] font-medium text-accent-400 transition-colors hover:text-accent-300"
         >
           Open in Maps
           <ExternalLink className="size-3.5" aria-hidden />
@@ -1286,3 +1286,4 @@ function LoadingPage({ wide }: { wide: boolean }) {
     </div>
   );
 }
+

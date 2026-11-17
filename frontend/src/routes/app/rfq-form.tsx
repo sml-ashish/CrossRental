@@ -136,7 +136,7 @@ export function RfqFormPage() {
             onClick={() => {
               document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="rounded-lg px-2.5 py-1.5 text-[13px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-lg px-2.5 py-1.5 text-[15px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
           >
             {section.label}
           </button>
@@ -688,7 +688,7 @@ export function RfqFormPage() {
               <Link
                 to="/app/rfqs/$rfqId"
                 params={{ rfqId }}
-                className="ml-auto text-[13px] text-slate-500 transition-colors hover:text-slate-900"
+                className="ml-auto text-[15px] text-slate-500 transition-colors hover:text-slate-900"
               >
                 Back to RFQ
               </Link>
@@ -699,3 +699,4 @@ export function RfqFormPage() {
     </div>
   );
 }
+

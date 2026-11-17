@@ -33,7 +33,7 @@ export function LifecycleStepper({
     <ol
       aria-label="RFQ lifecycle"
       className={cn(
-        "flex min-w-0 items-center gap-1 overflow-x-auto text-[11px] whitespace-nowrap",
+        "flex min-w-0 items-center gap-1 overflow-x-auto text-[13px] whitespace-nowrap",
         className,
       )}
     >
@@ -62,7 +62,7 @@ export function LifecycleStepper({
             >
               <span
                 className={cn(
-                  "flex size-4 items-center justify-center rounded-full border text-[9px] font-semibold",
+                  "flex size-4 items-center justify-center rounded-full border text-[12px] font-semibold",
                   cancelled
                     ? "border-slate-500/40 text-slate-500"
                     : done
@@ -91,3 +91,4 @@ export function LifecycleStepper({
     </ol>
   );
 }
+

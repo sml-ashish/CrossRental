@@ -5,6 +5,7 @@ import {
   formatKm,
   type DiscoveryCrane,
   type DiscoveryVendorPoint,
+  type LineRoute,
   type LineRouteOption,
 } from "@/lib/discovery";
 import {
@@ -48,6 +49,19 @@ export interface GoogleMapRoute {
   loading?: boolean;
 }
 
+/** One road from the job site to a crane ticked for an RFQ. */
+export interface GoogleMapMultiRoute {
+  craneId: string;
+  label: string;
+  lat: number;
+  lng: number;
+  /** The list distance the server already returned, for a failed request. */
+  fallbackKm: number | null;
+  route: LineRoute | null;
+  loading: boolean;
+  failed: boolean;
+}
+
 export interface GoogleCraneMapProps {
   cranes: DiscoveryCrane[];
   /** @deprecated The map no longer has a vendor view; ignored. */
@@ -59,6 +73,8 @@ export interface GoogleCraneMapProps {
   onSelect?: (craneId: string | null) => void;
   /** The route from the job site to the selected crane, when a line is open. */
   route?: GoogleMapRoute | null;
+  /** Roads to every crane ticked for an RFQ (two or more). Replaces `route`. */
+  multiRoutes?: GoogleMapMultiRoute[] | null;
   /** Fixed at map creation by Google, so the parent remounts the map when it changes. */
   theme?: "light" | "dark";
   className?: string;
@@ -98,8 +114,34 @@ const AUTH_FAILED =
 const ROUTE_BLUE = "#1a73e8";
 const ROUTE_ALT = "#8ea7c9";
 
-/** Route colours that read on the dark basemap without shouting. */
-const HEAT_COLOURS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444"];
+/** Heat tiers by share of the busiest cell, cool to hot. */
+const HEAT_TIERS = [
+  { upTo: 0.25, colour: "#3b82f6", label: "Few" },
+  { upTo: 0.5, colour: "#22c55e", label: "Some" },
+  { upTo: 0.75, colour: "#f59e0b", label: "Many" },
+  { upTo: 1, colour: "#ef4444", label: "Most" },
+];
+
+/** One colour per crane on a multi-crane send, distinct on dark and light maps. */
+const MULTI_COLOURS = [
+  "#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7",
+  "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#14b8a6",
+];
+
+/** Grid cell size in degrees: regions when zoomed out, neighbourhoods when in. */
+function heatCellDegrees(zoom: number): number {
+  if (zoom <= 5) return 1.2;
+  if (zoom === 6) return 0.6;
+  if (zoom === 7) return 0.3;
+  if (zoom === 8) return 0.15;
+  if (zoom === 9) return 0.08;
+  return 0.04;
+}
+
+interface HeatOverlays {
+  circles: google.maps.Circle[];
+  labels: google.maps.marker.AdvancedMarkerElement[];
+}
 
 export function GoogleCraneMap({
   cranes,
@@ -108,6 +150,7 @@ export function GoogleCraneMap({
   selectedCraneId = null,
   onSelect,
   route = null,
+  multiRoutes = null,
   theme = "dark",
   className,
 }: GoogleCraneMapProps) {
@@ -119,7 +162,11 @@ export function GoogleCraneMap({
     lines: google.maps.Polyline[];
     markers: google.maps.marker.AdvancedMarkerElement[];
   }>({ lines: [], markers: [] });
-  const heatRef = useRef<google.maps.Circle[]>([]);
+  const heatRef = useRef<HeatOverlays>({ circles: [], labels: [] });
+  const multiRef = useRef<{
+    lines: google.maps.Polyline[];
+    markers: google.maps.marker.AdvancedMarkerElement[];
+  }>({ lines: [], markers: [] });
   const fittedRef = useRef(false);
 
   // The map's click handler is installed once, so it reads the latest callbacks
@@ -143,16 +190,20 @@ export function GoogleCraneMap({
   const points = useMemo<MapPoint[]>(
     () =>
       cranes
-        .filter(
-          (crane): crane is DiscoveryCrane & { latitude: number; longitude: number } =>
-            crane.latitude !== null && crane.longitude !== null,
-        )
-        .map((crane) => ({ crane, lat: crane.latitude, lng: crane.longitude })),
+        .map((crane) => ({
+          crane,
+          lat: crane.latitude === null ? NaN : Number(crane.latitude),
+          lng: crane.longitude === null ? NaN : Number(crane.longitude),
+        }))
+        .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng)),
     [cranes],
   );
 
   const sitePoint = useMemo(
-    () => (site ? { lat: site.latitude, lng: site.longitude } : null),
+    () =>
+      site && Number.isFinite(Number(site.latitude)) && Number.isFinite(Number(site.longitude))
+        ? { lat: Number(site.latitude), lng: Number(site.longitude) }
+        : null,
     [site],
   );
 
@@ -242,7 +293,7 @@ export function GoogleCraneMap({
       clustererRef.current = null;
       clearOverlays(overlaysRef.current);
       clearHeat(heatRef.current);
-      heatRef.current = [];
+      heatRef.current = { circles: [], labels: [] };
       google.maps.event.clearInstanceListeners(map);
       mapRef.current = null;
       container.innerHTML = "";
@@ -267,7 +318,9 @@ export function GoogleCraneMap({
     markersRef.current.clear();
     clusterer.clearMarkers();
 
-    if (sitePoint) {
+    const multiOpen = (multiRoutes?.length ?? 0) >= 2;
+    // With a route open, the red destination pin replaces the site dot.
+    if (sitePoint && !route && !multiOpen) {
       const marker = new api.marker.AdvancedMarkerElement({
         position: sitePoint,
         content: siteMarkerContent(siteLabel ?? "Job site"),
@@ -281,10 +334,11 @@ export function GoogleCraneMap({
     // With a route open, the destination is the red pin: its capacity pill
     // would sit exactly underneath it and hide the pin's point.
     const destinationCraneId = route?.to.craneId ?? null;
+    const startIds = new Set(multiOpen ? multiRoutes!.map((item) => item.craneId) : []);
 
     const markers: google.maps.marker.AdvancedMarkerElement[] = [];
     for (const point of points) {
-      if (point.crane.craneId === destinationCraneId) continue;
+      if (point.crane.craneId === destinationCraneId || startIds.has(point.crane.craneId)) continue;
       const selected = point.crane.craneId === selectedCraneId;
       const artwork = cranePillSvg(point.crane.currentStatus, point.crane.capacityT, selected);
       const content = document.createElement("div");
@@ -316,7 +370,7 @@ export function GoogleCraneMap({
     }
     // `route` is intentionally read, but a route change must not rebuild pins.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [api, ready, points, selectedCraneId, sitePoint, siteLabel, route?.to.craneId]);
+  }, [api, ready, points, selectedCraneId, sitePoint, siteLabel, route?.to.craneId, Boolean(route), multiRoutes]);
 
   // Bring the selected crane into view. A crane hidden inside a cluster has no
   // map of its own, so selecting it zooms until the cluster splits.
@@ -370,7 +424,12 @@ export function GoogleCraneMap({
     // question "where are the two ends" has an answer before the road does.
     // The job site's white dot is the map's own site marker, so only the
     // destination needs drawing here.
-    markers.push(destinationPin(api, map, route.to, route.loading === true));
+    // The crane is where the journey starts (A, green); the job site is where
+    // it ends (B, red).
+    markers.push(
+      startDot(api, map, route.to, "#3c4043", route.to.label, route.loading === true),
+      destinationRedPin(api, map, route.from, route.loading === true),
+    );
 
     const fade = route.loading === true;
 
@@ -456,43 +515,164 @@ export function GoogleCraneMap({
   }, [api, ready, route]);
 
   // ------------------------------------------------------------------- heat
+  // Clusters, not states: the map is divided into a grid whose cell shrinks as
+  // the person zooms in, so the picture goes from regions to neighbourhoods.
+  // Colour is the share of the busiest cell: blue → green → amber → red.
   useEffect(() => {
     const map = mapRef.current;
     if (!api || !ready || !map) return;
 
     clearHeat(heatRef.current);
-    heatRef.current = [];
+    heatRef.current = { circles: [], labels: [] };
     if (!showHeat) return;
 
-    const groups = heatGroups(
-      points.map((point) => ({
-        lat: point.lat,
-        lng: point.lng,
-        key: point.crane.stateName || "Unknown",
-      })),
-    );
-    if (groups.length === 0) return;
-
-    const max = groups.reduce((value, group) => Math.max(value, group.count), 1);
-    const circles = groups.map((group) => {
-      const level = Math.min(
-        HEAT_COLOURS.length - 1,
-        Math.floor((group.count / max) * HEAT_COLOURS.length),
+    const draw = () => {
+      clearHeat(heatRef.current);
+      const cell = heatCellDegrees(map.getZoom() ?? INDIA_ZOOM);
+      const groups = heatGroups(
+        points.map((point) => ({ lat: point.lat, lng: point.lng })),
+        cell,
       );
-      const circle = new api.maps.Circle({
-        center: { lat: group.lat, lng: group.lng },
-        radius: 45_000 + 30_000 * Math.sqrt(group.count),
-        fillColor: HEAT_COLOURS[level],
-        fillOpacity: 0.24,
-        strokeOpacity: 0,
-        clickable: false,
-        zIndex: 5,
-      });
-      circle.setMap(map);
-      return circle;
-    });
-    heatRef.current = circles;
+      const max = groups.reduce((value, group) => Math.max(value, group.count), 1);
+      const cellKm = cell * 111;
+      const circles: google.maps.Circle[] = [];
+      const labels: google.maps.marker.AdvancedMarkerElement[] = [];
+      for (const group of groups) {
+        const share = group.count / max;
+        const tier = HEAT_TIERS.find((item) => share <= item.upTo) ?? HEAT_TIERS[HEAT_TIERS.length - 1]!;
+        const circle = new api.maps.Circle({
+          center: { lat: group.lat, lng: group.lng },
+          radius: cellKm * 1000 * (0.22 + 0.2 * Math.sqrt(share)),
+          fillColor: tier.colour,
+          fillOpacity: 0.42,
+          strokeColor: tier.colour,
+          strokeOpacity: 0.95,
+          strokeWeight: 2,
+          clickable: false,
+          zIndex: 5,
+        });
+        circle.setMap(map);
+        circles.push(circle);
+
+        const label = document.createElement("div");
+        label.textContent = String(group.count);
+        label.style.cssText =
+          "font:700 15px system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.85);pointer-events:none;transform:translateY(50%);";
+        const marker = new api.marker.AdvancedMarkerElement({
+          position: { lat: group.lat, lng: group.lng },
+          content: label,
+          zIndex: 6,
+        });
+        marker.map = map;
+        labels.push(marker);
+      }
+      heatRef.current = { circles, labels };
+    };
+
+    draw();
+    const listener = map.addListener("zoom_changed", draw);
+    return () => {
+      listener.remove();
+      clearHeat(heatRef.current);
+      heatRef.current = { circles: [], labels: [] };
+    };
   }, [api, ready, showHeat, points]);
+
+  // ------------------------------------------------------ multi-crane routes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!api || !ready || !map) return;
+
+    clearOverlays(multiRef.current);
+    multiRef.current = { lines: [], markers: [] };
+    if (!multiRoutes || multiRoutes.length < 2 || !site) return;
+
+    const from = { lat: Number(site.latitude), lng: Number(site.longitude) };
+    const lines: google.maps.Polyline[] = [];
+    const markers: google.maps.marker.AdvancedMarkerElement[] = [];
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(from);
+
+    multiRoutes.forEach((item, index) => {
+      const colour = MULTI_COLOURS[index % MULTI_COLOURS.length]!;
+      const to = { lat: item.lat, lng: item.lng };
+      const option = item.route?.routes.find((o) => o.isPrimary) ?? item.route?.routes[0];
+      const road =
+        option?.encodedPolyline && item.route?.method !== "straight_line"
+          ? api.geometry.encoding.decodePath(option.encodedPolyline)
+          : null;
+      bounds.extend(to);
+      if (road) for (const point of road) bounds.extend(point);
+
+      if (road && road.length > 1) {
+        lines.push(
+          new api.maps.Polyline({
+            path: road,
+            strokeColor: "#0b0c0e",
+            strokeOpacity: 0.55,
+            strokeWeight: 9,
+            zIndex: 300,
+            map,
+          }),
+          new api.maps.Polyline({
+            path: road,
+            strokeColor: colour,
+            strokeOpacity: item.loading ? 0.5 : 1,
+            strokeWeight: 5,
+            zIndex: 310,
+            map,
+          }),
+        );
+      } else if (!item.loading) {
+        // No road came back: a dashed, labelled straight line, never a fake road.
+        lines.push(
+          new api.maps.Polyline({
+            path: [from, to],
+            strokeOpacity: 0,
+            icons: [
+              {
+                icon: { path: "M 0,-1 0,1", strokeOpacity: 1, strokeColor: colour, scale: 3 },
+                offset: "0",
+                repeat: "14px",
+              },
+            ],
+            zIndex: 310,
+            map,
+          }),
+        );
+      }
+
+      markers.push(startDot(api, map, to, colour, item.label, false, String(index + 1)));
+
+      const km = option?.km ?? item.fallbackKm;
+      const time = option ? formatDriveTime(option.durationMin) : null;
+      const text = [formatKm(km), time].filter((part) => part && part !== "—").join(" · ");
+      const mid = road && road.length > 1 ? road[Math.floor(road.length / 2)]! : {
+        lat: (from.lat + to.lat) / 2,
+        lng: (from.lng + to.lng) / 2,
+      };
+      const bubble = document.createElement("div");
+      bubble.style.cssText = `padding:5px 10px;border-radius:12px;background:${colour};color:#fff;font:700 14px system-ui,sans-serif;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.45);border:2px solid #fff;`;
+      bubble.textContent = `${index + 1} · ${item.label}${text ? ` · ${text}` : item.loading ? " · …" : ""}`;
+      const tag = new api.marker.AdvancedMarkerElement({
+        position: mid,
+        content: bubble,
+        title: item.label,
+        zIndex: 400 + index,
+      });
+      tag.map = map;
+      markers.push(tag);
+    });
+
+    markers.push(destinationRedPin(api, map, { ...from, label: "Job site (destination)" }, false));
+
+    fitBounds(map, api, bounds, 80, 80);
+    multiRef.current = { lines, markers };
+    return () => {
+      clearOverlays(multiRef.current);
+      multiRef.current = { lines: [], markers: [] };
+    };
+  }, [api, ready, multiRoutes, site]);
 
   const fitAll = () => {
     const map = mapRef.current;
@@ -517,7 +697,7 @@ export function GoogleCraneMap({
           onSelect={onSelect}
         />
         <div className="pointer-events-none absolute inset-x-0 top-3 z-[900] flex justify-center px-3">
-          <p className="max-w-md rounded-xl border border-amber-500/35 bg-ink-900/95 px-3 py-1.5 text-center text-[12px] leading-snug text-amber-700 shadow-lg backdrop-blur">
+          <p className="max-w-md rounded-xl border border-amber-500/35 bg-ink-900/95 px-3 py-1.5 text-center text-[14px] leading-snug text-amber-700 shadow-lg backdrop-blur">
             {failure}
           </p>
         </div>
@@ -531,14 +711,14 @@ export function GoogleCraneMap({
 
       {!ready ? (
         <div className="absolute inset-0 z-[700] flex items-center justify-center bg-ink-950">
-          <p className="rounded-full border border-ink-800 bg-ink-900 px-3 py-1.5 text-[12px] text-neutral-400 shadow-lg">
+          <p className="rounded-full border border-ink-800 bg-ink-900 px-3 py-1.5 text-[14px] text-neutral-400 shadow-lg">
             Loading the map…
           </p>
         </div>
       ) : null}
 
       <div className="absolute top-3 right-3 z-[800] flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[12px] text-neutral-400 shadow-lg backdrop-blur">
+        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[14px] text-neutral-400 shadow-lg backdrop-blur">
           <label className="flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -546,23 +726,33 @@ export function GoogleCraneMap({
               onChange={(event) => setShowHeat(event.target.checked)}
               className="accent-accent-500"
             />
-            Heat
+            Heat map
           </label>
         </div>
+        {showHeat ? (
+          <ul className="flex items-center gap-3 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[14px] text-neutral-300 shadow-lg backdrop-blur">
+            {HEAT_TIERS.map((tier) => (
+              <li key={tier.label} className="flex items-center gap-1.5">
+                <span className="inline-block size-3 rounded-full" style={{ backgroundColor: tier.colour }} />
+                {tier.label}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <button
           type="button"
           onClick={fitAll}
-          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[12px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
+          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[14px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
         >
           Fit all
         </button>
       </div>
 
       <div className="pointer-events-none absolute top-3 left-3 z-[800] flex flex-col items-start gap-2">
-        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[12px] font-medium text-neutral-300 shadow-lg backdrop-blur">
+        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[14px] font-medium text-neutral-300 shadow-lg backdrop-blur">
           India · {statesLive} state{statesLive === 1 ? "" : "s"} live
         </div>
-        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[12px] text-neutral-400 shadow-lg backdrop-blur">
+        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[14px] text-neutral-400 shadow-lg backdrop-blur">
           <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <LegendItem status="AVAILABLE" label="Available" />
             <LegendItem status="ENGAGED" label="Engaged" />
@@ -607,8 +797,9 @@ function clearOverlays(overlays: {
   for (const marker of overlays.markers) marker.map = null;
 }
 
-function clearHeat(circles: google.maps.Circle[]) {
-  for (const circle of circles) circle.setMap(null);
+function clearHeat(heat: HeatOverlays) {
+  for (const circle of heat.circles) circle.setMap(null);
+  for (const label of heat.labels) label.map = null;
 }
 
 /**
@@ -637,27 +828,39 @@ function siteMarkerContent(label: string) {
     `box-shadow:0 0 0 3px rgba(255,255,255,0.45);"></span>` +
     `<span style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%);` +
     `white-space:nowrap;background:#111827;color:#ffffff;border:1px solid #3f3f46;` +
-    `border-radius:9999px;padding:2px 7px;font:600 10px/1.3 system-ui,sans-serif;` +
+    `border-radius:9999px;padding:2px 7px;font:600 12px/1.3 system-ui,sans-serif;` +
     `box-shadow:0 4px 12px rgba(0,0,0,0.5);">${escapeHtml(label)}</span>`;
   return wrapper;
 }
 
-function destinationPin(
+/** Google-style start: a white dot with a dark ring and the crane's name beside it. */
+function startDot(
   api: GoogleMapsApi,
   map: google.maps.Map,
-  to: GoogleMapRoute["to"],
+  at: { lat: number; lng: number },
+  ring: string,
+  label: string,
   faded: boolean,
+  text?: string,
 ) {
-  const pin = new api.marker.PinElement({
-    background: "#ea4335",
-    borderColor: "#b31412",
-    glyphColor: "#ffffff",
-    scale: 1.05,
-  });
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:relative;width:22px;height:22px;transform:translateY(50%);";
+  const dot = document.createElement("div");
+  dot.style.cssText = `box-sizing:border-box;width:22px;height:22px;border-radius:50%;background:#fff;border:6px solid ${ring};box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font:700 12px system-ui,sans-serif;color:${ring};`;
+  if (text) {
+    dot.style.border = `3px solid ${ring}`;
+    dot.textContent = text;
+  }
+  const tag = document.createElement("div");
+  tag.textContent = label;
+  tag.style.cssText =
+    "position:absolute;left:28px;top:50%;transform:translateY(-50%);white-space:nowrap;font:700 15px system-ui,sans-serif;color:#111827;text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff;";
+  wrap.append(dot);
+  if (!text) wrap.append(tag);
   const marker = new api.marker.AdvancedMarkerElement({
-    position: { lat: to.lat, lng: to.lng },
-    content: pin.element,
-    title: to.label,
+    position: { lat: Number(at.lat), lng: Number(at.lng) },
+    content: wrap,
+    title: label,
     zIndex: 600,
   });
   if (faded) marker.element.style.opacity = "0.55";
@@ -665,6 +868,29 @@ function destinationPin(
   return marker;
 }
 
+/** The destination: the standard red pin. */
+function destinationRedPin(
+  api: GoogleMapsApi,
+  map: google.maps.Map,
+  at: { lat: number; lng: number; label: string },
+  faded: boolean,
+) {
+  const pin = new api.marker.PinElement({
+    background: "#ea4335",
+    borderColor: "#b31412",
+    glyphColor: "#7a1410",
+    scale: 1.3,
+  });
+  const marker = new api.marker.AdvancedMarkerElement({
+    position: { lat: Number(at.lat), lng: Number(at.lng) },
+    content: pin.element,
+    title: at.label,
+    zIndex: 700,
+  });
+  if (faded) marker.element.style.opacity = "0.55";
+  marker.map = map;
+  return marker;
+}
 const CAR_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" ' +
   'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
@@ -695,10 +921,10 @@ function bubbleContent(
     `<span style="display:flex;align-items:center;justify-content:center;width:18px;height:18px;">` +
     CAR_ICON +
     `</span><span style="display:block;text-align:left;line-height:1.15;">` +
-    `<span style="display:block;font-size:11px;font-weight:700;white-space:nowrap;">${escapeHtml(
+    `<span style="display:block;font-size:13px;font-weight:700;white-space:nowrap;">${escapeHtml(
       time,
     )}</span>` +
-    `<span style="display:block;font-size:9px;font-weight:500;white-space:nowrap;opacity:0.8;">${escapeHtml(
+    `<span style="display:block;font-size:11px;font-weight:500;white-space:nowrap;opacity:0.8;">${escapeHtml(
       detail,
     )}</span></span>`;
   return card;
@@ -812,19 +1038,18 @@ interface HeatGroup {
   count: number;
 }
 
-/** One blob per state, sized by the number of points it covers. */
-function heatGroups(
-  points: Array<{ lat: number; lng: number; key: string }>,
-): HeatGroup[] {
+/** Points bucketed into a square grid; each cell sits at its points' centre. */
+function heatGroups(points: Array<{ lat: number; lng: number }>, cell: number): HeatGroup[] {
   const buckets = new Map<string, { lat: number; lng: number; count: number }>();
   for (const point of points) {
-    const bucket = buckets.get(point.key);
+    const key = `${Math.floor(point.lat / cell)}:${Math.floor(point.lng / cell)}`;
+    const bucket = buckets.get(key);
     if (bucket) {
       bucket.lat += point.lat;
       bucket.lng += point.lng;
       bucket.count += 1;
     } else {
-      buckets.set(point.key, { lat: point.lat, lng: point.lng, count: 1 });
+      buckets.set(key, { lat: point.lat, lng: point.lng, count: 1 });
     }
   }
   return [...buckets.values()].map((bucket) => ({
@@ -833,4 +1058,5 @@ function heatGroups(
     count: bucket.count,
   }));
 }
+
 

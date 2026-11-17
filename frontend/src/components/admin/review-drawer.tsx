@@ -141,7 +141,7 @@ export function ReviewDrawer({
             >
               {title}
             </h2>
-            <p className="mt-1.5 text-[13px] leading-5 text-slate-500">
+            <p className="mt-1.5 text-[15px] leading-5 text-slate-500">
               {definition.explanation}
             </p>
           </div>
@@ -165,20 +165,20 @@ export function ReviewDrawer({
               <button
                 type="button"
                 onClick={() => void items.refetch()}
-                className="btn-secondary h-9 px-3 py-0 text-[13px]"
+                className="btn-secondary h-9 px-3 py-0 text-[15px]"
               >
                 Retry
               </button>
             </div>
           ) : visible.length === 0 ? (
             <div className="py-8">
-              <p className="text-[14px] leading-5 text-slate-600">
+              <p className="text-[16px] leading-5 text-slate-600">
                 Nothing to review. This was resolved.
               </p>
               <button
                 type="button"
                 onClick={recheck}
-                className="btn-secondary mt-4 h-9 px-3 py-0 text-[13px]"
+                className="btn-secondary mt-4 h-9 px-3 py-0 text-[15px]"
               >
                 Check again
               </button>
@@ -186,13 +186,13 @@ export function ReviewDrawer({
           ) : (
             <>
               {mismatch ? (
-                <p className="pt-3 text-[12px] leading-5 text-slate-500">
+                <p className="pt-3 text-[14px] leading-5 text-slate-500">
                   The dashboard now counts {data?.total}. Refresh to update its number.
                 </p>
               ) : null}
 
               {capped > 0 ? (
-                <p className="pt-3 text-[12px] leading-5 text-slate-500">
+                <p className="pt-3 text-[14px] leading-5 text-slate-500">
                   Showing the first {data?.items.length} of {data?.total}.
                 </p>
               ) : null}
@@ -204,7 +204,7 @@ export function ReviewDrawer({
               </ul>
 
               <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-                <p className="text-[12px] tabular-nums text-slate-500">
+                <p className="text-[14px] tabular-nums text-slate-500">
                   {remaining > 0
                     ? `Showing ${visible.length} of ${data?.items.length}`
                     : `${data?.items.length ?? 0} item${
@@ -215,7 +215,7 @@ export function ReviewDrawer({
                   <button
                     type="button"
                     onClick={() => setLimit((current) => current + PAGE_SIZE)}
-                    className="btn-secondary h-9 px-3 py-0 text-[13px]"
+                    className="btn-secondary h-9 px-3 py-0 text-[15px]"
                   >
                     Show {Math.min(PAGE_SIZE, remaining)} more
                   </button>
@@ -229,7 +229,7 @@ export function ReviewDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="btn-secondary h-9 px-3 py-0 text-[13px]"
+            className="btn-secondary h-9 px-3 py-0 text-[15px]"
           >
             Close
           </button>
@@ -247,22 +247,22 @@ function ReviewRow({ item, kind }: { item: AdminDashboardItem; kind: ReviewKind 
   return (
     <li className="py-4">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="min-w-0 text-[14px] leading-5 font-medium text-slate-900">
+        <p className="min-w-0 text-[16px] leading-5 font-medium text-slate-900">
           {item.label}
         </p>
-        <p className="shrink-0 text-[12px] tabular-nums text-slate-500">
+        <p className="shrink-0 text-[14px] tabular-nums text-slate-500">
           {item.capacityT} t
         </p>
       </div>
-      <p className="mt-0.5 text-[13px] leading-5 text-slate-500">
+      <p className="mt-0.5 text-[15px] leading-5 text-slate-500">
         {item.make} {item.model}
       </p>
 
-      <p className="mt-2 text-[13px] leading-5 text-slate-600">
+      <p className="mt-2 text-[15px] leading-5 text-slate-600">
         {whyFlagged(item, definition.kind, status)}
       </p>
 
-      <p className="mt-1 text-[13px] leading-5 text-slate-500">
+      <p className="mt-1 text-[15px] leading-5 text-slate-500">
         Vendor:{" "}
         <Link
           to="/app/vendors/$vendorId"
@@ -273,7 +273,7 @@ function ReviewRow({ item, kind }: { item: AdminDashboardItem; kind: ReviewKind 
         </Link>
       </p>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[15px]">
         <Link
           to="/app/cranes/$craneId"
           params={{ craneId: item.craneId }}
@@ -350,3 +350,4 @@ function ReviewSkeleton() {
     </div>
   );
 }
+

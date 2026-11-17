@@ -74,7 +74,7 @@ export function ApprovalQueuePage() {
         <div className="min-w-0 space-y-5">
           <Toolbar>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+              <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
                 Status
               </p>
               <div className="mt-1 flex flex-wrap gap-1" role="tablist" aria-label="Vendor status">
@@ -208,14 +208,14 @@ function QueueRow({
         >
           {vendor.name ?? "(no name yet)"}
         </Link>
-        <p className="mt-0.5 text-[11px] text-slate-500">{primary?.email ?? vendor.email ?? "—"}</p>
+        <p className="mt-0.5 text-[13px] text-slate-500">{primary?.email ?? vendor.email ?? "—"}</p>
         {vendor.sapVendorCode ? (
-          <p className="mt-0.5 font-mono text-[11px] text-slate-500">{vendor.sapVendorCode}</p>
+          <p className="mt-0.5 font-mono text-[13px] text-slate-500">{vendor.sapVendorCode}</p>
         ) : null}
       </TD>
       <TD className="font-mono text-xs">
         <p>{vendor.pan ?? "—"}</p>
-        <p className="text-[11px] text-slate-500">{vendor.gstn ?? ""}</p>
+        <p className="text-[13px] text-slate-500">{vendor.gstn ?? ""}</p>
       </TD>
       <TD className="hidden text-xs lg:table-cell">
         {vendor.operatingRegions.join(", ") || "—"}
@@ -382,3 +382,4 @@ function InviteVendorCard() {
     </div>
   );
 }
+

@@ -107,7 +107,7 @@ export function ReplyQueuePage() {
                     <p className="truncate text-sm font-medium text-slate-800">
                       {reply.vendor?.name ?? reply.fromAddress}
                     </p>
-                    <p className="truncate text-[11px] text-slate-500">
+                    <p className="truncate text-[13px] text-slate-500">
                       {reply.rfq?.rfqNumber ?? "No RFQ matched"} ·{" "}
                       {reply.channel === "WHATSAPP" ? "WhatsApp" : "Email"}
                     </p>
@@ -117,7 +117,7 @@ export function ReplyQueuePage() {
                 <p className="mt-2 line-clamp-2 text-xs text-slate-600">
                   {reply.subject ?? reply.parseNote ?? "No subject"}
                 </p>
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="mt-1 text-[13px] text-slate-400">
                   {new Date(reply.receivedAt).toLocaleString("en-IN")}
                 </p>
               </button>
@@ -148,3 +148,4 @@ export function ReplyQueuePage() {
     </div>
   );
 }
+

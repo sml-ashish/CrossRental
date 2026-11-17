@@ -406,7 +406,7 @@ export function VendorRfqIndexPage() {
               aria-current={active ? "true" : undefined}
               onClick={() => changeTab(option.value)}
               className={cn(
-                "shrink-0 border-b-2 pb-3 pt-2 text-[14px] leading-5 whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-500",
+                "shrink-0 border-b-2 pb-3 pt-2 text-[16px] leading-5 whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-500",
                 active
                   ? "-mb-px border-white text-white"
                   : "border-transparent text-slate-500 hover:text-slate-300",
@@ -416,7 +416,7 @@ export function VendorRfqIndexPage() {
               {rfqs.data ? (
                 <span
                   className={cn(
-                    "ml-1.5 text-[12px] tabular-nums",
+                    "ml-1.5 text-[14px] tabular-nums",
                     active ? "text-slate-400" : "text-slate-600",
                   )}
                 >
@@ -437,12 +437,12 @@ export function VendorRfqIndexPage() {
           className="w-full sm:max-w-sm"
         />
 
-        <label className="flex items-center gap-2 text-[13px] text-slate-500">
+        <label className="flex items-center gap-2 text-[15px] text-slate-500">
           <span className="shrink-0">Sort</span>
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortKey)}
-            className="h-9 rounded-md border border-ink-800 bg-ink-900 px-2.5 text-[13px] text-slate-200 transition-colors hover:border-ink-700 focus:border-ink-700 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+            className="h-9 rounded-md border border-ink-800 bg-ink-900 px-2.5 text-[15px] text-slate-200 transition-colors hover:border-ink-700 focus:border-ink-700 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
           >
             {SORTS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -457,14 +457,14 @@ export function VendorRfqIndexPage() {
         <RfqSkeletons />
       ) : rfqs.error ? (
         <div className="mt-8 border-t border-ink-800 pt-8">
-          <p className="text-[14px] leading-5 text-slate-300">Could not load your RFQs.</p>
-          <p className="mt-1 text-[13px] leading-5 text-slate-500">
+          <p className="text-[16px] leading-5 text-slate-300">Could not load your RFQs.</p>
+          <p className="mt-1 text-[15px] leading-5 text-slate-500">
             {(rfqs.error as Error).message}
           </p>
           <button
             type="button"
             onClick={() => void rfqs.refetch()}
-            className="btn-secondary mt-4 px-3 py-1.5 text-[13px]"
+            className="btn-secondary mt-4 px-3 py-1.5 text-[15px]"
           >
             Retry
           </button>
@@ -473,19 +473,19 @@ export function VendorRfqIndexPage() {
         <div className="mt-8 border-t border-ink-800 py-16">
           {search ? (
             <>
-              <p className="text-[14px] leading-5 text-slate-300">
+              <p className="text-[16px] leading-5 text-slate-300">
                 No RFQs match “{search}”
               </p>
               <button
                 type="button"
                 onClick={clearSearch}
-                className="mt-4 rounded-sm text-[13px] font-medium text-slate-400 underline underline-offset-2 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                className="mt-4 rounded-sm text-[15px] font-medium text-slate-400 underline underline-offset-2 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
               >
                 Clear
               </button>
             </>
           ) : (
-            <p className="text-[14px] leading-5 text-slate-400">{emptyMessage(tab)}</p>
+            <p className="text-[16px] leading-5 text-slate-400">{emptyMessage(tab)}</p>
           )}
         </div>
       ) : grouped ? (
@@ -493,10 +493,10 @@ export function VendorRfqIndexPage() {
           {grouped.map((group) => (
             <section key={group.value} className="mt-8 first:mt-6">
               <div className="flex items-baseline justify-between border-b border-ink-800 pb-2">
-                <h2 className="text-[13px] leading-5 font-medium text-slate-300">
+                <h2 className="text-[15px] leading-5 font-medium text-slate-300">
                   {group.label}
                 </h2>
-                <span className="text-[12px] tabular-nums text-slate-300">
+                <span className="text-[14px] tabular-nums text-slate-300">
                   {group.rows.length}
                 </span>
               </div>
@@ -542,16 +542,16 @@ function RfqCard({
   return (
     <article className="grid gap-x-8 gap-y-4 py-6 min-[900px]:grid-cols-[minmax(0,1fr)_220px]">
       <div className="min-w-0">
-        <p className="text-[14px] leading-5 font-medium text-white">
+        <p className="text-[16px] leading-5 font-medium text-white">
           {row.craneTypeName} · {row.capacityT} t × {row.quantity}
         </p>
-        <p className="mt-1.5 text-[14px] leading-5 text-slate-400">{placeOf(row)}</p>
-        <p className="mt-0.5 text-[14px] leading-5 text-slate-400">{neededLine(row)}</p>
+        <p className="mt-1.5 text-[16px] leading-5 text-slate-400">{placeOf(row)}</p>
+        <p className="mt-0.5 text-[16px] leading-5 text-slate-400">{neededLine(row)}</p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] leading-4 text-slate-500">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] leading-4 text-slate-500">
           <span>{row.rfqNumber}</span>
           {row.unread ? (
-            <span className="text-[12px] leading-4 font-medium text-accent-400">New</span>
+            <span className="text-[14px] leading-4 font-medium text-accent-400">New</span>
           ) : null}
           {row.reminderCount > 0 ? (
             <span className="text-slate-400">
@@ -561,7 +561,7 @@ function RfqCard({
           ) : null}
         </div>
 
-        <p className="mt-3 text-[13px] leading-5 text-slate-400">
+        <p className="mt-3 text-[15px] leading-5 text-slate-400">
           {quoteLine(row, bucket)}
         </p>
       </div>
@@ -570,7 +570,7 @@ function RfqCard({
         <div className="min-[900px]:text-right">
           <p
             className={cn(
-              "text-[15px] leading-5 font-semibold",
+              "text-[17px] leading-5 font-semibold",
               countdown.tone === "closed"
                 ? "text-red-400"
                 : countdown.tone === "soon"
@@ -580,7 +580,7 @@ function RfqCard({
           >
             {countdown.text}
           </p>
-          <p className="mt-0.5 text-[12px] leading-4 text-slate-500">
+          <p className="mt-0.5 text-[14px] leading-4 text-slate-500">
             {formatExact(row.submissionDeadline)}
           </p>
         </div>
@@ -591,14 +591,14 @@ function RfqCard({
               <Link
                 to="/app/rfqs/$rfqId"
                 params={{ rfqId: row.rfqId }}
-                className="btn-primary w-full justify-center px-4 py-2 text-[13px] min-[900px]:w-auto"
+                className="btn-primary w-full justify-center px-4 py-2 text-[15px] min-[900px]:w-auto"
               >
                 {primaryLabel(row)}
               </Link>
               <Link
                 to="/app/rfqs/$rfqId"
                 params={{ rfqId: row.rfqId }}
-                className="rounded-sm text-center text-[13px] text-slate-500 underline underline-offset-2 transition-colors hover:text-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                className="rounded-sm text-center text-[15px] text-slate-500 underline underline-offset-2 transition-colors hover:text-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
               >
                 Can't do this
               </Link>
@@ -607,7 +607,7 @@ function RfqCard({
             <Link
               to="/app/rfqs/$rfqId"
               params={{ rfqId: row.rfqId }}
-              className="rounded-sm text-[13px] font-medium text-slate-300 underline underline-offset-2 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 min-[900px]:text-right"
+              className="rounded-sm text-[15px] font-medium text-slate-300 underline underline-offset-2 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 min-[900px]:text-right"
             >
               View
             </Link>
@@ -641,3 +641,4 @@ function RfqSkeletons() {
     </div>
   );
 }
+

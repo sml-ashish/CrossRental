@@ -153,7 +153,7 @@ function FitBadge({ level }: { level: MatchLevel }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[12px] font-semibold tracking-wide uppercase",
         LEVEL_TONE[level],
       )}
     >
@@ -165,7 +165,7 @@ function FitBadge({ level }: { level: MatchLevel }) {
 
 function ReasonItem({ reason }: { reason: MatchReason }) {
   return (
-    <li className="flex items-start gap-1.5 text-[11px] leading-4">
+    <li className="flex items-start gap-1.5 text-[13px] leading-4">
       {reason.ok ? (
         <Check className="mt-0.5 size-3 shrink-0 text-emerald-500" aria-hidden />
       ) : (
@@ -188,7 +188,7 @@ function ReasonList({ match }: { match: CraneMatch }) {
       {rest.length > 0 ? (
         <li>
           <details className="group">
-            <summary className="list-none text-[11px] text-slate-500 transition-colors hover:text-slate-300 [&::-webkit-details-marker]:hidden">
+            <summary className="list-none text-[13px] text-slate-500 transition-colors hover:text-slate-300 [&::-webkit-details-marker]:hidden">
               <span className="inline-flex items-center gap-1">
                 <ChevronRight className="size-3 transition-transform group-open:rotate-90" aria-hidden />
                 {rest.length} more check{rest.length === 1 ? "" : "s"}
@@ -209,8 +209,8 @@ function ReasonList({ match }: { match: CraneMatch }) {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[10px] font-medium tracking-[0.08em] text-slate-500 uppercase">{label}</dt>
-      <dd className="truncate text-[12px] text-slate-700">{value}</dd>
+      <dt className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">{label}</dt>
+      <dd className="truncate text-[14px] text-slate-700">{value}</dd>
     </div>
   );
 }
@@ -278,7 +278,7 @@ function RfqCard({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[12px] font-medium text-slate-800">{rfq.rfqNumber}</span>
+              <span className="font-mono text-[14px] font-medium text-slate-800">{rfq.rfqNumber}</span>
               <StatusPill tone={rfq.status === "DRAFT" ? "neutral" : "blue"}>
                 {rfq.status === "DRAFT" ? "Draft" : "Sent"}
               </StatusPill>
@@ -289,7 +289,7 @@ function RfqCard({
               ) : null}
               <FitBadge level={match.level} />
             </div>
-            <p className="mt-1 truncate text-[12px] text-slate-500">
+            <p className="mt-1 truncate text-[14px] text-slate-500">
               {rfq.enquiryNo} · line {rfq.lineNo}
             </p>
           </div>
@@ -299,7 +299,7 @@ function RfqCard({
               tone={countdown.tone}
               urgent={countdown.tone === "soon"}
             />
-            <span className="text-[11px] text-slate-500" title={formatDeadlineDate(rfq.submissionDeadline)}>
+            <span className="text-[13px] text-slate-500" title={formatDeadlineDate(rfq.submissionDeadline)}>
               due {formatDeadlineDate(rfq.submissionDeadline)}
             </span>
           </div>
@@ -321,7 +321,7 @@ function RfqCard({
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {sentNumber ? (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-[12px] text-emerald-600">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-[14px] text-emerald-600">
             <Check className="size-3.5 shrink-0" aria-hidden />
             <span>Sent to {vendorName}.</span>
             <Link
@@ -334,7 +334,7 @@ function RfqCard({
             </Link>
           </div>
         ) : invited ? (
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-[11px] text-slate-500">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-[13px] text-slate-500">
             <Check className="size-3.5" aria-hidden />
             Already invited · {RESPONSE_ROW_LABEL[invited.responseStatus].toLowerCase()}
           </span>
@@ -351,7 +351,7 @@ function RfqCard({
           </button>
         ) : confirming ? (
           <div className="w-full rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5">
-            <p className="text-[12px] text-amber-700">Send this RFQ to {vendorName} now?</p>
+            <p className="text-[14px] text-amber-700">Send this RFQ to {vendorName} now?</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -425,7 +425,7 @@ function LineCard({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[12px] font-medium text-slate-800">
+              <span className="font-mono text-[14px] font-medium text-slate-800">
                 {line.enquiryNo} · line {line.lineNo}
               </span>
               <FitBadge level={match.level} />
@@ -435,7 +435,7 @@ function LineCard({
                 </Badge>
               ) : null}
             </div>
-            <p className="mt-1 truncate text-[12px] text-slate-500">No RFQ raised on this line yet</p>
+            <p className="mt-1 truncate text-[14px] text-slate-500">No RFQ raised on this line yet</p>
           </div>
         </div>
       }
@@ -461,7 +461,7 @@ function LineCard({
 
       <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+          <span className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             Quotes due
           </span>
           <input
@@ -469,7 +469,7 @@ function LineCard({
             value={deadline}
             min={today}
             onChange={(event) => onDeadline(event.target.value)}
-            className="field-input h-8 w-[9.5rem] px-2 py-0 text-[12px]"
+            className="field-input h-8 w-[9.5rem] px-2 py-0 text-[14px]"
             aria-label={`Submission deadline for ${line.enquiryNo} line ${line.lineNo}`}
           />
         </label>
@@ -485,7 +485,7 @@ function LineCard({
                 aria-pressed={active}
                 onClick={() => onDeadline(value)}
                 className={cn(
-                  "rounded-full px-2 py-1 text-[11px] font-medium transition-colors",
+                  "rounded-full px-2 py-1 text-[13px] font-medium transition-colors",
                   active
                     ? "bg-white text-ink-950"
                     : "border border-ink-700 text-slate-500 hover:bg-ink-800 hover:text-white",
@@ -536,12 +536,12 @@ function SectionHeading({
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-2">
       <div className="min-w-0">
-        <h3 id={id} className="text-[13px] font-semibold tracking-tight text-slate-900">
+        <h3 id={id} className="text-[15px] font-semibold tracking-tight text-slate-900">
           {title}
         </h3>
-        {children ? <p className="mt-0.5 text-[11px] leading-4 text-slate-500">{children}</p> : null}
+        {children ? <p className="mt-0.5 text-[13px] leading-4 text-slate-500">{children}</p> : null}
       </div>
-      <span className="rounded-full border border-ink-700 bg-ink-850 px-2 py-0.5 text-[10px] font-medium text-slate-500 tabular-nums">
+      <span className="rounded-full border border-ink-700 bg-ink-850 px-2 py-0.5 text-[12px] font-medium text-slate-500 tabular-nums">
         {count}
       </span>
     </div>
@@ -767,7 +767,7 @@ export function RequestCraneDialog({
       <Link
         to="/app/enquiries/new"
         onClick={() => onOpenChange(false)}
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-600 transition-colors hover:text-white"
+        className="inline-flex items-center gap-1.5 text-[14px] font-medium text-slate-600 transition-colors hover:text-white"
       >
         <Plus className="size-3.5" aria-hidden />
         Raise a new enquiry
@@ -874,7 +874,7 @@ export function RequestCraneDialog({
               </SectionHeading>
               <div className="mt-2 space-y-2">
                 {rows.openRfqs.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-ink-800 px-3 py-4 text-[12px] text-slate-500">
+                  <p className="rounded-xl border border-dashed border-ink-800 px-3 py-4 text-[14px] text-slate-500">
                     No open RFQ is a good fit for this crane. The mismatches are under “Not a fit”.
                   </p>
                 ) : (
@@ -909,7 +909,7 @@ export function RequestCraneDialog({
               </SectionHeading>
               <div className="mt-2 space-y-2">
                 {rows.lines.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-ink-800 px-3 py-4 text-[12px] text-slate-500">
+                  <p className="rounded-xl border border-dashed border-ink-800 px-3 py-4 text-[14px] text-slate-500">
                     No enquiry line without an RFQ is a good fit. The mismatches are under “Not a
                     fit”.
                   </p>
@@ -937,18 +937,18 @@ export function RequestCraneDialog({
             </section>
 
             <details className="rounded-xl border border-ink-800 bg-ink-850/40">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-[12px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-[14px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
                 <span className="inline-flex items-center gap-2">
                   <AlertTriangle className="size-3.5 text-amber-500" aria-hidden />
                   Not a fit
                 </span>
-                <span className="text-[11px] text-slate-500 tabular-nums">
+                <span className="text-[13px] text-slate-500 tabular-nums">
                   {rows.notFit.length} check{rows.notFit.length === 1 ? "" : "s"}
                 </span>
               </summary>
               <div className="space-y-2 border-t border-ink-800 p-2.5">
                 {rows.notFit.length === 0 ? (
-                  <p className="px-1 py-2 text-[12px] text-slate-500">
+                  <p className="px-1 py-2 text-[14px] text-slate-500">
                     No crane type or capacity mismatch. Every live row is above.
                   </p>
                 ) : (
@@ -993,10 +993,11 @@ export function RequestCraneDialog({
               </div>
             </details>
 
-            {blockedReason ? <p className="text-[11px] text-slate-500">{blockedReason}</p> : null}
+            {blockedReason ? <p className="text-[13px] text-slate-500">{blockedReason}</p> : null}
           </>
         )}
       </div>
     </Dialog>
   );
 }
+

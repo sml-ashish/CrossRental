@@ -25,14 +25,9 @@ import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
 import { Field, ReadOnlyValue, Section, TextArea, TextInput } from "@/components/ui/form";
 import { LifecycleStepper } from "@/components/ui/lifecycle-stepper";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  RFQ_STATUS_LABELS,
-  deadlineCountdown,
-  formatCalendarDate,
-  formatDate,
-  formatDateTime,
-  statusTone,
-} from "@/routes/app/rfqs";
+import { RFQ_STATUS_LABELS } from "@/lib/rfqs";
+import { deadlineCountdown, statusTone } from "@/lib/rfq-display";
+import { formatCalendarDate, formatDate, formatDateTime } from "@/lib/format";
 import { cityOf, craneTypeLabel, siteLabel, titleCase } from "@/lib/format";
 import { deadlineRelative } from "@/lib/rfq-display";
 import { cn } from "@/lib/cn";
@@ -89,7 +84,7 @@ function StatusWord({ status }: { status: RfqStatus }) {
   return (
     <span className="inline-flex items-center gap-2">
       <span className={cn("size-1.5 rounded-full", tone.dot)} aria-hidden />
-      <span className={cn("text-[13px] font-medium", tone.text)}>
+      <span className={cn("text-[15px] font-medium", tone.text)}>
         {RFQ_STATUS_LABELS[status]}
       </span>
     </span>
@@ -241,7 +236,7 @@ function InternalRfqDetailPage() {
               {craneTypeLabel(rfq.craneTypeRef?.name ?? rfq.craneType)} · {rfq.capacityT} t
               {rfq.capacityRule === "AT_LEAST" ? "+" : ""} · qty {rfq.quantity} · {cityOf(rfq)}
               {rfq.siteState ? `, ${titleCase(rfq.siteState.name)}` : ""}
-              <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+              <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px]">
                 <Link
                   to="/app/enquiries"
                   search={{ q: rfq.enquiryNo }}
@@ -267,14 +262,14 @@ function InternalRfqDetailPage() {
             <>
               <StatusWord status={rfq.status} />
               {rfq.rollupStatus ? (
-                <span className="text-[13px] text-slate-500">
+                <span className="text-[15px] text-slate-500">
                   {ROLLUPE_STATUS_LABELS[rfq.rollupStatus]}
                 </span>
               ) : null}
               <span aria-hidden className="text-slate-400">
                 ·
               </span>
-              <span className="text-[13px] text-slate-500">
+              <span className="text-[15px] text-slate-500">
                 Created {dayMonth(rfq.createdAt)} by{" "}
                 {rfq.createdBy?.fullName ?? rfq.createdBy?.email ?? "—"}
               </span>
@@ -285,15 +280,15 @@ function InternalRfqDetailPage() {
           rfq ? (
             <div className="flex flex-col items-end gap-2">
               <div className="text-right" title={formatDeadlineExact(rfq.submissionDeadline)}>
-                <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
                   Submission deadline
                 </p>
-                <p className="text-[15px] text-slate-900 tabular-nums">
+                <p className="text-[17px] text-slate-900 tabular-nums">
                   {formatDeadline(rfq.submissionDeadline)}
                 </p>
                 <p
                   className={cn(
-                    "text-[12px]",
+                    "text-[14px]",
                     relative?.tone === "overdue"
                       ? "font-medium text-red-500"
                       : relative?.tone === "soon"
@@ -304,7 +299,7 @@ function InternalRfqDetailPage() {
                   {relative?.label} · {DEADLINE_ZONE_LABEL}
                 </p>
                 {deadlinePassed && isDraft ? (
-                  <p className="max-w-[240px] text-[12px] text-red-500">
+                  <p className="max-w-[240px] text-[14px] text-red-500">
                     Deadline has passed. Edit the draft before sending.
                   </p>
                 ) : null}
@@ -312,7 +307,7 @@ function InternalRfqDetailPage() {
                   <Link
                     to="/app/rfqs/$rfqId/edit"
                     params={{ rfqId }}
-                    className="mt-1 inline-block text-[12px] font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
+                    className="mt-1 inline-block text-[14px] font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
                   >
                     Edit deadline
                   </Link>
@@ -340,7 +335,7 @@ function InternalRfqDetailPage() {
             cancelled={isCancelled}
           />
           {isCancelled && rfq.cancelReason ? (
-            <p className="mt-1 text-[12px] text-slate-500">{rfq.cancelReason}</p>
+            <p className="mt-1 text-[14px] text-slate-500">{rfq.cancelReason}</p>
           ) : null}
         </div>
       ) : null}
@@ -393,7 +388,7 @@ function InternalRfqDetailPage() {
                     aria-selected={active}
                     onClick={() => setTab(entry.value)}
                     className={cn(
-                      "-mb-px shrink-0 border-b-2 pb-2.5 text-[13px] whitespace-nowrap transition-colors duration-150",
+                      "-mb-px shrink-0 border-b-2 pb-2.5 text-[15px] whitespace-nowrap transition-colors duration-150",
                       active
                         ? "border-accent-500 font-medium text-slate-900"
                         : "border-transparent text-slate-500 hover:text-slate-900",
@@ -401,7 +396,7 @@ function InternalRfqDetailPage() {
                   >
                     {entry.label}
                     {badge ? (
-                      <span className="ml-1.5 text-[12px] text-slate-500 tabular-nums">
+                      <span className="ml-1.5 text-[14px] text-slate-500 tabular-nums">
                         {badge}
                       </span>
                     ) : null}
@@ -634,7 +629,7 @@ function RfqHeaderActions({
   }, [open]);
 
   const quiet =
-    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500";
+    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[15px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500";
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-0.5">
@@ -676,7 +671,7 @@ function RfqHeaderActions({
               <button
                 type="button"
                 role="menuitem"
-                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[13px] text-red-500 transition-colors hover:bg-red-500/10"
+                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[15px] text-red-500 transition-colors hover:bg-red-500/10"
                 onClick={() => {
                   setOpen(false);
                   onCancel();
@@ -790,7 +785,7 @@ function ToneWord({ tone, label }: { tone: { dot: string; text: string }; label:
   return (
     <span className="inline-flex items-center gap-1.5">
       <span className={cn("size-1.5 rounded-full", tone.dot)} aria-hidden />
-      <span className={cn("text-[13px]", tone.text)}>{label}</span>
+      <span className={cn("text-[15px]", tone.text)}>{label}</span>
     </span>
   );
 }
@@ -872,11 +867,11 @@ function RecipientsSection({
       actions={
         canAddMore ? (
           adding ? (
-            <button type="button" className="btn-secondary px-3 py-1.5 text-[13px]" onClick={onStopAdding}>
+            <button type="button" className="btn-secondary px-3 py-1.5 text-[15px]" onClick={onStopAdding}>
               Stop adding
             </button>
           ) : (
-            <button type="button" className="btn-secondary px-3 py-1.5 text-[13px]" onClick={onAddMore}>
+            <button type="button" className="btn-secondary px-3 py-1.5 text-[15px]" onClick={onAddMore}>
               <UserPlus className="size-3.5" aria-hidden />
               Send to more vendors
             </button>
@@ -939,7 +934,7 @@ function RecipientsSection({
                     <TD>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="w-16 shrink-0 text-[11px] tracking-[0.08em] text-slate-500 uppercase">
+                          <span className="w-16 shrink-0 text-[13px] tracking-[0.08em] text-slate-500 uppercase">
                             Email
                           </span>
                           <ToneWord
@@ -948,12 +943,12 @@ function RecipientsSection({
                           />
                         </div>
                         {recipient.emailDeliveryError ? (
-                          <p className="pl-[4.5rem] text-[12px] text-red-600">
+                          <p className="pl-[4.5rem] text-[14px] text-red-600">
                             {recipient.emailDeliveryError}
                           </p>
                         ) : null}
                         <div className="flex items-center gap-2">
-                          <span className="w-16 shrink-0 text-[11px] tracking-[0.08em] text-slate-500 uppercase">
+                          <span className="w-16 shrink-0 text-[13px] tracking-[0.08em] text-slate-500 uppercase">
                             WhatsApp
                           </span>
                           {recipient.whatsappDeliveryStatus ? (
@@ -967,13 +962,13 @@ function RecipientsSection({
                               }
                             />
                           ) : (
-                            <span className="text-[13px] text-slate-500">
+                            <span className="text-[15px] text-slate-500">
                               {recipient.whatsappPhones.length > 0 ? "Not used" : "No number"}
                             </span>
                           )}
                         </div>
                         {recipient.whatsappDeliveryError ? (
-                          <p className="pl-[4.5rem] text-[12px] text-red-600">
+                          <p className="pl-[4.5rem] text-[14px] text-red-600">
                             {recipient.whatsappDeliveryError}
                           </p>
                         ) : null}
@@ -1200,7 +1195,7 @@ function QuotationsSection({
                 <TR key={quotation.quotationId} className="align-top">
                   <TD>
                     <p className="font-medium text-slate-800">{quotation.vendorName}</p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[13px] text-slate-500">
                       v{quotation.version}
                       {!quotation.isLatest ? " · superseded" : ""} ·{" "}
                       {formatDate(quotation.submittedAt)}
@@ -1404,3 +1399,4 @@ function AwardControl({
     </div>
   );
 }
+

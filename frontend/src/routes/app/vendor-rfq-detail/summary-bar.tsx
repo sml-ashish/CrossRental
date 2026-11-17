@@ -244,7 +244,7 @@ export function SummaryBar({
             {formatDateTime(rfq.submissionDeadline)}
             {!response.canRespond && !rfq.locked ? " · no longer accepted" : ""}
           </p>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[13px] text-slate-500">
             {rfq.startDateTbc
               ? "Start date to be confirmed"
               : `Start ${formatDateTime(rfq.requiredStartDate).split(",")[0]}`}
@@ -261,7 +261,7 @@ export function SummaryBar({
         ) : null}
 
         {response.reminderCount > 0 ? (
-          <p className="text-[11px] text-amber-700">
+          <p className="text-[13px] text-amber-700">
             SML sent {response.reminderCount} reminder
             {response.reminderCount === 1 ? "" : "s"} about this RFQ
           </p>
@@ -278,7 +278,7 @@ export function SummaryBar({
               <p className="truncate text-xs font-medium text-slate-800">
                 {showMessage ? message : VENDOR_RESPONSE_LABELS[status]}
               </p>
-              <p className="truncate text-[11px] text-slate-500">
+              <p className="truncate text-[13px] text-slate-500">
                 Quotes due {formatDateTime(rfq.submissionDeadline)}
               </p>
             </div>
@@ -298,3 +298,4 @@ export function SummaryBar({
     </>
   );
 }
+

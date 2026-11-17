@@ -284,7 +284,7 @@ export function RfqNewPage() {
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="Enquiry number or crane type"
                 aria-label="Search enquiry lines"
-                className="field-input h-9 py-0 text-[13px]"
+                className="field-input h-9 py-0 text-[15px]"
               />
               {searchInput ? (
                 <button
@@ -308,7 +308,7 @@ export function RfqNewPage() {
               id="raisable-state"
               value={stateFilter}
               onChange={(event) => setStateFilter(event.target.value)}
-              className="field-input h-9 w-auto py-0 pr-8 text-[13px]"
+              className="field-input h-9 w-auto py-0 pr-8 text-[15px]"
             >
               <option value="">All states</option>
               {states.map((state) => (
@@ -329,7 +329,7 @@ export function RfqNewPage() {
             <FilterChip active={hasRfqOnly} onClick={() => setHasRfqOnly((value) => !value)}>
               Has RFQs
             </FilterChip>
-            <span className="ml-auto text-[11px] text-slate-500 tabular-nums">
+            <span className="ml-auto text-[13px] text-slate-500 tabular-nums">
               {rows.length} {rows.length === 1 ? "line" : "lines"}
             </span>
           </div>
@@ -356,7 +356,7 @@ export function RfqNewPage() {
               <button
                 type="button"
                 onClick={() => void lines.refetch()}
-                className="btn-secondary mt-3 py-1.5 text-[13px]"
+                className="btn-secondary mt-3 py-1.5 text-[15px]"
               >
                 Retry
               </button>
@@ -372,7 +372,7 @@ export function RfqNewPage() {
                     : "A line needs a crane type and capacity before an RFQ can be raised from it. Add the line to an enquiry first."
                 }
                 action={
-                  <Link to="/app/enquiries" className="btn-primary py-1.5 text-[13px]">
+                  <Link to="/app/enquiries" className="btn-primary py-1.5 text-[15px]">
                     <ArrowLeft className="size-4" aria-hidden />
                     Go to enquiries
                   </Link>
@@ -386,7 +386,7 @@ export function RfqNewPage() {
               <p className="mx-auto mt-1 max-w-sm text-xs text-slate-500">
                 Clear the search, state or line filters to see every line still open for sourcing.
               </p>
-              <button type="button" onClick={clearFilters} className="btn-secondary mt-4 py-1.5 text-[13px]">
+              <button type="button" onClick={clearFilters} className="btn-secondary mt-4 py-1.5 text-[15px]">
                 Clear filters
               </button>
             </div>
@@ -464,7 +464,7 @@ function FilterChip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors duration-150",
+        "rounded-full px-2.5 py-1 text-[13px] font-medium transition-colors duration-150",
         active
           ? "bg-white text-ink-950"
           : "border border-ink-800 text-slate-500 hover:border-ink-700 hover:bg-ink-850 hover:text-white",
@@ -514,12 +514,12 @@ function RaisableLineCard({
       <div className="pointer-events-none relative flex items-start gap-3">
         <div className="flex w-[68px] shrink-0 flex-col items-center rounded-lg border border-ink-800 bg-ink-850 px-2 py-1.5">
           <span className="text-sm font-semibold tabular-nums text-white">{capacityLabel(line)}</span>
-          <span className="mt-0.5 text-[10px] text-slate-500 tabular-nums">qty {line.quantity}</span>
+          <span className="mt-0.5 text-[12px] text-slate-500 tabular-nums">qty {line.quantity}</span>
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="font-mono text-[10px] tracking-[0.08em] text-slate-500 uppercase">
+            <p className="font-mono text-[12px] tracking-[0.08em] text-slate-500 uppercase">
               {line.enquiryNo} / line {line.lineNo}
             </p>
             <StatusPill tone={trail.tone} className="shrink-0">
@@ -527,11 +527,11 @@ function RaisableLineCard({
             </StatusPill>
           </div>
 
-          <p className="mt-1 truncate text-[15px] font-semibold text-white">
+          <p className="mt-1 truncate text-[17px] font-semibold text-white">
             {line.craneTypeName ?? line.craneTypeCode ?? "No crane type"}
           </p>
 
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-slate-500">
             <span className="inline-flex min-w-0 items-center gap-1">
               <MapPin className="size-3 shrink-0" aria-hidden />
               <span className="truncate">{placeOf(line)}</span>
@@ -594,20 +594,20 @@ function DraftPreview({
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 border-b border-ink-800 px-5 py-4">
-        <p className="text-[10px] font-medium tracking-[0.14em] text-slate-500 uppercase">
+        <p className="text-[12px] font-medium tracking-[0.14em] text-slate-500 uppercase">
           Draft preview · what the vendor sees
         </p>
         <h2 className="mt-1 text-lg leading-tight font-semibold text-white">
           {line.quantity} × {line.craneTypeName ?? line.craneTypeCode ?? "Crane"} ·{" "}
           {capacityLabel(line)}
         </h2>
-        <p className="mt-0.5 font-mono text-[11px] text-slate-500">
+        <p className="mt-0.5 font-mono text-[13px] text-slate-500">
           {line.enquiryNo} / line {line.lineNo}
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <StatusPill tone={trail.tone}>{trail.label}</StatusPill>
-          <span className="inline-flex items-center gap-1 rounded-full border border-ink-800 bg-ink-850 px-2 py-0.5 text-[11px] text-slate-600">
+          <span className="inline-flex items-center gap-1 rounded-full border border-ink-800 bg-ink-850 px-2 py-0.5 text-[13px] text-slate-600">
             <MapPin className="size-3 text-accent-400" aria-hidden />
             {placeOf(line)}
           </span>
@@ -628,7 +628,7 @@ function DraftPreview({
           />
         </dl>
 
-        <p className="rounded-lg border border-ink-800 bg-ink-850 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
+        <p className="rounded-lg border border-ink-800 bg-ink-850 px-3 py-2 text-[13px] leading-relaxed text-slate-500">
           The draft is prefilled from the line. Customer name and address, the rental budget,
           internal notes and the Sales Partner&rsquo;s name are never copied into an RFQ.
         </p>
@@ -636,7 +636,7 @@ function DraftPreview({
         <div className="rounded-xl border border-ink-800 bg-ink-850/60 p-3">
           <label
             htmlFor="rfq-new-deadline"
-            className="text-[10px] font-medium tracking-[0.12em] text-slate-500 uppercase"
+            className="text-[12px] font-medium tracking-[0.12em] text-slate-500 uppercase"
           >
             Submission deadline
           </label>
@@ -646,7 +646,7 @@ function DraftPreview({
               type="date"
               value={deadline}
               onChange={(event) => onDeadline(event.target.value)}
-              className="field-input h-9 flex-1 py-0 text-[13px]"
+              className="field-input h-9 flex-1 py-0 text-[15px]"
             />
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -660,7 +660,7 @@ function DraftPreview({
                   aria-pressed={active}
                   onClick={() => onDeadline(value)}
                   className={cn(
-                    "rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors duration-150",
+                    "rounded-full px-2.5 py-1 text-[13px] font-medium transition-colors duration-150",
                     active
                       ? "bg-white text-ink-950"
                       : "border border-ink-700 text-slate-500 hover:bg-ink-800 hover:text-white",
@@ -673,7 +673,7 @@ function DraftPreview({
           </div>
           <p
             className={cn(
-              "mt-2 flex items-center gap-1.5 text-[11px] tabular-nums",
+              "mt-2 flex items-center gap-1.5 text-[13px] tabular-nums",
               days !== null && days < 0
                 ? "text-red-600"
                 : days !== null && days <= 3
@@ -688,11 +688,11 @@ function DraftPreview({
 
         {warnings.length > 0 ? (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
-            <p className="flex items-center gap-1.5 text-[11px] font-medium text-amber-600">
+            <p className="flex items-center gap-1.5 text-[13px] font-medium text-amber-600">
               <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
               Worth checking first
             </p>
-            <ul className="mt-1 space-y-1 text-[11px] leading-relaxed text-amber-700">
+            <ul className="mt-1 space-y-1 text-[13px] leading-relaxed text-amber-700">
               {warnings.map((warning) => (
                 <li key={warning}>{warning}</li>
               ))}
@@ -708,12 +708,12 @@ function DraftPreview({
           type="button"
           onClick={onCreate}
           disabled={pending || deadline === ""}
-          className="btn-primary w-full py-2 text-[13px]"
+          className="btn-primary w-full py-2 text-[15px]"
         >
           {pending ? <Spinner /> : <Send className="size-4" aria-hidden />}
           {pending ? "Creating the draft" : "Create draft RFQ"}
         </button>
-        <p className="mt-2 text-center text-[11px] text-slate-500">
+        <p className="mt-2 text-center text-[13px] text-slate-500">
           Creates a draft. Vendors are not emailed until you choose them and send.
         </p>
       </div>
@@ -724,10 +724,10 @@ function DraftPreview({
 function PreviewFact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[10px] font-medium tracking-[0.1em] text-slate-500 uppercase">{label}</dt>
+      <dt className="text-[12px] font-medium tracking-[0.1em] text-slate-500 uppercase">{label}</dt>
       <dd
         className={cn(
-          "mt-0.5 truncate text-[13px] text-slate-800",
+          "mt-0.5 truncate text-[15px] text-slate-800",
           mono && "font-mono text-xs",
         )}
         title={value}
@@ -737,3 +737,4 @@ function PreviewFact({ label, value, mono }: { label: string; value: string; mon
     </div>
   );
 }
+

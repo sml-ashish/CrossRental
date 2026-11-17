@@ -388,7 +388,7 @@ export function QuoteForm({
                 <span className="text-slate-900 tabular-nums">{fitMatches ?? 0}</span> of your{" "}
                 {fitTotal} {fitTotal === 1 ? "crane" : "cranes"} match this requirement
               </p>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-[13px] text-slate-500">
                 Type, capacity ({rfq.capacityRule === "EXACT" ? "exact" : "at least"}{" "}
                 {rfq.capacityT} t)
                 {rfq.mainBoomM !== null ? ` and ${rfq.mainBoomM} m boom` : ""} checked on paper. The
@@ -597,7 +597,7 @@ export function QuoteForm({
                 <span className="max-w-full truncate text-sm font-medium text-slate-800">
                   {chart.name}
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[13px] text-slate-500">
                   Click to choose a different file
                 </span>
               </>
@@ -606,7 +606,7 @@ export function QuoteForm({
                 <span className="text-sm text-slate-700">
                   Choose a PDF or image of the load chart
                 </span>
-                <span className="text-[11px] text-slate-500">PDF, PNG or JPG · one file</span>
+                <span className="text-[13px] text-slate-500">PDF, PNG or JPG · one file</span>
               </>
             )}
             <input
@@ -626,7 +626,7 @@ export function QuoteForm({
       )}
 
       <div className="space-y-2">
-        <p className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 uppercase">
+        <p className="text-[13px] font-semibold tracking-[0.08em] text-slate-500 uppercase">
           Review before sending
         </p>
         <PreviewPanel preview={previewData} loading={preview.isFetching} />
@@ -1096,4 +1096,5 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 
   return settled;
 }
+
 

@@ -44,7 +44,7 @@ function SortHeader({
       <button
         type="button"
         onClick={() => onSort(sortKey)}
-        className="inline-flex items-center gap-1 rounded text-[11px] tracking-[0.06em] uppercase transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+        className="inline-flex items-center gap-1 rounded text-[13px] tracking-[0.06em] uppercase transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
       >
         {label}
         {active ? (
@@ -112,7 +112,7 @@ export function AllCranesTable({
   return (
     <div className="mt-1">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[880px] border-collapse text-[13px] tabular-nums">
+        <table className="w-full min-w-[880px] border-collapse text-[15px] tabular-nums">
           <colgroup>
             <col className="w-8" />
             <col />
@@ -173,7 +173,7 @@ export function AllCranesTable({
                 onSort={onSort}
                 className="text-right"
               />
-              <th scope="col" className="px-1.5 py-1.5 text-left text-[11px] font-medium tracking-[0.06em] uppercase">
+              <th scope="col" className="px-1.5 py-1.5 text-left text-[13px] font-medium tracking-[0.06em] uppercase">
                 Flags
               </th>
               <SortHeader
@@ -259,7 +259,7 @@ export function AllCranesTable({
       </div>
 
       {remaining > 0 ? (
-        <div className="mt-2 flex items-center justify-between gap-2 text-[12px] text-slate-500">
+        <div className="mt-2 flex items-center justify-between gap-2 text-[14px] text-slate-500">
           <p className="tabular-nums">
             Showing {shown.length.toLocaleString("en-IN")} of{" "}
             {sorted.length.toLocaleString("en-IN")} cranes
@@ -276,3 +276,4 @@ export function AllCranesTable({
     </div>
   );
 }
+

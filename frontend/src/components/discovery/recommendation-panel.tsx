@@ -16,6 +16,9 @@ import {
   type LineRecommendationsResponse,
   type RecommendationCrane,
   type RecommendationMode,
+  TOP_RECOMMENDED_CRANES,
+  filterRecommended,
+  capacityFloorT,
 } from "@/lib/discovery";
 import type { RaisableLine } from "@/lib/enquiries";
 import { Alert } from "@/components/ui/alert";
@@ -99,6 +102,10 @@ export interface RecommendationPanelProps {
   selectedCraneId: string | null;
   /** "From": only cranes located here are listed. */
   fromText: string;
+  availableOnly: boolean;
+  onAvailableOnlyChange: (value: boolean) => void;
+  searchText: string;
+  onSearchChange: (value: string) => void;
   onFromChange: (value: string) => void;
   onSelect: (craneId: string) => void;
   /** Cranes ticked for an RFQ. The RFQ goes to their vendors only. */
@@ -121,6 +128,10 @@ export function RecommendationPanel({
   route,
   selectedCraneId,
   fromText,
+  availableOnly,
+  onAvailableOnlyChange,
+  searchText,
+  onSearchChange,
   onFromChange,
   onSelect,
   checkedIds,
@@ -132,10 +143,15 @@ export function RecommendationPanel({
 }: RecommendationPanelProps) {
   const noticeId = useId();
   const [sendOpen, setSendOpen] = useState(false);
-  const allCranes = orderedRecommendationCranes(recommendations, mode);
-  const cranes = cranesLocatedIn(allCranes, fromText);
+  const [sendAll, setSendAll] = useState(false);
+  const allCranes = orderedRecommendationCranes(recommendations, mode, line?.capacityT);
+  const cranes = filterRecommended(
+    cranesLocatedIn(allCranes, fromText),
+    availableOnly,
+    searchText,
+  ).slice(0, TOP_RECOMMENDED_CRANES);
   const total = cranes.length;
-  const filteredOut = allCranes.length > 0 && total === 0;
+  const filteredOut = allCranes.length > 0 && total === 0 && (Boolean(fromText.trim()) || availableOnly || Boolean(searchText.trim()));
   const siteLabel = recommendations?.site.siteLocation ?? line?.siteLocation ?? "";
   // Only ticks that are still on the visible list count: a crane filtered out by
   // "From" must not silently receive an RFQ.
@@ -148,14 +164,14 @@ export function RecommendationPanel({
       <div className="shrink-0 border-b border-ink-800 px-5 pt-5 pb-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            <p className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Recommendations
             </p>
-            <p className="mt-1 truncate text-[14px] font-semibold text-white">
+            <p className="mt-1 truncate text-[16px] font-semibold text-white">
               {line ? lineReference(line) : "Selected line"}
             </p>
             {line ? (
-              <p className="mt-0.5 truncate text-[11px] text-neutral-400">
+              <p className="mt-0.5 truncate text-[13px] text-neutral-400">
                 {line.craneTypeName ?? line.craneTypeCode ?? "Crane type not set"} ·{" "}
                 {capacityText(line)}
                 {line.siteLocation ? ` · ${line.siteLocation}` : ""}
@@ -165,7 +181,7 @@ export function RecommendationPanel({
           <button
             type="button"
             onClick={onClear}
-            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[12px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[14px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
           >
             <X className="size-3" aria-hidden />
             Clear
@@ -192,7 +208,7 @@ export function RecommendationPanel({
             <button
               type="button"
               onClick={onRetry}
-              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[12px] font-medium text-red-700 hover:bg-red-500/10"
+              className="mt-2 rounded-md border border-red-400/40 px-2 py-1 text-[14px] font-medium text-red-700 hover:bg-red-500/10"
             >
               Try again
             </button>
@@ -215,7 +231,7 @@ export function RecommendationPanel({
 
             <div className="mb-4 grid grid-cols-2 gap-2">
               <label className="min-w-0">
-                <span className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+                <span className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
                   From
                 </span>
                 <span className="relative mt-1.5 block">
@@ -224,7 +240,7 @@ export function RecommendationPanel({
                     value={fromText}
                     onChange={(event) => onFromChange(event.target.value)}
                     placeholder="Crane location, e.g. Pune"
-                    className="w-full rounded-lg border border-ink-800 bg-ink-850 py-2 pr-7 pl-3 text-[13px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+                    className="w-full rounded-lg border border-ink-800 bg-ink-850 py-2 pr-7 pl-3 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
                   />
                   {fromText ? (
                     <button
@@ -239,11 +255,11 @@ export function RecommendationPanel({
                 </span>
               </label>
               <div className="min-w-0">
-                <span className="text-[11px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+                <span className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
                   To
                 </span>
                 <p
-                  className="mt-1.5 truncate rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[13px] text-neutral-300"
+                  className="mt-1.5 truncate rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[15px] text-neutral-300"
                   title={siteLabel}
                 >
                   {siteLabel || "Enquiry site"}
@@ -251,9 +267,28 @@ export function RecommendationPanel({
               </div>
             </div>
 
+            <div className="mb-4 flex items-center gap-3">
+              <input
+                type="search"
+                value={searchText}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder="Search make, model or vendor"
+                className="min-w-0 flex-1 rounded-lg border border-ink-800 bg-ink-850 px-3 py-2 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+              />
+              <label className="flex shrink-0 cursor-pointer items-center gap-2 text-[14px] text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={availableOnly}
+                  onChange={(event) => onAvailableOnlyChange(event.target.checked)}
+                  className="accent-accent-500"
+                />
+                Available only
+              </label>
+            </div>
+
             <div className="mb-3 flex items-start justify-between gap-3 px-0.5">
               <div className="min-w-0">
-                <p className="text-[13px] font-medium text-neutral-200">
+                <p className="text-[15px] font-medium text-neutral-200">
                   {total} crane{total === 1 ? "" : "s"}
                   {fromText.trim() ? ` in ${fromText.trim()}` : ""}
                   <span className="font-normal text-neutral-500">
@@ -261,9 +296,11 @@ export function RecommendationPanel({
                     {mode === "distance" ? "nearest first" : "smallest adequate first"}
                   </span>
                 </p>
-                <p className="mt-0.5 text-[11px] text-neutral-500" title={recommendations.capacityRule}>
+                <p className="mt-0.5 text-[13px] text-neutral-500" title={recommendations.capacityRule}>
                   {mode === "distance"
-                    ? "Capacity is a label here, not a filter"
+                    ? capacityFloorT(line?.capacityT) !== null
+                      ? `Nearest first · only ${capacityFloorT(line?.capacityT)} t and above`
+                      : "Nearest first"
                     : recommendations.evaluatedAt
                       ? recommendations.snapshotId
                         ? evaluatedLabel(recommendations.evaluatedAt)
@@ -286,7 +323,7 @@ export function RecommendationPanel({
                   <button
                     type="button"
                     onClick={() => onFromChange("")}
-                    className="rounded-lg border border-ink-700 px-3 py-1.5 text-[12px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
+                    className="rounded-lg border border-ink-700 px-3 py-1.5 text-[14px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
                   >
                     Clear From
                   </button>
@@ -311,7 +348,7 @@ export function RecommendationPanel({
                     <button
                       type="button"
                       onClick={() => onModeChange("distance")}
-                      className="rounded-lg border border-ink-700 px-3 py-1.5 text-[12px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
+                      className="rounded-lg border border-ink-700 px-3 py-1.5 text-[14px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
                     >
                       Try Distance
                     </button>
@@ -320,7 +357,7 @@ export function RecommendationPanel({
               />
             ) : (
               <>
-              <label className="mb-2 flex w-fit cursor-pointer items-center gap-2 px-0.5 text-[12px] text-neutral-400">
+              <label className="mb-2 flex w-fit cursor-pointer items-center gap-2 px-0.5 text-[14px] text-neutral-400">
                 <input
                   type="checkbox"
                   checked={allChecked}
@@ -353,7 +390,7 @@ export function RecommendationPanel({
 
       {checkedCranes.length > 0 ? (
         <div className="flex shrink-0 items-center justify-between gap-3 border-t border-ink-800 bg-ink-900 px-4 py-3">
-          <p className="min-w-0 text-[12px] text-neutral-400">
+          <p className="min-w-0 text-[14px] text-neutral-400">
             <span className="font-semibold text-white tabular-nums">{checkedCranes.length}</span>{" "}
             crane{checkedCranes.length === 1 ? "" : "s"} ·{" "}
             <span className="font-semibold text-white tabular-nums">{checkedVendors}</span> vendor
@@ -368,11 +405,29 @@ export function RecommendationPanel({
           </p>
           <button
             type="button"
-            onClick={() => setSendOpen(true)}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-[12px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
+            onClick={() => {
+              setSendAll(false);
+              setSendOpen(true);
+            }}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-[14px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
           >
             <Mail className="size-3.5" aria-hidden />
-            Send RFQ
+            Email {checkedVendors} vendor{checkedVendors === 1 ? "" : "s"}
+          </button>
+        </div>
+      ) : recommendations ? (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-ink-800 bg-ink-900 px-4 py-3">
+          <p className="min-w-0 text-[14px] text-neutral-400">Tick cranes to email their vendors</p>
+          <button
+            type="button"
+            onClick={() => {
+              setSendAll(true);
+              setSendOpen(true);
+            }}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-[14px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
+          >
+            <Mail className="size-3.5" aria-hidden />
+            Email all approved vendors
           </button>
         </div>
       ) : null}
@@ -383,6 +438,7 @@ export function RecommendationPanel({
         lineId={lineId}
         lineLabel={line ? lineReference(line) : "Selected line"}
         cranes={checkedCranes}
+        startWithAll={sendAll}
         onSent={() => onSetChecked([])}
       />
     </div>
@@ -465,28 +521,31 @@ function RecommendationRow({
                 fill={craneFill(crane.currentStatus)}
               />
             </svg>
-            <span className="relative text-[16px] leading-none font-semibold tabular-nums">
+            <span className="relative text-[17px] leading-none font-semibold tabular-nums">
               {Math.round(crane.capacityT)}
             </span>
-            <span className="relative mt-1 text-[10px] font-semibold tracking-[0.14em] text-neutral-500">
+            <span className="relative mt-1 text-[12px] font-semibold tracking-[0.14em] text-neutral-500">
               TON
             </span>
           </span>
 
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[14px] font-semibold text-neutral-100">
+            <span className="block text-[16px] leading-snug font-semibold break-words text-neutral-100">
               {crane.make} {crane.model}
             </span>
-            <span className="mt-1 block truncate text-[12px] text-neutral-400">
+            <span className="mt-1 block text-[14px] leading-snug break-words text-neutral-400">
               {crane.vendorName}
             </span>
-            <span className="mt-0.5 block truncate text-[12px] text-neutral-500">{place}</span>
+            <span className="mt-0.5 block text-[14px] leading-snug break-words text-neutral-500">{place}</span>
           </span>
 
-          <span className="shrink-0 text-right">
+        </div>
+
+        <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-ink-800 pt-3">
+          <span className="flex w-full items-baseline justify-between gap-3">
             <span
               className={cn(
-                "block text-[14px] leading-tight font-semibold text-neutral-100 tabular-nums",
+                "block text-[16px] leading-tight font-semibold text-neutral-100 tabular-nums",
                 route?.loading && "opacity-60",
               )}
             >
@@ -494,7 +553,7 @@ function RecommendationRow({
             </span>
             <span
               className={cn(
-                "mt-1 block text-[11px]",
+                "mt-1 block text-[13px]",
                 route?.fallback ? "text-amber-700" : "text-neutral-500",
               )}
             >
@@ -505,7 +564,7 @@ function RecommendationRow({
 
         <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           {crane.availableInTime ? (
-            <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-700">
+            <span className="inline-flex items-center gap-1.5 text-[14px] text-emerald-700">
               <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />
               Available in time
             </span>
@@ -513,22 +572,22 @@ function RecommendationRow({
           {hasExceptions ? (
             <>
               {mode === "distance" && crane.belowRequiredCapacity ? (
-                <Badge tone="amber" className="px-2 py-0 text-[11px]">
+                <Badge tone="amber" className="px-2 py-0 text-[13px]">
                   Below capacity
                 </Badge>
               ) : null}
               {!crane.availableInTime ? (
-                <Badge tone="amber" className="px-2 py-0 text-[11px]">
+                <Badge tone="amber" className="px-2 py-0 text-[13px]">
                   {engagedUntil ? `Engaged until ${engagedUntil}` : "Not free in time"}
                 </Badge>
               ) : null}
               {crane.locationUnverified ? (
-                <Badge tone="amber" className="px-2 py-0 text-[11px]">
+                <Badge tone="amber" className="px-2 py-0 text-[13px]">
                   Location unverified
                 </Badge>
               ) : null}
               {crane.stale ? (
-                <Badge tone="neutral" className="px-2 py-0 text-[11px]">
+                <Badge tone="neutral" className="px-2 py-0 text-[13px]">
                   Stale
                 </Badge>
               ) : null}
@@ -537,7 +596,7 @@ function RecommendationRow({
         </span>
 
         {crane.boomWarnings.length > 0 ? (
-          <span className="mt-2 block text-[11px] leading-snug text-amber-700">
+          <span className="mt-2 block text-[13px] leading-snug text-amber-700">
             {crane.boomWarnings.join(" · ")}
           </span>
         ) : null}
@@ -576,13 +635,14 @@ function RefreshButton({
         type="button"
         onClick={() => refresh.mutate()}
         disabled={refresh.isPending}
-        className="flex items-center gap-1 rounded-md border border-ink-800 px-2 py-1 text-[11px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
+        className="flex items-center gap-1 rounded-md border border-ink-800 px-2 py-1 text-[13px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
       >
         <RefreshCw className={cn("size-3", refresh.isPending && "animate-spin")} aria-hidden />
         {refresh.isPending ? "Evaluating…" : "Refresh"}
       </button>
-      {note ? <p className="max-w-40 text-right text-[11px] text-red-700">{note}</p> : null}
+      {note ? <p className="max-w-40 text-right text-[13px] text-red-700">{note}</p> : null}
     </div>
   );
 }
+
 

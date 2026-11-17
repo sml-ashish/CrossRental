@@ -1,4 +1,5 @@
 
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -23,11 +24,6 @@ import { cn } from "@/lib/cn";
 
 interface MapPoint {
   crane: DiscoveryCrane;
-  lat: number;
-  lng: number;
-}
-
-interface HeatPoint {
   lat: number;
   lng: number;
 }
@@ -109,7 +105,7 @@ export function CraneMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerLayerRef = useRef<L.LayerGroup | null>(null);
-  const heatRef = useRef<L.ImageOverlay | null>(null);
+  const heatRef = useRef<L.LayerGroup | null>(null);
   const markersRef = useRef(new Map<string, L.Marker>());
   const fittedRef = useRef(false);
 
@@ -288,7 +284,8 @@ export function CraneMap({
     }
   }, [ready, selectedCraneId, points, cranes]);
 
-  // Heat layer, rebuilt only when its basis or the data changes.
+  // Heat clusters: a grid that tightens as the person zooms in, coloured by
+  // share of the busiest cell (blue → green → amber → red) with a count on each.
   useEffect(() => {
     if (!ready) return;
     const map = mapRef.current;
@@ -296,22 +293,59 @@ export function CraneMap({
 
     heatRef.current?.remove();
     heatRef.current = null;
+    if (!showHeat) return;
 
-    const heat = buildHeatImage(points);
-    if (!heat) return;
-    heatRef.current = L.imageOverlay(heat.url, heat.bounds, {
-      opacity: 0.72,
-      interactive: false,
-      className: "crane-heat",
-    });
-  }, [ready, points]);
+    const draw = () => {
+      heatRef.current?.remove();
+      const zoom = map.getZoom();
+      const cell = zoom <= 5 ? 1.2 : zoom === 6 ? 0.6 : zoom === 7 ? 0.3 : zoom === 8 ? 0.15 : zoom === 9 ? 0.08 : 0.04;
+      const buckets = new Map<string, { lat: number; lng: number; count: number }>();
+      for (const point of points) {
+        const key = `${Math.floor(point.lat / cell)}:${Math.floor(point.lng / cell)}`;
+        const bucket = buckets.get(key);
+        if (bucket) {
+          bucket.lat += point.lat;
+          bucket.lng += point.lng;
+          bucket.count += 1;
+        } else buckets.set(key, { lat: point.lat, lng: point.lng, count: 1 });
+      }
+      const groups = [...buckets.values()];
+      const max = groups.reduce((value, group) => Math.max(value, group.count), 1);
+      const layer = L.layerGroup();
+      for (const group of groups) {
+        const share = group.count / max;
+        const colour = share <= 0.25 ? "#3b82f6" : share <= 0.5 ? "#22c55e" : share <= 0.75 ? "#f59e0b" : "#ef4444";
+        const lat = group.lat / group.count;
+        const lng = group.lng / group.count;
+        L.circle([lat, lng], {
+          radius: cell * 111_000 * (0.22 + 0.2 * Math.sqrt(share)),
+          color: colour,
+          weight: 2,
+          fillColor: colour,
+          fillOpacity: 0.42,
+          interactive: false,
+        }).addTo(layer);
+        L.marker([lat, lng], {
+          interactive: false,
+          icon: L.divIcon({
+            className: "",
+            html: `<span style="display:block;width:30px;margin-left:-15px;margin-top:-10px;text-align:center;font:700 15px system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.85)">${group.count}</span>`,
+            iconSize: [0, 0],
+          }),
+        }).addTo(layer);
+      }
+      layer.addTo(map);
+      heatRef.current = layer;
+    };
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    if (showHeat && heatRef.current) heatRef.current.addTo(map);
-    else heatRef.current?.remove();
-  }, [showHeat, points, ready]);
+    draw();
+    map.on("zoomend", draw);
+    return () => {
+      map.off("zoomend", draw);
+      heatRef.current?.remove();
+      heatRef.current = null;
+    };
+  }, [ready, showHeat, points]);
 
   const fitAll = () => {
     const map = mapRef.current;
@@ -328,7 +362,7 @@ export function CraneMap({
       {/* Controls float over the map: the map is the page, so the chrome has to
           be small and out of the way. */}
       <div className="absolute top-3 right-3 z-[800] flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[11px] text-neutral-400 shadow-lg backdrop-blur">
+        <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[13px] text-neutral-400 shadow-lg backdrop-blur">
           <label className="flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -342,7 +376,7 @@ export function CraneMap({
         <button
           type="button"
           onClick={fitAll}
-          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[11px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
+          className="rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[13px] font-medium text-neutral-300 shadow-lg backdrop-blur hover:text-white"
         >
           Fit all
         </button>
@@ -351,10 +385,10 @@ export function CraneMap({
       {/* Top-left: where the results are, then what the colours mean. The bottom
           of the map belongs to the crane card. */}
       <div className="pointer-events-none absolute top-3 left-3 z-[800] flex flex-col items-start gap-2">
-        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[11px] font-medium text-neutral-300 shadow-lg backdrop-blur">
+        <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[13px] font-medium text-neutral-300 shadow-lg backdrop-blur">
           India · {statesLive} state{statesLive === 1 ? "" : "s"} live
         </div>
-        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[11px] text-neutral-400 shadow-lg backdrop-blur">
+        <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[13px] text-neutral-400 shadow-lg backdrop-blur">
           <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <LegendItem status="AVAILABLE" label="Available" />
             <LegendItem status="ENGAGED" label="Engaged" />
@@ -389,115 +423,5 @@ function LegendItem({ status, label }: { status: string; label: string }) {
 }
 
 
-const HEAT_SIZE = 512;
-const HEAT_RADIUS = 64;
 
-/** Blue → cyan → green → yellow → red, the conventional density ramp. */
-const HEAT_RAMP: Array<[at: number, r: number, g: number, b: number]> = [
-  [0, 0, 0, 255],
-  [0.35, 0, 255, 255],
-  [0.55, 0, 255, 0],
-  [0.75, 255, 255, 0],
-  [1, 255, 0, 0],
-];
-
-function heatColour(value: number): [number, number, number] {
-  for (let i = 1; i < HEAT_RAMP.length; i += 1) {
-    const previous = HEAT_RAMP[i - 1]!;
-    const next = HEAT_RAMP[i]!;
-    if (value <= next[0]) {
-      const span = next[0] - previous[0] || 1;
-      const t = (value - previous[0]) / span;
-      return [
-        Math.round(previous[1] + (next[1] - previous[1]) * t),
-        Math.round(previous[2] + (next[2] - previous[2]) * t),
-        Math.round(previous[3] + (next[3] - previous[3]) * t),
-      ];
-    }
-  }
-  return [255, 0, 0];
-}
-
-/**
- * Builds the heat layer as a PNG plus the lat/lng rectangle it covers.
- *
- * Radial blobs are accumulated additively, then each pixel's accumulated alpha
- * is mapped through the ramp. An `imageOverlay` carries the result, so Leaflet
- * handles positioning and scaling as the map moves; there is no per-pan redraw.
- */
-function buildHeatImage(
-  points: HeatPoint[],
-): { url: string; bounds: L.LatLngBoundsExpression } | null {
-  const first = points[0];
-  if (!first) return null;
-
-  let minLat = first.lat;
-  let maxLat = first.lat;
-  let minLng = first.lng;
-  let maxLng = first.lng;
-  for (const point of points) {
-    minLat = Math.min(minLat, point.lat);
-    maxLat = Math.max(maxLat, point.lat);
-    minLng = Math.min(minLng, point.lng);
-    maxLng = Math.max(maxLng, point.lng);
-  }
-
-  // A single crane, or a tight cluster, would give a zero-area rectangle. The
-  // padding also leaves room for the blob's edge.
-  const latPad = Math.max((maxLat - minLat) * 0.25, 0.25);
-  const lngPad = Math.max((maxLng - minLng) * 0.25, 0.25);
-  const south = minLat - latPad;
-  const north = maxLat + latPad;
-  const west = minLng - lngPad;
-  const east = maxLng + lngPad;
-  const latSpan = north - south;
-  const lngSpan = east - west;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = HEAT_SIZE;
-  canvas.height = HEAT_SIZE;
-  const context = canvas.getContext("2d");
-  if (!context) return null;
-
-  context.clearRect(0, 0, HEAT_SIZE, HEAT_SIZE);
-
-  // Additive compositing is what turns overlapping cranes into a hotter pixel.
-  context.globalCompositeOperation = "lighter";
-  for (const point of points) {
-    const x = ((point.lng - west) / lngSpan) * HEAT_SIZE;
-    const y = ((north - point.lat) / latSpan) * HEAT_SIZE;
-    const gradient = context.createRadialGradient(x, y, 0, x, y, HEAT_RADIUS);
-    gradient.addColorStop(0, "rgba(0, 0, 0, 0.6)");
-    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-    context.fillStyle = gradient;
-    context.beginPath();
-    context.arc(x, y, HEAT_RADIUS, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  const image = context.getImageData(0, 0, HEAT_SIZE, HEAT_SIZE);
-  const data = image.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const intensity = data[i + 3]! / 255;
-    if (intensity <= 0.02) {
-      data[i + 3] = 0;
-      continue;
-    }
-    const [r, g, b] = heatColour(Math.min(1, intensity * 1.25));
-    data[i] = r;
-    data[i + 1] = g;
-    data[i + 2] = b;
-    data[i + 3] = Math.min(235, Math.round(90 + intensity * 165));
-  }
-  context.globalCompositeOperation = "source-over";
-  context.putImageData(image, 0, 0);
-
-  return {
-    url: canvas.toDataURL("image/png"),
-    bounds: [
-      [south, west],
-      [north, east],
-    ],
-  };
-}
 

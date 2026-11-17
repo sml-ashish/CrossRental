@@ -303,7 +303,7 @@ export function BookingCalendarPage() {
           </button>
         </div>
 
-        <p className="mt-2 text-[13px] text-slate-500 md:hidden">{summaryParts.join(" · ")}</p>
+        <p className="mt-2 text-[15px] text-slate-500 md:hidden">{summaryParts.join(" · ")}</p>
 
         <div
           id="availability-filters"
@@ -336,7 +336,7 @@ export function BookingCalendarPage() {
                     aria-pressed={selected}
                     onClick={() => setRange(preset.from, preset.to)}
                     className={cn(
-                      "rounded-full border px-2.5 py-1.5 text-[12px] font-medium transition-colors duration-150",
+                      "rounded-full border px-2.5 py-1.5 text-[14px] font-medium transition-colors duration-150",
                       selected
                         ? "border-brand-300 bg-brand-50 text-brand-700"
                         : "border-slate-200 text-slate-600 hover:bg-ink-800 hover:text-slate-900",
@@ -432,12 +432,12 @@ export function BookingCalendarPage() {
       ) : (
         <section className="overflow-hidden rounded-lg border border-ink-800 bg-ink-900" aria-label="Cranes by availability">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-800 px-4 py-2.5">
-            <p className="text-[13px] text-slate-600" aria-live="polite">
+            <p className="text-[15px] text-slate-600" aria-live="polite">
               <span className="font-semibold text-slate-900">{freeCount}</span>{" "}
               {freeCount === 1 ? "crane" : "cranes"} free for all or part of{" "}
               <span className="font-medium text-slate-800">{rangeProse}</span>
             </p>
-            <p className="text-[12px] text-slate-500 tabular-nums">
+            <p className="text-[14px] text-slate-500 tabular-nums">
               {groups.whole.length} free the whole time · {groups.part.length} partly free
             </p>
           </div>
@@ -539,10 +539,10 @@ function GroupSection({
       ) : (
         <span className="size-4 shrink-0" aria-hidden />
       )}
-      <span className="text-[13px] font-semibold text-slate-800">{title}</span>
-      <span className="text-[13px] text-slate-500 tabular-nums">· {count}</span>
+      <span className="text-[15px] font-semibold text-slate-800">{title}</span>
+      <span className="text-[15px] text-slate-500 tabular-nums">· {count}</span>
       {!open && collapsible && count > 0 ? (
-        <span className="ml-auto text-[12px] font-medium text-brand-700">Show</span>
+        <span className="ml-auto text-[14px] font-medium text-brand-700">Show</span>
       ) : null}
     </>
   );
@@ -640,17 +640,17 @@ function CraneRow({
         )}
       >
         <div className="order-1 min-w-0">
-          <p className="flex items-center gap-1.5 text-[15px] leading-tight font-semibold text-slate-900">
+          <p className="flex items-center gap-1.5 text-[17px] leading-tight font-semibold text-slate-900">
             <ChevronDown
               className={cn("size-3.5 shrink-0 text-slate-500 transition-transform", !expanded && "-rotate-90 motion-reduce:transition-none")}
               aria-hidden
             />
             <span className="truncate">{crane.craneLabel}</span>
           </p>
-          <p className="mt-1 truncate text-[13px] text-slate-600 tabular-nums">
+          <p className="mt-1 truncate text-[15px] text-slate-600 tabular-nums">
             {crane.capacityT} t · {crane.craneTypeName.replace(/\s+Crane$/i, "")}
           </p>
-          <p className="truncate text-[13px] text-slate-500">
+          <p className="truncate text-[15px] text-slate-500">
             {crane.vendorName} · {crane.currentLocation}
           </p>
         </div>
@@ -668,18 +668,18 @@ function CraneRow({
         <div className="order-2 min-w-0 md:order-3">
           <p className="text-sm text-slate-800">{availability.sentence}</p>
           {availability.kind === "part" && availability.blocker ? (
-            <p className="mt-0.5 text-[13px] text-slate-500">{availability.blocker}</p>
+            <p className="mt-0.5 text-[15px] text-slate-500">{availability.blocker}</p>
           ) : null}
         </div>
       </div>
 
       {expanded ? (
         <div id={panelId} className="border-t border-ink-800 px-4 py-3 md:pl-11">
-          <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+          <p className="text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             In this period
           </p>
           {bookings.length === 0 ? (
-            <p className="mt-1.5 text-[13px] text-slate-500">
+            <p className="mt-1.5 text-[15px] text-slate-500">
               No bookings or blocks in this period.
             </p>
           ) : (
@@ -742,7 +742,7 @@ function CraneRow({
 
 function BookingLineRow({ segment }: { segment: DaySegment }) {
   return (
-    <li className="flex items-baseline gap-2 text-[13px] text-slate-700">
+    <li className="flex items-baseline gap-2 text-[15px] text-slate-700">
       <span
         className={cn(
           "mt-1 size-1.5 shrink-0 rounded-full",
@@ -803,7 +803,7 @@ function CraneStrip({
           />
         ) : null}
       </div>
-      <div className="mt-1 flex items-baseline justify-between gap-2 text-[12px] text-slate-500 tabular-nums">
+      <div className="mt-1 flex items-baseline justify-between gap-2 text-[14px] text-slate-500 tabular-nums">
         <span>{formatDay(from)}</span>
         {todayPosition !== null ? <span className="text-brand-700">Today</span> : null}
         <span>{formatDay(to)}</span>
@@ -811,3 +811,4 @@ function CraneStrip({
     </div>
   );
 }
+

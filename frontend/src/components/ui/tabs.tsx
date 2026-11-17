@@ -83,7 +83,7 @@ export function Tabs<T extends string>({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(tab.value)}
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-150",
+              "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[15px] font-medium whitespace-nowrap transition-colors duration-150",
               active
                 ? "bg-ink-800 text-white shadow-sm ring-1 ring-ink-700"
                 : "text-slate-500 hover:bg-ink-850 hover:text-white",
@@ -94,7 +94,7 @@ export function Tabs<T extends string>({
             {typeof tab.count === "number" ? (
               <span
                 className={cn(
-                  "rounded-full px-1.5 py-px text-[10px] tabular-nums",
+                  "rounded-full px-1.5 py-px text-[12px] tabular-nums",
                   active ? "bg-ink-700 text-neutral-200" : "bg-ink-800 text-slate-500",
                 )}
               >
@@ -107,3 +107,4 @@ export function Tabs<T extends string>({
     </div>
   );
 }
+

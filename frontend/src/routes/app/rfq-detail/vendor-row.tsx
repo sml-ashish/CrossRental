@@ -35,7 +35,7 @@ function HistoryChip({
 }) {
   if (alreadyRecipient) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-ink-800 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+      <span className="inline-flex items-center gap-1 rounded-full border border-ink-800 px-2 py-0.5 text-[13px] font-medium text-slate-500">
         <Check className="size-3" aria-hidden />
         Already a recipient
       </span>
@@ -44,7 +44,7 @@ function HistoryChip({
   if (!contacted) return null;
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+      className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[13px] font-medium text-amber-700"
       title={`Already sent ${contacted.rfqNumber} for this enquiry line`}
     >
       <History className="size-3" aria-hidden />
@@ -73,7 +73,7 @@ function CraneTable({
     <div id={id}>
       <div
         className={cn(
-          "hidden gap-x-3 border-b border-ink-800/70 pb-1 text-[11px] font-medium tracking-[0.06em] text-slate-500 uppercase md:grid",
+          "hidden gap-x-3 border-b border-ink-800/70 pb-1 text-[13px] font-medium tracking-[0.06em] text-slate-500 uppercase md:grid",
           CRANE_COLUMNS,
         )}
         aria-hidden
@@ -97,7 +97,7 @@ function CraneTable({
             >
               {/* phone: one stacked block per crane */}
               <div className="md:hidden">
-                <p className="text-[13px] text-slate-800">
+                <p className="text-[15px] text-slate-800">
                   <span>{name}</span>
                   <span className="text-slate-500">
                     {" · "}
@@ -107,7 +107,7 @@ function CraneTable({
                       : ` · ${headroomShort(crane, requiredT)}`}
                   </span>
                 </p>
-                <p className="mt-0.5 text-[12px] text-slate-500 tabular-nums">
+                <p className="mt-0.5 text-[14px] text-slate-500 tabular-nums">
                   {crane.yom ?? "Year unknown"}
                   {" · "}
                   <span
@@ -131,7 +131,7 @@ function CraneTable({
               {/* tablet and up: aligned columns, no zebra stripes */}
               <div
                 className={cn(
-                  "hidden gap-x-3 text-[13px] tabular-nums md:grid md:items-baseline",
+                  "hidden gap-x-3 text-[15px] tabular-nums md:grid md:items-baseline",
                   CRANE_COLUMNS,
                 )}
               >
@@ -241,14 +241,14 @@ export function VendorCard({
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h3
               id={`vendor-name-${group.vendorId}`}
-              className="text-[15px] leading-tight font-semibold text-slate-900"
+              className="text-[17px] leading-tight font-semibold text-slate-900"
             >
               {group.vendorName}
             </h3>
             <HistoryChip contacted={contacted} alreadyRecipient={alreadyRecipient} />
             {showDistance && stats.nearestKm !== null ? (
               <p
-                className="text-[13px] text-slate-600 tabular-nums"
+                className="text-[15px] text-slate-600 tabular-nums"
                 title={
                   stats.approximate ? "Straight-line estimate, not road distance" : "Road distance"
                 }
@@ -256,10 +256,10 @@ export function VendorCard({
                 nearest {shortDistance(stats.nearestKm, stats.approximate)}
               </p>
             ) : null}
-            {far ? <span className="text-[12px] text-slate-500">Far from site</span> : null}
+            {far ? <span className="text-[14px] text-slate-500">Far from site</span> : null}
           </div>
 
-          <p className="mt-0.5 text-[12px] text-slate-500 tabular-nums">
+          <p className="mt-0.5 text-[14px] text-slate-500 tabular-nums">
             {stats.count} matching ·{" "}
             <span
               className={
@@ -288,7 +288,7 @@ export function VendorCard({
             onClick={onToggleExpand}
             aria-expanded={expanded}
             aria-controls={detailId}
-            className="mt-1 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[12px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+            className="mt-1 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[14px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
           >
             {expanded ? (
               <>
@@ -306,7 +306,7 @@ export function VendorCard({
         ) : null}
 
         {contacted ? (
-          <p className="mt-1 text-[12px] text-slate-500">
+          <p className="mt-1 text-[14px] text-slate-500">
             Sent{" "}
             <Link
               to="/app/rfqs/$rfqId"
@@ -326,3 +326,4 @@ export function VendorCard({
     </article>
   );
 }
+

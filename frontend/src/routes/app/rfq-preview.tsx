@@ -71,7 +71,7 @@ function shortMoment(iso: string | null): string {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+    <h2 className="text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
       {children}
     </h2>
   );
@@ -80,11 +80,11 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function Item({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[12px] text-slate-500">{label}</dt>
+      <dt className="text-[14px] text-slate-500">{label}</dt>
       <dd
         className={cn(
-          "mt-0.5 truncate text-[13px] text-slate-700",
-          mono && "font-mono text-[12px]",
+          "mt-0.5 truncate text-[15px] text-slate-700",
+          mono && "font-mono text-[14px]",
         )}
         title={value}
       >
@@ -178,19 +178,19 @@ export function RfqPreview({
       {/* header */}
       <div className="flex shrink-0 items-start gap-3 border-b border-ink-800 px-4 py-4">
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[12px] leading-tight text-slate-500">
+          <p className="font-mono text-[14px] leading-tight text-slate-500">
             {rfq?.rfqNumber ?? row?.rfqNumber ?? "RFQ"}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className={cn("size-1.5 rounded-full", display.dot)} aria-hidden />
-            <span className={cn("text-[13px] font-medium", display.text)}>{display.label}</span>
+            <span className={cn("text-[15px] font-medium", display.text)}>{display.label}</span>
             {rfq?.rollupStatus && status === "SENT" ? (
-              <span className="text-[12px] text-slate-500">
+              <span className="text-[14px] text-slate-500">
                 · {ROLLUPE_STATUS_LABELS[rfq.rollupStatus]}
               </span>
             ) : null}
           </div>
-          <p className="mt-1 text-[12px] text-slate-500 tabular-nums">
+          <p className="mt-1 text-[14px] text-slate-500 tabular-nums">
             Due {formatDeadlineDate(rfq?.submissionDeadline ?? row?.submissionDeadline ?? null)}
             {countdown && countdown.label !== "—" ? (
               <>
@@ -211,7 +211,7 @@ export function RfqPreview({
           </p>
           <Link
             {...fullHref}
-            className="mt-2 inline-flex items-center gap-1 text-[13px] text-slate-500 transition-colors hover:text-white"
+            className="mt-2 inline-flex items-center gap-1 text-[15px] text-slate-500 transition-colors hover:text-white"
           >
             Open full page
             <ArrowUpRight className="size-3.5" aria-hidden />
@@ -236,13 +236,13 @@ export function RfqPreview({
             <button
               type="button"
               onClick={() => void detail.refetch()}
-              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-ink-800 px-3 py-1.5 text-[13px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
+              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-ink-800 px-3 py-1.5 text-[15px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
             >
               Retry
             </button>
           </div>
         ) : !rfq ? (
-          <div className="flex items-center gap-2 p-4 text-[13px] text-slate-500" role="status">
+          <div className="flex items-center gap-2 p-4 text-[15px] text-slate-500" role="status">
             <Spinner /> Loading the RFQ
           </div>
         ) : (
@@ -250,13 +250,13 @@ export function RfqPreview({
             {/* requirement */}
             <section className="border-b border-ink-800 px-4 py-4">
               <SectionLabel>Requirement</SectionLabel>
-              <p className="mt-1.5 text-[15px] leading-tight font-semibold text-white">
+              <p className="mt-1.5 text-[17px] leading-tight font-semibold text-white">
                 {craneTypeLabel(rfq.craneTypeRef?.name ?? rfq.craneType)} ·{" "}
                 <span className="tabular-nums">
                   {rfq.capacityT} t{rfq.capacityRule === "AT_LEAST" ? "+" : ""}
                 </span>
                 {rfq.quantity > 1 ? (
-                  <span className="ml-2 text-[13px] font-normal text-slate-500 tabular-nums">
+                  <span className="ml-2 text-[15px] font-normal text-slate-500 tabular-nums">
                     × {rfq.quantity}
                   </span>
                 ) : null}
@@ -289,7 +289,7 @@ export function RfqPreview({
               </dl>
 
               {rfq.applicationDescription || rfq.loadDescription ? (
-                <p className="mt-3 text-[13px] leading-relaxed text-slate-500">
+                <p className="mt-3 text-[15px] leading-relaxed text-slate-500">
                   {rfq.loadDescription ?? rfq.applicationDescription}
                 </p>
               ) : null}
@@ -311,22 +311,22 @@ export function RfqPreview({
               )}
               <div className="px-4 py-3">
                 <SectionLabel>Site</SectionLabel>
-                <p className="mt-1.5 text-[14px] text-slate-700">
+                <p className="mt-1.5 text-[16px] text-slate-700">
                   {rfq.siteState
                     ? `${cityOf(rfq)}, ${titleCase(rfq.siteState.name)}`
                     : cityOf(rfq)}
                 </p>
-                <p className="mt-0.5 text-[12px] text-slate-500 tabular-nums">
+                <p className="mt-0.5 text-[14px] text-slate-500 tabular-nums">
                   {rfq.sitePincode ?? "No pincode"}
                 </p>
                 {rfq.siteLocationUnverified ? (
-                  <p className="mt-1 text-[12px] text-amber-600">
+                  <p className="mt-1 text-[14px] text-amber-600">
                     Location unverified — distances are unavailable.
                   </p>
                 ) : null}
                 {mismatch ? (
                   <p
-                    className="mt-1 text-[12px] text-slate-500"
+                    className="mt-1 text-[14px] text-slate-500"
                     title={`${rfq.sitePincode} is a ${mismatch.expected} pincode, but the state is ${
                       rfq.siteState?.name ?? rfq.siteStateCode
                     }.`}
@@ -354,7 +354,7 @@ export function RfqPreview({
               </div>
 
               {recipients.length === 0 ? (
-                <p className="mt-2 text-[13px] text-slate-500">
+                <p className="mt-2 text-[15px] text-slate-500">
                   No vendors chosen yet.
                 </p>
               ) : (
@@ -376,7 +376,7 @@ export function RfqPreview({
                   type="button"
                   onClick={() => void remind()}
                   disabled={busy !== null}
-                  className="mt-3 inline-flex items-center gap-2 text-[13px] font-medium text-accent-400 transition-colors hover:text-accent-300 disabled:opacity-60"
+                  className="mt-3 inline-flex items-center gap-2 text-[15px] font-medium text-accent-400 transition-colors hover:text-accent-300 disabled:opacity-60"
                 >
                   {busy === "all" ? <Spinner /> : <Bell className="size-3.5" aria-hidden />}
                   Remind all {pending.length} pending
@@ -388,7 +388,7 @@ export function RfqPreview({
             <section className="border-b border-ink-800 px-4 py-4">
               <SectionLabel>Quotes ({quotations.length})</SectionLabel>
               {quotations.length === 0 ? (
-                <p className="mt-2 text-[13px] text-slate-500">
+                <p className="mt-2 text-[15px] text-slate-500">
                   {rfq.status === "SENT"
                     ? "Nothing has come back yet."
                     : "No quotations on this RFQ."}
@@ -400,21 +400,21 @@ export function RfqPreview({
                     .map((quotation) => (
                       <li key={quotation.quotationId} className="py-2.5">
                         <div className="flex items-baseline justify-between gap-3">
-                          <p className="min-w-0 truncate text-[13px] text-slate-700">
+                          <p className="min-w-0 truncate text-[15px] text-slate-700">
                             {quotation.vendorName}
                           </p>
-                          <p className="shrink-0 text-[13px] font-medium text-white tabular-nums">
+                          <p className="shrink-0 text-[15px] font-medium text-white tabular-nums">
                             {formatInr(quotation.totalQuotedValue, 0)}
                           </p>
                         </div>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[12px] text-slate-500">
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[14px] text-slate-500">
                           <span>Valid to {formatCalendarDate(quotation.validityDate)}</span>
                           {quotation.totalQuotedValue === lowest ? (
                             <span className="text-emerald-600">Lowest</span>
                           ) : null}
                         </div>
                         {quotation.craneDescription ? (
-                          <p className="mt-0.5 truncate text-[12px] text-slate-500">
+                          <p className="mt-0.5 truncate text-[14px] text-slate-500">
                             {quotation.craneDescription}
                           </p>
                         ) : null}
@@ -427,7 +427,7 @@ export function RfqPreview({
                   to="/app/rfqs/$rfqId"
                   params={{ rfqId }}
                   search={{ tab: "quotations" }}
-                  className="mt-2 inline-flex items-center gap-1 text-[13px] text-slate-500 transition-colors hover:text-white"
+                  className="mt-2 inline-flex items-center gap-1 text-[15px] text-slate-500 transition-colors hover:text-white"
                 >
                   Compare quotes
                   <ArrowRight className="size-3.5" aria-hidden />
@@ -439,10 +439,10 @@ export function RfqPreview({
             {rfq.smlContactName || rfq.smlContactMobile || rfq.smlContactEmail ? (
               <section className="border-b border-ink-800 px-4 py-4">
                 <SectionLabel>SML contact</SectionLabel>
-                <p className="mt-1.5 text-[13px] text-slate-700">
+                <p className="mt-1.5 text-[15px] text-slate-700">
                   {rfq.smlContactName ?? "—"}
                 </p>
-                <p className="mt-0.5 text-[12px] text-slate-500 tabular-nums">
+                <p className="mt-0.5 text-[14px] text-slate-500 tabular-nums">
                   {[rfq.smlContactMobile, rfq.smlContactEmail].filter(Boolean).join(" · ")}
                 </p>
               </section>
@@ -470,7 +470,7 @@ export function RfqPreview({
               to="/app/rfqs/$rfqId"
               params={{ rfqId }}
               search={{ tab: "vendors" }}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
             >
               Choose vendors
               <ArrowRight className="size-4" aria-hidden />
@@ -480,7 +480,7 @@ export function RfqPreview({
               type="button"
               onClick={() => void remind()}
               disabled={busy !== null}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-60"
             >
               {busy === "all" ? <Spinner /> : <Bell className="size-4" aria-hidden />}
               Remind {pending.length} pending
@@ -490,7 +490,7 @@ export function RfqPreview({
               to="/app/rfqs/$rfqId"
               params={{ rfqId }}
               search={{ tab: "quotations" }}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-600"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
             >
               Compare quotes
               <ArrowRight className="size-4" aria-hidden />
@@ -498,7 +498,7 @@ export function RfqPreview({
           ) : (
             <Link
               {...fullHref}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-ink-800 px-4 py-2.5 text-[13px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-ink-800 px-4 py-2.5 text-[15px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
             >
               Open full page
               <ArrowUpRight className="size-4" aria-hidden />
@@ -529,10 +529,10 @@ function RecipientLine({
     <li className="py-2.5">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-medium text-white">
+          <p className="truncate text-[15px] font-medium text-white">
             {recipient.vendorName}
           </p>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[12px] text-slate-500">
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[14px] text-slate-500">
             <span className="inline-flex items-center gap-1">
               <span
                 className={cn(
@@ -560,7 +560,7 @@ function RecipientLine({
             ) : null}
           </p>
           {failed ? (
-            <p className="mt-0.5 text-[12px] text-red-600">
+            <p className="mt-0.5 text-[14px] text-red-600">
               {recipient.emailDeliveryStatus === "FAILED" ? "Email" : "WhatsApp"} delivery
               failed
             </p>
@@ -575,7 +575,7 @@ function RecipientLine({
               onRemind();
             }}
             disabled={busy}
-            className="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-[12px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-60"
+            className="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-[14px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-60"
           >
             {busy ? <Spinner className="size-3" /> : <Bell className="size-3" aria-hidden />}
             Remind
@@ -585,3 +585,4 @@ function RecipientLine({
     </li>
   );
 }
+

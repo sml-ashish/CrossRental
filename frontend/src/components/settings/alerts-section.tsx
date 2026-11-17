@@ -189,7 +189,7 @@ export function AlertsSection({ query }: { query: SettingsQuery }) {
               />
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-ink-800 pt-4 text-[13px] text-slate-500">
+            <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-ink-800 pt-4 text-[15px] text-slate-500">
               <span>
                 Alert emails are {loaded.alertEmailsEnabled ? "on" : "off"} today. Alerts are
                 computed when the dashboard is opened, not stored.
@@ -216,3 +216,4 @@ export function AlertsSection({ query }: { query: SettingsQuery }) {
     </SettingsSection>
   );
 }
+

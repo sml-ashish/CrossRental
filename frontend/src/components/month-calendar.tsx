@@ -276,7 +276,7 @@ export function MonthCalendar({
             <div
               key={weekday}
               className={cn(
-                "px-2 py-2 text-center text-[11px] font-medium tracking-[0.08em] uppercase",
+                "px-2 py-2 text-center text-[13px] font-medium tracking-[0.08em] uppercase",
                 index > 4 ? "text-slate-400" : "text-slate-500",
               )}
             >
@@ -328,7 +328,7 @@ export function MonthCalendar({
                         {Number(date.slice(8, 10))}
                       </span>
                       {inMonth && busy.length > 0 ? (
-                        <span className="text-[10px] font-medium text-slate-500 tabular-nums">
+                        <span className="text-[12px] font-medium text-slate-500 tabular-nums">
                           {busy.length}
                         </span>
                       ) : null}
@@ -343,7 +343,7 @@ export function MonthCalendar({
                               key={entry.crane.craneId}
                               title={`${entry.crane.craneLabel} · ${DAY_STATE_LABELS[entry.state]}`}
                               className={cn(
-                                "flex min-w-0 items-center gap-1 rounded border px-1 py-[2px] text-[10px] leading-4",
+                                "flex min-w-0 items-center gap-1 rounded border px-1 py-[2px] text-[12px] leading-4",
                                 tone.chip,
                               )}
                             >
@@ -355,7 +355,7 @@ export function MonthCalendar({
                           );
                         })}
                         {overflow > 0 ? (
-                          <span className="pl-1 text-[10px] font-medium text-slate-400">
+                          <span className="pl-1 text-[12px] font-medium text-slate-400">
                             +{overflow} more
                           </span>
                         ) : null}
@@ -424,7 +424,7 @@ export function DayAgenda({
     <div className="px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+          <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
             {inMonth ? weekdayName(date) : "Nothing scheduled"}
           </p>
           <div className="mt-0.5 flex items-center gap-2">
@@ -432,7 +432,7 @@ export function DayAgenda({
               {inMonth ? fullDate(date) : shortDate(date)}
             </h2>
             {isToday ? (
-              <span className="rounded-full bg-ink-700 px-2 py-0.5 text-[10px] font-medium tracking-wide text-white uppercase">
+              <span className="rounded-full bg-ink-700 px-2 py-0.5 text-[12px] font-medium tracking-wide text-white uppercase">
                 Today
               </span>
             ) : null}
@@ -465,7 +465,7 @@ export function DayAgenda({
               const tone = STATE_STYLES[group.state];
               return (
                 <div key={group.state}>
-                  <p className="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                  <p className="flex items-center gap-1.5 text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
                     <span className={cn("size-1.5 rounded-full", tone.dot)} aria-hidden />
                     {DAY_STATE_LABELS[group.state]}
                     <span className="text-slate-400">· {group.items.length}</span>
@@ -481,7 +481,7 @@ export function DayAgenda({
                             ? renderCrane(entry.crane, shortLabel(entry.crane.craneLabel))
                             : shortLabel(entry.crane.craneLabel)}
                         </span>
-                        <span className="truncate text-right text-[11px] text-slate-500">
+                        <span className="truncate text-right text-[13px] text-slate-500">
                           {entry.crane.capacityT} t ·{" "}
                           {entry.crane.ownershipType === "SML" ? "SML" : entry.crane.vendorName}
                         </span>
@@ -502,9 +502,10 @@ function AgendaStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-3 text-center first:pl-0 last:pr-0">
       <p className="text-sm font-semibold text-slate-900 tabular-nums">{value}</p>
-      <p className="text-[10px] font-medium tracking-[0.08em] text-slate-500 uppercase">{label}</p>
+      <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">{label}</p>
     </div>
   );
 }
 
 export const CALENDAR_STATE_LABELS = DAY_STATE_LABELS;
+

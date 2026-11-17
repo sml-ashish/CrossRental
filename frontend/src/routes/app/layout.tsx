@@ -179,7 +179,7 @@ export function AppLayout() {
                 key={`${item.to}:${item.label}`}
                 to={item.to}
                 activeOptions={{ exact: item.exact ?? false }}
-                className="shrink-0 rounded-md px-2.5 py-1.5 text-[13px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
+                className="shrink-0 rounded-md px-2.5 py-1.5 text-[15px] text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
                 activeProps={{ className: "bg-ink-850 text-white" }}
               >
                 {item.label}
@@ -194,7 +194,7 @@ export function AppLayout() {
               aria-expanded={menuOpen}
               aria-haspopup="menu"
               aria-label="Account"
-              className="flex size-8 items-center justify-center rounded-full bg-ink-700 text-[11px] font-semibold tracking-wide text-white transition-colors hover:bg-ink-800"
+              className="flex size-8 items-center justify-center rounded-full bg-ink-700 text-[13px] font-semibold tracking-wide text-white transition-colors hover:bg-ink-800"
             >
               {initials || "U"}
             </button>
@@ -298,3 +298,4 @@ export function AppLayout() {
 }
 
 export { ROLE_HOME };
+

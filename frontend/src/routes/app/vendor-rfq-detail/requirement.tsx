@@ -91,7 +91,7 @@ export function Requirement({ rfq }: { rfq: VendorRfqDetail["rfq"] }) {
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-[11px] font-semibold tracking-[0.08em] text-slate-500 uppercase">
+      <h3 className="text-[13px] font-semibold tracking-[0.08em] text-slate-500 uppercase">
         {title}
       </h3>
       <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
@@ -221,4 +221,5 @@ function ContactPanel({ rfq }: { rfq: VendorRfqDetail["rfq"] }) {
     </Panel>
   );
 }
+
 

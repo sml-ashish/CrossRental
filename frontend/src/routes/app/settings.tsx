@@ -180,7 +180,7 @@ export function SettingsPage() {
                   href={`#${section.id}`}
                   aria-current={isActive ? "location" : undefined}
                   className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] whitespace-nowrap transition-colors",
+                    "flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-[15px] whitespace-nowrap transition-colors",
                     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
                     isActive
                       ? "bg-ink-850 font-medium text-white"
@@ -215,21 +215,21 @@ export function SettingsPage() {
       {anyDirty ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-800 bg-ink-900/95 backdrop-blur print:hidden">
           <div className="flex max-w-[1100px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
-            <p className="flex items-center gap-2 text-[13px] text-slate-600">
+            <p className="flex items-center gap-2 text-[15px] text-slate-600">
               <span className="size-1.5 shrink-0 rounded-full bg-accent-500" aria-hidden />
               Unsaved changes in {dirtyCount} {dirtyCount === 1 ? "section" : "sections"}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className="btn-secondary px-3 py-1.5 text-[13px]"
+                className="btn-secondary px-3 py-1.5 text-[15px]"
                 onClick={discardAll}
               >
                 Discard all
               </button>
               <button
                 type="button"
-                className="btn-primary px-3.5 py-1.5 text-[13px]"
+                className="btn-primary px-3.5 py-1.5 text-[15px]"
                 onClick={saveAll}
               >
                 Save changes
@@ -253,3 +253,4 @@ export function SettingsPage() {
     </SettingsRegistryContext.Provider>
   );
 }
+
