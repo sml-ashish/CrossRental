@@ -116,6 +116,8 @@ export interface VendorRfqDetail {
     durationValue: number;
     durationUnit: DurationUnit;
     configuration: string | null;
+    /** Cranes SML tagged for this vendor on this RFQ; empty when sent untagged. */
+    taggedCraneIds?: string[];
     commercialTerms: {
       otCharges: string | null;
       breakdownTerms: string | null;

@@ -44,6 +44,7 @@ import { PageHeader, Panel } from "@/components/ui/page-header";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
 import { listEnquiries } from "@/lib/enquiries";
+import { chartColors, useTheme } from "@/lib/theme";
 import {
   REPORT_VIEW_LABELS,
   downloadReportCsv,
@@ -263,6 +264,7 @@ function ChartEmpty({ title }: { title: string }) {
 }
 
 function ReportChart({ report, range }: { report: Report; range: ResolvedPeriod }) {
+  const colors = chartColors(useTheme().theme);
   const view = report.view;
   const { points, granularity } = useMemo(() => {
     if (view === "enquiry") {
@@ -347,24 +349,24 @@ function ReportChart({ report, range }: { report: Report; range: ResolvedPeriod 
                   margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
                   barCategoryGap="22%"
                 >
-                  <CartesianGrid vertical={false} stroke="#26282b" />
+                  <CartesianGrid vertical={false} stroke={colors.grid} />
                   <XAxis
                     dataKey="label"
-                    tick={{ fill: "#8f9299", fontSize: 12 }}
+                    tick={{ fill: colors.tick, fontSize: 12 }}
                     tickLine={false}
-                    axisLine={{ stroke: "#34363a" }}
+                    axisLine={{ stroke: colors.axis }}
                     interval="preserveStartEnd"
                     minTickGap={18}
                   />
                   <YAxis
                     allowDecimals={false}
-                    tick={{ fill: "#8f9299", fontSize: 12 }}
+                    tick={{ fill: colors.tick, fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
                     width={40}
                   />
                   <Tooltip
-                    cursor={{ fill: "#26282b" }}
+                    cursor={{ fill: colors.cursor }}
                     content={(props) => (
                       <ChartTooltip
                         active={props.active}
@@ -387,26 +389,26 @@ function ReportChart({ report, range }: { report: Report; range: ResolvedPeriod 
                   margin={{ top: 4, right: 56, bottom: 4, left: 4 }}
                   barCategoryGap={view === "vendor" ? "28%" : "26%"}
                 >
-                  <CartesianGrid horizontal={false} stroke="#26282b" />
+                  <CartesianGrid horizontal={false} stroke={colors.grid} />
                   <XAxis
                     type="number"
                     domain={view === "vendor" ? ([0, 100] as [number, number]) : undefined}
                     allowDecimals={view !== "vendor"}
                     tickFormatter={view === "vendor" ? (value) => `${value}%` : undefined}
-                    tick={{ fill: "#8f9299", fontSize: 12 }}
+                    tick={{ fill: colors.tick, fontSize: 12 }}
                     tickLine={false}
-                    axisLine={{ stroke: "#34363a" }}
+                    axisLine={{ stroke: colors.axis }}
                   />
                   <YAxis
                     type="category"
                     dataKey="label"
                     width={view === "vendor" ? 148 : 132}
-                    tick={{ fill: "#c3c6cb", fontSize: 12 }}
+                    tick={{ fill: colors.tickStrong, fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
                   />
                   <Tooltip
-                    cursor={{ fill: "#26282b" }}
+                    cursor={{ fill: colors.cursor }}
                     content={(props) => (
                       <ChartTooltip
                         active={props.active}
@@ -426,7 +428,7 @@ function ReportChart({ report, range }: { report: Report; range: ResolvedPeriod 
                       <LabelList
                         dataKey="annotation"
                         position="right"
-                        style={{ fill: "#8f9299", fontSize: 12 }}
+                        style={{ fill: colors.tick, fontSize: 12 }}
                       />
                     ) : null}
                   </Bar>
@@ -1468,4 +1470,3 @@ export function ReportsPage() {
     </div>
   );
 }
-

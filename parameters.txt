@@ -1,0 +1,278 @@
+CROSSRENTAL - FIELD REFERENCE (Enquiry, Crane, RFQ)
+Source: backend/prisma/schema.prisma
+Legend:  * = required   (blank) = optional   [internal] = never sent to vendors
+
+======================================================================
+1. ENQUIRY (header)   table: enquiries
+======================================================================
+id *                    Unique id (generated)
+enquiryNo *             Enquiry number, unique (format CR-2026-0001)
+enquiryDate *           Date of the enquiry
+customerName *          [internal] Customer name
+customerAddress *       [internal] Customer address
+siteLocation *          Job site location (free text)
+siteStateCode *         Job site state (linked to State list)
+sitePincode             Job site pincode
+region                  Region
+siteLatitude            Job site pin - latitude
+siteLongitude           Job site pin - longitude
+siteCoordinateSource    How the pin was set: auto / manual
+overallStatus *         RECEIVED_PENDING_SOURCING / PARTIALLY_QUOTED /
+                        PARTIALLY_FINALISED / FULLY_FINALISED / CLOSED
+createdById             User who created it
+createdAt, updatedAt    Timestamps (generated)
+lines                   The requirement lines below
+
+
+======================================================================
+2. ENQUIRY LINE ITEM   table: enquiry_line_items
+   (one requirement line on an enquiry)
+======================================================================
+id *                    Unique id (generated)
+enquiryId *             Parent enquiry
+lineNo *                Line number, unique within the enquiry
+
+-- Requirement
+craneTypeCode           Crane type required
+capacityT               Capacity required (tonnes)
+capacityRule *          AT_LEAST (bigger crane allowed) / EXACT (default AT_LEAST)
+capacityNote            Free-text note on capacity
+quantity *              Number of cranes (default 1)
+
+-- Application and load
+applicationDescription  What the crane will be used for
+loadDescription         Description of the load
+liftLoadT               Lift load (tonnes)
+workingRadiusM          Working radius (metres)
+
+-- Configuration
+requiredMainBoomM       Main boom required (m)
+requiredFixedJibM       Fixed jib required (m)
+requiredLuffingJibM     Luffing jib required (m)
+requiredWindJibM        Wind jib required (m)
+configurationNotes      Configuration notes
+
+-- Dates
+requiredStartDate       Required start date
+durationValue           Duration number
+durationUnit            DAYS / MONTHS
+workingDaysPerMonth     Working days per month (used to convert months to days)
+
+-- Mobilisation
+mobilisationTerms       Mobilisation terms
+demobilisationTerms     Demobilisation terms
+
+-- Commercial terms and scopes
+otCharges               Overtime charges
+breakdownTerms          Breakdown terms
+dieselScope             Diesel scope
+workingHoursShift       Working hours / shift
+accommodationConveyance Accommodation and conveyance
+paymentTerms            Payment terms
+supportCraneScope       Support crane scope
+steelMatsGroundPrepScope Steel mats / ground preparation scope
+ehsHrCompliance         EHS / HR compliance
+insuranceTerms          Insurance terms
+extensionClause         Extension clause
+craneAgeCriteriaYears   Maximum crane age (years)
+otherTerms              Other terms
+additionalManpowerScope Additional manpower scope
+intraSiteMovementScope  Intra-site movement scope
+prereleaseTerms         Pre-release terms
+ppeScope                PPE scope
+rowScope                ROW scope
+
+-- Internal only
+rentalBudget            [internal] Rental budget
+
+-- Status
+trailStatus *           NEW / AVAILABILITY_CHECK / VENDOR_SHORTLISTED / RFQ_SENT /
+                        AWAITING_QUOTES / QUOTES_RECEIVED / UNDER_EVALUATION /
+                        VENDOR_FINALISED / BOOKED / CLOSED /
+                        FULFILLED_INTERNALLY / CANCELLED  (default NEW)
+closureStatus           Closure status text
+cancelledAt             When cancelled
+cancelReason            Why cancelled
+createdAt, updatedAt    Timestamps (generated)
+
+
+======================================================================
+3. CRANE   table: cranes
+======================================================================
+id *                    Unique id (generated)
+vendorId *              Owning vendor
+typeOfCraneCode *       Crane type
+capacityT *             Capacity (tonnes)
+currentStatus *         AVAILABLE / ENGAGED / UNDER_MAINTENANCE / DEPLOYED
+                        (BOOKED and HIRED exist only for old records)
+currentLocation *       Where the crane is now (text)
+stateCode *             State the crane is in
+make *                  Manufacturer
+model *                 Model
+yom *                   Year of manufacture
+mainBoomM               Main boom (m)
+fixedJibM               Fixed jib (m)
+luffingJibM             Luffing jib (m)
+windJibM                Wind jib (m)
+serialRegistrationNo *  Serial / registration no. (unique per vendor among active cranes)
+pincode                 Pincode of the location
+
+-- Map pin
+latitude                Latitude
+longitude               Longitude
+coordinateSource        auto / manual
+geocodedBy              Which service set the pin
+geocodedAt              When the pin was set
+
+-- Availability
+availableFrom           Required when status is ENGAGED; cleared when AVAILABLE
+expectedReadyDate       Optional; when status is UNDER_MAINTENANCE
+updatedOnBehalf *       True if an SML user made the last change (default false)
+
+-- Load chart
+loadChartFileRef        Stored file reference
+loadChartFileName       File name
+loadChartMimeType       File type
+loadChartSizeBytes      File size
+
+-- Other
+ownershipType *         VENDOR / SML (default VENDOR)
+isActive *              Active or not (default true)
+remarks                 Remarks
+approvalStatus *        APPROVED / PENDING (default APPROVED)
+statusUpdatedAt *       Last status / location / availability change
+                        (drives the 30-day "due" and 60-day "stale" flags)
+createdAt, updatedAt    Timestamps (generated)
+updatedBy               Who last updated it
+
+
+======================================================================
+4. RFQ   table: rfqs
+======================================================================
+id *                    Unique id (generated)
+rfqNumber *             RFQ number, unique
+enquiryNo *             Enquiry number (printed copy)
+lineNo *                Line number (printed copy)
+enquiryLineId           Live link to the enquiry line it was raised from
+
+-- Requirement
+craneType *             Crane type
+capacityT *             Capacity (tonnes)
+quantity *              Number of cranes (default 1)
+capacityRule *          AT_LEAST / EXACT (default AT_LEAST)
+capacityNote            Capacity note
+applicationDescription  Application
+loadDescription         Load
+mainBoomM               Main boom required (m)
+jibLengthM              Jib length required (m)
+configuration           Configuration text
+
+-- Site
+siteLocation *          Job site location
+siteStateCode *         Job site state
+sitePincode             Pincode
+siteLatitude            Site pin - latitude
+siteLongitude           Site pin - longitude
+siteCoordinateSource    auto / manual
+
+-- Dates
+requiredStartDate *     Required start date
+startDateTbc *          Start date not fixed (default false)
+durationValue *         Duration number
+durationUnit *          DAYS / MONTHS
+workingDaysPerMonth     Working days per month
+submissionDeadline *    Deadline for vendors to quote
+
+-- Commercial terms
+otCharges               Overtime charges
+breakdownTerms          Breakdown terms
+dieselScope             Diesel scope
+workingHoursShift       Working hours / shift
+craneAgeCriteriaYears   Maximum crane age (years)
+accommodationConveyance Accommodation and conveyance
+paymentTerms            Payment terms
+notes                   Notes
+mobilisationTerms       Mobilisation terms
+supportCrane            Support crane
+steelMatsGroundPrep     Steel mats / ground preparation
+ehsHrRequirements       EHS / HR requirements
+insuranceTerms          Insurance terms
+extensionClause         Extension clause
+commercialTermsExtra    Remaining rows of the enquiry template (stored as JSON)
+
+-- SML contact shown to vendors
+smlContactName          Contact name
+smlContactMobile        Contact mobile
+smlContactEmail         Contact email
+
+-- Status and sending
+status *                DRAFT / SENT / CLOSED / CANCELLED (default DRAFT)
+rollupStatus            SENT / AWAITING_QUOTES / QUOTES_RECEIVED
+sentAt                  When it was sent
+channels *              Email and/or WhatsApp (default EMAIL)
+cancelledAt             When cancelled
+cancelReason            Why cancelled
+createdById *           Creator
+createdAt, updatedAt    Timestamps (generated)
+
+-- Linked records
+recipients              Vendors it was sent to (see 5)
+quotations              Quotations received
+attachments             Files attached to the RFQ
+reservations, inboundReplies
+
+
+======================================================================
+5. RFQ VENDOR RECIPIENT   table: rfq_vendor_recipients
+   (one row per vendor the RFQ was sent to)
+======================================================================
+rfqId, vendorId         Which RFQ, which vendor (unique together)
+emails                  Addresses the email went to
+emailDeliveryStatus     QUEUED / SENT / FAILED
+emailDeliveryError      Error text if failed
+whatsappPhones, whatsappDeliveryStatus, whatsappDeliveryError, whatsappMessageIds
+firstViewedAt           When the vendor first opened it
+responseStatus          PENDING / QUOTED / DECLINED / EXPIRED / FINALISED
+respondedAt             When they responded
+declineReason, declineNote
+reminderCount, lastReminderAt
+candidateSnapshot       Cranes and distances shown at send time (JSON). Also now
+                        holds taggedCraneIds - the cranes SML tagged for that
+                        vendor on this RFQ (empty = sent untagged).
+
+
+======================================================================
+6. QUOTATION   table: quotations
+   (what a vendor submits against an RFQ, one series per crane)
+======================================================================
+rfqId, vendorId, craneId   Which RFQ, vendor and crane
+version, isLatest          Version number (per crane) and latest flag
+rentalRate *               Rate
+rateBasis *                PER_DAY / PER_MONTH / LUMP_SUM
+mobilisationCharges        (default 0)
+demobilisationCharges      (default 0)
+taxBasis *                 EXCLUSIVE_OF_GST / INCLUSIVE_OF_GST
+totalQuotedValue *         Total
+calculationNote            Working shown to the vendor
+availabilityConfirmed *    Yes / no
+availableFrom              Date, if given
+validityDate *             Quote valid until
+acceptsCommercialTerms *   Yes / no
+deviationText, remarks
+warnings                   System advisories (JSON)
+submittedAt, source        When, and PORTAL or other source
+craneLocationSnapshot, distanceToSiteKm, distanceMethod   Crane position and distance at quote time
+status                     SUBMITTED etc. (plus comparison mark and reason fields)
+
+
+======================================================================
+7. SHARED OPTION VALUES
+======================================================================
+Capacity rule:   AT_LEAST, EXACT
+Duration unit:   DAYS, MONTHS
+Rate basis:      PER_DAY, PER_MONTH, LUMP_SUM
+Tax basis:       EXCLUSIVE_OF_GST, INCLUSIVE_OF_GST
+Ownership:       VENDOR, SML
+Crane approval:  APPROVED, PENDING
+Coordinate src:  auto, manual
+RFQ status:      DRAFT, SENT, CLOSED, CANCELLED

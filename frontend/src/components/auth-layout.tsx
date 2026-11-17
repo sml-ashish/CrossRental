@@ -1,3 +1,5 @@
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 /**
  * Marketing-neutral shell shared by every signed-out screen.
  *
@@ -19,6 +21,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
             <p className="text-sm font-semibold tracking-tight text-slate-900">crossrental</p>
             <p className="text-xs text-slate-500">Vendor portal</p>
           </div>
+          <ThemeToggle className="ml-auto" />
         </div>
       </header>
 

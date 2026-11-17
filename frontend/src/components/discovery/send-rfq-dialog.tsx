@@ -64,6 +64,8 @@ export function SendRfqDialog({
   const [deadline, setDeadline] = useState(() => addDays(todayDay(), 7));
   /** Email every approved vendor instead of only the vendors of the ticked cranes. */
   const [allApproved, setAllApproved] = useState(false);
+  /** Tag the ticked cranes against the RFQ. Off, and ignored, for "all approved vendors". */
+  const [tagCranes, setTagCranes] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** Set once the RFQ exists, so a failed send is retried without a duplicate. */
@@ -78,6 +80,7 @@ export function SendRfqDialog({
     setRfq(null);
     setResult(null);
     setAllApproved(startWithAll);
+    setTagCranes(true);
   }, [open, lineId, startWithAll]);
 
   async function submit() {
@@ -95,7 +98,10 @@ export function SendRfqDialog({
         ? (await listApprovedVendors("")).vendors.map((vendor) => vendor.id)
         : vendors.map((vendor) => vendor.vendorId);
       if (vendorIds.length === 0) throw new ApiError(400, "no_vendors", "No approved vendors to send to.");
-      const sent = await sendRfq(target.id, vendorIds, ["EMAIL"]);
+      // Sending to every approved vendor goes out untagged; a send to the ticked
+      // cranes' vendors tags those cranes when the box is on.
+      const craneIds = !allApproved && tagCranes ? cranes.map((crane) => crane.craneId) : undefined;
+      const sent = await sendRfq(target.id, vendorIds, ["EMAIL"], craneIds);
       setResult(sent.result);
       await queryClient.invalidateQueries({ queryKey: ["enquiries"] });
       onSent();
@@ -195,6 +201,25 @@ export function SendRfqDialog({
                 </span>
               </span>
             </label>
+            {!allApproved && cranes.length > 0 ? (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-ink-800 px-3.5 py-3 text-[15px] text-slate-800">
+                <input
+                  type="checkbox"
+                  checked={tagCranes}
+                  onChange={(event) => setTagCranes(event.target.checked)}
+                  className="mt-1 accent-accent-500"
+                />
+                <span>
+                  <span className="font-semibold">
+                    Tag the {cranes.length} selected crane{cranes.length === 1 ? "" : "s"} on this RFQ
+                  </span>
+                  <span className="mt-0.5 block text-slate-500">
+                    Each vendor sees its tagged cranes first and can quote every one of them, or any
+                    other crane from its fleet. Untick to send without tagging.
+                  </span>
+                </span>
+              </label>
+            ) : null}
             <ul className={cn("divide-y divide-ink-800 rounded-xl border border-ink-800", allApproved && "opacity-50")}>
               {vendors.map((vendor) => (
                 <li key={vendor.vendorId} className="px-3.5 py-2.5">
@@ -239,7 +264,7 @@ export function SendRfqDialog({
             </div>
 
             <p className="text-[14px] text-slate-500">
-              One RFQ is raised from this enquiry line and emailed only to the vendors above.
+              One RFQ is raised from this enquiry line and emailed {allApproved ? "to every approved vendor, with no crane tagged" : "only to the vendors above"}.
               Customer name, address and the internal budget are never sent.
             </p>
           </>
@@ -248,4 +273,5 @@ export function SendRfqDialog({
     </Dialog>
   );
 }
+
 

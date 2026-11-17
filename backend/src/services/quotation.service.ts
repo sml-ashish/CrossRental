@@ -122,6 +122,7 @@ const RECIPIENT_SELECT = {
   firstViewedAt: true,
   reminderCount: true,
   emails: true,
+  candidateSnapshot: true,
   rfq: {
     select: {
       id: true,
@@ -913,6 +914,11 @@ function isVendorLive(status: QuotationStatus): boolean {
   );
 }
 
+function taggedCraneIdsOf(snapshot: unknown): string[] {
+  const raw = (snapshot as { taggedCraneIds?: unknown } | null)?.taggedCraneIds;
+  return Array.isArray(raw) ? raw.filter((id): id is string => typeof id === "string") : [];
+}
+
 export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
   assertVendor(actor);
   const vendorId = requireVendorId(actor);
@@ -991,6 +997,10 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       submissionDeadline: rfq.submissionDeadline.toISOString(),
       locked,
       notes: rfq.notes,
+      // Cranes SML tagged against this RFQ for this vendor. Empty means untagged:
+      // the vendor may quote any crane in its fleet. Tagged is a pointer, not a
+      // limit — the fleet picker still lists every crane.
+      taggedCraneIds: taggedCraneIdsOf(recipient.candidateSnapshot),
     },
     response: {
       responseStatus: recipient.responseStatus,
@@ -2166,3 +2176,4 @@ export async function listQuotationAttachments(
 }
 
 /** Exported for the internal tracking screen: a quotation's own attachments. */
+

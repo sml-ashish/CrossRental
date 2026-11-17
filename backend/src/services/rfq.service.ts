@@ -1213,8 +1213,21 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
 
     // Stored now, never recomputed: cranes move, and re-deriving this later would
     // rewrite what the vendor was actually offered.
+    // Tagged cranes: only this vendor's own, and only when the sender tagged.
+    // An untagged send (every approved vendor) leaves the list empty, so the
+    // vendor quotes any crane of its fleet.
+    const taggedCraneIds = (input.craneIds ?? []).length
+      ? await prisma.crane
+          .findMany({
+            where: { id: { in: input.craneIds }, vendorId: recipient.vendorId },
+            select: { id: true },
+          })
+          .then((rows: Array<{ id: string }>) => rows.map((row) => row.id))
+      : [];
+
     const snapshot = {
       capturedAt: new Date().toISOString(),
+      taggedCraneIds,
       siteDistanceMethod: picker.site.locationUnverified
         ? null
         : (picker.located[0]?.distanceMethod ?? null),
@@ -1709,3 +1722,4 @@ export async function runAutomaticRfqReminders(
 }
 
 export type { CandidateCrane };
+

@@ -109,7 +109,7 @@ export function RouteCard({
             className="absolute inset-0 opacity-40"
             style={{
               backgroundImage:
-                "linear-gradient(#26282b 1px, transparent 1px), linear-gradient(90deg, #26282b 1px, transparent 1px)",
+                "linear-gradient(var(--color-ink-800) 1px, transparent 1px), linear-gradient(90deg, var(--color-ink-800) 1px, transparent 1px)",
               backgroundSize: "22px 22px",
             }}
           />
@@ -394,4 +394,3 @@ function shortDate(iso: string | null): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" });
 }
-

@@ -6,6 +6,15 @@
     <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#17181b" />
+    <script>
+      // Apply the saved theme before first paint so a light-mode user does not
+      // see a dark flash on load. Storage can be blocked; dark is the fallback.
+      try {
+        if (localStorage.getItem("crossrentel.discovery.theme") === "light") {
+          document.documentElement.classList.add("theme-light");
+        }
+      } catch (e) {}
+    </script>
     <title>crossrental · Crane sourcing &amp; vendor network</title>
   </head>
   <body>

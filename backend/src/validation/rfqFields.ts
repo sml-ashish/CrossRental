@@ -330,6 +330,14 @@ export const sendRfqSchema = z.object({
     .array(z.enum(["EMAIL", "WHATSAPP"]))
     .min(1, "Choose at least one channel")
     .default(["EMAIL"]),
+  /**
+   * Optional crane tags. When present, each recipient vendor is told which of
+   * its own cranes this RFQ is tagged against; ids that belong to another vendor
+   * are ignored. Omit it (e.g. "all approved vendors") to send with no tagging.
+   */
+  craneIds: z
+    .array(z.string().uuid("That is not a valid crane reference"))
+    .optional(),
 });
 
 export type SendRfqInput = z.infer<typeof sendRfqSchema>;
@@ -435,3 +443,4 @@ export const candidateQuerySchema = z.object({
 });
 
 export type CandidateQuery = z.infer<typeof candidateQuerySchema>;
+

@@ -222,6 +222,9 @@ export function QuotePanel({
       mutation={submit}
       mode="create"
       previousQuote={previousQuote}
+      quotedCraneIds={quotations
+        .filter((quotation) => quotation.status !== "WITHDRAWN")
+        .map((quotation) => quotation.craneId)}
     />
   );
 }
@@ -248,6 +251,7 @@ export function QuoteForm({
   lockedCraneFallback = null,
   onCancel,
   previousQuote = null,
+  quotedCraneIds = [],
 }: {
   rfq: VendorRfqDetail["rfq"];
   form: FormState;
@@ -265,7 +269,11 @@ export function QuoteForm({
   lockedCraneFallback?: { id: string; label: string } | null;
   onCancel?: () => void;
   previousQuote?: VendorQuotation | null;
+  /** Cranes already quoted on this RFQ, so the tagged list can show what is left. */
+  quotedCraneIds?: string[];
 }) {
+  const taggedIds = rfq.taggedCraneIds ?? [];
+  const taggedCranes = cranes.filter((crane) => taggedIds.includes(crane.id));
   const [chart, setChart] = useState<File | null>(null);
   const [warningsAcknowledged, setWarningsAcknowledged] = useState(false);
   const [addingCrane, setAddingCrane] = useState(false);
@@ -374,6 +382,45 @@ export function QuoteForm({
         </Alert>
       ) : null}
 
+      {!craneLocked && taggedCranes.length > 0 ? (
+        <div className="rounded-lg border border-accent-500/40 bg-accent-500/[0.06] p-3">
+          <p className="text-xs font-medium text-slate-900">
+            SML tagged {taggedCranes.length === 1 ? "this crane" : `these ${taggedCranes.length} cranes`}{" "}
+            for this RFQ
+          </p>
+          <p className="mt-0.5 text-[13px] text-slate-500">
+            Quote each tagged crane, one after another. You can also quote any other crane from your
+            fleet using the list below.
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {taggedCranes.map((crane) => {
+              const quoted = quotedCraneIds.includes(crane.id);
+              const active = form.craneId === crane.id;
+              return (
+                <li key={crane.id} className="flex items-center justify-between gap-2 text-[13px]">
+                  <span className="min-w-0 truncate text-slate-800">
+                    {crane.typeOfCrane?.name ?? crane.typeOfCraneCode} · {crane.capacityT} t ·{" "}
+                    {crane.currentLocation}
+                  </span>
+                  {quoted ? (
+                    <span className="shrink-0 font-medium text-emerald-600">Quoted</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => set("craneId", crane.id)}
+                      disabled={active}
+                      className="btn-secondary min-h-8 shrink-0 px-2.5 py-1 text-xs"
+                    >
+                      {active ? "Selected" : "Quote this crane"}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+
       {!craneLocked ? (
         <div className="rounded-lg border border-ink-800 bg-ink-900/60 p-3">
           {cranesLoading ? (
@@ -410,7 +457,7 @@ export function QuoteForm({
               ? selectedCrane.loadChart
                 ? "This crane already has a load chart on file, so you do not need to attach one."
                 : "This crane has no load chart on file — attach the chart with your quote."
-              : "Only your own cranes are listed here."
+              : "Tagged cranes come first; every crane in your fleet can be quoted."
         }
       >
         <Select
@@ -418,7 +465,7 @@ export function QuoteForm({
           value={form.craneId}
           onChange={(value) => set("craneId", value)}
           disabled={craneLocked}
-          options={craneOptions(cranes, lockedCraneFallback, fit)}
+          options={craneOptions(cranes, lockedCraneFallback, fit, taggedIds)}
           placeholder={cranesLoading ? "Loading your cranes…" : "Select a crane"}
         />
         {!craneLocked ? (
@@ -1028,8 +1075,17 @@ export function craneOptions(
   cranes: Crane[],
   fallback: { id: string; label: string } | null,
   fit?: Map<string, FitVerdict>,
+  taggedIds: string[] = [],
 ) {
-  const options = cranes.map((crane) => craneOption(crane, fit?.get(crane.id)));
+  // Tagged cranes lead the list; the rest of the fleet follows, still quotable.
+  const ordered = [
+    ...cranes.filter((crane) => taggedIds.includes(crane.id)),
+    ...cranes.filter((crane) => !taggedIds.includes(crane.id)),
+  ];
+  const options = ordered.map((crane) => {
+    const option = craneOption(crane, fit?.get(crane.id));
+    return taggedIds.includes(crane.id) ? { ...option, label: `★ Tagged · ${option.label}` } : option;
+  });
   if (fallback && !cranes.some((crane) => crane.id === fallback.id)) {
     options.push({ value: fallback.id, label: `${fallback.label} (no longer active)` });
   }
@@ -1096,3 +1152,4 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 
   return settled;
 }
+

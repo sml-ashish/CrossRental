@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ROLE_HOME, roleLabel, useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
  * The application shell.
@@ -188,6 +189,7 @@ export function AppLayout() {
           </nav>
 
           <div className="relative ml-auto flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => setMenuOpen((value) => !value)}
@@ -298,4 +300,3 @@ export function AppLayout() {
 }
 
 export { ROLE_HOME };
-

@@ -562,8 +562,13 @@ export function sendRfq(
   rfqId: string,
   vendorIds: string[],
   channels: MessageChannel[] = ["EMAIL"],
+  /** Cranes to tag against the RFQ. Omit (or leave empty) to send untagged. */
+  craneIds?: string[],
 ): Promise<{ result: SendResult }> {
-  return api(`/rfqs/${rfqId}/send`, { method: "POST", body: { vendorIds, channels } });
+  return api(`/rfqs/${rfqId}/send`, {
+    method: "POST",
+    body: craneIds && craneIds.length > 0 ? { vendorIds, channels, craneIds } : { vendorIds, channels },
+  });
 }
 
 export function confirmSitePin(
@@ -657,3 +662,4 @@ export function formatDistance(
   const rounded = km >= 100 ? Math.round(km) : Math.round(km * 10) / 10;
   return approximate ? `${rounded} km (straight-line approx.)` : `${rounded} km`;
 }
+

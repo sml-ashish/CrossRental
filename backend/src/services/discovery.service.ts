@@ -1,7 +1,7 @@
 import { prisma } from "../lib/database";
 import { BUSY_STATUSES } from "../validation/craneFields";
 import { AppError } from "../middleware/errorHandler";
-import { tryGeocode, type GeoPoint } from "../lib/geo";
+import { getGeoProvider, straightLineKm, tryGeocode, type GeoPoint } from "../lib/geo";
 import { distancesTo, type Distance } from "./distance.service";
 import { getSettings } from "../utils/settings";
 import {
@@ -275,7 +275,7 @@ type DiscoveryRow = {
  * "matches the filters" means. The hire window is part of it: a crane that
  * cannot serve the window does not belong on either screen.
  */
-function discoveryWhere(query: DiscoveryQuery): Prisma.CraneWhereInput {
+function discoveryWhere(query: DiscoveryQuery, opts: { skipLocationText?: boolean } = {}): Prisma.CraneWhereInput {
   const availability =
     query.availability && query.availability !== "ALL" ? query.availability : null;
   const capacityRule = query.capacityRule ?? "AT_LEAST";
@@ -344,7 +344,7 @@ function discoveryWhere(query: DiscoveryQuery): Prisma.CraneWhereInput {
           },
         }
       : {}),
-    ...(query.location
+    ...(query.location && !opts.skipLocationText
       ? {
           OR: [
             { currentLocation: { contains: query.location, mode: "insensitive" } },
@@ -371,6 +371,19 @@ function discoveryWhere(query: DiscoveryQuery): Prisma.CraneWhereInput {
   };
 }
 
+/**
+ * "Pune" means cranes in and around Pune, not only rows with the word in them.
+ * Straight-line radius around the geocoded place; a crane's own pin decides.
+ */
+const NEARBY_RADIUS_KM = 150;
+
+async function geocodeCraneLocation(location: string): Promise<GeoPoint | null> {
+  // The stub invents coordinates; a made-up centre would pull in the wrong cranes.
+  if (getGeoProvider().name === "stub") return null;
+  const found = await tryGeocode({ location, state: "", pincode: null });
+  return found.ok ? found.point : null;
+}
+
 export async function searchCranes(
   rawQuery: unknown,
   actor: DiscoveryActor,
@@ -382,10 +395,34 @@ export async function searchCranes(
 
   const settings = await getSettings();
 
-  const rows = (await prisma.crane.findMany({
-    where: discoveryWhere(query),
+  // "Crane location": cranes in or near the place typed. When the place can be
+  // geocoded, the text match is widened to a radius around it; otherwise the
+  // plain text match stands, as before.
+  const originPoint = query.location ? await geocodeCraneLocation(query.location) : null;
+
+  let rows = (await prisma.crane.findMany({
+    where: discoveryWhere(query, { skipLocationText: originPoint !== null }),
     select: DISCOVERY_SELECT,
   })) as unknown as DiscoveryRow[];
+
+  const fromOrigin = new Map<string, number>();
+  if (originPoint && query.location) {
+    const needle = query.location.toLowerCase();
+    const parts = needle.split(",").map((part) => part.trim()).filter(Boolean);
+    rows = rows.filter((row) => {
+      const lat = num(row.latitude);
+      const lng = num(row.longitude);
+      if (lat !== null && lng !== null) {
+        const km = straightLineKm(originPoint, { lat, lng });
+        fromOrigin.set(row.id, km);
+        if (km <= NEARBY_RADIUS_KM) return true;
+      }
+      // A crane with no pin (or one outside the radius) still counts when its
+      // own location text says it is there.
+      const place = `${row.currentLocation} ${row.state.name}`.toLowerCase();
+      return parts.every((part) => place.includes(part));
+    });
+  }
 
   // A site arrives either as a coordinate pair (what the map sends back) or as
   // free text (what a user with no pin can type). The pair wins; the text goes
@@ -470,7 +507,12 @@ export async function searchCranes(
 
   const locatedCranes = located.map((row) => shape(row, measured.get(row.id) ?? null));
   locatedCranes.sort((a, b) => {
-    if (a.distanceKm === null && b.distanceKm === null) return a.capacityT - b.capacityT;
+    if (a.distanceKm === null && b.distanceKm === null) {
+      const near = (id: string) => fromOrigin.get(id) ?? Number.POSITIVE_INFINITY;
+      const byOrigin = near(a.craneId) - near(b.craneId);
+      if (Number.isFinite(byOrigin) && byOrigin !== 0) return byOrigin;
+      return a.capacityT - b.capacityT;
+    }
     if (a.distanceKm === null) return 1;
     if (b.distanceKm === null) return -1;
     return a.distanceKm - b.distanceKm;
@@ -589,3 +631,4 @@ export async function discoveryFacets() {
     availability: ["AVAILABLE", "ENGAGED", "UNDER_MAINTENANCE", "ALL"],
   };
 }
+

@@ -362,6 +362,13 @@
   --color-accent-400: #b3352f;
   --color-accent-600: #a83733;
 
+  --color-brand-50: #fef2f2;
+  --color-brand-100: #fee2e2;
+  --color-brand-200: #fecaca;
+  --color-brand-700: #b91c1c;
+  --color-brand-800: #991b1b;
+  --color-brand-900: #7f1d1d;
+
   --color-neutral-100: #1b1e22;
   --color-neutral-200: #262a30;
   --color-neutral-300: #3a3f47;
@@ -422,9 +429,14 @@
   --color-purple-700: #7e22ce;
 }
 
-/* `--color-white` is the strong ink in light mode, so the red primary button —
-   which is `text-white` by default — has to be pinned back to real white. */
-.theme-light .btn-primary {
+/* `--color-white` is the strong ink in light mode, so anything solid red that
+   uses `text-white` has to be pinned back to real white. The `~=` selector
+   matches the exact class only, so tinted backgrounds like `bg-accent-500/10`
+   keep their dark text. */
+.theme-light .btn-primary,
+.theme-light [class~="bg-accent-500"],
+.theme-light [class~="bg-brand-500"],
+.theme-light [class~="from-brand-300"] {
   color: #ffffff;
 }
 

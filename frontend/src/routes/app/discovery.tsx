@@ -102,7 +102,6 @@ const MORE_FIELDS: Array<keyof FilterState> = [
   "vendorName",
   "yomFrom",
   "yomTo",
-  "siteLocation",
   "availableFrom",
   "availableTo",
 ];
@@ -274,7 +273,6 @@ export function DiscoveryPage() {
   const [isDesktop, setIsDesktop] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(min-width: 1280px)").matches,
   );
-  const autoSelectedRef = useRef<string | null>(null);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -658,25 +656,8 @@ export function DiscoveryPage() {
     multiActive,
   ]);
 
-  /**
-   * Auto-select the nearest crane with a pin, once per (line, mode).
-   *
-   * A route on the map the moment the list appears is the whole point of the
-   * screen. The ref keeps the auto-pick from fighting a later click: once the
-   * pair has been auto-selected, only the person changes it.
-   */
-  useEffect(() => {
-    if (!lineId || !recommendations || recommendations.lineId !== lineId) return;
-    const key = `${lineId}:${mode}`;
-    if (autoSelectedRef.current === key) return;
-    autoSelectedRef.current = key;
-    if (selectedCraneId) return;
-    const nearest = orderedRecommendationCranes(recommendations, mode, requiredT)
-      .slice(0, TOP_RECOMMENDED_CRANES)
-      .filter((crane) => crane.latitude !== null && crane.longitude !== null)
-      .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))[0];
-    if (nearest) setSelectedCraneId(nearest.craneId);
-  }, [lineId, mode, recommendations, selectedCraneId, requiredT]);
+  // Picking an enquiry never picks a crane: a crane is selected only when the
+  // person clicks one in the list or on the map.
 
   // Esc closes the line sheet, then the calendar, then clears the crane. An open
   // dialog owns its own Escape handling, so it is left alone.
@@ -1027,7 +1008,7 @@ export function DiscoveryPage() {
     </div>
   ) : null;
 
-  const craneCard = selectedCrane ? (
+  const craneCard = selectedCrane && !lineId ? (
     <RouteCard
       crane={selectedCrane}
       route={lineId ? routeSummary : undefined}
@@ -1039,7 +1020,7 @@ export function DiscoveryPage() {
 
   /* The phone summary strip: the same card, minus the artwork and the facts the
      list already showed, so the sheet can stay short while the route is read. */
-  const mobileCraneCard = selectedCrane ? (
+  const mobileCraneCard = selectedCrane && !lineId ? (
     <RouteCard
       crane={selectedCrane}
       route={lineId ? routeSummary : undefined}
@@ -1156,7 +1137,7 @@ export function DiscoveryPage() {
             <span className="h-1 w-10 rounded-full bg-ink-700" aria-hidden />
           </div>
 
-          {selectedCrane ? (
+          {mobileCraneCard ? (
             <div className="max-h-[46%] shrink-0 overflow-y-auto border-b border-ink-800 px-2.5 pb-2.5">
               {mobileCraneCard}
             </div>
@@ -1175,7 +1156,6 @@ export function DiscoveryPage() {
         <MoreFilters
           filters={filters}
           set={set}
-          enquirySite={selectedLine?.siteLocation ?? null}
           halfWindow={halfWindow}
           activeCount={moreCount}
           onClear={clearAll}
@@ -1345,7 +1325,6 @@ function SkeletonRows() {
 function MoreFilters({
   filters,
   set,
-  enquirySite,
   halfWindow,
   activeCount,
   onClear,
@@ -1353,8 +1332,6 @@ function MoreFilters({
 }: {
   filters: FilterState;
   set: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
-  /** The selected enquiry's site, when one is picked; it then fills "To". */
-  enquirySite: string | null;
   halfWindow: boolean;
   activeCount: number;
   onClear: () => void;
@@ -1426,35 +1403,18 @@ function MoreFilters({
 
           <fieldset className="space-y-3">
             <legend className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-              Route
+              Location
             </legend>
             <Field
-              label="From"
-              htmlFor="more-from-location"
-              hint="Only cranes located here are listed, e.g. Pune."
+              label="Crane location"
+              htmlFor="more-crane-location"
+              hint="Lists cranes in and near this place, nearest first, e.g. Pune."
             >
               <TextInput
-                id="more-from-location"
+                id="more-crane-location"
                 value={filters.location}
                 onChange={(value) => set("location", value)}
-                placeholder="Crane location, e.g. Pune"
-              />
-            </Field>
-            <Field
-              label="To"
-              htmlFor="more-to-location"
-              hint={
-                enquirySite
-                  ? "Taken from the selected enquiry."
-                  : "The enquiry site. Drops the red site pin and sorts the list by road distance."
-              }
-            >
-              <TextInput
-                id="more-to-location"
-                value={enquirySite ?? filters.siteLocation}
-                onChange={(value) => set("siteLocation", value)}
-                disabled={Boolean(enquirySite)}
-                placeholder="Enquiry site, e.g. Vadodara, Gujarat"
+                placeholder="e.g. Pune"
               />
             </Field>
           </fieldset>
@@ -1531,5 +1491,6 @@ function MoreFilters({
     </div>
   );
 }
+
 
 
