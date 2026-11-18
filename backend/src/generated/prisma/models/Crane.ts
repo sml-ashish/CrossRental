@@ -502,6 +502,7 @@ export type CraneWhereInput = {
   quotations?: Prisma.QuotationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  negotiations?: Prisma.QuotationNegotiationListRelationFilter
   inboundReplies?: Prisma.InboundReplyListRelationFilter
 }
 
@@ -548,6 +549,7 @@ export type CraneOrderByWithRelationInput = {
   quotations?: Prisma.QuotationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
+  negotiations?: Prisma.QuotationNegotiationOrderByRelationAggregateInput
   inboundReplies?: Prisma.InboundReplyOrderByRelationAggregateInput
 }
 
@@ -597,6 +599,7 @@ export type CraneWhereUniqueInput = Prisma.AtLeast<{
   quotations?: Prisma.QuotationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  negotiations?: Prisma.QuotationNegotiationListRelationFilter
   inboundReplies?: Prisma.InboundReplyListRelationFilter
 }, "id">
 
@@ -726,6 +729,7 @@ export type CraneCreateInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -769,6 +773,7 @@ export type CraneUncheckedCreateInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -812,6 +817,7 @@ export type CraneUpdateInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -855,6 +861,7 @@ export type CraneUncheckedUpdateInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
 }
 
@@ -1319,6 +1326,20 @@ export type CraneUpdateOneRequiredWithoutQuotationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CraneUpdateToOneWithWhereWithoutQuotationsInput, Prisma.CraneUpdateWithoutQuotationsInput>, Prisma.CraneUncheckedUpdateWithoutQuotationsInput>
 }
 
+export type CraneCreateNestedOneWithoutNegotiationsInput = {
+  create?: Prisma.XOR<Prisma.CraneCreateWithoutNegotiationsInput, Prisma.CraneUncheckedCreateWithoutNegotiationsInput>
+  connectOrCreate?: Prisma.CraneCreateOrConnectWithoutNegotiationsInput
+  connect?: Prisma.CraneWhereUniqueInput
+}
+
+export type CraneUpdateOneRequiredWithoutNegotiationsNestedInput = {
+  create?: Prisma.XOR<Prisma.CraneCreateWithoutNegotiationsInput, Prisma.CraneUncheckedCreateWithoutNegotiationsInput>
+  connectOrCreate?: Prisma.CraneCreateOrConnectWithoutNegotiationsInput
+  upsert?: Prisma.CraneUpsertWithoutNegotiationsInput
+  connect?: Prisma.CraneWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CraneUpdateToOneWithWhereWithoutNegotiationsInput, Prisma.CraneUpdateWithoutNegotiationsInput>, Prisma.CraneUncheckedUpdateWithoutNegotiationsInput>
+}
+
 export type CraneCreateNestedOneWithoutAuditLogsInput = {
   create?: Prisma.XOR<Prisma.CraneCreateWithoutAuditLogsInput, Prisma.CraneUncheckedCreateWithoutAuditLogsInput>
   connectOrCreate?: Prisma.CraneCreateOrConnectWithoutAuditLogsInput
@@ -1390,6 +1411,7 @@ export type CraneCreateWithoutStateInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -1432,6 +1454,7 @@ export type CraneUncheckedCreateWithoutStateInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -1542,6 +1565,7 @@ export type CraneCreateWithoutTypeOfCraneInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -1584,6 +1608,7 @@ export type CraneUncheckedCreateWithoutTypeOfCraneInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -1652,6 +1677,7 @@ export type CraneCreateWithoutVendorInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -1694,6 +1720,7 @@ export type CraneUncheckedCreateWithoutVendorInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -1762,6 +1789,7 @@ export type CraneCreateWithoutReservationsInput = {
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -1804,6 +1832,7 @@ export type CraneUncheckedCreateWithoutReservationsInput = {
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -1862,6 +1891,7 @@ export type CraneUpdateWithoutReservationsInput = {
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -1904,6 +1934,7 @@ export type CraneUncheckedUpdateWithoutReservationsInput = {
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
 }
 
@@ -1946,6 +1977,7 @@ export type CraneCreateWithoutQuotationsInput = {
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -1988,6 +2020,7 @@ export type CraneUncheckedCreateWithoutQuotationsInput = {
   updatedBy?: string | null
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -2046,6 +2079,7 @@ export type CraneUpdateWithoutQuotationsInput = {
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -2086,6 +2120,195 @@ export type CraneUncheckedUpdateWithoutQuotationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
+}
+
+export type CraneCreateWithoutNegotiationsInput = {
+  id?: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus: $Enums.CraneStatus
+  currentLocation: string
+  make: string
+  model: string
+  yom: number
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo: string
+  pincode?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: $Enums.CoordinateSource | null
+  geocodedBy?: string | null
+  geocodedAt?: Date | string | null
+  availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
+  loadChartFileRef?: string | null
+  loadChartFileName?: string | null
+  loadChartMimeType?: string | null
+  loadChartSizeBytes?: number | null
+  ownershipType?: $Enums.OwnershipType
+  isActive?: boolean
+  remarks?: string | null
+  approvalStatus?: $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  typeOfCrane: Prisma.CraneTypeCreateNestedOneWithoutCranesInput
+  state: Prisma.StateCreateNestedOneWithoutCranesInput
+  vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
+}
+
+export type CraneUncheckedCreateWithoutNegotiationsInput = {
+  id?: string
+  vendorId: string
+  typeOfCraneCode: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus: $Enums.CraneStatus
+  currentLocation: string
+  stateCode: string
+  make: string
+  model: string
+  yom: number
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo: string
+  pincode?: string | null
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: $Enums.CoordinateSource | null
+  geocodedBy?: string | null
+  geocodedAt?: Date | string | null
+  availableFrom?: Date | string | null
+  expectedReadyDate?: Date | string | null
+  updatedOnBehalf?: boolean
+  loadChartFileRef?: string | null
+  loadChartFileName?: string | null
+  loadChartMimeType?: string | null
+  loadChartSizeBytes?: number | null
+  ownershipType?: $Enums.OwnershipType
+  isActive?: boolean
+  remarks?: string | null
+  approvalStatus?: $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  updatedBy?: string | null
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
+}
+
+export type CraneCreateOrConnectWithoutNegotiationsInput = {
+  where: Prisma.CraneWhereUniqueInput
+  create: Prisma.XOR<Prisma.CraneCreateWithoutNegotiationsInput, Prisma.CraneUncheckedCreateWithoutNegotiationsInput>
+}
+
+export type CraneUpsertWithoutNegotiationsInput = {
+  update: Prisma.XOR<Prisma.CraneUpdateWithoutNegotiationsInput, Prisma.CraneUncheckedUpdateWithoutNegotiationsInput>
+  create: Prisma.XOR<Prisma.CraneCreateWithoutNegotiationsInput, Prisma.CraneUncheckedCreateWithoutNegotiationsInput>
+  where?: Prisma.CraneWhereInput
+}
+
+export type CraneUpdateToOneWithWhereWithoutNegotiationsInput = {
+  where?: Prisma.CraneWhereInput
+  data: Prisma.XOR<Prisma.CraneUpdateWithoutNegotiationsInput, Prisma.CraneUncheckedUpdateWithoutNegotiationsInput>
+}
+
+export type CraneUpdateWithoutNegotiationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus?: Prisma.EnumCraneStatusFieldUpdateOperationsInput | $Enums.CraneStatus
+  currentLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  make?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.StringFieldUpdateOperationsInput | string
+  yom?: Prisma.IntFieldUpdateOperationsInput | number
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo?: Prisma.StringFieldUpdateOperationsInput | string
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ownershipType?: Prisma.EnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalStatus?: Prisma.EnumCraneApprovalStatusFieldUpdateOperationsInput | $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  typeOfCrane?: Prisma.CraneTypeUpdateOneRequiredWithoutCranesNestedInput
+  state?: Prisma.StateUpdateOneRequiredWithoutCranesNestedInput
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
+}
+
+export type CraneUncheckedUpdateWithoutNegotiationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  typeOfCraneCode?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  currentStatus?: Prisma.EnumCraneStatusFieldUpdateOperationsInput | $Enums.CraneStatus
+  currentLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  stateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  make?: Prisma.StringFieldUpdateOperationsInput | string
+  model?: Prisma.StringFieldUpdateOperationsInput | string
+  yom?: Prisma.IntFieldUpdateOperationsInput | number
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serialRegistrationNo?: Prisma.StringFieldUpdateOperationsInput | string
+  pincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  coordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  geocodedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  geocodedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expectedReadyDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedOnBehalf?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  loadChartFileRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadChartSizeBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ownershipType?: Prisma.EnumOwnershipTypeFieldUpdateOperationsInput | $Enums.OwnershipType
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalStatus?: Prisma.EnumCraneApprovalStatusFieldUpdateOperationsInput | $Enums.CraneApprovalStatus
+  statusUpdatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
@@ -2130,6 +2353,7 @@ export type CraneCreateWithoutAuditLogsInput = {
   vendor: Prisma.VendorCreateNestedOneWithoutCranesInput
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutCraneInput
 }
 
@@ -2172,6 +2396,7 @@ export type CraneUncheckedCreateWithoutAuditLogsInput = {
   updatedBy?: string | null
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutCraneInput
 }
 
@@ -2230,6 +2455,7 @@ export type CraneUpdateWithoutAuditLogsInput = {
   vendor?: Prisma.VendorUpdateOneRequiredWithoutCranesNestedInput
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -2272,6 +2498,7 @@ export type CraneUncheckedUpdateWithoutAuditLogsInput = {
   updatedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
 }
 
@@ -2315,6 +2542,7 @@ export type CraneCreateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutCraneInput
 }
 
 export type CraneUncheckedCreateWithoutInboundRepliesInput = {
@@ -2357,6 +2585,7 @@ export type CraneUncheckedCreateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutCraneInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutCraneInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutCraneInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutCraneInput
 }
 
 export type CraneCreateOrConnectWithoutInboundRepliesInput = {
@@ -2415,6 +2644,7 @@ export type CraneUpdateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneUncheckedUpdateWithoutInboundRepliesInput = {
@@ -2457,6 +2687,7 @@ export type CraneUncheckedUpdateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
 }
 
 export type CraneCreateManyStateInput = {
@@ -2536,6 +2767,7 @@ export type CraneUpdateWithoutStateInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -2578,6 +2810,7 @@ export type CraneUncheckedUpdateWithoutStateInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
 }
 
@@ -2696,6 +2929,7 @@ export type CraneUpdateWithoutTypeOfCraneInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -2738,6 +2972,7 @@ export type CraneUncheckedUpdateWithoutTypeOfCraneInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
 }
 
@@ -2856,6 +3091,7 @@ export type CraneUpdateWithoutVendorInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutCraneNestedInput
 }
 
@@ -2898,6 +3134,7 @@ export type CraneUncheckedUpdateWithoutVendorInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutCraneNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutCraneNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutCraneNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutCraneNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutCraneNestedInput
 }
 
@@ -2948,6 +3185,7 @@ export type CraneCountOutputType = {
   quotations: number
   auditLogs: number
   reservations: number
+  negotiations: number
   inboundReplies: number
 }
 
@@ -2955,6 +3193,7 @@ export type CraneCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   quotations?: boolean | CraneCountOutputTypeCountQuotationsArgs
   auditLogs?: boolean | CraneCountOutputTypeCountAuditLogsArgs
   reservations?: boolean | CraneCountOutputTypeCountReservationsArgs
+  negotiations?: boolean | CraneCountOutputTypeCountNegotiationsArgs
   inboundReplies?: boolean | CraneCountOutputTypeCountInboundRepliesArgs
 }
 
@@ -2987,6 +3226,13 @@ export type CraneCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types
  */
 export type CraneCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ReservationWhereInput
+}
+
+/**
+ * CraneCountOutputType without action
+ */
+export type CraneCountOutputTypeCountNegotiationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuotationNegotiationWhereInput
 }
 
 /**
@@ -3040,6 +3286,7 @@ export type CraneSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   quotations?: boolean | Prisma.Crane$quotationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Crane$auditLogsArgs<ExtArgs>
   reservations?: boolean | Prisma.Crane$reservationsArgs<ExtArgs>
+  negotiations?: boolean | Prisma.Crane$negotiationsArgs<ExtArgs>
   inboundReplies?: boolean | Prisma.Crane$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.CraneCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["crane"]>
@@ -3175,6 +3422,7 @@ export type CraneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   quotations?: boolean | Prisma.Crane$quotationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Crane$auditLogsArgs<ExtArgs>
   reservations?: boolean | Prisma.Crane$reservationsArgs<ExtArgs>
+  negotiations?: boolean | Prisma.Crane$negotiationsArgs<ExtArgs>
   inboundReplies?: boolean | Prisma.Crane$inboundRepliesArgs<ExtArgs>
   _count?: boolean | Prisma.CraneCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -3198,6 +3446,7 @@ export type $CranePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     quotations: Prisma.$QuotationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
+    negotiations: Prisma.$QuotationNegotiationPayload<ExtArgs>[]
     inboundReplies: Prisma.$InboundReplyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -3637,6 +3886,7 @@ export interface Prisma__CraneClient<T, Null = never, ExtArgs extends runtime.Ty
   quotations<T extends Prisma.Crane$quotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$quotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Crane$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.Crane$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  negotiations<T extends Prisma.Crane$negotiationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$negotiationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationNegotiationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inboundReplies<T extends Prisma.Crane$inboundRepliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Crane$inboundRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4173,6 +4423,30 @@ export type Crane$reservationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
+}
+
+/**
+ * Crane.negotiations
+ */
+export type Crane$negotiationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuotationNegotiation
+   */
+  select?: Prisma.QuotationNegotiationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuotationNegotiation
+   */
+  omit?: Prisma.QuotationNegotiationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuotationNegotiationInclude<ExtArgs> | null
+  where?: Prisma.QuotationNegotiationWhereInput
+  orderBy?: Prisma.QuotationNegotiationOrderByWithRelationInput | Prisma.QuotationNegotiationOrderByWithRelationInput[]
+  cursor?: Prisma.QuotationNegotiationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuotationNegotiationScalarFieldEnum | Prisma.QuotationNegotiationScalarFieldEnum[]
 }
 
 /**

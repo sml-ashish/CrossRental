@@ -124,6 +124,20 @@ export type Quotation = Prisma.QuotationModel
  */
 export type QuotationAttachment = Prisma.QuotationAttachmentModel
 /**
+ * Model QuotationNegotiation
+ * *
+ *  * One negotiation thread per RFQ + vendor + crane. The vendor's standing
+ *  * quotation keeps its own version chain; a thread only adds rounds beside it,
+ *  * and acceptance creates the next quotation version. `version` is the
+ *  * optimistic-concurrency token for every write endpoint.
+ */
+export type QuotationNegotiation = Prisma.QuotationNegotiationModel
+/**
+ * Model NegotiationRound
+ * 
+ */
+export type NegotiationRound = Prisma.NegotiationRoundModel
+/**
  * Model Enquiry
  * *
  *  * The enquiry header (BPD 6.3/6.4, P1 section 2).

@@ -180,7 +180,7 @@ function money(value: number): string {
 
 const trimmed = (max: number) => z.string().trim().max(max);
 
-const optionalText = (max: number) =>
+export const optionalText = (max: number) =>
   z
     .union([z.string(), z.null()])
     .optional()

@@ -288,6 +288,9 @@ export interface QuickUpdate {
   availableFrom?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /** Optional pincode, so a location fix can carry the full address. */
+  pincode?: string | null;
+  expectedReadyDate?: string | null;
 }
 
 export function quickUpdateCrane(craneId: string, input: QuickUpdate): Promise<{ crane: Crane }> {

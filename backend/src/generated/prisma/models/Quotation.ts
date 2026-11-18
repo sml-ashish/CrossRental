@@ -73,6 +73,7 @@ export type QuotationMinAggregateOutputType = {
   statusReasonText: string | null
   statusChangedAt: Date | null
   statusChangedById: string | null
+  negotiationId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -106,6 +107,7 @@ export type QuotationMaxAggregateOutputType = {
   statusReasonText: string | null
   statusChangedAt: Date | null
   statusChangedById: string | null
+  negotiationId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -141,6 +143,7 @@ export type QuotationCountAggregateOutputType = {
   statusReasonText: number
   statusChangedAt: number
   statusChangedById: number
+  negotiationId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -194,6 +197,7 @@ export type QuotationMinAggregateInputType = {
   statusReasonText?: true
   statusChangedAt?: true
   statusChangedById?: true
+  negotiationId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -227,6 +231,7 @@ export type QuotationMaxAggregateInputType = {
   statusReasonText?: true
   statusChangedAt?: true
   statusChangedById?: true
+  negotiationId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -262,6 +267,7 @@ export type QuotationCountAggregateInputType = {
   statusReasonText?: true
   statusChangedAt?: true
   statusChangedById?: true
+  negotiationId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -384,6 +390,7 @@ export type QuotationGroupByOutputType = {
   statusReasonText: string | null
   statusChangedAt: Date | null
   statusChangedById: string | null
+  negotiationId: string | null
   createdAt: Date
   updatedAt: Date
   _count: QuotationCountAggregateOutputType | null
@@ -442,6 +449,7 @@ export type QuotationWhereInput = {
   statusReasonText?: Prisma.StringNullableFilter<"Quotation"> | string | null
   statusChangedAt?: Prisma.DateTimeNullableFilter<"Quotation"> | Date | string | null
   statusChangedById?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  negotiationId?: Prisma.StringNullableFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   rfq?: Prisma.XOR<Prisma.RfqScalarRelationFilter, Prisma.RfqWhereInput>
@@ -450,6 +458,9 @@ export type QuotationWhereInput = {
   attachments?: Prisma.QuotationAttachmentListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
   inboundReply?: Prisma.XOR<Prisma.InboundReplyNullableScalarRelationFilter, Prisma.InboundReplyWhereInput> | null
+  negotiation?: Prisma.XOR<Prisma.QuotationNegotiationNullableScalarRelationFilter, Prisma.QuotationNegotiationWhereInput> | null
+  baseOfNegotiation?: Prisma.QuotationNegotiationListRelationFilter
+  agreedOfNegotiation?: Prisma.XOR<Prisma.QuotationNegotiationNullableScalarRelationFilter, Prisma.QuotationNegotiationWhereInput> | null
 }
 
 export type QuotationOrderByWithRelationInput = {
@@ -483,6 +494,7 @@ export type QuotationOrderByWithRelationInput = {
   statusReasonText?: Prisma.SortOrderInput | Prisma.SortOrder
   statusChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   statusChangedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  negotiationId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   rfq?: Prisma.RfqOrderByWithRelationInput
@@ -491,6 +503,9 @@ export type QuotationOrderByWithRelationInput = {
   attachments?: Prisma.QuotationAttachmentOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
   inboundReply?: Prisma.InboundReplyOrderByWithRelationInput
+  negotiation?: Prisma.QuotationNegotiationOrderByWithRelationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationOrderByRelationAggregateInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationOrderByWithRelationInput
 }
 
 export type QuotationWhereUniqueInput = Prisma.AtLeast<{
@@ -528,6 +543,7 @@ export type QuotationWhereUniqueInput = Prisma.AtLeast<{
   statusReasonText?: Prisma.StringNullableFilter<"Quotation"> | string | null
   statusChangedAt?: Prisma.DateTimeNullableFilter<"Quotation"> | Date | string | null
   statusChangedById?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  negotiationId?: Prisma.StringNullableFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   rfq?: Prisma.XOR<Prisma.RfqScalarRelationFilter, Prisma.RfqWhereInput>
@@ -536,6 +552,9 @@ export type QuotationWhereUniqueInput = Prisma.AtLeast<{
   attachments?: Prisma.QuotationAttachmentListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
   inboundReply?: Prisma.XOR<Prisma.InboundReplyNullableScalarRelationFilter, Prisma.InboundReplyWhereInput> | null
+  negotiation?: Prisma.XOR<Prisma.QuotationNegotiationNullableScalarRelationFilter, Prisma.QuotationNegotiationWhereInput> | null
+  baseOfNegotiation?: Prisma.QuotationNegotiationListRelationFilter
+  agreedOfNegotiation?: Prisma.XOR<Prisma.QuotationNegotiationNullableScalarRelationFilter, Prisma.QuotationNegotiationWhereInput> | null
 }, "id" | "rfqId_vendorId_craneId_version">
 
 export type QuotationOrderByWithAggregationInput = {
@@ -569,6 +588,7 @@ export type QuotationOrderByWithAggregationInput = {
   statusReasonText?: Prisma.SortOrderInput | Prisma.SortOrder
   statusChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   statusChangedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  negotiationId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.QuotationCountOrderByAggregateInput
@@ -612,6 +632,7 @@ export type QuotationScalarWhereWithAggregatesInput = {
   statusReasonText?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
   statusChangedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Quotation"> | Date | string | null
   statusChangedById?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
+  negotiationId?: Prisma.StringNullableWithAggregatesFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Quotation"> | Date | string
 }
@@ -652,6 +673,9 @@ export type QuotationCreateInput = {
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateInput = {
@@ -685,11 +709,14 @@ export type QuotationUncheckedCreateInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUpdateInput = {
@@ -728,6 +755,9 @@ export type QuotationUpdateInput = {
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateInput = {
@@ -761,11 +791,14 @@ export type QuotationUncheckedUpdateInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationCreateManyInput = {
@@ -799,6 +832,7 @@ export type QuotationCreateManyInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -866,6 +900,7 @@ export type QuotationUncheckedUpdateManyInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -923,6 +958,7 @@ export type QuotationCountOrderByAggregateInput = {
   statusReasonText?: Prisma.SortOrder
   statusChangedAt?: Prisma.SortOrder
   statusChangedById?: Prisma.SortOrder
+  negotiationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -965,6 +1001,7 @@ export type QuotationMaxOrderByAggregateInput = {
   statusReasonText?: Prisma.SortOrder
   statusChangedAt?: Prisma.SortOrder
   statusChangedById?: Prisma.SortOrder
+  negotiationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -998,6 +1035,7 @@ export type QuotationMinOrderByAggregateInput = {
   statusReasonText?: Prisma.SortOrder
   statusChangedAt?: Prisma.SortOrder
   statusChangedById?: Prisma.SortOrder
+  negotiationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1192,6 +1230,78 @@ export type QuotationUpdateOneRequiredWithoutAttachmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.QuotationUpdateToOneWithWhereWithoutAttachmentsInput, Prisma.QuotationUpdateWithoutAttachmentsInput>, Prisma.QuotationUncheckedUpdateWithoutAttachmentsInput>
 }
 
+export type QuotationCreateNestedOneWithoutBaseOfNegotiationInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutBaseOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutBaseOfNegotiationInput>
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutBaseOfNegotiationInput
+  connect?: Prisma.QuotationWhereUniqueInput
+}
+
+export type QuotationCreateNestedOneWithoutAgreedOfNegotiationInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutAgreedOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutAgreedOfNegotiationInput>
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutAgreedOfNegotiationInput
+  connect?: Prisma.QuotationWhereUniqueInput
+}
+
+export type QuotationCreateNestedManyWithoutNegotiationInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutNegotiationInput, Prisma.QuotationUncheckedCreateWithoutNegotiationInput> | Prisma.QuotationCreateWithoutNegotiationInput[] | Prisma.QuotationUncheckedCreateWithoutNegotiationInput[]
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutNegotiationInput | Prisma.QuotationCreateOrConnectWithoutNegotiationInput[]
+  createMany?: Prisma.QuotationCreateManyNegotiationInputEnvelope
+  connect?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+}
+
+export type QuotationUncheckedCreateNestedManyWithoutNegotiationInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutNegotiationInput, Prisma.QuotationUncheckedCreateWithoutNegotiationInput> | Prisma.QuotationCreateWithoutNegotiationInput[] | Prisma.QuotationUncheckedCreateWithoutNegotiationInput[]
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutNegotiationInput | Prisma.QuotationCreateOrConnectWithoutNegotiationInput[]
+  createMany?: Prisma.QuotationCreateManyNegotiationInputEnvelope
+  connect?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+}
+
+export type QuotationUpdateOneRequiredWithoutBaseOfNegotiationNestedInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutBaseOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutBaseOfNegotiationInput>
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutBaseOfNegotiationInput
+  upsert?: Prisma.QuotationUpsertWithoutBaseOfNegotiationInput
+  connect?: Prisma.QuotationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.QuotationUpdateToOneWithWhereWithoutBaseOfNegotiationInput, Prisma.QuotationUpdateWithoutBaseOfNegotiationInput>, Prisma.QuotationUncheckedUpdateWithoutBaseOfNegotiationInput>
+}
+
+export type QuotationUpdateOneWithoutAgreedOfNegotiationNestedInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutAgreedOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutAgreedOfNegotiationInput>
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutAgreedOfNegotiationInput
+  upsert?: Prisma.QuotationUpsertWithoutAgreedOfNegotiationInput
+  disconnect?: Prisma.QuotationWhereInput | boolean
+  delete?: Prisma.QuotationWhereInput | boolean
+  connect?: Prisma.QuotationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.QuotationUpdateToOneWithWhereWithoutAgreedOfNegotiationInput, Prisma.QuotationUpdateWithoutAgreedOfNegotiationInput>, Prisma.QuotationUncheckedUpdateWithoutAgreedOfNegotiationInput>
+}
+
+export type QuotationUpdateManyWithoutNegotiationNestedInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutNegotiationInput, Prisma.QuotationUncheckedCreateWithoutNegotiationInput> | Prisma.QuotationCreateWithoutNegotiationInput[] | Prisma.QuotationUncheckedCreateWithoutNegotiationInput[]
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutNegotiationInput | Prisma.QuotationCreateOrConnectWithoutNegotiationInput[]
+  upsert?: Prisma.QuotationUpsertWithWhereUniqueWithoutNegotiationInput | Prisma.QuotationUpsertWithWhereUniqueWithoutNegotiationInput[]
+  createMany?: Prisma.QuotationCreateManyNegotiationInputEnvelope
+  set?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  disconnect?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  delete?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  connect?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  update?: Prisma.QuotationUpdateWithWhereUniqueWithoutNegotiationInput | Prisma.QuotationUpdateWithWhereUniqueWithoutNegotiationInput[]
+  updateMany?: Prisma.QuotationUpdateManyWithWhereWithoutNegotiationInput | Prisma.QuotationUpdateManyWithWhereWithoutNegotiationInput[]
+  deleteMany?: Prisma.QuotationScalarWhereInput | Prisma.QuotationScalarWhereInput[]
+}
+
+export type QuotationUncheckedUpdateManyWithoutNegotiationNestedInput = {
+  create?: Prisma.XOR<Prisma.QuotationCreateWithoutNegotiationInput, Prisma.QuotationUncheckedCreateWithoutNegotiationInput> | Prisma.QuotationCreateWithoutNegotiationInput[] | Prisma.QuotationUncheckedCreateWithoutNegotiationInput[]
+  connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutNegotiationInput | Prisma.QuotationCreateOrConnectWithoutNegotiationInput[]
+  upsert?: Prisma.QuotationUpsertWithWhereUniqueWithoutNegotiationInput | Prisma.QuotationUpsertWithWhereUniqueWithoutNegotiationInput[]
+  createMany?: Prisma.QuotationCreateManyNegotiationInputEnvelope
+  set?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  disconnect?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  delete?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  connect?: Prisma.QuotationWhereUniqueInput | Prisma.QuotationWhereUniqueInput[]
+  update?: Prisma.QuotationUpdateWithWhereUniqueWithoutNegotiationInput | Prisma.QuotationUpdateWithWhereUniqueWithoutNegotiationInput[]
+  updateMany?: Prisma.QuotationUpdateManyWithWhereWithoutNegotiationInput | Prisma.QuotationUpdateManyWithWhereWithoutNegotiationInput[]
+  deleteMany?: Prisma.QuotationScalarWhereInput | Prisma.QuotationScalarWhereInput[]
+}
+
 export type QuotationCreateNestedOneWithoutInboundReplyInput = {
   create?: Prisma.XOR<Prisma.QuotationCreateWithoutInboundReplyInput, Prisma.QuotationUncheckedCreateWithoutInboundReplyInput>
   connectOrCreate?: Prisma.QuotationCreateOrConnectWithoutInboundReplyInput
@@ -1243,6 +1353,9 @@ export type QuotationCreateWithoutVendorInput = {
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutVendorInput = {
@@ -1275,11 +1388,14 @@ export type QuotationUncheckedCreateWithoutVendorInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutVendorInput = {
@@ -1342,6 +1458,7 @@ export type QuotationScalarWhereInput = {
   statusReasonText?: Prisma.StringNullableFilter<"Quotation"> | string | null
   statusChangedAt?: Prisma.DateTimeNullableFilter<"Quotation"> | Date | string | null
   statusChangedById?: Prisma.StringNullableFilter<"Quotation"> | string | null
+  negotiationId?: Prisma.StringNullableFilter<"Quotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quotation"> | Date | string
 }
@@ -1381,6 +1498,9 @@ export type QuotationCreateWithoutCraneInput = {
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutCraneInput = {
@@ -1413,11 +1533,14 @@ export type QuotationUncheckedCreateWithoutCraneInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutCraneInput = {
@@ -1481,6 +1604,9 @@ export type QuotationCreateWithoutRfqInput = {
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutRfqInput = {
@@ -1513,11 +1639,14 @@ export type QuotationUncheckedCreateWithoutRfqInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutRfqInput = {
@@ -1581,6 +1710,9 @@ export type QuotationCreateWithoutReservationsInput = {
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutReservationsInput = {
@@ -1614,10 +1746,13 @@ export type QuotationUncheckedCreateWithoutReservationsInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutReservationsInput = {
@@ -1671,6 +1806,9 @@ export type QuotationUpdateWithoutReservationsInput = {
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutReservationsInput = {
@@ -1704,10 +1842,13 @@ export type QuotationUncheckedUpdateWithoutReservationsInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationCreateWithoutAttachmentsInput = {
@@ -1745,6 +1886,9 @@ export type QuotationCreateWithoutAttachmentsInput = {
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutAttachmentsInput = {
@@ -1778,10 +1922,13 @@ export type QuotationUncheckedCreateWithoutAttachmentsInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
   inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutAttachmentsInput = {
@@ -1835,6 +1982,9 @@ export type QuotationUpdateWithoutAttachmentsInput = {
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutAttachmentsInput = {
@@ -1868,10 +2018,471 @@ export type QuotationUncheckedUpdateWithoutAttachmentsInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
+}
+
+export type QuotationCreateWithoutBaseOfNegotiationInput = {
+  id?: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
+  vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
+  crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
+  attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
+  inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
+}
+
+export type QuotationUncheckedCreateWithoutBaseOfNegotiationInput = {
+  id?: string
+  rfqId: string
+  vendorId: string
+  craneId: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  negotiationId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
+  inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
+}
+
+export type QuotationCreateOrConnectWithoutBaseOfNegotiationInput = {
+  where: Prisma.QuotationWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutBaseOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutBaseOfNegotiationInput>
+}
+
+export type QuotationCreateWithoutAgreedOfNegotiationInput = {
+  id?: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
+  vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
+  crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
+  attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
+  inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+}
+
+export type QuotationUncheckedCreateWithoutAgreedOfNegotiationInput = {
+  id?: string
+  rfqId: string
+  vendorId: string
+  craneId: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  negotiationId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
+  inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+}
+
+export type QuotationCreateOrConnectWithoutAgreedOfNegotiationInput = {
+  where: Prisma.QuotationWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutAgreedOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutAgreedOfNegotiationInput>
+}
+
+export type QuotationCreateWithoutNegotiationInput = {
+  id?: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rfq: Prisma.RfqCreateNestedOneWithoutQuotationsInput
+  vendor: Prisma.VendorCreateNestedOneWithoutQuotationsInput
+  crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
+  attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
+  inboundReply?: Prisma.InboundReplyCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
+}
+
+export type QuotationUncheckedCreateWithoutNegotiationInput = {
+  id?: string
+  rfqId: string
+  vendorId: string
+  craneId: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
+  inboundReply?: Prisma.InboundReplyUncheckedCreateNestedOneWithoutConvertedQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
+}
+
+export type QuotationCreateOrConnectWithoutNegotiationInput = {
+  where: Prisma.QuotationWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutNegotiationInput, Prisma.QuotationUncheckedCreateWithoutNegotiationInput>
+}
+
+export type QuotationCreateManyNegotiationInputEnvelope = {
+  data: Prisma.QuotationCreateManyNegotiationInput | Prisma.QuotationCreateManyNegotiationInput[]
+  skipDuplicates?: boolean
+}
+
+export type QuotationUpsertWithoutBaseOfNegotiationInput = {
+  update: Prisma.XOR<Prisma.QuotationUpdateWithoutBaseOfNegotiationInput, Prisma.QuotationUncheckedUpdateWithoutBaseOfNegotiationInput>
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutBaseOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutBaseOfNegotiationInput>
+  where?: Prisma.QuotationWhereInput
+}
+
+export type QuotationUpdateToOneWithWhereWithoutBaseOfNegotiationInput = {
+  where?: Prisma.QuotationWhereInput
+  data: Prisma.XOR<Prisma.QuotationUpdateWithoutBaseOfNegotiationInput, Prisma.QuotationUncheckedUpdateWithoutBaseOfNegotiationInput>
+}
+
+export type QuotationUpdateWithoutBaseOfNegotiationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
+  crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
+  attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
+  inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
+}
+
+export type QuotationUncheckedUpdateWithoutBaseOfNegotiationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqId?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  craneId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
+  inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
+}
+
+export type QuotationUpsertWithoutAgreedOfNegotiationInput = {
+  update: Prisma.XOR<Prisma.QuotationUpdateWithoutAgreedOfNegotiationInput, Prisma.QuotationUncheckedUpdateWithoutAgreedOfNegotiationInput>
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutAgreedOfNegotiationInput, Prisma.QuotationUncheckedCreateWithoutAgreedOfNegotiationInput>
+  where?: Prisma.QuotationWhereInput
+}
+
+export type QuotationUpdateToOneWithWhereWithoutAgreedOfNegotiationInput = {
+  where?: Prisma.QuotationWhereInput
+  data: Prisma.XOR<Prisma.QuotationUpdateWithoutAgreedOfNegotiationInput, Prisma.QuotationUncheckedUpdateWithoutAgreedOfNegotiationInput>
+}
+
+export type QuotationUpdateWithoutAgreedOfNegotiationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
+  crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
+  attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
+  inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+}
+
+export type QuotationUncheckedUpdateWithoutAgreedOfNegotiationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqId?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  craneId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
+  inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+}
+
+export type QuotationUpsertWithWhereUniqueWithoutNegotiationInput = {
+  where: Prisma.QuotationWhereUniqueInput
+  update: Prisma.XOR<Prisma.QuotationUpdateWithoutNegotiationInput, Prisma.QuotationUncheckedUpdateWithoutNegotiationInput>
+  create: Prisma.XOR<Prisma.QuotationCreateWithoutNegotiationInput, Prisma.QuotationUncheckedCreateWithoutNegotiationInput>
+}
+
+export type QuotationUpdateWithWhereUniqueWithoutNegotiationInput = {
+  where: Prisma.QuotationWhereUniqueInput
+  data: Prisma.XOR<Prisma.QuotationUpdateWithoutNegotiationInput, Prisma.QuotationUncheckedUpdateWithoutNegotiationInput>
+}
+
+export type QuotationUpdateManyWithWhereWithoutNegotiationInput = {
+  where: Prisma.QuotationScalarWhereInput
+  data: Prisma.XOR<Prisma.QuotationUpdateManyMutationInput, Prisma.QuotationUncheckedUpdateManyWithoutNegotiationInput>
 }
 
 export type QuotationCreateWithoutInboundReplyInput = {
@@ -1909,6 +2520,9 @@ export type QuotationCreateWithoutInboundReplyInput = {
   crane: Prisma.CraneCreateNestedOneWithoutQuotationsInput
   attachments?: Prisma.QuotationAttachmentCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutQuotationInput
+  negotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutQuotationsInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationUncheckedCreateWithoutInboundReplyInput = {
@@ -1942,10 +2556,13 @@ export type QuotationUncheckedCreateWithoutInboundReplyInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedCreateNestedManyWithoutQuotationInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutQuotationInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutBaseQuotationInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedCreateNestedOneWithoutAgreedQuotationInput
 }
 
 export type QuotationCreateOrConnectWithoutInboundReplyInput = {
@@ -1999,6 +2616,9 @@ export type QuotationUpdateWithoutInboundReplyInput = {
   crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutInboundReplyInput = {
@@ -2032,10 +2652,13 @@ export type QuotationUncheckedUpdateWithoutInboundReplyInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationCreateManyVendorInput = {
@@ -2068,6 +2691,7 @@ export type QuotationCreateManyVendorInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2107,6 +2731,9 @@ export type QuotationUpdateWithoutVendorInput = {
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutVendorInput = {
@@ -2139,11 +2766,14 @@ export type QuotationUncheckedUpdateWithoutVendorInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateManyWithoutVendorInput = {
@@ -2176,6 +2806,7 @@ export type QuotationUncheckedUpdateManyWithoutVendorInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2210,6 +2841,7 @@ export type QuotationCreateManyCraneInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2249,6 +2881,9 @@ export type QuotationUpdateWithoutCraneInput = {
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutCraneInput = {
@@ -2281,11 +2916,14 @@ export type QuotationUncheckedUpdateWithoutCraneInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateManyWithoutCraneInput = {
@@ -2318,6 +2956,7 @@ export type QuotationUncheckedUpdateManyWithoutCraneInput = {
   statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2352,6 +2991,7 @@ export type QuotationCreateManyRfqInput = {
   statusReasonText?: string | null
   statusChangedAt?: Date | string | null
   statusChangedById?: string | null
+  negotiationId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2391,10 +3031,164 @@ export type QuotationUpdateWithoutRfqInput = {
   attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  negotiation?: Prisma.QuotationNegotiationUpdateOneWithoutQuotationsNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
 }
 
 export type QuotationUncheckedUpdateWithoutRfqInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  craneId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
+  inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
+}
+
+export type QuotationUncheckedUpdateManyWithoutRfqInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  craneId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  negotiationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuotationCreateManyNegotiationInput = {
+  id?: string
+  rfqId: string
+  vendorId: string
+  craneId: string
+  version?: number
+  isLatest?: boolean
+  rentalRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis: $Enums.RateBasis
+  mobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: $Enums.TaxBasisOfQuotation
+  totalQuotedValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: string | null
+  availabilityConfirmed: boolean
+  availableFrom?: Date | string | null
+  validityDate: Date | string
+  acceptsCommercialTerms: boolean
+  deviationText?: string | null
+  remarks?: string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Date | string
+  source?: $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: $Enums.DistanceMethod | null
+  status?: $Enums.QuotationStatus
+  statusReasonCode?: string | null
+  statusReasonText?: string | null
+  statusChangedAt?: Date | string | null
+  statusChangedById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type QuotationUpdateWithoutNegotiationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  isLatest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rentalRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  rateBasis?: Prisma.EnumRateBasisFieldUpdateOperationsInput | $Enums.RateBasis
+  mobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  demobilisationCharges?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  taxBasis?: Prisma.EnumTaxBasisOfQuotationFieldUpdateOperationsInput | $Enums.TaxBasisOfQuotation
+  totalQuotedValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  calculationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  availabilityConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  validityDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acceptsCommercialTerms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deviationText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  warnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source?: Prisma.EnumQuoteSourceFieldUpdateOperationsInput | $Enums.QuoteSource
+  craneLocationSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  distanceToSiteKm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  distanceMethod?: Prisma.NullableEnumDistanceMethodFieldUpdateOperationsInput | $Enums.DistanceMethod | null
+  status?: Prisma.EnumQuotationStatusFieldUpdateOperationsInput | $Enums.QuotationStatus
+  statusReasonCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusReasonText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rfq?: Prisma.RfqUpdateOneRequiredWithoutQuotationsNestedInput
+  vendor?: Prisma.VendorUpdateOneRequiredWithoutQuotationsNestedInput
+  crane?: Prisma.CraneUpdateOneRequiredWithoutQuotationsNestedInput
+  attachments?: Prisma.QuotationAttachmentUpdateManyWithoutQuotationNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutQuotationNestedInput
+  inboundReply?: Prisma.InboundReplyUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUpdateOneWithoutAgreedQuotationNestedInput
+}
+
+export type QuotationUncheckedUpdateWithoutNegotiationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqId?: Prisma.StringFieldUpdateOperationsInput | string
   vendorId?: Prisma.StringFieldUpdateOperationsInput | string
   craneId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2428,10 +3222,13 @@ export type QuotationUncheckedUpdateWithoutRfqInput = {
   attachments?: Prisma.QuotationAttachmentUncheckedUpdateManyWithoutQuotationNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutQuotationNestedInput
   inboundReply?: Prisma.InboundReplyUncheckedUpdateOneWithoutConvertedQuotationNestedInput
+  baseOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutBaseQuotationNestedInput
+  agreedOfNegotiation?: Prisma.QuotationNegotiationUncheckedUpdateOneWithoutAgreedQuotationNestedInput
 }
 
-export type QuotationUncheckedUpdateManyWithoutRfqInput = {
+export type QuotationUncheckedUpdateManyWithoutNegotiationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqId?: Prisma.StringFieldUpdateOperationsInput | string
   vendorId?: Prisma.StringFieldUpdateOperationsInput | string
   craneId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2472,11 +3269,13 @@ export type QuotationUncheckedUpdateManyWithoutRfqInput = {
 export type QuotationCountOutputType = {
   attachments: number
   reservations: number
+  baseOfNegotiation: number
 }
 
 export type QuotationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   attachments?: boolean | QuotationCountOutputTypeCountAttachmentsArgs
   reservations?: boolean | QuotationCountOutputTypeCountReservationsArgs
+  baseOfNegotiation?: boolean | QuotationCountOutputTypeCountBaseOfNegotiationArgs
 }
 
 /**
@@ -2501,6 +3300,13 @@ export type QuotationCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime
  */
 export type QuotationCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ReservationWhereInput
+}
+
+/**
+ * QuotationCountOutputType without action
+ */
+export type QuotationCountOutputTypeCountBaseOfNegotiationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuotationNegotiationWhereInput
 }
 
 
@@ -2535,6 +3341,7 @@ export type QuotationSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   statusReasonText?: boolean
   statusChangedAt?: boolean
   statusChangedById?: boolean
+  negotiationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
@@ -2543,6 +3350,9 @@ export type QuotationSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   attachments?: boolean | Prisma.Quotation$attachmentsArgs<ExtArgs>
   reservations?: boolean | Prisma.Quotation$reservationsArgs<ExtArgs>
   inboundReply?: boolean | Prisma.Quotation$inboundReplyArgs<ExtArgs>
+  negotiation?: boolean | Prisma.Quotation$negotiationArgs<ExtArgs>
+  baseOfNegotiation?: boolean | Prisma.Quotation$baseOfNegotiationArgs<ExtArgs>
+  agreedOfNegotiation?: boolean | Prisma.Quotation$agreedOfNegotiationArgs<ExtArgs>
   _count?: boolean | Prisma.QuotationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["quotation"]>
 
@@ -2577,11 +3387,13 @@ export type QuotationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   statusReasonText?: boolean
   statusChangedAt?: boolean
   statusChangedById?: boolean
+  negotiationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   crane?: boolean | Prisma.CraneDefaultArgs<ExtArgs>
+  negotiation?: boolean | Prisma.Quotation$negotiationArgs<ExtArgs>
 }, ExtArgs["result"]["quotation"]>
 
 export type QuotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2615,11 +3427,13 @@ export type QuotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   statusReasonText?: boolean
   statusChangedAt?: boolean
   statusChangedById?: boolean
+  negotiationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   crane?: boolean | Prisma.CraneDefaultArgs<ExtArgs>
+  negotiation?: boolean | Prisma.Quotation$negotiationArgs<ExtArgs>
 }, ExtArgs["result"]["quotation"]>
 
 export type QuotationSelectScalar = {
@@ -2653,11 +3467,12 @@ export type QuotationSelectScalar = {
   statusReasonText?: boolean
   statusChangedAt?: boolean
   statusChangedById?: boolean
+  negotiationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type QuotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqId" | "vendorId" | "craneId" | "version" | "isLatest" | "rentalRate" | "rateBasis" | "mobilisationCharges" | "demobilisationCharges" | "taxBasis" | "totalQuotedValue" | "calculationNote" | "availabilityConfirmed" | "availableFrom" | "validityDate" | "acceptsCommercialTerms" | "deviationText" | "remarks" | "warnings" | "submittedAt" | "source" | "craneLocationSnapshot" | "distanceToSiteKm" | "distanceMethod" | "status" | "statusReasonCode" | "statusReasonText" | "statusChangedAt" | "statusChangedById" | "createdAt" | "updatedAt", ExtArgs["result"]["quotation"]>
+export type QuotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqId" | "vendorId" | "craneId" | "version" | "isLatest" | "rentalRate" | "rateBasis" | "mobilisationCharges" | "demobilisationCharges" | "taxBasis" | "totalQuotedValue" | "calculationNote" | "availabilityConfirmed" | "availableFrom" | "validityDate" | "acceptsCommercialTerms" | "deviationText" | "remarks" | "warnings" | "submittedAt" | "source" | "craneLocationSnapshot" | "distanceToSiteKm" | "distanceMethod" | "status" | "statusReasonCode" | "statusReasonText" | "statusChangedAt" | "statusChangedById" | "negotiationId" | "createdAt" | "updatedAt", ExtArgs["result"]["quotation"]>
 export type QuotationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
@@ -2665,17 +3480,22 @@ export type QuotationInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   attachments?: boolean | Prisma.Quotation$attachmentsArgs<ExtArgs>
   reservations?: boolean | Prisma.Quotation$reservationsArgs<ExtArgs>
   inboundReply?: boolean | Prisma.Quotation$inboundReplyArgs<ExtArgs>
+  negotiation?: boolean | Prisma.Quotation$negotiationArgs<ExtArgs>
+  baseOfNegotiation?: boolean | Prisma.Quotation$baseOfNegotiationArgs<ExtArgs>
+  agreedOfNegotiation?: boolean | Prisma.Quotation$agreedOfNegotiationArgs<ExtArgs>
   _count?: boolean | Prisma.QuotationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type QuotationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   crane?: boolean | Prisma.CraneDefaultArgs<ExtArgs>
+  negotiation?: boolean | Prisma.Quotation$negotiationArgs<ExtArgs>
 }
 export type QuotationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rfq?: boolean | Prisma.RfqDefaultArgs<ExtArgs>
   vendor?: boolean | Prisma.VendorDefaultArgs<ExtArgs>
   crane?: boolean | Prisma.CraneDefaultArgs<ExtArgs>
+  negotiation?: boolean | Prisma.Quotation$negotiationArgs<ExtArgs>
 }
 
 export type $QuotationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2687,6 +3507,9 @@ export type $QuotationPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     attachments: Prisma.$QuotationAttachmentPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
     inboundReply: Prisma.$InboundReplyPayload<ExtArgs> | null
+    negotiation: Prisma.$QuotationNegotiationPayload<ExtArgs> | null
+    baseOfNegotiation: Prisma.$QuotationNegotiationPayload<ExtArgs>[]
+    agreedOfNegotiation: Prisma.$QuotationNegotiationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2719,6 +3542,7 @@ export type $QuotationPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     statusReasonText: string | null
     statusChangedAt: Date | null
     statusChangedById: string | null
+    negotiationId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["quotation"]>
@@ -3121,6 +3945,9 @@ export interface Prisma__QuotationClient<T, Null = never, ExtArgs extends runtim
   attachments<T extends Prisma.Quotation$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.Quotation$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inboundReply<T extends Prisma.Quotation$inboundReplyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$inboundReplyArgs<ExtArgs>>): Prisma.Prisma__InboundReplyClient<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  negotiation<T extends Prisma.Quotation$negotiationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$negotiationArgs<ExtArgs>>): Prisma.Prisma__QuotationNegotiationClient<runtime.Types.Result.GetResult<Prisma.$QuotationNegotiationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  baseOfNegotiation<T extends Prisma.Quotation$baseOfNegotiationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$baseOfNegotiationArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationNegotiationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  agreedOfNegotiation<T extends Prisma.Quotation$agreedOfNegotiationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Quotation$agreedOfNegotiationArgs<ExtArgs>>): Prisma.Prisma__QuotationNegotiationClient<runtime.Types.Result.GetResult<Prisma.$QuotationNegotiationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3180,6 +4007,7 @@ export interface QuotationFieldRefs {
   readonly statusReasonText: Prisma.FieldRef<"Quotation", 'String'>
   readonly statusChangedAt: Prisma.FieldRef<"Quotation", 'DateTime'>
   readonly statusChangedById: Prisma.FieldRef<"Quotation", 'String'>
+  readonly negotiationId: Prisma.FieldRef<"Quotation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Quotation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Quotation", 'DateTime'>
 }
@@ -3647,6 +4475,68 @@ export type Quotation$inboundReplyArgs<ExtArgs extends runtime.Types.Extensions.
    */
   include?: Prisma.InboundReplyInclude<ExtArgs> | null
   where?: Prisma.InboundReplyWhereInput
+}
+
+/**
+ * Quotation.negotiation
+ */
+export type Quotation$negotiationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuotationNegotiation
+   */
+  select?: Prisma.QuotationNegotiationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuotationNegotiation
+   */
+  omit?: Prisma.QuotationNegotiationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuotationNegotiationInclude<ExtArgs> | null
+  where?: Prisma.QuotationNegotiationWhereInput
+}
+
+/**
+ * Quotation.baseOfNegotiation
+ */
+export type Quotation$baseOfNegotiationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuotationNegotiation
+   */
+  select?: Prisma.QuotationNegotiationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuotationNegotiation
+   */
+  omit?: Prisma.QuotationNegotiationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuotationNegotiationInclude<ExtArgs> | null
+  where?: Prisma.QuotationNegotiationWhereInput
+  orderBy?: Prisma.QuotationNegotiationOrderByWithRelationInput | Prisma.QuotationNegotiationOrderByWithRelationInput[]
+  cursor?: Prisma.QuotationNegotiationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuotationNegotiationScalarFieldEnum | Prisma.QuotationNegotiationScalarFieldEnum[]
+}
+
+/**
+ * Quotation.agreedOfNegotiation
+ */
+export type Quotation$agreedOfNegotiationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuotationNegotiation
+   */
+  select?: Prisma.QuotationNegotiationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuotationNegotiation
+   */
+  omit?: Prisma.QuotationNegotiationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuotationNegotiationInclude<ExtArgs> | null
+  where?: Prisma.QuotationNegotiationWhereInput
 }
 
 /**

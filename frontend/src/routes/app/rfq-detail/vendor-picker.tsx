@@ -93,6 +93,8 @@ export function VendorPickerSection({
   // a live read could lose the vendor between render and the first preselection.
   const [requestedVendorId] = useState<string | null>(() => routeSearch.vendor ?? null);
   const [selected, setSelected] = useState<string[]>([]);
+  /** Cranes tagged to the RFQ. A vendor stays selected while any of them is. */
+  const [selectedCranes, setSelectedCranes] = useState<string[]>([]);
   /** Set the moment the user changes the shortlist; stops any re-defaulting. */
   const [touched, setTouched] = useState(false);
   const preselectionApplied = useRef(false);
@@ -140,7 +142,7 @@ export function VendorPickerSection({
 
   const send = useMutation({
     // Email is the only channel RFQs go out on.
-    mutationFn: () => sendRfq(rfq.id, selected, ["EMAIL"]),
+    mutationFn: () => sendRfq(rfq.id, selected, ["EMAIL"], selectedCranes),
     onSuccess: (result) => {
       const { sent, failed, results } = result.result;
       onSent({
@@ -154,6 +156,7 @@ export function VendorPickerSection({
           })),
       });
       setSelected([]);
+      setSelectedCranes([]);
       setTouched(true);
       void queryClient.invalidateQueries({ queryKey: ["rfq", rfq.id] });
       void queryClient.invalidateQueries({ queryKey: ["rfqs"] });
@@ -174,18 +177,31 @@ export function VendorPickerSection({
     return ids;
   }, [located, contactedIndex]);
 
+  const vendorOfCrane = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const { crane, group } of topRows) map.set(crane.craneId, group.vendorId);
+    return map;
+  }, [topRows]);
+
   const selectedVendors: SelectedVendor[] = selected.map((vendorId) => ({
     vendorId,
     vendorName: nameById.get(vendorId) ?? "Selected vendor",
+    craneCount: selectedCranes.filter((craneId) => vendorOfCrane.get(craneId) === vendorId)
+      .length,
   }));
 
   const contactedSelected = selectedVendors
     .filter((vendor) => contactedIds.has(vendor.vendorId))
     .map((vendor) => vendor.vendorName);
 
+  const selectableTopCranes = topRows
+    .filter(({ group }) => !alreadySent.includes(group.vendorId))
+    .map(({ crane }) => crane.craneId);
+  const allTopCranesSelected =
+    selectableTopCranes.length > 0 &&
+    selectableTopCranes.every((craneId) => selectedCranes.includes(craneId));
+
   const selectableTop = topVendorIds.filter((vendorId) => !alreadySent.includes(vendorId));
-  const allTopSelected =
-    selectableTop.length > 0 && selectableTop.every((vendorId) => selected.includes(vendorId));
 
   const blockReason = disabled
     ? "This RFQ was cancelled and cannot be sent."
@@ -197,11 +213,18 @@ export function VendorPickerSection({
     setAnnounce(`${count} vendor${count === 1 ? "" : "s"} selected`);
   }
 
+  /** Picking a vendor by name (the approved list) tags no particular crane. */
   function toggle(vendorId: string) {
     if (alreadySent.includes(vendorId)) return;
     setTouched(true);
+    const dropping = selected.includes(vendorId);
+    if (dropping) {
+      setSelectedCranes((previous) =>
+        previous.filter((craneId) => vendorOfCrane.get(craneId) !== vendorId),
+      );
+    }
     setSelected((previous) => {
-      const next = previous.includes(vendorId)
+      const next = dropping
         ? previous.filter((id) => id !== vendorId)
         : [...previous, vendorId];
       announceSelection(next.length);
@@ -209,20 +232,45 @@ export function VendorPickerSection({
     });
   }
 
-  function toggleAllTop() {
+  /** One crane in, one crane out. The vendor follows its cranes. */
+  function toggleCrane(craneId: string, vendorId: string) {
+    if (alreadySent.includes(vendorId)) return;
     setTouched(true);
+    const nextCranes = selectedCranes.includes(craneId)
+      ? selectedCranes.filter((id) => id !== craneId)
+      : [...selectedCranes, craneId];
+    setSelectedCranes(nextCranes);
+    const stillHasCrane = nextCranes.some((id) => vendorOfCrane.get(id) === vendorId);
     setSelected((previous) => {
-      const next = allTopSelected
-        ? previous.filter((vendorId) => !selectableTop.includes(vendorId))
-        : [...new Set([...previous, ...selectableTop])];
-      announceSelection(next.length);
+      const has = previous.includes(vendorId);
+      const next = stillHasCrane
+        ? has
+          ? previous
+          : [...previous, vendorId]
+        : previous.filter((id) => id !== vendorId);
+      announceSelection(nextCranes.length);
       return next;
     });
+  }
+
+  function toggleAllTop() {
+    setTouched(true);
+    if (allTopCranesSelected) {
+      setSelectedCranes((previous) =>
+        previous.filter((craneId) => !selectableTopCranes.includes(craneId)),
+      );
+      setSelected((previous) => previous.filter((id) => !selectableTop.includes(id)));
+    } else {
+      setSelectedCranes((previous) => [...new Set([...previous, ...selectableTopCranes])]);
+      setSelected((previous) => [...new Set([...previous, ...selectableTop])]);
+    }
+    announceSelection(allTopCranesSelected ? 0 : selectableTopCranes.length);
   }
 
   function clearSelection() {
     setTouched(true);
     setSelected([]);
+    setSelectedCranes([]);
     setAnnounce("Selection cleared");
   }
 
@@ -423,10 +471,10 @@ export function VendorPickerSection({
                 <button
                   type="button"
                   onClick={toggleAllTop}
-                  disabled={selectableTop.length === 0}
+                  disabled={selectableTopCranes.length === 0}
                   className="rounded-md px-2 py-1 text-[14px] font-medium text-slate-600 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
                 >
-                  {allTopSelected ? "Clear these" : "Select all"}
+                  {allTopCranesSelected ? "Clear these" : "Select all"}
                 </button>
               </div>
 
@@ -436,14 +484,14 @@ export function VendorPickerSection({
                 startDateTbc={startDateTbc}
                 startLabel={startLabel}
                 showDistance={distancesAvailable}
-                selected={selected}
+                selectedCranes={selectedCranes}
                 alreadySent={alreadySent}
                 contacted={contactedIds}
-                onToggleVendor={toggle}
+                onToggleCrane={toggleCrane}
               />
 
               <p className="text-[14px] text-slate-500">
-                The RFQ goes to the vendor, who chooses which crane to quote.
+                Only the cranes you tick are tagged to this RFQ. The vendor is told which ones to quote.
               </p>
             </>
           )}

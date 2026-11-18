@@ -27,7 +27,7 @@ import { cn } from "@/lib/cn";
 
 type Tab = "to-quote" | "quoted" | "closed" | "declined" | "all";
 type Bucket = Exclude<Tab, "all">;
-type SortKey = "closing" | "newest" | "biggest";
+type SortKey = "closing" | "newest" | "biggest" | "counter";
 type Group = "soon" | "week" | "later";
 
 type InboxSearch = { response?: string; q?: string; delivery?: "FAILED" };
@@ -42,6 +42,7 @@ const TABS: Array<{ value: Tab; label: string }> = [
 
 const SORTS: Array<{ value: SortKey; label: string }> = [
   { value: "closing", label: "Closing soonest" },
+  { value: "counter", label: "Counter-offers first" },
   { value: "newest", label: "Newest" },
   { value: "biggest", label: "Biggest crane" },
 ];
@@ -87,6 +88,17 @@ function tabOf(row: VendorInboxRow): Bucket {
   ) {
     return "closed";
   }
+  // A cancelled or fully awarded RFQ with no quote from this vendor has nothing
+  // left to quote. It must leave To quote even when the recipient row was never
+  // moved off Pending. A vendor who did quote keeps the Quoted row — their offer
+  // stays on record, with its award outcome shown on the detail screen.
+  if (
+    (row.rfqStatus === "CLOSED" || row.rfqStatus === "CANCELLED") &&
+    row.responseStatus !== "QUOTED" &&
+    row.quotationCount === 0
+  ) {
+    return "closed";
+  }
   if (row.responseStatus === "QUOTED") return "quoted";
   if (row.quotationCount > 0) return "quoted";
   return row.canRespond ? "to-quote" : "closed";
@@ -105,7 +117,19 @@ function deadlineValue(row: VendorInboxRow): number {
   return Number.isNaN(value) ? Number.MAX_SAFE_INTEGER : value;
 }
 
+function respondByValue(row: VendorInboxRow): number {
+  if (!row.respondBy) return Number.MAX_SAFE_INTEGER;
+  const value = new Date(row.respondBy).getTime();
+  return Number.isNaN(value) ? Number.MAX_SAFE_INTEGER : value;
+}
+
 function compareRows(a: VendorInboxRow, b: VendorInboxRow, sort: SortKey): number {
+  if (sort === "counter") {
+    // Counter-offers needing a response float to the top, soonest response first.
+    if (a.counterOffer !== b.counterOffer) return a.counterOffer ? -1 : 1;
+    if (a.counterOffer) return respondByValue(a) - respondByValue(b);
+    return deadlineValue(a) - deadlineValue(b);
+  }
   if (sort === "biggest") {
     return (
       b.capacityT - a.capacityT ||
@@ -246,7 +270,11 @@ function countdownFor(
 
 function quoteLine(row: VendorInboxRow, bucket: Bucket): string {
   if (bucket === "declined") return "You declined this job";
-  if (bucket === "closed") return "Closed. You can no longer quote.";
+  if (bucket === "closed") {
+    if (row.rfqStatus === "CANCELLED") return "SML cancelled this job.";
+    if (row.rfqStatus === "CLOSED") return "Finalised. You can no longer quote.";
+    return "Closed. You can no longer quote.";
+  }
   if (row.quotationCount === 0) return "No quote yet";
 
   const amount =
@@ -263,6 +291,7 @@ function quoteLine(row: VendorInboxRow, bucket: Bucket): string {
 }
 
 function primaryLabel(row: VendorInboxRow): string {
+  if (row.counterOffer) return "Respond to counter-offer";
   if (row.quotationCount === 0) return "Send quote";
   if (row.quotationCount < row.quantity) return "Quote the other crane";
   return "Edit quote";
@@ -553,6 +582,12 @@ function RfqCard({
           {row.unread ? (
             <span className="text-[14px] leading-4 font-medium text-accent-400">New</span>
           ) : null}
+          {row.counterOffer ? (
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[13px] font-medium text-amber-400">
+              Counter-offer received
+              {row.respondBy ? ` · ${formatExact(row.respondBy)}` : ""}
+            </span>
+          ) : null}
           {row.reminderCount > 0 ? (
             <span className="text-slate-400">
               SML sent {row.reminderCount} reminder
@@ -594,13 +629,6 @@ function RfqCard({
                 className="btn-primary w-full justify-center px-4 py-2 text-[15px] min-[900px]:w-auto"
               >
                 {primaryLabel(row)}
-              </Link>
-              <Link
-                to="/app/rfqs/$rfqId"
-                params={{ rfqId: row.rfqId }}
-                className="rounded-sm text-center text-[15px] text-slate-500 underline underline-offset-2 transition-colors hover:text-slate-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
-              >
-                Can't do this
               </Link>
             </>
           ) : (

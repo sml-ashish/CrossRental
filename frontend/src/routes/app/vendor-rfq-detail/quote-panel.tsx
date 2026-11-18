@@ -24,17 +24,9 @@ import {
   type VendorQuotation,
   type VendorRfqDetail,
 } from "@/lib/quotations";
-import {
-  createCrane,
-  CRANE_STATUS_LABELS,
-  EMPTY_CRANE_FORM,
-  fetchReferenceData,
-  listCranes,
-  NEW_CRANE_STATUSES,
-  type Crane,
-  type CraneForm,
-} from "@/lib/fleet";
+import { listCranes, type Crane } from "@/lib/fleet";
 import { fitLabel, fleetFit, type FitVerdict } from "./fit";
+import { CraneLocationFix, craneNeedsLocation } from "./crane-location-fix";
 
 /**
  * The quote panel: pick a crane, price it, read the server's total, send it.
@@ -54,7 +46,6 @@ const EMPTY_FORM = {
   demobilisationCharges: "",
   taxBasis: "EXCLUSIVE_OF_GST",
   availabilityConfirmed: false,
-  availableFrom: "",
   validityDate: "",
   acceptsCommercialTerms: false,
   deviationText: "",
@@ -111,7 +102,6 @@ function storedDraft(rfqId: string): Partial<FormState> | null {
     rentalRate: safeString(raw.rentalRate) ?? "",
     mobilisationCharges: safeString(raw.mobilisationCharges) ?? "",
     demobilisationCharges: safeString(raw.demobilisationCharges) ?? "",
-    availableFrom: safeString(raw.availableFrom) ?? "",
     validityDate: safeString(raw.validityDate) ?? "",
     deviationText: safeString(raw.deviationText) ?? "",
     remarks: safeString(raw.remarks) ?? "",
@@ -222,9 +212,7 @@ export function QuotePanel({
       mutation={submit}
       mode="create"
       previousQuote={previousQuote}
-      quotedCraneIds={quotations
-        .filter((quotation) => quotation.status !== "WITHDRAWN")
-        .map((quotation) => quotation.craneId)}
+      quotedCraneIds={quotations.map((quotation) => quotation.craneId)}
     />
   );
 }
@@ -276,9 +264,13 @@ export function QuoteForm({
   const taggedCranes = cranes.filter((crane) => taggedIds.includes(crane.id));
   const [chart, setChart] = useState<File | null>(null);
   const [warningsAcknowledged, setWarningsAcknowledged] = useState(false);
-  const [addingCrane, setAddingCrane] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const error = mutation.error as ApiError | null;
+
+  // A crane already quoted on this RFQ owns its version series. Offering it as
+  // a fresh quote would only end in the server's duplicate-crane refusal, so
+  // the picker shows what is left to quote.
+  const selectableCranes = cranes.filter((crane) => !quotedCraneIds.includes(crane.id));
 
   // The backend owns the arithmetic (brief 6.4), so the live figure comes from
   // preview and is only refreshed when a field that moves money changes. Debounced
@@ -324,7 +316,9 @@ export function QuoteForm({
     if (!previousQuote) return;
     setForm((previous) => ({
       ...previous,
-      craneId: previousQuote.craneId,
+      // The previous crane already has a quote; copy its numbers, not its id.
+      // An empty id makes the vendor choose another crane from the fleet.
+      craneId: quotedCraneIds.includes(previousQuote.craneId) ? "" : previousQuote.craneId,
       rentalRate: String(previousQuote.rentalRate),
       rateBasis: previousQuote.rateBasis,
       mobilisationCharges: String(previousQuote.mobilisationCharges),
@@ -333,7 +327,6 @@ export function QuoteForm({
           ? ""
           : String(previousQuote.demobilisationCharges),
       taxBasis: previousQuote.taxBasis,
-      availableFrom: previousQuote.availableFrom ?? "",
       validityDate: previousQuote.validityDate,
       deviationText: previousQuote.deviationText ?? "",
       remarks: previousQuote.remarks ?? "",
@@ -382,6 +375,8 @@ export function QuoteForm({
         </Alert>
       ) : null}
 
+      <StepHeading n={1} title="Choose the crane" />
+
       {!craneLocked && taggedCranes.length > 0 ? (
         <div className="rounded-lg border border-accent-500/40 bg-accent-500/[0.06] p-3">
           <p className="text-xs font-medium text-slate-900">
@@ -427,7 +422,7 @@ export function QuoteForm({
             <p className="text-xs text-slate-500">Checking your fleet against this requirement…</p>
           ) : (fitTotal ?? 0) === 0 ? (
             <p className="text-xs text-slate-500">
-              No active cranes in your fleet yet. You can add one below.
+              No active cranes in your fleet yet. Add one on My Fleet first.
             </p>
           ) : (
             <>
@@ -465,33 +460,18 @@ export function QuoteForm({
           value={form.craneId}
           onChange={(value) => set("craneId", value)}
           disabled={craneLocked}
-          options={craneOptions(cranes, lockedCraneFallback, fit, taggedIds)}
+          options={craneOptions(selectableCranes, lockedCraneFallback, fit, taggedIds)}
           placeholder={cranesLoading ? "Loading your cranes…" : "Select a crane"}
         />
-        {!craneLocked ? (
-          <div className="mt-2">
-            <button
-              type="button"
-              className="min-h-10 text-xs font-medium text-brand-700 underline underline-offset-2"
-              onClick={() => setAddingCrane((open) => !open)}
-            >
-              {addingCrane ? "Hide the add-crane form" : "Crane not in your fleet? Add it here"}
-            </button>
-          </div>
-        ) : null}
       </Field>
 
-      {addingCrane && !craneLocked ? (
-        <InlineCraneAdd
-          onCancel={() => setAddingCrane(false)}
-          onCreated={(craneId) => {
-            set("craneId", craneId);
-            setAddingCrane(false);
-          }}
-        />
+      {!craneLocked && selectedCrane && craneNeedsLocation(selectedCrane) ? (
+        <CraneLocationFix key={selectedCrane.id} crane={selectedCrane} />
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <StepHeading n={2} title="Set your price" />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <MoneyField
           id="quote-rate"
           label="Rental rate"
@@ -559,40 +539,27 @@ export function QuoteForm({
         </Field>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <p className="field-label">
-            Availability<span className="ml-0.5 text-red-600">*</span>
+      <StepHeading n={3} title="Availability and terms" />
+
+      <div>
+        <p className="field-label">
+          Availability<span className="ml-0.5 text-red-600">*</span>
+        </p>
+        <Checkbox
+          id="quote-available"
+          checked={form.availabilityConfirmed}
+          onChange={(value) => set("availabilityConfirmed", value)}
+          label={
+            rfq.startDateTbc
+              ? "This crane is available for the full required duration"
+              : `This crane is available from ${formatCalendarDate(rfq.requiredStartDate)} for the full duration`
+          }
+        />
+        {error?.fieldError("availabilityConfirmed") ? (
+          <p className="mt-1 text-xs font-medium text-red-600">
+            {error.fieldError("availabilityConfirmed")}
           </p>
-          <Checkbox
-            id="quote-available"
-            checked={form.availabilityConfirmed}
-            onChange={(value) => set("availabilityConfirmed", value)}
-            label={
-              rfq.startDateTbc
-                ? "This crane is available for the full required duration"
-                : `This crane is available from ${formatCalendarDate(rfq.requiredStartDate)} for the full duration`
-            }
-          />
-          {error?.fieldError("availabilityConfirmed") ? (
-            <p className="mt-1 text-xs font-medium text-red-600">
-              {error.fieldError("availabilityConfirmed")}
-            </p>
-          ) : null}
-        </div>
-        <Field
-          label="Available from (if later)"
-          htmlFor="quote-available-from"
-          error={error?.fieldError("availableFrom")}
-        >
-          <TextInput
-            id="quote-available-from"
-            type="date"
-            value={form.availableFrom}
-            onChange={(value) => set("availableFrom", value)}
-            invalid={Boolean(error?.fieldError("availableFrom"))}
-          />
-        </Field>
+        ) : null}
       </div>
 
       <Checkbox
@@ -672,10 +639,9 @@ export function QuoteForm({
         </p>
       )}
 
+      <StepHeading n={4} title="Review and send" />
+
       <div className="space-y-2">
-        <p className="text-[13px] font-semibold tracking-[0.08em] text-slate-500 uppercase">
-          Review before sending
-        </p>
         <PreviewPanel preview={previewData} loading={preview.isFetching} />
       </div>
 
@@ -740,6 +706,18 @@ export function QuoteForm({
   );
 }
 
+/** A numbered step label so a long form reads as four short jobs. */
+function StepHeading({ n, title }: { n: number; title: string }) {
+  return (
+    <div className="flex items-center gap-3 border-t border-ink-800 pt-5 first:border-t-0 first:pt-0">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[13px] font-semibold text-[#fff]">
+        {n}
+      </span>
+      <h3 className="text-[16px] font-semibold text-slate-900">{title}</h3>
+    </div>
+  );
+}
+
 /** An INR field: digits while typing, grouped on blur, clean in the request. */
 function MoneyField({
   id,
@@ -771,235 +749,6 @@ function MoneyField({
         invalid={Boolean(error)}
       />
     </Field>
-  );
-}
-
-/**
- * Brief D2: add a crane without leaving the quotation. It is deliberately a
- * subset of the fleet form — only the fields a quote cannot proceed without
- * (brief 5.2's mandatory set). Anything else is finished later on My Fleet,
- * because a vendor mid-quote should not be made to run the whole screen.
- *
- * It posts through the same `createCrane` endpoint as My Fleet, so the duplicate
- * rule, the coordinates and the status rules are enforced in exactly one place.
- */
-function InlineCraneAdd({
-  onCreated,
-  onCancel,
-}: {
-  onCreated: (craneId: string) => void;
-  onCancel: () => void;
-}) {
-  const queryClient = useQueryClient();
-  const [form, setForm] = useState<CraneForm>({ ...EMPTY_CRANE_FORM });
-  const [availableFrom, setAvailableFrom] = useState("");
-  const reference = useQuery({
-    queryKey: ["fleet", "reference-data"],
-    queryFn: fetchReferenceData,
-    staleTime: 5 * 60_000,
-  });
-
-  const create = useMutation({
-    mutationFn: () =>
-      createCrane(form, {
-        availableFrom: form.currentStatus === "ENGAGED" ? availableFrom : null,
-      }),
-    onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: ["cranes"] });
-      onCreated(result.crane.id);
-    },
-  });
-
-  const error = create.error as ApiError | null;
-  const set = <K extends keyof CraneForm>(key: K, value: CraneForm[K]) =>
-    setForm((previous) => ({ ...previous, [key]: value }));
-
-  const craneTypes = (reference.data?.craneTypes ?? []).map((c) => ({
-    value: c.code,
-    label: c.name,
-  }));
-  const states = (reference.data?.states ?? []).map((s) => ({ value: s.code, label: s.name }));
-  const engaged = form.currentStatus === "ENGAGED";
-
-  return (
-    <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
-      <p className="text-sm font-medium text-slate-900">Add a crane to your fleet</p>
-      <p className="mt-0.5 text-xs text-slate-500">
-        The essentials. You can complete the rest — boom and jib lengths, map pin, load chart — on My
-        Fleet afterwards.
-      </p>
-
-      {error ? <Alert title="Could not add this crane">{error.message}</Alert> : null}
-
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field
-          label="Type of crane"
-          htmlFor="inline-type"
-          required
-          error={error?.fieldError("typeOfCraneCode")}
-        >
-          <Select
-            id="inline-type"
-            value={form.typeOfCraneCode}
-            onChange={(value) => set("typeOfCraneCode", value)}
-            options={craneTypes}
-            placeholder="Select a type"
-            invalid={Boolean(error?.fieldError("typeOfCraneCode"))}
-          />
-        </Field>
-        <Field
-          label="Capacity (t)"
-          htmlFor="inline-capacity"
-          required
-          error={error?.fieldError("capacityT")}
-        >
-          <TextInput
-            id="inline-capacity"
-            value={form.capacityT}
-            onChange={(value) => set("capacityT", value)}
-            inputMode="numeric"
-            invalid={Boolean(error?.fieldError("capacityT"))}
-          />
-        </Field>
-        <Field label="Make" htmlFor="inline-make" required error={error?.fieldError("make")}>
-          <TextInput
-            id="inline-make"
-            value={form.make}
-            onChange={(value) => set("make", value)}
-            invalid={Boolean(error?.fieldError("make"))}
-          />
-        </Field>
-        <Field label="Model" htmlFor="inline-model" required error={error?.fieldError("model")}>
-          <TextInput
-            id="inline-model"
-            value={form.model}
-            onChange={(value) => set("model", value)}
-            invalid={Boolean(error?.fieldError("model"))}
-          />
-        </Field>
-        <Field
-          label="Year of manufacture"
-          htmlFor="inline-yom"
-          required
-          error={error?.fieldError("yom")}
-          hint="Four digits."
-        >
-          <TextInput
-            id="inline-yom"
-            value={form.yom}
-            onChange={(value) => set("yom", value)}
-            inputMode="numeric"
-            placeholder="2021"
-            invalid={Boolean(error?.fieldError("yom"))}
-          />
-        </Field>
-        <Field
-          label="Main boom (m)"
-          htmlFor="inline-boom"
-          required
-          error={error?.fieldError("mainBoomM")}
-        >
-          <TextInput
-            id="inline-boom"
-            value={form.mainBoomM}
-            onChange={(value) => set("mainBoomM", value)}
-            inputMode="numeric"
-            invalid={Boolean(error?.fieldError("mainBoomM"))}
-          />
-        </Field>
-        <Field
-          label="Serial / registration number"
-          htmlFor="inline-serial"
-          required
-          error={error?.fieldError("serialRegistrationNo")}
-          hint="Unique among your active cranes."
-        >
-          <TextInput
-            id="inline-serial"
-            value={form.serialRegistrationNo}
-            onChange={(value) => set("serialRegistrationNo", value)}
-            invalid={Boolean(error?.fieldError("serialRegistrationNo"))}
-          />
-        </Field>
-        <Field label="Status" htmlFor="inline-status" required>
-          <Select
-            id="inline-status"
-            value={form.currentStatus}
-            onChange={(value) => set("currentStatus", value)}
-            options={NEW_CRANE_STATUSES.map((status) => ({
-              value: status,
-              label: CRANE_STATUS_LABELS[status],
-            }))}
-          />
-        </Field>
-        <Field
-          label="Current location"
-          htmlFor="inline-location"
-          required
-          error={error?.fieldError("currentLocation")}
-          className="sm:col-span-2"
-        >
-          <TextInput
-            id="inline-location"
-            value={form.currentLocation}
-            onChange={(value) => set("currentLocation", value)}
-            placeholder="e.g. Ahmedabad Yard"
-            invalid={Boolean(error?.fieldError("currentLocation"))}
-          />
-        </Field>
-        <Field
-          label="State"
-          htmlFor="inline-state"
-          required
-          error={error?.fieldError("stateCode")}
-        >
-          <Select
-            id="inline-state"
-            value={form.stateCode}
-            onChange={(value) => set("stateCode", value)}
-            options={states}
-            placeholder="Select a state"
-            invalid={Boolean(error?.fieldError("stateCode"))}
-          />
-        </Field>
-        {engaged ? (
-          <Field
-            label="Available from"
-            htmlFor="inline-available-from"
-            required
-            error={error?.fieldError("availableFrom")}
-            hint="Today or later."
-          >
-            <TextInput
-              id="inline-available-from"
-              type="date"
-              value={availableFrom}
-              onChange={setAvailableFrom}
-              invalid={Boolean(error?.fieldError("availableFrom"))}
-            />
-          </Field>
-        ) : null}
-      </div>
-
-      <div className="mt-4 flex gap-2">
-        <button
-          type="button"
-          className="btn-primary min-h-11 px-4 text-sm"
-          disabled={create.isPending}
-          onClick={() => create.mutate()}
-        >
-          {create.isPending ? "Adding…" : "Add crane and use it"}
-        </button>
-        <button
-          type="button"
-          className="btn-secondary min-h-11 px-4 text-sm"
-          onClick={onCancel}
-          disabled={create.isPending}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -1094,7 +843,14 @@ export function craneOptions(
 
 function craneOption(crane: Crane, verdict?: FitVerdict) {
   const chart = crane.loadChart ? "load chart on file" : "no load chart";
-  const base = `${crane.typeOfCrane?.name ?? crane.typeOfCraneCode} · ${crane.capacityT} t · ${crane.currentLocation} (${crane.currentStatus.toLowerCase()}, ${chart})`;
+  // Past 30 days the status/location data is due for confirmation. Showing the
+  // date in the picker lets a vendor see they are quoting from old information
+  // without hiding a crane that may still be perfectly good (brief 6.5).
+  const lastUpdated =
+    (crane.freshness?.daysSinceUpdate ?? 0) > 30
+      ? ` · last updated ${formatCalendarDate(crane.statusUpdatedAt)}`
+      : "";
+  const base = `${crane.typeOfCrane?.name ?? crane.typeOfCraneCode} · ${crane.capacityT} t · ${crane.currentLocation} (${crane.currentStatus.toLowerCase()}, ${chart})${lastUpdated}`;
   return {
     value: crane.id,
     label: verdict ? `${base} — ${fitLabel(verdict)}` : base,
@@ -1115,7 +871,6 @@ export function toInput(form: FormState): QuoteInput {
     demobilisationCharges: cleanMoney(form.demobilisationCharges) || 0,
     taxBasis: (form.taxBasis as QuoteInput["taxBasis"]) ?? "EXCLUSIVE_OF_GST",
     availabilityConfirmed: form.availabilityConfirmed,
-    availableFrom: form.availableFrom || null,
     validityDate: form.validityDate,
     acceptsCommercialTerms: form.acceptsCommercialTerms,
     deviationText: form.deviationText || null,
@@ -1152,4 +907,3 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 
   return settled;
 }
-

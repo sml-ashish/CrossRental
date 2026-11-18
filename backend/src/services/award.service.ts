@@ -1,6 +1,10 @@
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
 import { recordAudit } from "./audit.service";
+import {
+  cancelAllNegotiations,
+  cancelNegotiationsForAward,
+} from "./negotiation.service";
 import { onBooked, onVendorFinalised } from "./enquiryTrail.service";
 import { sendTemplate, optionalBlock } from "./email.service";
 import { getSettings } from "../utils/settings";
@@ -396,6 +400,20 @@ export async function awardQuotation(
       );
     }
     throw error;
+  }
+
+  // Counter-quotes: awarding ends the relevant negotiation. A partial award only
+  // closes threads on the awarded quotation (base or agreed version); a full
+  // award closes every open thread on the RFQ. Bookkeeping must never fail the
+  // award itself, so it is best-effort here.
+  try {
+    if (closing) {
+      await cancelAllNegotiations(rfqId, "RFQ finalised by award");
+    } else {
+      await cancelNegotiationsForAward(rfqId, quotationId);
+    }
+  } catch (error) {
+    console.error("[award] negotiation cancellation failed", error);
   }
 
   // P1: an award creates the reservation, which is what "Booked" means for the

@@ -38,6 +38,14 @@ const optionalText = (max: number) =>
       return text === "" ? null : text;
     });
 
+/** An optional length in metres, with the same bounds as the main boom / jib. */
+const optionalLength = () =>
+  z.coerce
+    .number({ message: "Enter a length in metres" })
+    .positive("Length must be greater than 0")
+    .max(200, "Length cannot exceed 200 m")
+    .optional();
+
 /**
  * The submission deadline (brief 5.4): mandatory and in the future.
  *
@@ -277,10 +285,35 @@ function requireLineOrLegacyIdentity(
   }
 }
 
+/**
+ * Extra line-item measures the sales user can pick while raising an RFQ.
+ *
+ * Kept out of `baseRfqFields` deliberately: the RFQ edit form has no inputs for
+ * them, so putting them in the update schema would silently null them the next
+ * time a draft is saved. They are create-only, and `updateRfq` leaves the stored
+ * values untouched.
+ */
+const lineMeasureFields = {
+  liftLoadT: z.coerce
+    .number({ message: "Enter the lift load in tonnes" })
+    .positive("Lift load must be greater than 0")
+    .max(10_000, "Lift load is too high")
+    .optional(),
+  workingRadiusM: z.coerce
+    .number({ message: "Enter the working radius in metres" })
+    .positive("Working radius must be greater than 0")
+    .max(500, "Working radius is too high")
+    .optional(),
+  fixedJibM: optionalLength(),
+  luffingJibM: optionalLength(),
+  windJibM: optionalLength(),
+};
+
 export const createRfqSchema = z
   .object({
     ...enquiryIdentityFields,
     ...baseRfqFields,
+    ...lineMeasureFields,
     submissionDeadline: submissionDeadlineField,
     ...sitePinFields,
   })

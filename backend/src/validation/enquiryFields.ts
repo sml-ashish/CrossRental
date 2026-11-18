@@ -168,11 +168,70 @@ export const internalCheckSchema = z.object({
 export type InternalCheckInput = z.infer<typeof internalCheckSchema>;
 
 /**
+ * The line-item fields a sales user may choose to copy into an RFQ.
+ *
+ * Core facts (crane type, capacity, quantity, site, dates and duration) are not
+ * in this list: an RFQ cannot be sourced without them, so they are always sent.
+ * Internal-only fields (customer name/address, rental budget) are absent by
+ * construction — there is no key a caller could supply to leak them.
+ *
+ * The client sends the keys it wants; the service uses this list as the only
+ * allow-list, so an unknown key is a validation error rather than a silent way
+ * to populate an RFQ column.
+ */
+export const RFQ_LINE_FIELD_KEYS = [
+  // Job and load
+  "applicationDescription",
+  "loadDescription",
+  "liftLoadT",
+  "workingRadiusM",
+  "capacityNote",
+  // Configuration
+  "requiredMainBoomM",
+  "requiredFixedJibM",
+  "requiredLuffingJibM",
+  "requiredWindJibM",
+  "configurationNotes",
+  "workingDaysPerMonth",
+  // Mobilisation
+  "mobilisationTerms",
+  "demobilisationTerms",
+  // Commercial terms
+  "otCharges",
+  "breakdownTerms",
+  "dieselScope",
+  "workingHoursShift",
+  "accommodationConveyance",
+  "paymentTerms",
+  "craneAgeCriteriaYears",
+  // Scopes and other terms
+  "supportCraneScope",
+  "steelMatsGroundPrepScope",
+  "ehsHrCompliance",
+  "insuranceTerms",
+  "extensionClause",
+  "otherTerms",
+  "additionalManpowerScope",
+  "intraSiteMovementScope",
+  "prereleaseTerms",
+  "ppeScope",
+  "rowScope",
+] as const;
+
+export type RfqLineFieldKey = (typeof RFQ_LINE_FIELD_KEYS)[number];
+
+/**
  * Raising an RFQ from a line. Everything else is prefilled from the line and
  * the enquiry header's vendor-safe subset, so only the deadline is required.
+ *
+ * `includeFields` is the sales user's field picker. When it is omitted the
+ * service copies every vendor-safe line field, which keeps older callers (and
+ * the enquiry-screen shortcuts) behaving exactly as before. When present, only
+ * the named fields are copied; everything else stays null/absent on the RFQ.
  */
 export const rfqFromLineSchema = z.object({
   submissionDeadline: submissionDeadlineField,
+  includeFields: z.array(z.enum(RFQ_LINE_FIELD_KEYS)).optional(),
 });
 
 export type RfqFromLineInput = z.infer<typeof rfqFromLineSchema>;

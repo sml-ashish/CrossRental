@@ -1328,6 +1328,31 @@ describe("cancelling an RFQ", () => {
     expect(subjects.some((s) => s.includes("cancelled"))).toBe(true);
   });
 
+  it("takes a cancelled RFQ out of the vendor's To quote list", async () => {
+    const rfq = await createRfq();
+    await sendRfq(rfq.id, [ctx.a.vendorId]);
+    await call(app, "POST", `/api/rfqs/${rfq.id}/cancel`, {
+      token: ctx.salesToken,
+      body: { reason: "Customer postponed the work" },
+    });
+
+    // The recipient row stays Pending — the RFQ's own status is what makes it
+    // final. The inbox must therefore stop offering "quote" while the deadline
+    // is still in the future.
+    const inbox = await call(app, "GET", "/api/vendor/rfqs", {
+      token: ctx.vendorTokenA,
+    });
+    const row = (inbox.body.rfqs as Array<Record<string, unknown>>).find(
+      (r) => r.rfqId === rfq.id,
+    );
+    expect(row).toMatchObject({
+      rfqStatus: "CANCELLED",
+      responseStatus: "PENDING",
+      canRespond: false,
+      quotationCount: 0,
+    });
+  });
+
   it("rejects a cancellation with no reason", async () => {
     const rfq = await createRfq();
     const res = await call(app, "POST", `/api/rfqs/${rfq.id}/cancel`, {
@@ -1599,6 +1624,55 @@ describe("the tracking list and detail", () => {
     const detail = await call(app, "GET", `/api/rfqs/${rfq.id}`, { token: ctx.salesToken });
     // The shape the comparison screens will read must exist now and not change.
     expect(detail.body.rfq.quotations).toEqual([]);
+  });
+
+  it("returns every submitted quote field on the RFQ detail", async () => {
+    const rfq = await createRfq();
+    const sent = await sendRfq(rfq.id, [ctx.a.vendorId]);
+    expect(sent.status).toBe(200);
+
+    await appPrisma.crane.update({
+      where: { id: ctx.a.craneId },
+      data: {
+        loadChartFileRef: "vendors/test/chart.pdf",
+        loadChartFileName: "chart.pdf",
+        loadChartMimeType: "application/pdf",
+        loadChartSizeBytes: 1024,
+      },
+    });
+
+    const quote = await call(app, "POST", `/api/vendor/rfqs/${rfq.id}/quotations`, {
+      token: ctx.vendorTokenA,
+      body: {
+        craneId: ctx.a.craneId,
+        rentalRate: 50_000,
+        rateBasis: "PER_MONTH",
+        mobilisationCharges: 10_000,
+        demobilisationCharges: 2_000,
+        taxBasis: "INCLUSIVE_OF_GST",
+        availabilityConfirmed: true,
+        availableFrom: inDays(10).toISOString(),
+        validityDate: inDays(14).toISOString(),
+        acceptsCommercialTerms: false,
+        deviationText: "Payment terms 45 days",
+        remarks: "Crane can reach the site in two days",
+      },
+    });
+    expect(quote.status, `quote failed: ${JSON.stringify(quote.body)}`).toBe(201);
+
+    const detail = await call(app, "GET", `/api/rfqs/${rfq.id}`, { token: ctx.salesToken });
+    expect(detail.status).toBe(200);
+    const row = (detail.body.rfq.quotations as Array<Record<string, unknown>>)[0];
+    expect(row).toMatchObject({
+      calculationNote: expect.any(String),
+      taxBasis: "INCLUSIVE_OF_GST",
+      availabilityConfirmed: true,
+      acceptsCommercialTerms: false,
+      deviationText: "Payment terms 45 days",
+      remarks: "Crane can reach the site in two days",
+    });
+    expect(row?.availableFrom).toBeTruthy();
+    expect(row?.validityDate).toBeTruthy();
   });
 
   it("lists only approved vendors with an active user", async () => {

@@ -27,7 +27,13 @@ export type TemplateKey =
   | "rfq_deadline_changed"
   | "reservation_released"
   | "internal_user_created"
-  | "internal_alert_digest";
+  | "internal_alert_digest"
+  // Counter-quote / negotiation (phase 1 + 2)
+  | "negotiation_counter_received"
+  | "negotiation_vendor_countered"
+  | "negotiation_accepted"
+  | "negotiation_declined"
+  | "negotiation_reminder";
 
 export type TemplateVars = Record<string, string | number | null | undefined | Raw>;
 

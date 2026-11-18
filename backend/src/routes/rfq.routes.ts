@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as inbound from "../controllers/inbound.controller";
 import * as rfq from "../controllers/rfq.controller";
+import * as negotiation from "../controllers/negotiation.controller";
 import { requireAuth, requireCapability } from "../middleware/auth";
 import { apiLimiter } from "../middleware/rateLimiter";
 
@@ -71,6 +72,9 @@ router.get(
   rfq.candidates,
 );
 
+/** Everything that has happened to this RFQ, shown inline as its audit trail. */
+router.get("/:rfqId/audit", requireCapability("rfq:track"), rfq.audit);
+
 /**
  * Replies belonging to this RFQ, shown where the conversation lives. Validation
  * stays in the admin reply queue so sales can read the conversation without a
@@ -120,6 +124,41 @@ router.post(
   "/:rfqId/quotations/:quotationId/mark",
   requireCapability("quotation:review"),
   rfq.mark,
+);
+
+// --- counter-quote / negotiation (phase 1 + 2) ------------------------------
+// Guarded by `quotation:counter` (held by sales and admin). The service
+// re-checks the role and, for vendor-scoped reads, the ownership.
+
+router.get(
+  "/:rfqId/negotiations",
+  requireCapability("quotation:counter"),
+  negotiation.listForRfq,
+);
+router.post(
+  "/:rfqId/quotations/:quotationId/counter/preview",
+  requireCapability("quotation:counter"),
+  negotiation.previewCounter,
+);
+router.post(
+  "/:rfqId/quotations/:quotationId/counter",
+  requireCapability("quotation:counter"),
+  negotiation.counter,
+);
+router.post(
+  "/:rfqId/negotiations/:id/accept",
+  requireCapability("quotation:counter"),
+  negotiation.accept,
+);
+router.post(
+  "/:rfqId/negotiations/:id/reject",
+  requireCapability("quotation:counter"),
+  negotiation.reject,
+);
+router.post(
+  "/:rfqId/negotiations/:id/log-vendor-offer",
+  requireCapability("quotation:counter"),
+  negotiation.logVendorOffer,
 );
 
 export default router;

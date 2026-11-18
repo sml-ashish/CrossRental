@@ -277,10 +277,43 @@ export const QuoteSource = {
   PORTAL: 'PORTAL',
   EMAIL: 'EMAIL',
   WHATSAPP: 'WHATSAPP',
-  MANUAL: 'MANUAL'
+  MANUAL: 'MANUAL',
+  NEGOTIATED: 'NEGOTIATED'
 } as const
 
 export type QuoteSource = (typeof QuoteSource)[keyof typeof QuoteSource]
+
+
+export const NegotiationStatus = {
+  AWAITING_VENDOR: 'AWAITING_VENDOR',
+  AWAITING_SML: 'AWAITING_SML',
+  AGREED: 'AGREED',
+  DECLINED: 'DECLINED',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type NegotiationStatus = (typeof NegotiationStatus)[keyof typeof NegotiationStatus]
+
+
+export const NegotiationParty = {
+  SML: 'SML',
+  VENDOR: 'VENDOR'
+} as const
+
+export type NegotiationParty = (typeof NegotiationParty)[keyof typeof NegotiationParty]
+
+
+export const RoundOutcome = {
+  OPEN: 'OPEN',
+  ACCEPTED: 'ACCEPTED',
+  COUNTERED: 'COUNTERED',
+  DECLINED: 'DECLINED',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type RoundOutcome = (typeof RoundOutcome)[keyof typeof RoundOutcome]
 
 
 export const MessageChannel = {

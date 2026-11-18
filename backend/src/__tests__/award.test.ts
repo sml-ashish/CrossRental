@@ -802,6 +802,26 @@ describe("finalising an RFQ (recipient outcome)", () => {
       (q: { quotationId: string }) => q.quotationId === quoteB.quotationId,
     );
     expect(losing.status).toBe("NOT_AWARDED");
+
+    // The inbox still reports the quote on record. An award changes the
+    // quotation's outcome, not the fact that the vendor sent it — without this,
+    // both rows fall back to "No quote yet" because SELECTED / NOT_AWARDED are
+    // not editable statuses.
+    for (const [token, quote] of [
+      [ctx.vendorTokenA, quoteA],
+      [ctx.vendorTokenB, quoteB],
+    ] as const) {
+      const inbox = await call(app, "GET", "/api/vendor/rfqs", { token });
+      const row = inbox.body.rfqs.find(
+        (r: { rfqId: string }) => r.rfqId === rfq.id,
+      );
+      expect(row).toMatchObject({
+        responseStatus: "QUOTED",
+        quotationCount: 1,
+        canRespond: false,
+      });
+      expect(Number(row.latestQuotationTotal)).toBe(quote.totalQuotedValue);
+    }
   });
 });
 

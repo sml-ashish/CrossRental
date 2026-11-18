@@ -24,7 +24,7 @@ export type ResponseStatus =
   | "EXPIRED"
   | "FINALISED";
 export type MessageChannel = "EMAIL" | "WHATSAPP";
-export type QuoteSource = "PORTAL" | "EMAIL" | "WHATSAPP" | "MANUAL";
+export type QuoteSource = "PORTAL" | "EMAIL" | "WHATSAPP" | "MANUAL" | "NEGOTIATED";
 export type DurationUnit = "DAYS" | "MONTHS";
 export type DistanceMethod = "road" | "straight_line" | null;
 
@@ -79,6 +79,12 @@ export interface Rfq {
   loadDescription: string | null;
   mainBoomM: number | null;
   jibLengthM: number | null;
+  /** Line-item measures included only when the sales user picked them. */
+  liftLoadT: number | null;
+  workingRadiusM: number | null;
+  fixedJibM: number | null;
+  luffingJibM: number | null;
+  windJibM: number | null;
   startDateTbc: boolean;
   workingDaysPerMonth: number | null;
   quantity: number;
@@ -109,6 +115,8 @@ export interface Rfq {
   insuranceTerms: string | null;
   extensionClause: string | null;
   notes: string | null;
+  /** Vendor-safe terms without a column of their own, keyed by enquiry name. */
+  commercialTermsExtra: Record<string, string | number | boolean | null> | null;
   smlContactName: string | null;
   smlContactMobile: string | null;
   smlContactEmail: string | null;
@@ -177,7 +185,14 @@ export interface ReceivedQuotation {
   demobilisationCharges: number;
   taxBasis: string;
   totalQuotedValue: number;
+  /** Human-readable working behind the total, as shown to the vendor before submission. */
+  calculationNote: string | null;
+  availabilityConfirmed: boolean;
+  availableFrom: string | null;
   validityDate: string;
+  acceptsCommercialTerms: boolean;
+  deviationText: string | null;
+  remarks: string | null;
   distanceToSiteKm: number | null;
   distanceMethod: DistanceMethod;
   /** Brief 6.9: a straight-line figure must be labelled, not presented as road. */
@@ -663,3 +678,24 @@ export function formatDistance(
   return approximate ? `${rounded} km (straight-line approx.)` : `${rounded} km`;
 }
 
+
+
+export interface RfqAuditEvent {
+  id: string;
+  at: string;
+  entity: "rfq" | "quotation" | string;
+  action: string;
+  actor: string | null;
+  actorRole: string | null;
+  onBehalfOfVendor: boolean;
+  vendorId: string | null;
+  quotationVersion: number | null;
+  oldValue: Record<string, unknown> | null;
+  newValue: Record<string, unknown> | null;
+}
+
+export function getRfqAudit(
+  rfqId: string,
+): Promise<{ events: RfqAuditEvent[]; vendorNames: Record<string, string> }> {
+  return api(`/rfqs/${rfqId}/audit`);
+}

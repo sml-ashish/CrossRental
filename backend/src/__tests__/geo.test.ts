@@ -74,10 +74,28 @@ describe("Google geo provider: geocoding", () => {
     expect(url.origin + url.pathname).toBe(
       "https://maps.googleapis.com/maps/api/geocode/json",
     );
-    expect(url.searchParams.get("address")).toBe("Pune, 411001, MH, India");
+    expect(url.searchParams.get("address")).toBe("Pune, MH, India");
     expect(url.searchParams.get("components")).toBe("country:IN");
     expect(url.searchParams.get("region")).toBe("in");
     expect(url.searchParams.get("key")).toBe("test-key");
+  });
+
+  it("looks up by city + state, ignoring the pincode and a repeated state", async () => {
+    const { provider, calls } = providerWith(() =>
+      jsonResponse({
+        status: "OK",
+        results: [{ geometry: { location: { lat: 23.242, lng: 69.667 } } }],
+      }),
+    );
+
+    await provider.geocode({
+      location: "Bhuj, Gujarat",
+      state: "Gujarat",
+      pincode: "370001",
+    });
+
+    const url = new URL(calls[0]!.url);
+    expect(url.searchParams.get("address")).toBe("Bhuj, Gujarat, India");
   });
 
   it("reports a zero-result lookup as a reason, not an exception", async () => {

@@ -401,6 +401,8 @@ export const ModelName = {
   RfqVendorRecipient: 'RfqVendorRecipient',
   Quotation: 'Quotation',
   QuotationAttachment: 'QuotationAttachment',
+  QuotationNegotiation: 'QuotationNegotiation',
+  NegotiationRound: 'NegotiationRound',
   Enquiry: 'Enquiry',
   EnquiryLineItem: 'EnquiryLineItem',
   EnquirySequence: 'EnquirySequence',
@@ -428,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "state" | "stateVendorRegion" | "craneType" | "vendor" | "vendorContact" | "vendorDocument" | "vendorInvitation" | "vendorDecision" | "user" | "loginOtp" | "crane" | "rfq" | "rfqAttachment" | "reservation" | "rfqVendorRecipient" | "quotation" | "quotationAttachment" | "enquiry" | "enquiryLineItem" | "enquirySequence" | "auditLog" | "emailLog" | "inboundReply" | "distanceCache" | "appSetting" | "rfqSequence" | "emailTemplate" | "recommendationSnapshot" | "mobilisationRate"
+    modelProps: "state" | "stateVendorRegion" | "craneType" | "vendor" | "vendorContact" | "vendorDocument" | "vendorInvitation" | "vendorDecision" | "user" | "loginOtp" | "crane" | "rfq" | "rfqAttachment" | "reservation" | "rfqVendorRecipient" | "quotation" | "quotationAttachment" | "quotationNegotiation" | "negotiationRound" | "enquiry" | "enquiryLineItem" | "enquirySequence" | "auditLog" | "emailLog" | "inboundReply" | "distanceCache" | "appSetting" | "rfqSequence" | "emailTemplate" | "recommendationSnapshot" | "mobilisationRate"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1690,6 +1692,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    QuotationNegotiation: {
+      payload: Prisma.$QuotationNegotiationPayload<ExtArgs>
+      fields: Prisma.QuotationNegotiationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QuotationNegotiationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QuotationNegotiationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>
+        }
+        findFirst: {
+          args: Prisma.QuotationNegotiationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QuotationNegotiationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>
+        }
+        findMany: {
+          args: Prisma.QuotationNegotiationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>[]
+        }
+        create: {
+          args: Prisma.QuotationNegotiationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>
+        }
+        createMany: {
+          args: Prisma.QuotationNegotiationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.QuotationNegotiationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>[]
+        }
+        delete: {
+          args: Prisma.QuotationNegotiationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>
+        }
+        update: {
+          args: Prisma.QuotationNegotiationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>
+        }
+        deleteMany: {
+          args: Prisma.QuotationNegotiationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QuotationNegotiationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.QuotationNegotiationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>[]
+        }
+        upsert: {
+          args: Prisma.QuotationNegotiationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuotationNegotiationPayload>
+        }
+        aggregate: {
+          args: Prisma.QuotationNegotiationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQuotationNegotiation>
+        }
+        groupBy: {
+          args: Prisma.QuotationNegotiationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuotationNegotiationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QuotationNegotiationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QuotationNegotiationCountAggregateOutputType> | number
+        }
+      }
+    }
+    NegotiationRound: {
+      payload: Prisma.$NegotiationRoundPayload<ExtArgs>
+      fields: Prisma.NegotiationRoundFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NegotiationRoundFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NegotiationRoundFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>
+        }
+        findFirst: {
+          args: Prisma.NegotiationRoundFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NegotiationRoundFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>
+        }
+        findMany: {
+          args: Prisma.NegotiationRoundFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>[]
+        }
+        create: {
+          args: Prisma.NegotiationRoundCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>
+        }
+        createMany: {
+          args: Prisma.NegotiationRoundCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NegotiationRoundCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>[]
+        }
+        delete: {
+          args: Prisma.NegotiationRoundDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>
+        }
+        update: {
+          args: Prisma.NegotiationRoundUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>
+        }
+        deleteMany: {
+          args: Prisma.NegotiationRoundDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NegotiationRoundUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NegotiationRoundUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>[]
+        }
+        upsert: {
+          args: Prisma.NegotiationRoundUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NegotiationRoundPayload>
+        }
+        aggregate: {
+          args: Prisma.NegotiationRoundAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNegotiationRound>
+        }
+        groupBy: {
+          args: Prisma.NegotiationRoundGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NegotiationRoundGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NegotiationRoundCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NegotiationRoundCountAggregateOutputType> | number
+        }
+      }
+    }
     Enquiry: {
       payload: Prisma.$EnquiryPayload<ExtArgs>
       fields: Prisma.EnquiryFieldRefs
@@ -2875,6 +3025,11 @@ export const RfqScalarFieldEnum = {
   loadDescription: 'loadDescription',
   mainBoomM: 'mainBoomM',
   jibLengthM: 'jibLengthM',
+  liftLoadT: 'liftLoadT',
+  workingRadiusM: 'workingRadiusM',
+  fixedJibM: 'fixedJibM',
+  luffingJibM: 'luffingJibM',
+  windJibM: 'windJibM',
   startDateTbc: 'startDateTbc',
   workingDaysPerMonth: 'workingDaysPerMonth',
   siteLocation: 'siteLocation',
@@ -3013,6 +3168,7 @@ export const QuotationScalarFieldEnum = {
   statusReasonText: 'statusReasonText',
   statusChangedAt: 'statusChangedAt',
   statusChangedById: 'statusChangedById',
+  negotiationId: 'negotiationId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3032,6 +3188,58 @@ export const QuotationAttachmentScalarFieldEnum = {
 } as const
 
 export type QuotationAttachmentScalarFieldEnum = (typeof QuotationAttachmentScalarFieldEnum)[keyof typeof QuotationAttachmentScalarFieldEnum]
+
+
+export const QuotationNegotiationScalarFieldEnum = {
+  id: 'id',
+  rfqId: 'rfqId',
+  vendorId: 'vendorId',
+  craneId: 'craneId',
+  baseQuotationId: 'baseQuotationId',
+  agreedQuotationId: 'agreedQuotationId',
+  status: 'status',
+  currentRound: 'currentRound',
+  maxRounds: 'maxRounds',
+  version: 'version',
+  closedReason: 'closedReason',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuotationNegotiationScalarFieldEnum = (typeof QuotationNegotiationScalarFieldEnum)[keyof typeof QuotationNegotiationScalarFieldEnum]
+
+
+export const NegotiationRoundScalarFieldEnum = {
+  id: 'id',
+  negotiationId: 'negotiationId',
+  roundNumber: 'roundNumber',
+  offeredBy: 'offeredBy',
+  offeredByUserId: 'offeredByUserId',
+  onBehalfOfVendor: 'onBehalfOfVendor',
+  channel: 'channel',
+  rentalRate: 'rentalRate',
+  rateBasis: 'rateBasis',
+  mobilisationCharges: 'mobilisationCharges',
+  demobilisationCharges: 'demobilisationCharges',
+  taxBasis: 'taxBasis',
+  validityDate: 'validityDate',
+  availableFrom: 'availableFrom',
+  availabilityConfirmed: 'availabilityConfirmed',
+  deviationText: 'deviationText',
+  message: 'message',
+  totalQuotedValue: 'totalQuotedValue',
+  calculationNote: 'calculationNote',
+  warnings: 'warnings',
+  warningsAcknowledged: 'warningsAcknowledged',
+  isFinal: 'isFinal',
+  respondBy: 'respondBy',
+  outcome: 'outcome',
+  respondedAt: 'respondedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NegotiationRoundScalarFieldEnum = (typeof NegotiationRoundScalarFieldEnum)[keyof typeof NegotiationRoundScalarFieldEnum]
 
 
 export const EnquiryScalarFieldEnum = {
@@ -3836,6 +4044,48 @@ export type ListEnumAttachmentKindFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'NegotiationStatus'
+ */
+export type EnumNegotiationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'NegotiationStatus[]'
+ */
+export type ListEnumNegotiationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'NegotiationParty'
+ */
+export type EnumNegotiationPartyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationParty'>
+    
+
+
+/**
+ * Reference to a field of type 'NegotiationParty[]'
+ */
+export type ListEnumNegotiationPartyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NegotiationParty[]'>
+    
+
+
+/**
+ * Reference to a field of type 'RoundOutcome'
+ */
+export type EnumRoundOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoundOutcome'>
+    
+
+
+/**
+ * Reference to a field of type 'RoundOutcome[]'
+ */
+export type ListEnumRoundOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoundOutcome[]'>
+    
+
+
+/**
  * Reference to a field of type 'EnquiryOverallStatus'
  */
 export type EnumEnquiryOverallStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EnquiryOverallStatus'>
@@ -4045,6 +4295,8 @@ export type GlobalOmitConfig = {
   rfqVendorRecipient?: Prisma.RfqVendorRecipientOmit
   quotation?: Prisma.QuotationOmit
   quotationAttachment?: Prisma.QuotationAttachmentOmit
+  quotationNegotiation?: Prisma.QuotationNegotiationOmit
+  negotiationRound?: Prisma.NegotiationRoundOmit
   enquiry?: Prisma.EnquiryOmit
   enquiryLineItem?: Prisma.EnquiryLineItemOmit
   enquirySequence?: Prisma.EnquirySequenceOmit

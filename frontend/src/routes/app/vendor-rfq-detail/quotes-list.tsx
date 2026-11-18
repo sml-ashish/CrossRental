@@ -238,7 +238,6 @@ function RevisePanel({
     demobilisationCharges: String(quotation.demobilisationCharges ?? ""),
     taxBasis: quotation.taxBasis ?? "EXCLUSIVE_OF_GST",
     availabilityConfirmed: quotation.availabilityConfirmed,
-    availableFrom: quotation.availableFrom ?? "",
     validityDate: quotation.validityDate,
     acceptsCommercialTerms: quotation.acceptsCommercialTerms,
     deviationText: quotation.deviationText ?? "",

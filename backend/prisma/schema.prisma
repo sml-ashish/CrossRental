@@ -245,6 +245,33 @@ enum QuoteSource {
   EMAIL
   WHATSAPP
   MANUAL
+  // An offer agreed in a negotiation thread, created as a normal quotation
+  // version so the existing award flow needs no changes.
+  NEGOTIATED
+}
+
+// Counter-quote thread lifecycle. One thread per RFQ + vendor + crane.
+enum NegotiationStatus {
+  AWAITING_VENDOR
+  AWAITING_SML
+  AGREED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum NegotiationParty {
+  SML
+  VENDOR
+}
+
+enum RoundOutcome {
+  OPEN
+  ACCEPTED
+  COUNTERED
+  DECLINED
+  EXPIRED
+  CANCELLED
 }
 
 // P6: how an RFQ was dispatched and how a message moved.
@@ -476,6 +503,7 @@ model Vendor {
   rfqRecipients    RfqVendorRecipient[]
   quotations       Quotation[]
   inboundReplies   InboundReply[]
+  negotiations     QuotationNegotiation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -742,10 +770,11 @@ model Crane {
   // 30-day "due for update" and 60-day "stale" thresholds.
   statusUpdatedAt DateTime @default(now())
 
-  vendor       Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendor       Vendor                 @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   quotations   Quotation[]
   auditLogs    AuditLog[]
   reservations Reservation[]
+  negotiations QuotationNegotiation[]
 
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -793,6 +822,13 @@ model Rfq {
   // when the offered crane's boom is shorter than required.
   mainBoomM  Decimal? @db.Decimal(6, 2)
   jibLengthM Decimal? @db.Decimal(6, 2)
+  // Line-item fields the sales user chose to send. Unselected fields stay null,
+  // so the vendor screen never shows a requirement SML did not intend to share.
+  liftLoadT      Decimal? @db.Decimal(10, 2)
+  workingRadiusM Decimal? @db.Decimal(6, 2)
+  fixedJibM      Decimal? @db.Decimal(6, 2)
+  luffingJibM    Decimal? @db.Decimal(6, 2)
+  windJibM       Decimal? @db.Decimal(6, 2)
 
   // Brief A3: the customer has not fixed a start date, so the availability
   // confirmation is not demanded and the vendor is told why.
@@ -868,6 +904,7 @@ model Rfq {
   attachments    RfqAttachment[]
   reservations   Reservation[]
   inboundReplies InboundReply[]
+  negotiations   QuotationNegotiation[]
 
   @@index([status])
   @@index([submissionDeadline])
@@ -1044,6 +1081,13 @@ model Quotation {
   reservations Reservation[]
   inboundReply InboundReply?         @relation("InboundReplyQuotation")
 
+  // Set on the agreed version created when a negotiation round is accepted.
+  // The thread also points back at that version through agreedQuotationId.
+  negotiationId       String?
+  negotiation         QuotationNegotiation?  @relation("QuotationNegotiationRef", fields: [negotiationId], references: [id])
+  baseOfNegotiation   QuotationNegotiation[] @relation("NegotiationBase")
+  agreedOfNegotiation QuotationNegotiation?  @relation("NegotiationAgreed")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1073,6 +1117,80 @@ model QuotationAttachment {
 }
 
 // ---------------------------------------------------------------------------
+// Counter-quotes / negotiation (phase 1 + 2)
+// ---------------------------------------------------------------------------
+
+/**
+ * One negotiation thread per RFQ + vendor + crane. The vendor's standing
+ * quotation keeps its own version chain; a thread only adds rounds beside it,
+ * and acceptance creates the next quotation version. `version` is the
+ * optimistic-concurrency token for every write endpoint.
+ */
+model QuotationNegotiation {
+  id                String            @id @default(uuid())
+  rfqId             String
+  vendorId          String
+  craneId           String
+  baseQuotationId   String
+  agreedQuotationId String?           @unique
+  status            NegotiationStatus
+  currentRound      Int               @default(0)
+  maxRounds         Int               @default(5)
+  version           Int               @default(0)
+  closedReason      String?
+  closedAt          DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  rfq             Rfq                @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  vendor          Vendor             @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  crane           Crane              @relation(fields: [craneId], references: [id])
+  baseQuotation   Quotation          @relation("NegotiationBase", fields: [baseQuotationId], references: [id])
+  agreedQuotation Quotation?         @relation("NegotiationAgreed", fields: [agreedQuotationId], references: [id])
+  rounds          NegotiationRound[]
+  quotations      Quotation[]        @relation("QuotationNegotiationRef")
+
+  @@index([rfqId, status])
+  @@index([vendorId, status])
+  @@map("quotation_negotiations")
+}
+
+model NegotiationRound {
+  id                    String              @id @default(uuid())
+  negotiationId         String
+  roundNumber           Int
+  offeredBy             NegotiationParty
+  offeredByUserId       String?
+  onBehalfOfVendor      Boolean             @default(false)
+  channel               String?
+  rentalRate            Decimal             @db.Decimal(14, 2)
+  rateBasis             RateBasis
+  mobilisationCharges   Decimal             @default(0) @db.Decimal(14, 2)
+  demobilisationCharges Decimal?            @db.Decimal(14, 2)
+  taxBasis              TaxBasisOfQuotation
+  validityDate          DateTime
+  availableFrom         DateTime?
+  availabilityConfirmed Boolean
+  deviationText         String?
+  message               String?
+  totalQuotedValue      Decimal             @db.Decimal(14, 2)
+  calculationNote       String?
+  warnings              Json?
+  warningsAcknowledged  Boolean             @default(false)
+  isFinal               Boolean             @default(false)
+  respondBy             DateTime
+  outcome               RoundOutcome        @default(OPEN)
+  respondedAt           DateTime?
+  createdAt             DateTime            @default(now())
+
+  negotiation QuotationNegotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+
+  @@unique([negotiationId, roundNumber])
+  @@index([negotiationId, outcome])
+  @@map("negotiation_rounds")
+}
+
+// ---------------------------------------------------------------------------
 // Enquiries (P1)
 // ---------------------------------------------------------------------------
 
@@ -1084,8 +1202,8 @@ model QuotationAttachment {
  * address are internal-only and are never copied into an RFQ.
  */
 model Enquiry {
-  id                String        @id @default(uuid())
-  enquiryNo   String        @unique
+  id          String   @id @default(uuid())
+  enquiryNo   String   @unique
   enquiryDate DateTime
 
   // Internal only, never copied into an RFQ.
@@ -1193,10 +1311,10 @@ model EnquiryLineItem {
   rentalBudget String?
 
   // --- Status (event driven; see services/enquiryTrail.service.ts) ---
-  trailStatus    EnquiryLineTrailStatus @default(NEW)
-  closureStatus  String?
-  cancelledAt    DateTime?
-  cancelReason   String?
+  trailStatus   EnquiryLineTrailStatus @default(NEW)
+  closureStatus String?
+  cancelledAt   DateTime?
+  cancelReason  String?
 
   rfqs            Rfq[]
   reservations    Reservation[]
@@ -1474,4 +1592,3 @@ model MobilisationRate {
   @@index([craneTypeCode])
   @@map("mobilisation_rates")
 }
-

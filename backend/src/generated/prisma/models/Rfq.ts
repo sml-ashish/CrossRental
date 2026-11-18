@@ -31,6 +31,11 @@ export type RfqAvgAggregateOutputType = {
   quantity: number | null
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
+  liftLoadT: runtime.Decimal | null
+  workingRadiusM: runtime.Decimal | null
+  fixedJibM: runtime.Decimal | null
+  luffingJibM: runtime.Decimal | null
+  windJibM: runtime.Decimal | null
   workingDaysPerMonth: number | null
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
@@ -43,6 +48,11 @@ export type RfqSumAggregateOutputType = {
   quantity: number | null
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
+  liftLoadT: runtime.Decimal | null
+  workingRadiusM: runtime.Decimal | null
+  fixedJibM: runtime.Decimal | null
+  luffingJibM: runtime.Decimal | null
+  windJibM: runtime.Decimal | null
   workingDaysPerMonth: number | null
   siteLatitude: runtime.Decimal | null
   siteLongitude: runtime.Decimal | null
@@ -64,6 +74,11 @@ export type RfqMinAggregateOutputType = {
   loadDescription: string | null
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
+  liftLoadT: runtime.Decimal | null
+  workingRadiusM: runtime.Decimal | null
+  fixedJibM: runtime.Decimal | null
+  luffingJibM: runtime.Decimal | null
+  windJibM: runtime.Decimal | null
   startDateTbc: boolean | null
   workingDaysPerMonth: number | null
   siteLocation: string | null
@@ -119,6 +134,11 @@ export type RfqMaxAggregateOutputType = {
   loadDescription: string | null
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
+  liftLoadT: runtime.Decimal | null
+  workingRadiusM: runtime.Decimal | null
+  fixedJibM: runtime.Decimal | null
+  luffingJibM: runtime.Decimal | null
+  windJibM: runtime.Decimal | null
   startDateTbc: boolean | null
   workingDaysPerMonth: number | null
   siteLocation: string | null
@@ -174,6 +194,11 @@ export type RfqCountAggregateOutputType = {
   loadDescription: number
   mainBoomM: number
   jibLengthM: number
+  liftLoadT: number
+  workingRadiusM: number
+  fixedJibM: number
+  luffingJibM: number
+  windJibM: number
   startDateTbc: number
   workingDaysPerMonth: number
   siteLocation: number
@@ -224,6 +249,11 @@ export type RfqAvgAggregateInputType = {
   quantity?: true
   mainBoomM?: true
   jibLengthM?: true
+  liftLoadT?: true
+  workingRadiusM?: true
+  fixedJibM?: true
+  luffingJibM?: true
+  windJibM?: true
   workingDaysPerMonth?: true
   siteLatitude?: true
   siteLongitude?: true
@@ -236,6 +266,11 @@ export type RfqSumAggregateInputType = {
   quantity?: true
   mainBoomM?: true
   jibLengthM?: true
+  liftLoadT?: true
+  workingRadiusM?: true
+  fixedJibM?: true
+  luffingJibM?: true
+  windJibM?: true
   workingDaysPerMonth?: true
   siteLatitude?: true
   siteLongitude?: true
@@ -257,6 +292,11 @@ export type RfqMinAggregateInputType = {
   loadDescription?: true
   mainBoomM?: true
   jibLengthM?: true
+  liftLoadT?: true
+  workingRadiusM?: true
+  fixedJibM?: true
+  luffingJibM?: true
+  windJibM?: true
   startDateTbc?: true
   workingDaysPerMonth?: true
   siteLocation?: true
@@ -312,6 +352,11 @@ export type RfqMaxAggregateInputType = {
   loadDescription?: true
   mainBoomM?: true
   jibLengthM?: true
+  liftLoadT?: true
+  workingRadiusM?: true
+  fixedJibM?: true
+  luffingJibM?: true
+  windJibM?: true
   startDateTbc?: true
   workingDaysPerMonth?: true
   siteLocation?: true
@@ -367,6 +412,11 @@ export type RfqCountAggregateInputType = {
   loadDescription?: true
   mainBoomM?: true
   jibLengthM?: true
+  liftLoadT?: true
+  workingRadiusM?: true
+  fixedJibM?: true
+  luffingJibM?: true
+  windJibM?: true
   startDateTbc?: true
   workingDaysPerMonth?: true
   siteLocation?: true
@@ -511,6 +561,11 @@ export type RfqGroupByOutputType = {
   loadDescription: string | null
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
+  liftLoadT: runtime.Decimal | null
+  workingRadiusM: runtime.Decimal | null
+  fixedJibM: runtime.Decimal | null
+  luffingJibM: runtime.Decimal | null
+  windJibM: runtime.Decimal | null
   startDateTbc: boolean
   workingDaysPerMonth: number | null
   siteLocation: string
@@ -591,6 +646,11 @@ export type RfqWhereInput = {
   loadDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
   mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFilter<"Rfq"> | boolean
   workingDaysPerMonth?: Prisma.IntNullableFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringFilter<"Rfq"> | string
@@ -641,6 +701,7 @@ export type RfqWhereInput = {
   attachments?: Prisma.RfqAttachmentListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
   inboundReplies?: Prisma.InboundReplyListRelationFilter
+  negotiations?: Prisma.QuotationNegotiationListRelationFilter
 }
 
 export type RfqOrderByWithRelationInput = {
@@ -657,6 +718,11 @@ export type RfqOrderByWithRelationInput = {
   loadDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   mainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
   jibLengthM?: Prisma.SortOrderInput | Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrderInput | Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrderInput | Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrderInput | Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrderInput | Prisma.SortOrder
+  windJibM?: Prisma.SortOrderInput | Prisma.SortOrder
   startDateTbc?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
@@ -707,6 +773,7 @@ export type RfqOrderByWithRelationInput = {
   attachments?: Prisma.RfqAttachmentOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
   inboundReplies?: Prisma.InboundReplyOrderByRelationAggregateInput
+  negotiations?: Prisma.QuotationNegotiationOrderByRelationAggregateInput
 }
 
 export type RfqWhereUniqueInput = Prisma.AtLeast<{
@@ -726,6 +793,11 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   loadDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
   mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFilter<"Rfq"> | boolean
   workingDaysPerMonth?: Prisma.IntNullableFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringFilter<"Rfq"> | string
@@ -776,6 +848,7 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   attachments?: Prisma.RfqAttachmentListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
   inboundReplies?: Prisma.InboundReplyListRelationFilter
+  negotiations?: Prisma.QuotationNegotiationListRelationFilter
 }, "id" | "rfqNumber">
 
 export type RfqOrderByWithAggregationInput = {
@@ -792,6 +865,11 @@ export type RfqOrderByWithAggregationInput = {
   loadDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   mainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
   jibLengthM?: Prisma.SortOrderInput | Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrderInput | Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrderInput | Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrderInput | Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrderInput | Prisma.SortOrder
+  windJibM?: Prisma.SortOrderInput | Prisma.SortOrder
   startDateTbc?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
@@ -857,6 +935,11 @@ export type RfqScalarWhereWithAggregatesInput = {
   loadDescription?: Prisma.StringNullableWithAggregatesFilter<"Rfq"> | string | null
   mainBoomM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolWithAggregatesFilter<"Rfq"> | boolean
   workingDaysPerMonth?: Prisma.IntNullableWithAggregatesFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringWithAggregatesFilter<"Rfq"> | string
@@ -913,6 +996,11 @@ export type RfqCreateInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -960,6 +1048,7 @@ export type RfqCreateInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateInput = {
@@ -976,6 +1065,11 @@ export type RfqUncheckedCreateInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -1022,6 +1116,7 @@ export type RfqUncheckedCreateInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUpdateInput = {
@@ -1037,6 +1132,11 @@ export type RfqUpdateInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1084,6 +1184,7 @@ export type RfqUpdateInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateInput = {
@@ -1100,6 +1201,11 @@ export type RfqUncheckedUpdateInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1146,6 +1252,7 @@ export type RfqUncheckedUpdateInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateManyInput = {
@@ -1162,6 +1269,11 @@ export type RfqCreateManyInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -1218,6 +1330,11 @@ export type RfqUpdateManyMutationInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1272,6 +1389,11 @@ export type RfqUncheckedUpdateManyInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1347,6 +1469,11 @@ export type RfqCountOrderByAggregateInput = {
   loadDescription?: Prisma.SortOrder
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrder
+  windJibM?: Prisma.SortOrder
   startDateTbc?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
@@ -1395,6 +1522,11 @@ export type RfqAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrder
+  windJibM?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
@@ -1416,6 +1548,11 @@ export type RfqMaxOrderByAggregateInput = {
   loadDescription?: Prisma.SortOrder
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrder
+  windJibM?: Prisma.SortOrder
   startDateTbc?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
@@ -1471,6 +1608,11 @@ export type RfqMinOrderByAggregateInput = {
   loadDescription?: Prisma.SortOrder
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrder
+  windJibM?: Prisma.SortOrder
   startDateTbc?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   siteLocation?: Prisma.SortOrder
@@ -1517,6 +1659,11 @@ export type RfqSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
+  liftLoadT?: Prisma.SortOrder
+  workingRadiusM?: Prisma.SortOrder
+  fixedJibM?: Prisma.SortOrder
+  luffingJibM?: Prisma.SortOrder
+  windJibM?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   siteLatitude?: Prisma.SortOrder
   siteLongitude?: Prisma.SortOrder
@@ -1743,6 +1890,20 @@ export type RfqUpdateOneRequiredWithoutQuotationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.RfqUpdateToOneWithWhereWithoutQuotationsInput, Prisma.RfqUpdateWithoutQuotationsInput>, Prisma.RfqUncheckedUpdateWithoutQuotationsInput>
 }
 
+export type RfqCreateNestedOneWithoutNegotiationsInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutNegotiationsInput, Prisma.RfqUncheckedCreateWithoutNegotiationsInput>
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutNegotiationsInput
+  connect?: Prisma.RfqWhereUniqueInput
+}
+
+export type RfqUpdateOneRequiredWithoutNegotiationsNestedInput = {
+  create?: Prisma.XOR<Prisma.RfqCreateWithoutNegotiationsInput, Prisma.RfqUncheckedCreateWithoutNegotiationsInput>
+  connectOrCreate?: Prisma.RfqCreateOrConnectWithoutNegotiationsInput
+  upsert?: Prisma.RfqUpsertWithoutNegotiationsInput
+  connect?: Prisma.RfqWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RfqUpdateToOneWithWhereWithoutNegotiationsInput, Prisma.RfqUpdateWithoutNegotiationsInput>, Prisma.RfqUncheckedUpdateWithoutNegotiationsInput>
+}
+
 export type RfqCreateNestedManyWithoutEnquiryLineInput = {
   create?: Prisma.XOR<Prisma.RfqCreateWithoutEnquiryLineInput, Prisma.RfqUncheckedCreateWithoutEnquiryLineInput> | Prisma.RfqCreateWithoutEnquiryLineInput[] | Prisma.RfqUncheckedCreateWithoutEnquiryLineInput[]
   connectOrCreate?: Prisma.RfqCreateOrConnectWithoutEnquiryLineInput | Prisma.RfqCreateOrConnectWithoutEnquiryLineInput[]
@@ -1814,6 +1975,11 @@ export type RfqCreateWithoutSiteStateInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -1860,6 +2026,7 @@ export type RfqCreateWithoutSiteStateInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutSiteStateInput = {
@@ -1876,6 +2043,11 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -1921,6 +2093,7 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutSiteStateInput = {
@@ -1966,6 +2139,11 @@ export type RfqScalarWhereInput = {
   loadDescription?: Prisma.StringNullableFilter<"Rfq"> | string | null
   mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFilter<"Rfq"> | boolean
   workingDaysPerMonth?: Prisma.IntNullableFilter<"Rfq"> | number | null
   siteLocation?: Prisma.StringFilter<"Rfq"> | string
@@ -2022,6 +2200,11 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2068,6 +2251,7 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
@@ -2083,6 +2267,11 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2129,6 +2318,7 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutCraneTypeRefInput = {
@@ -2170,6 +2360,11 @@ export type RfqCreateWithoutCreatedByInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2216,6 +2411,7 @@ export type RfqCreateWithoutCreatedByInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutCreatedByInput = {
@@ -2232,6 +2428,11 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2277,6 +2478,7 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutCreatedByInput = {
@@ -2318,6 +2520,11 @@ export type RfqCreateWithoutAttachmentsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2364,6 +2571,7 @@ export type RfqCreateWithoutAttachmentsInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutAttachmentsInput = {
@@ -2380,6 +2588,11 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2425,6 +2638,7 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutAttachmentsInput = {
@@ -2456,6 +2670,11 @@ export type RfqUpdateWithoutAttachmentsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2502,6 +2721,7 @@ export type RfqUpdateWithoutAttachmentsInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutAttachmentsInput = {
@@ -2518,6 +2738,11 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2563,6 +2788,7 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutReservationsInput = {
@@ -2578,6 +2804,11 @@ export type RfqCreateWithoutReservationsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2624,6 +2855,7 @@ export type RfqCreateWithoutReservationsInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutReservationsInput = {
@@ -2640,6 +2872,11 @@ export type RfqUncheckedCreateWithoutReservationsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2685,6 +2922,7 @@ export type RfqUncheckedCreateWithoutReservationsInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutReservationsInput = {
@@ -2716,6 +2954,11 @@ export type RfqUpdateWithoutReservationsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2762,6 +3005,7 @@ export type RfqUpdateWithoutReservationsInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutReservationsInput = {
@@ -2778,6 +3022,11 @@ export type RfqUncheckedUpdateWithoutReservationsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2823,6 +3072,7 @@ export type RfqUncheckedUpdateWithoutReservationsInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutRecipientsInput = {
@@ -2838,6 +3088,11 @@ export type RfqCreateWithoutRecipientsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2884,6 +3139,7 @@ export type RfqCreateWithoutRecipientsInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutRecipientsInput = {
@@ -2900,6 +3156,11 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -2945,6 +3206,7 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutRecipientsInput = {
@@ -2976,6 +3238,11 @@ export type RfqUpdateWithoutRecipientsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3022,6 +3289,7 @@ export type RfqUpdateWithoutRecipientsInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutRecipientsInput = {
@@ -3038,6 +3306,11 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3083,6 +3356,7 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutQuotationsInput = {
@@ -3098,6 +3372,11 @@ export type RfqCreateWithoutQuotationsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3144,6 +3423,7 @@ export type RfqCreateWithoutQuotationsInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutQuotationsInput = {
@@ -3160,6 +3440,11 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3205,6 +3490,7 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutQuotationsInput = {
@@ -3236,6 +3522,11 @@ export type RfqUpdateWithoutQuotationsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3282,6 +3573,7 @@ export type RfqUpdateWithoutQuotationsInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutQuotationsInput = {
@@ -3298,6 +3590,11 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3343,6 +3640,291 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqCreateWithoutNegotiationsInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
+  craneTypeRef: Prisma.CraneTypeCreateNestedOneWithoutRfqCandidatesInput
+  siteState: Prisma.StateCreateNestedOneWithoutRfqsInput
+  enquiryLine?: Prisma.EnquiryLineItemCreateNestedOneWithoutRfqsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedRfqsInput
+  recipients?: Prisma.RfqVendorRecipientCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+}
+
+export type RfqUncheckedCreateWithoutNegotiationsInput = {
+  id?: string
+  rfqNumber: string
+  enquiryNo: string
+  lineNo: string
+  craneType: string
+  capacityT: runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: number
+  capacityRule?: $Enums.CapacityRule
+  capacityNote?: string | null
+  applicationDescription?: string | null
+  loadDescription?: string | null
+  mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: boolean
+  workingDaysPerMonth?: number | null
+  siteLocation: string
+  siteStateCode: string
+  sitePincode?: string | null
+  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: $Enums.CoordinateSource | null
+  requiredStartDate: Date | string
+  durationValue: runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit: $Enums.DurationUnit
+  configuration?: string | null
+  otCharges?: string | null
+  breakdownTerms?: string | null
+  dieselScope?: string | null
+  workingHoursShift?: string | null
+  craneAgeCriteriaYears?: number | null
+  accommodationConveyance?: string | null
+  paymentTerms?: string | null
+  notes?: string | null
+  mobilisationTerms?: string | null
+  supportCrane?: string | null
+  steelMatsGroundPrep?: string | null
+  ehsHrRequirements?: string | null
+  insuranceTerms?: string | null
+  extensionClause?: string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: string | null
+  smlContactMobile?: string | null
+  smlContactEmail?: string | null
+  submissionDeadline: Date | string
+  status?: $Enums.RfqStatus
+  rollupStatus?: $Enums.RfqRollupStatus | null
+  cancelledAt?: Date | string | null
+  cancelReason?: string | null
+  enquiryLineId?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentAt?: Date | string | null
+  channels?: Prisma.RfqCreatechannelsInput | $Enums.MessageChannel[]
+  recipients?: Prisma.RfqVendorRecipientUncheckedCreateNestedManyWithoutRfqInput
+  quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
+  attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+}
+
+export type RfqCreateOrConnectWithoutNegotiationsInput = {
+  where: Prisma.RfqWhereUniqueInput
+  create: Prisma.XOR<Prisma.RfqCreateWithoutNegotiationsInput, Prisma.RfqUncheckedCreateWithoutNegotiationsInput>
+}
+
+export type RfqUpsertWithoutNegotiationsInput = {
+  update: Prisma.XOR<Prisma.RfqUpdateWithoutNegotiationsInput, Prisma.RfqUncheckedUpdateWithoutNegotiationsInput>
+  create: Prisma.XOR<Prisma.RfqCreateWithoutNegotiationsInput, Prisma.RfqUncheckedCreateWithoutNegotiationsInput>
+  where?: Prisma.RfqWhereInput
+}
+
+export type RfqUpdateToOneWithWhereWithoutNegotiationsInput = {
+  where?: Prisma.RfqWhereInput
+  data: Prisma.XOR<Prisma.RfqUpdateWithoutNegotiationsInput, Prisma.RfqUncheckedUpdateWithoutNegotiationsInput>
+}
+
+export type RfqUpdateWithoutNegotiationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
+  craneTypeRef?: Prisma.CraneTypeUpdateOneRequiredWithoutRfqCandidatesNestedInput
+  siteState?: Prisma.StateUpdateOneRequiredWithoutRfqsNestedInput
+  enquiryLine?: Prisma.EnquiryLineItemUpdateOneWithoutRfqsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedRfqsNestedInput
+  recipients?: Prisma.RfqVendorRecipientUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+}
+
+export type RfqUncheckedUpdateWithoutNegotiationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rfqNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
+  lineNo?: Prisma.StringFieldUpdateOperationsInput | string
+  craneType?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityT?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
+  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
+  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  requiredStartDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  durationUnit?: Prisma.EnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit
+  configuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supportCrane?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steelMatsGroundPrep?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ehsHrRequirements?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  commercialTermsExtra?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  smlContactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactMobile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  smlContactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionDeadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumRfqStatusFieldUpdateOperationsInput | $Enums.RfqStatus
+  rollupStatus?: Prisma.NullableEnumRfqRollupStatusFieldUpdateOperationsInput | $Enums.RfqRollupStatus | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enquiryLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  channels?: Prisma.RfqUpdatechannelsInput | $Enums.MessageChannel[]
+  recipients?: Prisma.RfqVendorRecipientUncheckedUpdateManyWithoutRfqNestedInput
+  quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
+  attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateWithoutEnquiryLineInput = {
@@ -3358,6 +3940,11 @@ export type RfqCreateWithoutEnquiryLineInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3404,6 +3991,7 @@ export type RfqCreateWithoutEnquiryLineInput = {
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutEnquiryLineInput = {
@@ -3420,6 +4008,11 @@ export type RfqUncheckedCreateWithoutEnquiryLineInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3465,6 +4058,7 @@ export type RfqUncheckedCreateWithoutEnquiryLineInput = {
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
   inboundReplies?: Prisma.InboundReplyUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutEnquiryLineInput = {
@@ -3506,6 +4100,11 @@ export type RfqCreateWithoutInboundRepliesInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3552,6 +4151,7 @@ export type RfqCreateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationCreateNestedManyWithoutRfqInput
 }
 
 export type RfqUncheckedCreateWithoutInboundRepliesInput = {
@@ -3568,6 +4168,11 @@ export type RfqUncheckedCreateWithoutInboundRepliesInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3613,6 +4218,7 @@ export type RfqUncheckedCreateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationUncheckedCreateNestedManyWithoutRfqInput
   attachments?: Prisma.RfqAttachmentUncheckedCreateNestedManyWithoutRfqInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutRfqInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedCreateNestedManyWithoutRfqInput
 }
 
 export type RfqCreateOrConnectWithoutInboundRepliesInput = {
@@ -3644,6 +4250,11 @@ export type RfqUpdateWithoutInboundRepliesInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3690,6 +4301,7 @@ export type RfqUpdateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutInboundRepliesInput = {
@@ -3706,6 +4318,11 @@ export type RfqUncheckedUpdateWithoutInboundRepliesInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3751,6 +4368,7 @@ export type RfqUncheckedUpdateWithoutInboundRepliesInput = {
   quotations?: Prisma.QuotationUncheckedUpdateManyWithoutRfqNestedInput
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqCreateManySiteStateInput = {
@@ -3767,6 +4385,11 @@ export type RfqCreateManySiteStateInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -3822,6 +4445,11 @@ export type RfqUpdateWithoutSiteStateInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3868,6 +4496,7 @@ export type RfqUpdateWithoutSiteStateInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutSiteStateInput = {
@@ -3884,6 +4513,11 @@ export type RfqUncheckedUpdateWithoutSiteStateInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3929,6 +4563,7 @@ export type RfqUncheckedUpdateWithoutSiteStateInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
@@ -3945,6 +4580,11 @@ export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4000,6 +4640,11 @@ export type RfqCreateManyCraneTypeRefInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -4056,6 +4701,11 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4102,6 +4752,7 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
@@ -4117,6 +4768,11 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4163,6 +4819,7 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
@@ -4178,6 +4835,11 @@ export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4235,6 +4897,11 @@ export type RfqCreateManyCreatedByInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -4290,6 +4957,11 @@ export type RfqUpdateWithoutCreatedByInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4336,6 +5008,7 @@ export type RfqUpdateWithoutCreatedByInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutCreatedByInput = {
@@ -4352,6 +5025,11 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4397,6 +5075,7 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
@@ -4413,6 +5092,11 @@ export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4469,6 +5153,11 @@ export type RfqCreateManyEnquiryLineInput = {
   loadDescription?: string | null
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: boolean
   workingDaysPerMonth?: number | null
   siteLocation: string
@@ -4524,6 +5213,11 @@ export type RfqUpdateWithoutEnquiryLineInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4570,6 +5264,7 @@ export type RfqUpdateWithoutEnquiryLineInput = {
   attachments?: Prisma.RfqAttachmentUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
@@ -4586,6 +5281,11 @@ export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4631,6 +5331,7 @@ export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
   attachments?: Prisma.RfqAttachmentUncheckedUpdateManyWithoutRfqNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutRfqNestedInput
   inboundReplies?: Prisma.InboundReplyUncheckedUpdateManyWithoutRfqNestedInput
+  negotiations?: Prisma.QuotationNegotiationUncheckedUpdateManyWithoutRfqNestedInput
 }
 
 export type RfqUncheckedUpdateManyWithoutEnquiryLineInput = {
@@ -4647,6 +5348,11 @@ export type RfqUncheckedUpdateManyWithoutEnquiryLineInput = {
   loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  windJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   startDateTbc?: Prisma.BoolFieldUpdateOperationsInput | boolean
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
@@ -4700,6 +5406,7 @@ export type RfqCountOutputType = {
   attachments: number
   reservations: number
   inboundReplies: number
+  negotiations: number
 }
 
 export type RfqCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4708,6 +5415,7 @@ export type RfqCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.In
   attachments?: boolean | RfqCountOutputTypeCountAttachmentsArgs
   reservations?: boolean | RfqCountOutputTypeCountReservationsArgs
   inboundReplies?: boolean | RfqCountOutputTypeCountInboundRepliesArgs
+  negotiations?: boolean | RfqCountOutputTypeCountNegotiationsArgs
 }
 
 /**
@@ -4755,6 +5463,13 @@ export type RfqCountOutputTypeCountInboundRepliesArgs<ExtArgs extends runtime.Ty
   where?: Prisma.InboundReplyWhereInput
 }
 
+/**
+ * RfqCountOutputType without action
+ */
+export type RfqCountOutputTypeCountNegotiationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuotationNegotiationWhereInput
+}
+
 
 export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4770,6 +5485,11 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   loadDescription?: boolean
   mainBoomM?: boolean
   jibLengthM?: boolean
+  liftLoadT?: boolean
+  workingRadiusM?: boolean
+  fixedJibM?: boolean
+  luffingJibM?: boolean
+  windJibM?: boolean
   startDateTbc?: boolean
   workingDaysPerMonth?: boolean
   siteLocation?: boolean
@@ -4820,6 +5540,7 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   attachments?: boolean | Prisma.Rfq$attachmentsArgs<ExtArgs>
   reservations?: boolean | Prisma.Rfq$reservationsArgs<ExtArgs>
   inboundReplies?: boolean | Prisma.Rfq$inboundRepliesArgs<ExtArgs>
+  negotiations?: boolean | Prisma.Rfq$negotiationsArgs<ExtArgs>
   _count?: boolean | Prisma.RfqCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rfq"]>
 
@@ -4837,6 +5558,11 @@ export type RfqSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   loadDescription?: boolean
   mainBoomM?: boolean
   jibLengthM?: boolean
+  liftLoadT?: boolean
+  workingRadiusM?: boolean
+  fixedJibM?: boolean
+  luffingJibM?: boolean
+  windJibM?: boolean
   startDateTbc?: boolean
   workingDaysPerMonth?: boolean
   siteLocation?: boolean
@@ -4898,6 +5624,11 @@ export type RfqSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   loadDescription?: boolean
   mainBoomM?: boolean
   jibLengthM?: boolean
+  liftLoadT?: boolean
+  workingRadiusM?: boolean
+  fixedJibM?: boolean
+  luffingJibM?: boolean
+  windJibM?: boolean
   startDateTbc?: boolean
   workingDaysPerMonth?: boolean
   siteLocation?: boolean
@@ -4959,6 +5690,11 @@ export type RfqSelectScalar = {
   loadDescription?: boolean
   mainBoomM?: boolean
   jibLengthM?: boolean
+  liftLoadT?: boolean
+  workingRadiusM?: boolean
+  fixedJibM?: boolean
+  luffingJibM?: boolean
+  windJibM?: boolean
   startDateTbc?: boolean
   workingDaysPerMonth?: boolean
   siteLocation?: boolean
@@ -5002,7 +5738,7 @@ export type RfqSelectScalar = {
   channels?: boolean
 }
 
-export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt" | "channels", ExtArgs["result"]["rfq"]>
+export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "liftLoadT" | "workingRadiusM" | "fixedJibM" | "luffingJibM" | "windJibM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt" | "channels", ExtArgs["result"]["rfq"]>
 export type RfqInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
@@ -5013,6 +5749,7 @@ export type RfqInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   attachments?: boolean | Prisma.Rfq$attachmentsArgs<ExtArgs>
   reservations?: boolean | Prisma.Rfq$reservationsArgs<ExtArgs>
   inboundReplies?: boolean | Prisma.Rfq$inboundRepliesArgs<ExtArgs>
+  negotiations?: boolean | Prisma.Rfq$negotiationsArgs<ExtArgs>
   _count?: boolean | Prisma.RfqCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RfqIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5040,6 +5777,7 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     attachments: Prisma.$RfqAttachmentPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
     inboundReplies: Prisma.$InboundReplyPayload<ExtArgs>[]
+    negotiations: Prisma.$QuotationNegotiationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5055,6 +5793,11 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     loadDescription: string | null
     mainBoomM: runtime.Decimal | null
     jibLengthM: runtime.Decimal | null
+    liftLoadT: runtime.Decimal | null
+    workingRadiusM: runtime.Decimal | null
+    fixedJibM: runtime.Decimal | null
+    luffingJibM: runtime.Decimal | null
+    windJibM: runtime.Decimal | null
     startDateTbc: boolean
     /**
      * *
@@ -5503,6 +6246,7 @@ export interface Prisma__RfqClient<T, Null = never, ExtArgs extends runtime.Type
   attachments<T extends Prisma.Rfq$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RfqAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.Rfq$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inboundReplies<T extends Prisma.Rfq$inboundRepliesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$inboundRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InboundReplyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  negotiations<T extends Prisma.Rfq$negotiationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Rfq$negotiationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuotationNegotiationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5545,6 +6289,11 @@ export interface RfqFieldRefs {
   readonly loadDescription: Prisma.FieldRef<"Rfq", 'String'>
   readonly mainBoomM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly jibLengthM: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly liftLoadT: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly workingRadiusM: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly fixedJibM: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly luffingJibM: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly windJibM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly startDateTbc: Prisma.FieldRef<"Rfq", 'Boolean'>
   readonly workingDaysPerMonth: Prisma.FieldRef<"Rfq", 'Int'>
   readonly siteLocation: Prisma.FieldRef<"Rfq", 'String'>
@@ -6123,6 +6872,30 @@ export type Rfq$inboundRepliesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.InboundReplyScalarFieldEnum | Prisma.InboundReplyScalarFieldEnum[]
+}
+
+/**
+ * Rfq.negotiations
+ */
+export type Rfq$negotiationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuotationNegotiation
+   */
+  select?: Prisma.QuotationNegotiationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuotationNegotiation
+   */
+  omit?: Prisma.QuotationNegotiationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuotationNegotiationInclude<ExtArgs> | null
+  where?: Prisma.QuotationNegotiationWhereInput
+  orderBy?: Prisma.QuotationNegotiationOrderByWithRelationInput | Prisma.QuotationNegotiationOrderByWithRelationInput[]
+  cursor?: Prisma.QuotationNegotiationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuotationNegotiationScalarFieldEnum | Prisma.QuotationNegotiationScalarFieldEnum[]
 }
 
 /**

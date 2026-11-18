@@ -17,6 +17,11 @@ import {
   listRaisableLines,
   type RaisableLine,
 } from "@/lib/enquiries";
+import {
+  RfqLineFieldPicker,
+  useRfqLineFieldSelection,
+  type RfqLineFieldSelection,
+} from "@/components/rfq-line-field-picker";
 import { ApiError } from "@/lib/api";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -152,8 +157,18 @@ export function RfqNewPage() {
     queryFn: () => listRaisableLines(search),
   });
 
+  // The picker is keyed to a line so switching lines cannot carry a stale
+  // selection across. It is populated once the full line arrives.
+  const fieldSelection = useRfqLineFieldSelection({ lineId: selectedId });
+
   const raise = useMutation({
-    mutationFn: (line: RaisableLine) => createRfqFromLine(line.id, deadline),
+    mutationFn: ({
+      line,
+      fields,
+    }: {
+      line: RaisableLine;
+      fields: RfqLineFieldSelection["keys"];
+    }) => createRfqFromLine(line.id, deadline, fields),
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ["raisable-lines"] });
       void queryClient.invalidateQueries({ queryKey: ["enquiries"] });
@@ -216,6 +231,9 @@ export function RfqNewPage() {
   }, [rows, selectedId]);
 
   const selected = rows.find((line) => line.id === selectedId) ?? null;
+  const fullLine = fieldSelection.line;
+  const selectedFields = fieldSelection.keys;
+
   const warnings = lineWarnings(selected);
   const days = daysToRespond(deadline);
   const filtersOn = Boolean(stateFilter || tbcOnly || hasRfqOnly);
@@ -227,9 +245,9 @@ export function RfqNewPage() {
   }
 
   function startRaise() {
-    if (!selected) return;
+    if (!selected || !fullLine) return;
     setError(null);
-    raise.mutate(selected);
+    raise.mutate({ line: selected, fields: selectedFields });
   }
 
   const listKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -261,7 +279,8 @@ export function RfqNewPage() {
       days={days}
       warnings={warnings}
       error={error}
-      pending={raise.isPending}
+      pending={raise.isPending || fieldSelection.loading}
+      fieldSelection={fieldSelection}
       onCreate={startRaise}
     />
   );
@@ -560,6 +579,7 @@ function DraftPreview({
   warnings,
   error,
   pending,
+  fieldSelection,
   onCreate,
 }: {
   line: RaisableLine | null;
@@ -569,6 +589,7 @@ function DraftPreview({
   warnings: string[];
   error: string | null;
   pending: boolean;
+  fieldSelection: RfqLineFieldSelection;
   onCreate: () => void;
 }) {
   if (!line) {
@@ -628,9 +649,18 @@ function DraftPreview({
           />
         </dl>
 
+        <RfqLineFieldPicker
+          line={fieldSelection.line}
+          selected={fieldSelection.keys}
+          onToggle={fieldSelection.toggle}
+          loading={fieldSelection.loading}
+          error={fieldSelection.error}
+          onRetry={fieldSelection.retry}
+        />
+
         <p className="rounded-lg border border-ink-800 bg-ink-850 px-3 py-2 text-[13px] leading-relaxed text-slate-500">
-          The draft is prefilled from the line. Customer name and address, the rental budget,
-          internal notes and the Sales Partner&rsquo;s name are never copied into an RFQ.
+          Customer name and address, the rental budget, internal notes and the Sales
+          Partner&rsquo;s name are never copied into an RFQ.
         </p>
 
         <div className="rounded-xl border border-ink-800 bg-ink-850/60 p-3">
@@ -707,11 +737,15 @@ function DraftPreview({
         <button
           type="button"
           onClick={onCreate}
-          disabled={pending || deadline === ""}
+          disabled={pending || deadline === "" || !fieldSelection.ready || fieldSelection.error}
           className="btn-primary w-full py-2 text-[15px]"
         >
           {pending ? <Spinner /> : <Send className="size-4" aria-hidden />}
-          {pending ? "Creating the draft" : "Create draft RFQ"}
+          {fieldSelection.error
+            ? "Line details unavailable"
+            : pending
+              ? "Creating the draft"
+              : "Create draft RFQ"}
         </button>
         <p className="mt-2 text-center text-[13px] text-slate-500">
           Creates a draft. Vendors are not emailed until you choose them and send.

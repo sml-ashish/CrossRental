@@ -36,6 +36,9 @@ export type Capability =
   | "rfq:view_quotations"
   | "rfq:respond"
   | "quotation:award"
+  // Counter-quote / negotiation: both internal roles that can award may also
+  // counter, accept a vendor counter, reject and log an offline vendor offer.
+  | "quotation:counter"
   // P3: marking a quotation Under Review / Shortlisted / Rejected in the
   // comparison screen. Held by both internal roles; the award is separate.
   | "quotation:review"
@@ -71,6 +74,7 @@ const CAPABILITIES: Record<UserRole, Capability[]> = {
     "rfq:remind",
     "rfq:view_quotations",
     "quotation:award",
+    "quotation:counter",
     "quotation:review",
     "fleet:view_all",
     // Brief D1: admin maintains any vendor's fleet on their behalf.
@@ -98,6 +102,7 @@ const CAPABILITIES: Record<UserRole, Capability[]> = {
     "rfq:remind",
     "rfq:view_quotations",
     "quotation:award",
+    "quotation:counter",
     "quotation:review",
     "fleet:view_all",
     // Brief D1/6.6: sales may add or edit a vendor's cranes on their behalf.

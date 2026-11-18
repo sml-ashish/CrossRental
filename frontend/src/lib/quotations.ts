@@ -23,6 +23,7 @@ export type QuotationStatus =
   | "UNDER_REVIEW"
   | "SHORTLISTED"
   | "AWARDED"
+  | "NOT_AWARDED"
   | "REJECTED"
   | "WITHDRAWN"
   | "EXPIRED";
@@ -45,6 +46,7 @@ export const QUOTATION_STATUS_LABELS: Record<QuotationStatus, string> = {
   UNDER_REVIEW: "Under review",
   SHORTLISTED: "Shortlisted",
   AWARDED: "Awarded",
+  NOT_AWARDED: "Not awarded",
   REJECTED: "Not selected",
   WITHDRAWN: "Withdrawn",
   EXPIRED: "Expired",
@@ -69,6 +71,8 @@ export interface VendorInboxRow {
   recipientId: string;
   rfqId: string;
   rfqNumber: string;
+  /** The RFQ's own status decides whether a Pending row is still actionable. */
+  rfqStatus: "DRAFT" | "SENT" | "CLOSED" | "CANCELLED";
   craneType: string;
   craneTypeName: string;
   capacityT: number;
@@ -89,6 +93,10 @@ export interface VendorInboxRow {
   canRespond: boolean;
   quotationCount: number;
   latestQuotationTotal: number | null;
+  /** An SML counter-offer is waiting for this vendor on this RFQ. */
+  counterOffer: boolean;
+  /** Response deadline of the soonest open counter-offer, if any. */
+  respondBy: string | null;
 }
 
 export interface VendorRfqDetail {
@@ -106,6 +114,11 @@ export interface VendorRfqDetail {
     loadDescription: string | null;
     mainBoomM: number | null;
     jibLengthM: number | null;
+    liftLoadT: number | null;
+    workingRadiusM: number | null;
+    fixedJibM: number | null;
+    luffingJibM: number | null;
+    windJibM: number | null;
     startDateTbc: boolean;
     quantity: number;
     siteLocation: string;
@@ -145,6 +158,8 @@ export interface VendorRfqDetail {
     respondedAt: string | null;
     reminderCount: number;
     canRespond: boolean;
+    counterOffer: boolean;
+    respondBy: string | null;
   };
   quotations: VendorQuotation[];
 }

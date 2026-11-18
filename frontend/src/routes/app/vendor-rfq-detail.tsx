@@ -15,10 +15,10 @@ import {
   type VendorRfqDetail,
 } from "@/lib/quotations";
 import { DeclineDialog } from "./vendor-rfq-detail/decline-dialog";
-import { GlanceStrip } from "./vendor-rfq-detail/glance-strip";
+import { VendorNegotiations } from "./vendor-rfq-detail/negotiation";
 import { QuotePanel } from "./vendor-rfq-detail/quote-panel";
 import { QuotesList } from "./vendor-rfq-detail/quotes-list";
-import { Requirement } from "./vendor-rfq-detail/requirement";
+import { Requirement, RequirementFull } from "./vendor-rfq-detail/requirement";
 import { SummaryBar } from "./vendor-rfq-detail/summary-bar";
 
 /**
@@ -49,6 +49,9 @@ import { SummaryBar } from "./vendor-rfq-detail/summary-bar";
 export function VendorRfqDetailPage() {
   const { rfqId } = useParams({ from: "/app/rfqs/$rfqId" }) as { rfqId: string };
   const [quotingAnother, setQuotingAnother] = useState(false);
+  // Read first, then quote: the requirement is what the price is based on, so
+  // it gets the whole page until the vendor chooses to move on.
+  const [step, setStep] = useState<"requirement" | "quote" | null>(null);
   const [declineOpen, setDeclineOpen] = useState(false);
   // Height of the sticky summary row, reported by the bar itself. The CSS
   // variable adds the 3rem application header, because the bar sticks at
@@ -60,13 +63,14 @@ export function VendorRfqDetailPage() {
     queryFn: () => getVendorRfq(rfqId),
   });
 
+  const goTo = (next: "requirement" | "quote") => {
+    setStep(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const startQuote = () => {
     setQuotingAnother(true);
-    requestAnimationFrame(() =>
-      document
-        .getElementById("quote-panel")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
-    );
+    goTo("quote");
   };
 
   if (detail.isLoading || !detail.data) {
@@ -86,6 +90,10 @@ export function VendorRfqDetailPage() {
   const { rfq, response, quotations } = detail.data;
   const showQuoteForm =
     response.canRespond && (quotations.length === 0 || quotingAnother);
+  // A vendor who has already responded, or can no longer respond, lands on
+  // their response; a new RFQ opens on the requirement.
+  const activeStep: "requirement" | "quote" =
+    step ?? (quotations.length > 0 || !response.canRespond ? "quote" : "requirement");
   const latestQuote =
     quotations.find((quotation) => quotation.isLatest && quotation.status !== "WITHDRAWN") ??
     quotations[0] ??
@@ -112,8 +120,6 @@ export function VendorRfqDetailPage() {
         onBarHeightChange={setBarHeight}
       />
 
-      <GlanceStrip rfq={rfq} />
-
       {response.responseStatus === "DECLINED" &&
       (response.declineReason || response.declineNote) ? (
         <Alert tone="info" title="You declined this RFQ">
@@ -124,38 +130,125 @@ export function VendorRfqDetailPage() {
         </Alert>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
-        <div id="rfq-print" className="min-w-0 space-y-5">
-          <Requirement rfq={rfq} />
+      <StepSwitch
+        step={activeStep}
+        onChange={goTo}
+        quoteLabel={quotations.length > 0 || !response.canRespond ? "Your response" : "Your quote"}
+        quoteCount={quotations.length}
+      />
+
+      <VendorNegotiations rfqId={rfqId} submissionDeadline={rfq.submissionDeadline} />
+
+      {activeStep === "requirement" ? (
+        <div id="rfq-print">
+          <RequirementFull
+            rfq={rfq}
+            canQuote={response.canRespond}
+            onQuote={startQuote}
+          />
         </div>
-
-        <aside className="min-w-0 space-y-5 lg:sticky lg:top-[calc(var(--rfq-bar-h)+1rem)] lg:z-20 lg:max-h-[calc(100vh-var(--rfq-bar-h)-2rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
-          {showQuoteForm ? (
-            <div id="quote-panel" className="scroll-mt-40">
-              <QuotePanel
-                rfqId={rfqId}
-                rfq={rfq}
-                quotations={quotations}
-                onQuoted={() => setQuotingAnother(false)}
+      ) : (
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <div className="min-w-0 space-y-5">
+            {showQuoteForm ? (
+              <div id="quote-panel" className="scroll-mt-40">
+                <QuotePanel
+                  rfqId={rfqId}
+                  rfq={rfq}
+                  quotations={quotations}
+                  onQuoted={() => setQuotingAnother(false)}
+                />
+              </div>
+            ) : latestQuote ? (
+              <LatestQuote
+                quotation={latestQuote}
+                canRespond={response.canRespond}
+                onQuote={startQuote}
               />
-            </div>
-          ) : latestQuote ? (
-            <LatestQuote
-              quotation={latestQuote}
-              canRespond={response.canRespond}
-              onQuote={startQuote}
-            />
-          ) : (
-            <ReadOnlyCard rfq={rfq} response={response} />
-          )}
-        </aside>
-      </div>
+            ) : (
+              <ReadOnlyCard rfq={rfq} response={response} />
+            )}
 
-      {quotations.length > 0 ? (
-        <QuotesList rfqId={rfqId} rfq={rfq} quotations={quotations} />
-      ) : null}
+            {quotations.length > 0 ? (
+              <QuotesList rfqId={rfqId} rfq={rfq} quotations={quotations} />
+            ) : null}
+          </div>
+
+          {/* While pricing, the requirement stays in view as a recap. */}
+          <aside className="min-w-0 space-y-3 lg:sticky lg:top-[calc(var(--rfq-bar-h)+1rem)] lg:max-h-[calc(100vh-var(--rfq-bar-h)-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
+            <button
+              type="button"
+              onClick={() => goTo("requirement")}
+              className="text-[14px] font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
+            >
+              ← Back to the full requirement
+            </button>
+            <div id="rfq-print">
+              <Requirement rfq={rfq} />
+            </div>
+          </aside>
+        </div>
+      )}
 
       <DeclineDialog rfqId={rfqId} open={declineOpen} onOpenChange={setDeclineOpen} />
+    </div>
+  );
+}
+
+function StepSwitch({
+  step,
+  onChange,
+  quoteLabel,
+  quoteCount,
+}: {
+  step: "requirement" | "quote";
+  onChange: (step: "requirement" | "quote") => void;
+  quoteLabel: string;
+  quoteCount: number;
+}) {
+  const items = [
+    { value: "requirement" as const, n: 1, label: "Requirement" },
+    { value: "quote" as const, n: 2, label: quoteLabel },
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="RFQ steps"
+      className="inline-flex max-w-full gap-1 rounded-xl border border-ink-800 bg-ink-850 p-1 print:hidden"
+    >
+      {items.map((item) => {
+        const active = step === item.value;
+        return (
+          <button
+            key={item.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(item.value)}
+            className={
+              "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[15px] whitespace-nowrap transition-colors " +
+              (active
+                ? "bg-ink-900 font-medium text-slate-900 shadow-sm ring-1 ring-ink-800"
+                : "text-slate-500 hover:text-slate-900")
+            }
+          >
+            <span
+              className={
+                "flex size-5 items-center justify-center rounded-full text-[12px] font-semibold " +
+                (active ? "bg-accent-500 text-[#fff]" : "bg-ink-800 text-slate-600")
+              }
+            >
+              {item.n}
+            </span>
+            {item.label}
+            {item.value === "quote" && quoteCount > 0 ? (
+              <span className="rounded-full bg-ink-800 px-1.5 text-[12px] text-slate-600">
+                {quoteCount}
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -245,12 +338,8 @@ function PageSkeleton() {
         </div>
         <Skeleton className="mt-2 h-3 w-64" />
       </div>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-6">
-        {Array.from({ length: 6 }, (_, index) => (
-          <Skeleton key={index} className="h-[86px] rounded-xl" />
-        ))}
-      </div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+      <Skeleton className="h-20 rounded-2xl" />
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="card space-y-4 p-4">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-3 w-full max-w-md" />

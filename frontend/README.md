@@ -278,14 +278,6 @@ role, enable/disable, or reset credentials. Vendor suspension lives on
 `vendor-detail.tsx` — an admin sees a **Vendor access** section with Suspend
 (optional reason) and Reinstate.
 
-### Inline crane add (phase D2)
-
-Inside the vendor quotation form, a "Crane not in your fleet? Add it here" toggle
-opens the mandatory crane fields (brief 5.2) without leaving the page. It posts
-through the same `createCrane` call as the fleet screen, then selects the new
-crane for the quote — so a vendor who only notices the crane is missing while
-reading the requirement is not sent away to add it and come back.
-
 ## Design tokens
 
 Declared CSS-first in `src/styles/index.css` via Tailwind v4's `@theme`, per

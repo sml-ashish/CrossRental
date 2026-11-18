@@ -6,9 +6,9 @@ import type { RfqRollupStatus } from "@/lib/rfqs";
  *
  * The customer block — customer name/address and the rental budget — is shown
  * on the internal screens but never leaves the server when an RFQ is raised:
- * `createRfqFromLine` takes only a deadline and the backend prefills the RFQ
- * from the vendor-safe subset. There is deliberately no way to send those
- * fields from here.
+ * `createRfqFromLine` takes a deadline plus the optional line fields the user
+ * ticked, and the backend copies only that vendor-safe subset. There is
+ * deliberately no way to send those customer fields from here.
  */
 
 export type EnquiryOverallStatus =
@@ -564,14 +564,22 @@ export function cancelLine(lineId: string, reason: string): Promise<{ line: Enqu
   return api(`/enquiries/lines/${lineId}/cancel`, { method: "POST", body: { reason } });
 }
 
-/** Raise an RFQ from a line. Only the deadline is sent; the rest is prefilled. */
+/**
+ * Raise an RFQ from a line. The deadline is always sent; `includeFields` is the
+ * sales user's field picker. Every raise screen now passes it. Omitting it keeps
+ * the server's original copy-everything behaviour for older integrations.
+ */
 export function createRfqFromLine(
   lineId: string,
   submissionDeadline: string,
+  includeFields?: readonly string[],
 ): Promise<{ rfq: { id: string; rfqNumber: string; enquiryLineId: string } }> {
   return api(`/enquiries/lines/${lineId}/rfq`, {
     method: "POST",
-    body: { submissionDeadline: new Date(submissionDeadline).toISOString() },
+    body: {
+      submissionDeadline: new Date(submissionDeadline).toISOString(),
+      ...(includeFields ? { includeFields: [...includeFields] } : {}),
+    },
   });
 }
 

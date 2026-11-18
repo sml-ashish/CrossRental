@@ -368,9 +368,6 @@ function RfqCard({
   const canQuote =
     !deadline.closed &&
     (row.responseStatus === "PENDING" || row.responseStatus === "QUOTED");
-  // The decline panel on the RFQ screen is only offered while the response is
-  // still pending, so the link says "Can't do this" only when it can be honoured.
-  const canDecline = !deadline.closed && row.responseStatus === "PENDING";
 
   return (
     <article className="card p-5">
@@ -432,15 +429,15 @@ function RfqCard({
           >
             {hasQuote ? "Edit quote" : "Send quote"}
           </Link>
-        ) : null}
-
-        <Link
-          to="/app/rfqs/$rfqId"
-          params={{ rfqId: row.rfqId }}
-          className="inline-flex items-center justify-center rounded-lg px-1 py-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
-        >
-          {canDecline ? "Can't do this" : "View RFQ"}
-        </Link>
+        ) : (
+          <Link
+            to="/app/rfqs/$rfqId"
+            params={{ rfqId: row.rfqId }}
+            className="inline-flex items-center justify-center rounded-lg px-1 py-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
+          >
+            View RFQ
+          </Link>
+        )}
       </div>
     </article>
   );

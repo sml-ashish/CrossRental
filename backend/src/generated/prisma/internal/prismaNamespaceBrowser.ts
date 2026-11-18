@@ -68,6 +68,8 @@ export const ModelName = {
   RfqVendorRecipient: 'RfqVendorRecipient',
   Quotation: 'Quotation',
   QuotationAttachment: 'QuotationAttachment',
+  QuotationNegotiation: 'QuotationNegotiation',
+  NegotiationRound: 'NegotiationRound',
   Enquiry: 'Enquiry',
   EnquiryLineItem: 'EnquiryLineItem',
   EnquirySequence: 'EnquirySequence',
@@ -356,6 +358,11 @@ export const RfqScalarFieldEnum = {
   loadDescription: 'loadDescription',
   mainBoomM: 'mainBoomM',
   jibLengthM: 'jibLengthM',
+  liftLoadT: 'liftLoadT',
+  workingRadiusM: 'workingRadiusM',
+  fixedJibM: 'fixedJibM',
+  luffingJibM: 'luffingJibM',
+  windJibM: 'windJibM',
   startDateTbc: 'startDateTbc',
   workingDaysPerMonth: 'workingDaysPerMonth',
   siteLocation: 'siteLocation',
@@ -494,6 +501,7 @@ export const QuotationScalarFieldEnum = {
   statusReasonText: 'statusReasonText',
   statusChangedAt: 'statusChangedAt',
   statusChangedById: 'statusChangedById',
+  negotiationId: 'negotiationId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -513,6 +521,58 @@ export const QuotationAttachmentScalarFieldEnum = {
 } as const
 
 export type QuotationAttachmentScalarFieldEnum = (typeof QuotationAttachmentScalarFieldEnum)[keyof typeof QuotationAttachmentScalarFieldEnum]
+
+
+export const QuotationNegotiationScalarFieldEnum = {
+  id: 'id',
+  rfqId: 'rfqId',
+  vendorId: 'vendorId',
+  craneId: 'craneId',
+  baseQuotationId: 'baseQuotationId',
+  agreedQuotationId: 'agreedQuotationId',
+  status: 'status',
+  currentRound: 'currentRound',
+  maxRounds: 'maxRounds',
+  version: 'version',
+  closedReason: 'closedReason',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuotationNegotiationScalarFieldEnum = (typeof QuotationNegotiationScalarFieldEnum)[keyof typeof QuotationNegotiationScalarFieldEnum]
+
+
+export const NegotiationRoundScalarFieldEnum = {
+  id: 'id',
+  negotiationId: 'negotiationId',
+  roundNumber: 'roundNumber',
+  offeredBy: 'offeredBy',
+  offeredByUserId: 'offeredByUserId',
+  onBehalfOfVendor: 'onBehalfOfVendor',
+  channel: 'channel',
+  rentalRate: 'rentalRate',
+  rateBasis: 'rateBasis',
+  mobilisationCharges: 'mobilisationCharges',
+  demobilisationCharges: 'demobilisationCharges',
+  taxBasis: 'taxBasis',
+  validityDate: 'validityDate',
+  availableFrom: 'availableFrom',
+  availabilityConfirmed: 'availabilityConfirmed',
+  deviationText: 'deviationText',
+  message: 'message',
+  totalQuotedValue: 'totalQuotedValue',
+  calculationNote: 'calculationNote',
+  warnings: 'warnings',
+  warningsAcknowledged: 'warningsAcknowledged',
+  isFinal: 'isFinal',
+  respondBy: 'respondBy',
+  outcome: 'outcome',
+  respondedAt: 'respondedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NegotiationRoundScalarFieldEnum = (typeof NegotiationRoundScalarFieldEnum)[keyof typeof NegotiationRoundScalarFieldEnum]
 
 
 export const EnquiryScalarFieldEnum = {

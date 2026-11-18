@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as vendorQuotations from "../controllers/vendorQuotation.controller";
+import * as negotiation from "../controllers/negotiation.controller";
 import { requireAuth, requireCapability } from "../middleware/auth";
 import { apiLimiter } from "../middleware/rateLimiter";
 import { uploadSingle } from "../middleware/upload";
@@ -53,5 +54,11 @@ router.get(
   "/quotations/:quotationId/attachments",
   vendorQuotations.attachments,
 );
+
+// --- counter-quote / negotiation (phase 1 + 2) ------------------------------
+// Thread-id routes live on /api/vendor/negotiations (a separate router); this
+// RFQ-scoped list is the vendor's inbox view of open offers.
+
+router.get("/:rfqId/negotiations", negotiation.vendorListForRfq);
 
 export default router;

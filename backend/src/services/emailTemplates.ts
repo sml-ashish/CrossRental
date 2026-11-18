@@ -391,4 +391,105 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   },
 ];
 
+// Counter-quote / negotiation (phase 1 + 2)
+const NEGOTIATION_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
+  {
+    key: "negotiation_counter_received",
+    subject: "[{{rfqNumber}}] Counter-offer received — round {{roundNumber}}",
+    bodyHtml: layout(
+      "SML sent a counter-offer",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         SML has sent a counter-offer for <strong>{{rfqNumber}}</strong>
+         ({{craneLabel}}), round <strong>{{roundNumber}} of {{maxRounds}}</strong>.
+       </p>
+       <div style="margin:0 0 16px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534">
+         Total quoted value: INR {{totalQuotedValue}}<br/>
+         <span style="color:#475569">Reply by: {{respondBy}}</span>
+       </div>
+       <p style="margin:0;font-size:13px;color:#64748b">
+         Sign in to the portal to accept, counter or decline. Please reply before the time above.
+       </p>`,
+      { label: "View offer", url: "{{rfqUrl}}" },
+    ),
+  },
+  {
+    key: "negotiation_vendor_countered",
+    subject: "[{{rfqNumber}}] {{vendorName}} countered — round {{roundNumber}}",
+    bodyHtml: layout(
+      "Vendor countered your offer",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         <strong>{{vendorName}}</strong> has sent a counter for
+         <strong>{{rfqNumber}}</strong> ({{craneLabel}}),
+         round <strong>{{roundNumber}} of {{maxRounds}}</strong>.
+       </p>
+       <div style="margin:0 0 16px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534">
+         Total quoted value: INR {{totalQuotedValue}}<br/>
+         <span style="color:#475569">Reply by: {{respondBy}}</span>
+       </div>
+       <p style="margin:0;font-size:13px;color:#64748b">
+         Open the RFQ to accept, counter or reject before the reply time.
+       </p>`,
+      { label: "View offer", url: "{{rfqUrl}}" },
+    ),
+  },
+  {
+    key: "negotiation_accepted",
+    subject: "[{{rfqNumber}}] Offer agreed — awaiting award",
+    bodyHtml: layout(
+      "Offer agreed",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         An offer for <strong>{{rfqNumber}}</strong> has been agreed with
+         <strong>{{vendorName}}</strong> at INR {{totalQuotedValue}}.
+       </p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">{{nextStep}}</p>
+       <p style="margin:0;font-size:13px;color:#64748b">
+         Open the RFQ to review and confirm the award.
+       </p>`,
+      { label: "View offer", url: "{{rfqUrl}}" },
+    ),
+  },
+  {
+    key: "negotiation_declined",
+    subject: "[{{rfqNumber}}] Negotiation closed",
+    bodyHtml: layout(
+      "Negotiation closed",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         The negotiation for <strong>{{rfqNumber}}</strong> with
+         <strong>{{vendorName}}</strong> has been closed.
+         <strong>{{actor}}</strong> ended the thread.
+       </p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">Reason: {{reason}}</p>
+       <p style="margin:0;font-size:13px;color:#64748b">
+         The vendor's standing quotation is still available and can be awarded.
+       </p>`,
+      { label: "View enquiry", url: "{{rfqUrl}}" },
+    ),
+  },
+  {
+    key: "negotiation_reminder",
+    subject: "[{{rfqNumber}}] Offer awaiting your reply",
+    bodyHtml: layout(
+      "Counter-offer awaiting your reply",
+      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
+       <p style="margin:0 0 12px;font-size:14px;color:#334155">
+         A counter-offer for <strong>{{rfqNumber}}</strong> is still awaiting your reply.
+       </p>
+       <div style="margin:0 0 16px;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412">
+         Total quoted value: INR {{totalQuotedValue}}<br/>
+         <span style="color:#475569">Reply by: {{respondBy}}</span>
+       </div>
+       <p style="margin:0;font-size:13px;color:#64748b">
+         If it is not answered before the time above, the offer expires.
+       </p>`,
+      { label: "View offer", url: "{{rfqUrl}}" },
+    ),
+  },
+];
+
+DEFAULT_EMAIL_TEMPLATES.push(...NEGOTIATION_EMAIL_TEMPLATES);
+
 export const EMAIL_TEMPLATE_KEYS = DEFAULT_EMAIL_TEMPLATES.map((t) => t.key);

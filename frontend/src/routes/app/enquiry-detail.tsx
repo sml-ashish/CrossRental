@@ -65,6 +65,10 @@ import { cn } from "@/lib/cn";
 import { SiteMap } from "@/components/site-map";
 import { EnquiryBulkLines } from "@/components/enquiry-bulk-lines";
 import { Alert } from "@/components/ui/alert";
+import {
+  RfqLineFieldPicker,
+  useRfqLineFieldSelection,
+} from "@/components/rfq-line-field-picker";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field, TextInput } from "@/components/ui/form";
 import { Menu, type MenuItem } from "@/components/ui/menu";
@@ -80,8 +84,8 @@ import { Spinner } from "@/components/ui/spinner";
  * controls that open them.
  *
  * The customer block and the rental budget are internal and are shown here.
- * No field from this page is sent when an RFQ is raised: `createRfqFromLine`
- * takes only a deadline and the backend prefills the vendor-safe subset.
+ * When an RFQ is raised, the deadline and the fields ticked in the picker are
+ * sent; the backend still owns the allow-list and copies the core requirement.
  */
 
 function defaultDeadline(): string {
@@ -189,6 +193,11 @@ export function EnquiryDetailPage() {
   const [copyState, setCopyState] = useState<"copied" | "failed" | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
+  // This screen already has the full line, so the picker needs no extra fetch.
+  const rfqLine =
+    enquiry.data?.enquiry.lines.find((line) => line.id === rfqFor) ?? null;
+  const rfqFields = useRfqLineFieldSelection({ line: rfqLine, enabled: Boolean(rfqFor) });
+
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: ["enquiry", params.enquiryId] });
     await queryClient.invalidateQueries({ queryKey: ["enquiries"] });
@@ -196,10 +205,11 @@ export function EnquiryDetailPage() {
   }
 
   async function raiseRfq(lineId: string) {
+    if (!rfqFields.ready || rfqFields.error) return;
     setBusy(true);
     setError(null);
     try {
-      const created = await createRfqFromLine(lineId, rfqDeadline);
+      const created = await createRfqFromLine(lineId, rfqDeadline, rfqFields.keys);
       await refresh();
       void navigate({ to: "/app/rfqs/$rfqId", params: { rfqId: created.rfq.id } });
     } catch (err) {
@@ -225,6 +235,7 @@ export function EnquiryDetailPage() {
   }
 
   function openRaise(lineId: string) {
+    rfqFields.reset();
     setRfqFor(lineId);
     setRfqDeadline(defaultDeadline());
     setCancelFor(null);
@@ -713,9 +724,29 @@ export function EnquiryDetailPage() {
                                 Raise an RFQ for {lineShort(line)}
                               </p>
                               <p className="mt-1 text-[14px] text-slate-500">
-                                The vendor-safe fields are copied from this line. Customer
-                                name, address and the internal budget are never sent.
+                                Choose which optional fields to copy. The customer name,
+                                address and internal budget are never sent.
                               </p>
+
+                              <details className="mt-3 rounded-lg border border-ink-800 bg-ink-850/40">
+                                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[14px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+                                  <span>Choose which line fields to send</span>
+                                  <span className="text-[13px] text-slate-500 tabular-nums">
+                                    {rfqFields.keys.length} selected
+                                  </span>
+                                </summary>
+                                <div className="max-h-72 overflow-y-auto border-t border-ink-800 p-2.5">
+                                  <RfqLineFieldPicker
+                                    line={rfqFields.line}
+                                    selected={rfqFields.keys}
+                                    onToggle={rfqFields.toggle}
+                                    loading={rfqFields.loading}
+                                    error={rfqFields.error}
+                                    onRetry={rfqFields.retry}
+                                    variant="plain"
+                                  />
+                                </div>
+                              </details>
 
                               <div className="mt-3 flex flex-wrap items-end gap-2">
                                 <Field
@@ -760,7 +791,7 @@ export function EnquiryDetailPage() {
                                 <button
                                   type="button"
                                   className="btn-primary"
-                                  disabled={busy}
+                                  disabled={busy || !rfqFields.ready || rfqFields.error}
                                   onClick={() => void raiseRfq(line.id)}
                                 >
                                   {busy ? <Spinner /> : null}

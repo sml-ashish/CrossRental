@@ -35,6 +35,7 @@ import {
   type CancelLineInput,
   type InternalCheckInput,
   type RfqFromLineInput,
+  type RfqLineFieldKey,
   type ListEnquiriesQuery,
   type ListRaisableLinesQuery,
 } from "../validation/enquiryFields";
@@ -903,18 +904,62 @@ export async function markUnderEvaluation(lineId: string, actor: Actor) {
 
 // --- RFQ from a line ------------------------------------------------------
 
-/** The largest jib the line requires, since the RFQ carries one jib length. */
-function requiredJib(line: {
-  requiredLuffingJibM: unknown;
-  requiredFixedJibM: unknown;
-  requiredWindJibM: unknown;
-}): number | null {
-  const candidates = [
-    num(line.requiredLuffingJibM),
-    num(line.requiredFixedJibM),
-    num(line.requiredWindJibM),
-  ].filter((v): v is number => v !== null);
+/**
+ * The largest *selected* jib the line requires.
+ *
+ * The RFQ keeps a single `jibLengthM` for the fit warnings in the quotation
+ * service. It is derived only from jib fields the sales user chose to send, so
+ * an unselected jib never reaches the vendor indirectly through this column.
+ */
+function selectedJib(
+  line: {
+    requiredLuffingJibM: unknown;
+    requiredFixedJibM: unknown;
+    requiredWindJibM: unknown;
+  },
+  want: (key: RfqLineFieldKey) => boolean,
+): number | null {
+  const candidates: number[] = [];
+  if (want("requiredLuffingJibM")) {
+    const value = num(line.requiredLuffingJibM);
+    if (value !== null) candidates.push(value);
+  }
+  if (want("requiredFixedJibM")) {
+    const value = num(line.requiredFixedJibM);
+    if (value !== null) candidates.push(value);
+  }
+  if (want("requiredWindJibM")) {
+    const value = num(line.requiredWindJibM);
+    if (value !== null) candidates.push(value);
+  }
   return candidates.length > 0 ? Math.max(...candidates) : null;
+}
+
+/** The vendor-safe terms with no column of their own, filtered to the picker. */
+function selectedExtraTerms(
+  line: {
+    demobilisationTerms: unknown;
+    additionalManpowerScope: unknown;
+    intraSiteMovementScope: unknown;
+    prereleaseTerms: unknown;
+    ppeScope: unknown;
+    rowScope: unknown;
+  },
+  want: (key: RfqLineFieldKey) => boolean,
+): Record<string, string | null> {
+  const extra: Record<string, string | null> = {};
+  const pairs: Array<[RfqLineFieldKey, string, unknown]> = [
+    ["demobilisationTerms", "demobilisationTerms", line.demobilisationTerms],
+    ["additionalManpowerScope", "additionalManpowerScope", line.additionalManpowerScope],
+    ["intraSiteMovementScope", "intraSiteMovementScope", line.intraSiteMovementScope],
+    ["prereleaseTerms", "prereleaseTerms", line.prereleaseTerms],
+    ["ppeScope", "ppeScope", line.ppeScope],
+    ["rowScope", "rowScope", line.rowScope],
+  ];
+  for (const [key, target, value] of pairs) {
+    if (want(key)) extra[target] = value === null || value === undefined ? null : String(value);
+  }
+  return extra;
 }
 
 /**
@@ -924,6 +969,11 @@ function requiredJib(line: {
  * customer name/address and the rental budget are never read here, so they
  * cannot leak into the RFQ. The RFQ is a snapshot; later edits to the line do
  * not rewrite it.
+ *
+ * `includeFields` narrows which optional line fields are copied. Core sourcing
+ * facts are always sent; the caller's selection decides the rest, so a vendor
+ * never sees a requirement SML chose not to share. Omitting the selection keeps
+ * the original copy-everything behaviour for older callers.
  */
 export async function createRfqFromLine(lineId: string, raw: unknown, actor: Actor) {
   assertInternal(actor);
@@ -939,6 +989,9 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
           siteLocation: true,
           siteStateCode: true,
           sitePincode: true,
+          siteLatitude: true,
+          siteLongitude: true,
+          siteCoordinateSource: true,
         },
       },
     },
@@ -950,56 +1003,72 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
     );
   }
 
-  const jib = requiredJib(line);
+  // Omitted includeFields means "copy everything", which keeps every older
+  // caller (and the enquiry-screen shortcuts) behaving exactly as before. When
+  // the picker is present, only the named keys are copied through.
+  const selected = input.includeFields;
+  const want = (key: RfqLineFieldKey) => selected === undefined || selected.includes(key);
+  const pick = (lineKey: RfqLineFieldKey, rfqKey: string, value: unknown) =>
+    want(lineKey) ? { [rfqKey]: value } : {};
 
   const rfq = await createRfq(
     {
+      // Core facts are never optional: without them the vendor cannot quote.
       enquiryLineId: line.id,
       craneType: line.craneTypeCode,
       capacityT: num(line.capacityT),
       capacityRule: line.capacityRule,
-      capacityNote: line.capacityNote,
       quantity: line.quantity,
-      applicationDescription: line.applicationDescription,
-      loadDescription: line.loadDescription,
-      mainBoomM: num(line.requiredMainBoomM) ?? undefined,
-      jibLengthM: jib ?? undefined,
       // A line without a start date means "to be confirmed"; the template's
       // free-text TBC is represented by the absence of a date.
       startDateTbc: line.requiredStartDate === null,
-      workingDaysPerMonth: line.workingDaysPerMonth ?? undefined,
       siteLocation: line.enquiry.siteLocation,
       siteStateCode: line.enquiry.siteStateCode,
       sitePincode: line.enquiry.sitePincode,
+      // Inherit the enquiry's already-geocoded pin. Re-geocoding from the site
+      // text would be a second provider call that can fail (or drift) after the
+      // enquiry was pinned, leaving the RFQ with no distance to show.
+      siteLatitude: num(line.enquiry.siteLatitude) ?? undefined,
+      siteLongitude: num(line.enquiry.siteLongitude) ?? undefined,
       requiredStartDate: line.requiredStartDate ?? new Date(),
       durationValue: num(line.durationValue) ?? 1,
       durationUnit: line.durationUnit ?? DurationUnit.DAYS,
-      configuration: line.configurationNotes,
       submissionDeadline: input.submissionDeadline,
-      otCharges: line.otCharges,
-      breakdownTerms: line.breakdownTerms,
-      dieselScope: line.dieselScope,
-      workingHoursShift: line.workingHoursShift,
-      craneAgeCriteriaYears: line.craneAgeCriteriaYears,
-      accommodationConveyance: line.accommodationConveyance,
-      paymentTerms: line.paymentTerms,
-      mobilisationTerms: line.mobilisationTerms,
-      supportCrane: line.supportCraneScope,
-      steelMatsGroundPrep: line.steelMatsGroundPrepScope,
-      ehsHrRequirements: line.ehsHrCompliance,
-      insuranceTerms: line.insuranceTerms,
-      extensionClause: line.extensionClause,
-      notes: line.otherTerms,
-      commercialTermsExtra: {
-        demobilisationTerms: line.demobilisationTerms ?? null,
-        additionalManpowerScope: line.additionalManpowerScope ?? null,
-        intraSiteMovementScope: line.intraSiteMovementScope ?? null,
-        prereleaseTerms: line.prereleaseTerms ?? null,
-        ppeScope: line.ppeScope ?? null,
-        rowScope: line.rowScope ?? null,
-      },
+
+      // Everything below is chosen by the sales user. Unselected keys are
+      // absent from this payload, so createRfq stores them as null. Where the
+      // enquiry and RFQ use different names, the second argument is the RFQ
+      // column the picked value lands in.
+      ...pick("capacityNote", "capacityNote", line.capacityNote),
+      ...pick("applicationDescription", "applicationDescription", line.applicationDescription),
+      ...pick("loadDescription", "loadDescription", line.loadDescription),
+      ...pick("liftLoadT", "liftLoadT", num(line.liftLoadT) ?? undefined),
+      ...pick("workingRadiusM", "workingRadiusM", num(line.workingRadiusM) ?? undefined),
+      ...pick("requiredMainBoomM", "mainBoomM", num(line.requiredMainBoomM) ?? undefined),
+      ...pick("configurationNotes", "configuration", line.configurationNotes),
+      ...pick("workingDaysPerMonth", "workingDaysPerMonth", line.workingDaysPerMonth ?? undefined),
+      ...pick("mobilisationTerms", "mobilisationTerms", line.mobilisationTerms),
+      ...pick("otCharges", "otCharges", line.otCharges),
+      ...pick("breakdownTerms", "breakdownTerms", line.breakdownTerms),
+      ...pick("dieselScope", "dieselScope", line.dieselScope),
+      ...pick("workingHoursShift", "workingHoursShift", line.workingHoursShift),
+      ...pick("craneAgeCriteriaYears", "craneAgeCriteriaYears", line.craneAgeCriteriaYears),
+      ...pick("accommodationConveyance", "accommodationConveyance", line.accommodationConveyance),
+      ...pick("paymentTerms", "paymentTerms", line.paymentTerms),
+      ...pick("supportCraneScope", "supportCrane", line.supportCraneScope),
+      ...pick("steelMatsGroundPrepScope", "steelMatsGroundPrep", line.steelMatsGroundPrepScope),
+      ...pick("ehsHrCompliance", "ehsHrRequirements", line.ehsHrCompliance),
+      ...pick("insuranceTerms", "insuranceTerms", line.insuranceTerms),
+      ...pick("extensionClause", "extensionClause", line.extensionClause),
+      ...pick("otherTerms", "notes", line.otherTerms),
+      ...pick("requiredFixedJibM", "fixedJibM", num(line.requiredFixedJibM) ?? undefined),
+      ...pick("requiredLuffingJibM", "luffingJibM", num(line.requiredLuffingJibM) ?? undefined),
+      ...pick("requiredWindJibM", "windJibM", num(line.requiredWindJibM) ?? undefined),
+      jibLengthM: selectedJib(line, want) ?? undefined,
+      commercialTermsExtra: selectedExtraTerms(line, want),
     },
     actor,
+    { siteCoordinateSource: line.enquiry.siteCoordinateSource },
   );
 
   // A line with an RFQ is no longer merely shortlisted; the dispatch trigger

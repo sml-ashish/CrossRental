@@ -43,6 +43,10 @@ export const detail = asyncHandler(async (req: Request, res: Response) => {
   res.json({ rfq: await rfqs.getRfqDetail(param(req, "rfqId"), actorOf(req)) });
 });
 
+export const audit = asyncHandler(async (req: Request, res: Response) => {
+  res.json(await rfqs.getRfqAudit(param(req, "rfqId"), actorOf(req)));
+});
+
 export const create = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ rfq: await rfqs.createRfq(req.body, actorOf(req)) });
 });

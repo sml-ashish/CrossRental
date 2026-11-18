@@ -377,6 +377,164 @@ describe("RFQ from an enquiry line (P1)", () => {
     });
   });
 
+  it("copies only the fields selected by the sales user", async () => {
+    const enquiry = await createEnquiry({
+      lines: [
+        linePayload({
+          liftLoadT: 42,
+          workingRadiusM: 18,
+          requiredMainBoomM: 60,
+          requiredFixedJibM: 12,
+          requiredLuffingJibM: 24,
+          requiredWindJibM: 8,
+          configurationNotes: "Fixed jib preferred",
+          workingDaysPerMonth: 26,
+          craneAgeCriteriaYears: 7,
+          mobilisationTerms: "SML arranges",
+          demobilisationTerms: "Vendor arranges",
+          otCharges: "1.5x after 8 hours",
+          breakdownTerms: "Vendor covers",
+          dieselScope: "Vendor diesel",
+          workingHoursShift: "10 hours",
+          accommodationConveyance: "SML provides",
+          paymentTerms: "45 days",
+          supportCraneScope: "50 t helper",
+          steelMatsGroundPrepScope: "SML mats",
+          ehsHrCompliance: "Permit to work",
+          insuranceTerms: "Vendor insurance",
+          extensionClause: "At site rate",
+          otherTerms: "Report to site engineer",
+          additionalManpowerScope: "Two riggers",
+          intraSiteMovementScope: "Between bays",
+          prereleaseTerms: "No pre-release",
+          ppeScope: "Vendor PPE",
+          rowScope: "ROW to bay 4",
+        }),
+      ],
+    });
+    const lineId = enquiry.lines[0].id;
+
+    const created = await call(app, "POST", `/api/enquiries/lines/${lineId}/rfq`, {
+      token: ctx.salesToken,
+      body: {
+        submissionDeadline: inDays(7).toISOString(),
+        includeFields: ["liftLoadT", "requiredFixedJibM", "otCharges", "demobilisationTerms"],
+      },
+    });
+    expect(created.status, `rfq failed: ${JSON.stringify(created.body)}`).toBe(201);
+    const rfqId = created.body.rfq.id as string;
+
+    const rfq = await appPrisma.rfq.findUniqueOrThrow({ where: { id: rfqId } });
+    expect(Number(rfq.liftLoadT)).toBe(42);
+    expect(Number(rfq.fixedJibM)).toBe(12);
+    // The fit-check column is derived from selected jibs only, never from a jib
+    // SML chose not to share.
+    expect(Number(rfq.jibLengthM)).toBe(12);
+    expect(rfq.otCharges).toBe("1.5x after 8 hours");
+    expect(rfq.commercialTermsExtra).toEqual({ demobilisationTerms: "Vendor arranges" });
+
+    for (const field of [
+      "workingRadiusM",
+      "mainBoomM",
+      "luffingJibM",
+      "windJibM",
+      "applicationDescription",
+      "loadDescription",
+      "configuration",
+      "workingDaysPerMonth",
+      "capacityNote",
+      "breakdownTerms",
+      "dieselScope",
+      "workingHoursShift",
+      "mobilisationTerms",
+      "paymentTerms",
+      "supportCrane",
+      "steelMatsGroundPrep",
+      "ehsHrRequirements",
+      "insuranceTerms",
+      "extensionClause",
+      "notes",
+      "craneAgeCriteriaYears",
+      "accommodationConveyance",
+    ] as const) {
+      expect(rfq[field], `${field} must stay null when not selected`).toBeNull();
+    }
+
+    // Core sourcing facts are never optional.
+    expect(rfq.craneType).toBe("CRAWLER");
+    expect(Number(rfq.capacityT)).toBe(100);
+    expect(rfq.quantity).toBe(1);
+    expect(rfq.siteLocation).toBe("Vadodara");
+
+    // The vendor sees exactly the same narrowed set.
+    const sent = await call(app, "POST", `/api/rfqs/${rfqId}/send`, {
+      token: ctx.salesToken,
+      body: { vendorIds: [ctx.a.vendorId] },
+    });
+    expect(sent.status, `send failed: ${JSON.stringify(sent.body)}`).toBe(200);
+    const detail = await call(app, "GET", `/api/vendor/rfqs/${rfqId}`, {
+      token: ctx.vendorTokenA,
+    });
+    expect(detail.status).toBe(200);
+    expect(detail.body.rfq.liftLoadT).toBe(42);
+    expect(detail.body.rfq.fixedJibM).toBe(12);
+    expect(detail.body.rfq.jibLengthM).toBe(12);
+    expect(detail.body.rfq.applicationDescription).toBeNull();
+    expect(detail.body.rfq.commercialTerms.otCharges).toBe("1.5x after 8 hours");
+    expect(detail.body.rfq.commercialTerms.breakdownTerms).toBeNull();
+    expect(detail.body.rfq.commercialTerms.extra).toEqual({
+      demobilisationTerms: "Vendor arranges",
+    });
+  });
+
+  it("keeps the copy-everything behaviour when no field picker is supplied", async () => {
+    const enquiry = await createEnquiry({
+      lines: [
+        linePayload({
+          liftLoadT: 42,
+          workingRadiusM: 18,
+          requiredFixedJibM: 12,
+          configurationNotes: "Fixed jib preferred",
+        }),
+      ],
+    });
+    const lineId = enquiry.lines[0].id;
+
+    const created = await call(app, "POST", `/api/enquiries/lines/${lineId}/rfq`, {
+      token: ctx.salesToken,
+      body: { submissionDeadline: inDays(7).toISOString() },
+    });
+    expect(created.status, `rfq failed: ${JSON.stringify(created.body)}`).toBe(201);
+
+    const rfq = await appPrisma.rfq.findUniqueOrThrow({
+      where: { id: created.body.rfq.id as string },
+    });
+    expect(Number(rfq.liftLoadT)).toBe(42);
+    expect(Number(rfq.workingRadiusM)).toBe(18);
+    expect(Number(rfq.fixedJibM)).toBe(12);
+    expect(Number(rfq.jibLengthM)).toBe(12);
+    expect(rfq.configuration).toBe("Fixed jib preferred");
+    expect(rfq.applicationDescription).toBe("Erection of process columns");
+    expect(rfq.commercialTermsExtra).toMatchObject({
+      additionalManpowerScope: "Two riggers per shift",
+      ppeScope: "Helmets and harnesses by vendor",
+    });
+  });
+
+  it("rejects a field key outside the picker's allow-list", async () => {
+    const enquiry = await createEnquiry();
+    const lineId = enquiry.lines[0].id;
+
+    const created = await call(app, "POST", `/api/enquiries/lines/${lineId}/rfq`, {
+      token: ctx.salesToken,
+      body: {
+        submissionDeadline: inDays(7).toISOString(),
+        includeFields: ["rentalBudget"],
+      },
+    });
+    expect(created.status).toBe(400);
+  });
+
   it("is readable on its own and carries vendor recommendations", async () => {
     const enquiry = await createEnquiry();
     const lineId = enquiry.lines[0].id;
@@ -404,6 +562,37 @@ describe("RFQ from an enquiry line (P1)", () => {
     expect(recommendations.status).toBe(200);
     // Two approved vendors each have a matching 250 t crawler.
     expect(recommendations.body.recommendations).toBeTruthy();
+  });
+
+  it("inherits the enquiry's geocoded site pin so the picker can show distances", async () => {
+    const enquiry = await createEnquiry({
+      siteLocation: "Bhuj, Gujarat",
+      siteStateCode: "GJ",
+      sitePincode: "370001",
+    });
+    const lineId = enquiry.lines[0].id;
+
+    const source = await appPrisma.enquiry.findUniqueOrThrow({
+      where: { id: enquiry.id },
+      select: { siteLatitude: true, siteLongitude: true, siteCoordinateSource: true },
+    });
+    expect(source.siteLatitude, "the enquiry must be pinned at intake").not.toBeNull();
+
+    const created = await call(app, "POST", `/api/enquiries/lines/${lineId}/rfq`, {
+      token: ctx.salesToken,
+      body: { submissionDeadline: inDays(7).toISOString() },
+    });
+    expect(created.status, `rfq failed: ${JSON.stringify(created.body)}`).toBe(201);
+
+    const rfq = await appPrisma.rfq.findUniqueOrThrow({
+      where: { id: created.body.rfq.id as string },
+      select: { siteLatitude: true, siteLongitude: true, siteCoordinateSource: true },
+    });
+    // A fresh lookup would invent different stub points, so these assertions
+    // fail if the RFQ re-geocodes instead of inheriting the enquiry's pin.
+    expect(Number(rfq.siteLatitude)).toBe(Number(source.siteLatitude));
+    expect(Number(rfq.siteLongitude)).toBe(Number(source.siteLongitude));
+    expect(rfq.siteCoordinateSource).toBe(source.siteCoordinateSource);
   });
 });
 

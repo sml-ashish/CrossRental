@@ -19,6 +19,8 @@ import { DEADLINE_ZONE_LABEL, formatDeadline } from "./datetime";
 export interface SelectedVendor {
   vendorId: string;
   vendorName: string;
+  /** Cranes tagged for this vendor; 0 means the vendor may quote any crane. */
+  craneCount?: number;
 }
 
 /** Confirms the job-site pin without touching the rest of the RFQ (brief 6.9). */
@@ -150,6 +152,11 @@ function SendConfirm({
               className="border-b border-ink-800 px-3 py-2 text-[15px] text-slate-800 last:border-b-0"
             >
               {vendor.vendorName}
+              <span className="ml-2 text-[13px] text-slate-500">
+                {vendor.craneCount
+                  ? `${vendor.craneCount} crane${vendor.craneCount === 1 ? "" : "s"} tagged`
+                  : "any crane"}
+              </span>
             </li>
           ))}
         </ul>

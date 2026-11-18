@@ -4,6 +4,10 @@ import { sendStaleReminders } from "../services/staleFleet.service";
 import { completeOverdueReservations } from "../services/reservations.service";
 import { sendAlertDigest } from "../services/alert.service";
 import { isImapConfigured, pollInboundMailbox } from "../services/imap.service";
+import {
+  expireNegotiations,
+  sendNegotiationReminders,
+} from "../services/negotiation.service";
 
 /**
  * The milestone plan's "callable functions become scheduled jobs" step.
@@ -60,6 +64,31 @@ export function registerDefaultJobs(): void {
       const expired = await expireOverdueRecipients();
       if (expired > 0) {
         console.log(`[scheduler] rfq-expiry — ${expired} recipients expired`);
+      }
+    },
+  });
+
+  // Counter-quotes: open rounds past their respond-by (or the RFQ deadline)
+  // become Expired; a separate pass sends the 24-hour reminder. Both are
+  // idempotent and re-run safely.
+  registerJob({
+    name: "negotiation-expiry",
+    expression: "17 * * * *",
+    run: async () => {
+      const expired = await expireNegotiations();
+      if (expired > 0) {
+        console.log(`[scheduler] negotiation-expiry — ${expired} threads expired`);
+      }
+    },
+  });
+
+  registerJob({
+    name: "negotiation-reminders",
+    expression: "37 * * * *",
+    run: async () => {
+      const sent = await sendNegotiationReminders();
+      if (sent > 0) {
+        console.log(`[scheduler] negotiation-reminders — ${sent} reminders sent`);
       }
     },
   });

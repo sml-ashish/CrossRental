@@ -79,10 +79,21 @@ export function statusTone(status: string): BadgeTone {
   }
 }
 
+/**
+ * Vendor-facing outcome words come back from the server already translated
+ * (`SELECTED` → `AWARDED`), but still in upper case. Spell them the way the
+ * brief writes them instead of printing a raw enum to the vendor.
+ */
+const STATUS_LABELS: Record<string, string> = {
+  AWARDED: "Awarded",
+  NOT_AWARDED: "Not awarded",
+  SUBMITTED_QUOTE: "Submitted quote",
+};
+
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
   return (
     <Badge tone={statusTone(status)} className={className}>
-      {status.replaceAll("_", " ")}
+      {STATUS_LABELS[status] ?? status.replaceAll("_", " ")}
     </Badge>
   );
 }

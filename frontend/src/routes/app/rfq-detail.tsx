@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, MoreHorizontal, Moon, Sun, UserPlus } from "lucide-react";
+import { CalendarClock, MoreHorizontal, Moon, Sun, UserPlus, X } from "lucide-react";
 import {
   DELIVERY_LABELS,
   RESPONSE_LABELS,
@@ -12,8 +12,11 @@ import {
   formatDistance,
   getCandidates,
   getRfq,
+  getRfqAudit,
+  type RfqAuditEvent,
   remindRfq,
   type CandidateMode,
+  type RfqDetail,
   type RfqRecipient,
   type RfqStatus,
   type ReceivedQuotation,
@@ -23,9 +26,9 @@ import { Badge, StatusBadge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/data-table";
 import { Field, ReadOnlyValue, Section, TextArea, TextInput } from "@/components/ui/form";
-import { LifecycleStepper } from "@/components/ui/lifecycle-stepper";
 import { Spinner } from "@/components/ui/spinner";
 import { RFQ_STATUS_LABELS } from "@/lib/rfqs";
+import { extraTermRows } from "@/lib/quotations";
 import { deadlineCountdown, statusTone } from "@/lib/rfq-display";
 import { formatCalendarDate, formatDate, formatDateTime } from "@/lib/format";
 import { cityOf, craneTypeLabel, siteLabel, titleCase } from "@/lib/format";
@@ -33,7 +36,12 @@ import { deadlineRelative } from "@/lib/rfq-display";
 import { cn } from "@/lib/cn";
 import { loadRfqReplies } from "@/lib/replies";
 import { useAuth } from "@/lib/auth";
+import { getRfqNegotiations, type NegotiationThread } from "@/lib/negotiations";
 import { VendorRfqDetailPage } from "@/routes/app/vendor-rfq-detail";
+import {
+  CounterButton,
+  NegotiationsSection,
+} from "./rfq-detail/negotiations";
 import { DEADLINE_ZONE_LABEL, dayMonth, formatDeadline, formatDeadlineExact } from "./rfq-detail/datetime";
 import { VendorPickerSection, type SendOutcome } from "./rfq-detail/vendor-picker";
 
@@ -69,13 +77,14 @@ export function RfqDetailPage() {
 }
 
 /** The sections of the RFQ screen, in the order work moves through them. */
-type DetailTab = "overview" | "vendors" | "replies" | "quotations";
+type DetailTab = "overview" | "vendors" | "replies" | "quotations" | "audit";
 
 const DETAIL_TABS: Array<{ value: DetailTab; label: string }> = [
   { value: "overview", label: "Overview" },
   { value: "vendors", label: "Vendors" },
   { value: "replies", label: "Replies" },
   { value: "quotations", label: "Quotations" },
+  { value: "audit", label: "Audit trail" },
 ];
 
 /** Status reads as a dot and a word, the same as it does in the list. */
@@ -155,6 +164,8 @@ function InternalRfqDetailPage() {
     void queryClient.invalidateQueries({ queryKey: ["rfq", rfqId] });
     void queryClient.invalidateQueries({ queryKey: ["rfqs"] });
     void queryClient.invalidateQueries({ queryKey: ["rfq-candidates", rfqId] });
+    void queryClient.invalidateQueries({ queryKey: ["rfq-audit", rfqId] });
+    void queryClient.invalidateQueries({ queryKey: ["rfq-negotiations", rfqId] });
   };
 
   const isDraft = rfq?.status === "DRAFT";
@@ -168,6 +179,31 @@ function InternalRfqDetailPage() {
   const canDispatch = user?.capabilities
     ? user.capabilities.includes("rfq:dispatch")
     : user?.role === "sales_user" || user?.role === "admin_user";
+
+  // Negotiation powers both the counter action and the counter/accept/reject
+  // controls. It is gated on quotation:counter — the same capability the backend
+  // checks — with a role fallback for older /auth/me responses without the list.
+  const canAward = user?.capabilities
+    ? user.capabilities.includes("quotation:award")
+    : user?.role === "admin_user";
+  const canCounter = user?.capabilities
+    ? user.capabilities.includes("quotation:counter")
+    : user?.role === "sales_user" || user?.role === "admin_user";
+
+  const negotiations = useQuery({
+    queryKey: ["rfq-negotiations", rfqId],
+    queryFn: () => getRfqNegotiations(rfqId),
+    enabled: Boolean(rfq) && isSent,
+  });
+  const negotiationThreads: NegotiationThread[] = negotiations.data?.negotiations ?? [];
+  const openNegotiations = negotiationThreads.filter((thread) =>
+    ["AWAITING_VENDOR", "AWAITING_SML", "AGREED"].includes(thread.status),
+  );
+  const negotiatingQuotationIds = new Set(
+    negotiationThreads
+      .filter((thread) => ["AWAITING_VENDOR", "AWAITING_SML"].includes(thread.status))
+      .map((thread) => thread.baseQuotation.quotationId),
+  );
 
   // The same query the picker reads, owned here so the Vendors tab can say how
   // many vendors are available before the section below has rendered.
@@ -205,7 +241,10 @@ function InternalRfqDetailPage() {
       return rfq.recipients.length > 0 ? String(rfq.recipients.length) : null;
     }
     if (entry === "quotations") {
-      return rfq.quotations.length > 0 ? String(rfq.quotations.length) : null;
+      const count = rfq.quotations.length > 0 ? String(rfq.quotations.length) : null;
+      return openNegotiations.length > 0
+        ? `${count ?? "0"} · ${openNegotiations.length} negotiating`
+        : count;
     }
     return null;
   };
@@ -219,28 +258,12 @@ function InternalRfqDetailPage() {
       : deadlineCountdown(rfq.submissionDeadline, rfq.status)
     : null;
 
-  const steps = [
-    { key: "draft", label: "Draft" },
-    { key: "choose", label: "Choose vendors" },
-    { key: "send", label: "Send" },
-    { key: "replies", label: "Replies" },
-    { key: "award", label: "Awarded" },
-  ];
-  // The stepper reports where the work actually is, not just the status:
-  // a sent RFQ with no reply yet is still at "Send", and moves to "Replies" as
-  // soon as one vendor answers.
-  const stepIndex = !rfq
-    ? 0
-    : rfq.status === "DRAFT" || rfq.status === "CANCELLED"
-      ? 0
-      : rfq.status === "CLOSED"
-        ? 4
-        : rfq.recipients.some(
-              (recipient) =>
-                recipient.responseStatus === "QUOTED" || recipient.responseStatus === "DECLINED",
-            )
-          ? 3
-          : 2;
+  const responded = rfq
+    ? rfq.recipients.filter(
+        (recipient) =>
+          recipient.responseStatus === "QUOTED" || recipient.responseStatus === "DECLINED",
+      ).length
+    : 0;
 
   function handleSent(result: SendOutcome) {
     setOutcome(result);
@@ -277,24 +300,6 @@ function InternalRfqDetailPage() {
                 {craneTypeLabel(rfq.craneTypeRef?.name ?? rfq.craneType)} · {rfq.capacityT} t
                 {rfq.capacityRule === "AT_LEAST" ? "+" : ""} · qty {rfq.quantity} · {cityOf(rfq)}
                 {rfq.siteState ? `, ${titleCase(rfq.siteState.name)}` : ""}
-                <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px]">
-                  <Link
-                    to="/app/enquiries"
-                    search={{ q: rfq.enquiryNo }}
-                    className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
-                  >
-                    Enquiry {rfq.enquiryNo}/{rfq.lineNo}
-                  </Link>
-                  {rfq.enquiryLineId ? (
-                    <Link
-                      to="/app/enquiries/lines/$lineId/edit"
-                      params={{ lineId: rfq.enquiryLineId }}
-                      className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
-                    >
-                      Open line item
-                    </Link>
-                  ) : null}
-                </span>
               </>
             ) : undefined
           }
@@ -319,66 +324,33 @@ function InternalRfqDetailPage() {
           }
           actions={
             rfq ? (
-              <div className="flex flex-col items-end gap-2">
-                <div className="text-right" title={formatDeadlineExact(rfq.submissionDeadline)}>
-                  <p className="text-[13px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-                    Submission deadline
-                  </p>
-                  <p className="text-[17px] text-slate-900 tabular-nums">
-                    {formatDeadline(rfq.submissionDeadline)}
-                  </p>
-                  <p
-                    className={cn(
-                      "text-[14px]",
-                      relative?.tone === "overdue"
-                        ? "font-medium text-red-500"
-                        : relative?.tone === "soon"
-                          ? "font-medium text-amber-500"
-                          : "text-slate-500",
-                    )}
-                  >
-                    {relative?.label} · {DEADLINE_ZONE_LABEL}
-                  </p>
-                  {deadlinePassed && isDraft ? (
-                    <p className="max-w-[240px] text-[14px] text-red-500">
-                      Deadline has passed. Edit the draft before sending.
-                    </p>
-                  ) : null}
-                  {isDraft ? (
-                    <Link
-                      to="/app/rfqs/$rfqId/edit"
-                      params={{ rfqId }}
-                      className="mt-1 inline-block text-[14px] font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
-                    >
-                      Edit deadline
-                    </Link>
-                  ) : null}
-                </div>
-
-                <RfqHeaderActions
-                  rfqId={rfqId}
-                  isDraft={isDraft}
-                  isSent={isSent}
-                  isCancelled={isCancelled}
-                  onCancel={() => setActionForm(actionForm === "cancel" ? null : "cancel")}
-                  onExtend={() => setActionForm(actionForm === "extend" ? null : "extend")}
-                />
-              </div>
+              <RfqHeaderActions
+                rfqId={rfqId}
+                isDraft={isDraft}
+                isSent={isSent}
+                isCancelled={isCancelled}
+                onCancel={() => setActionForm(actionForm === "cancel" ? null : "cancel")}
+                onExtend={() => setActionForm(actionForm === "extend" ? null : "extend")}
+                onAudit={() => setTab("audit")}
+              />
             ) : null
           }
         />
 
         {rfq ? (
-          <div className="border-y border-ink-800 py-2">
-            <LifecycleStepper
-              steps={steps}
-              current={stepIndex}
-              cancelled={isCancelled}
-            />
-            {isCancelled && rfq.cancelReason ? (
-              <p className="mt-1 text-[14px] text-slate-500">{rfq.cancelReason}</p>
-            ) : null}
-          </div>
+          <NextStepBanner
+            rfqId={rfqId}
+            status={rfq.status}
+            isDraft={isDraft}
+            deadline={rfq.submissionDeadline}
+            deadlinePassed={deadlinePassed}
+            relative={relative}
+            recipientCount={rfq.recipients.length}
+            responded={responded}
+            quotationCount={rfq.quotations.length}
+            cancelReason={rfq.cancelReason}
+            onGoTo={setTab}
+          />
         ) : null}
 
         {actionForm === "cancel" ? (
@@ -429,7 +401,7 @@ function InternalRfqDetailPage() {
               <div
                 role="tablist"
                 aria-label="RFQ sections"
-                className="flex gap-5 overflow-x-auto border-b border-slate-200 pr-12"
+                className="mr-12 inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border border-ink-800 bg-ink-850 p-1"
               >
                 {DETAIL_TABS.map((entry) => {
                   const active = tab === entry.value;
@@ -442,15 +414,20 @@ function InternalRfqDetailPage() {
                       aria-selected={active}
                       onClick={() => setTab(entry.value)}
                       className={cn(
-                        "-mb-px shrink-0 border-b-2 pb-2.5 text-[15px] whitespace-nowrap transition-colors duration-150",
+                        "inline-flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-1.5 text-[15px] whitespace-nowrap transition-colors duration-150",
                         active
-                          ? "border-accent-500 font-medium text-slate-900"
-                          : "border-transparent text-slate-500 hover:text-slate-900",
+                          ? "bg-ink-900 font-medium text-slate-900 shadow-sm ring-1 ring-ink-800"
+                          : "text-slate-500 hover:text-slate-900",
                       )}
                     >
                       {entry.label}
                       {badge ? (
-                        <span className="ml-1.5 text-[14px] text-slate-500 tabular-nums">
+                        <span
+                          className={cn(
+                            "rounded-full px-1.5 text-[12px] font-medium tabular-nums",
+                            active ? "bg-ink-800 text-slate-700" : "bg-ink-800/70 text-slate-500",
+                          )}
+                        >
                           {badge}
                         </span>
                       ) : null}
@@ -466,34 +443,14 @@ function InternalRfqDetailPage() {
               <div className={cn("space-y-5", tab !== "overview" && "hidden")}>
                 <Section title="Requirement">
                   <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <ReadOnlyValue label="Crane type" value={rfq.craneTypeRef?.name ?? rfq.craneType} />
+                    <ReadOnlyValue label="Crane" value={craneTypeLabel(rfq.craneTypeRef?.name ?? rfq.craneType)} />
                     <ReadOnlyValue
-                      label="Capacity required"
-                      value={`${rfq.capacityT} t (${rfq.capacityRule === "EXACT" ? "exact" : "at least"})`}
+                      label="Capacity"
+                      value={`${rfq.capacityT} t (${rfq.capacityRule === "EXACT" ? "exact" : "at least"}) × ${rfq.quantity}`}
                     />
-                    <ReadOnlyValue label="Quantity" value={String(rfq.quantity)} />
-                    {rfq.capacityNote ? (
-                      <ReadOnlyValue label="Capacity note" value={rfq.capacityNote} />
-                    ) : null}
-                    {rfq.applicationDescription ? (
-                      <ReadOnlyValue label="Application" value={rfq.applicationDescription} />
-                    ) : null}
-                    {rfq.loadDescription ? (
-                      <ReadOnlyValue label="Load details" value={rfq.loadDescription} />
-                    ) : null}
-                    {rfq.mainBoomM !== null ? (
-                      <ReadOnlyValue label="Main boom required" value={`${rfq.mainBoomM} m`} />
-                    ) : null}
-                    {rfq.jibLengthM !== null ? (
-                      <ReadOnlyValue label="Jib length required" value={`${rfq.jibLengthM} m`} />
-                    ) : null}
+                    <ReadOnlyValue label="Job site" value={siteLabel(rfq)} />
                     <ReadOnlyValue
-                      label="Job site"
-                      value={siteLabel(rfq)}
-                    />
-                    <ReadOnlyValue label="Pincode" value={rfq.sitePincode ?? "—"} mono />
-                    <ReadOnlyValue
-                      label="Required start"
+                      label="Start"
                       value={
                         rfq.startDateTbc ? "To be confirmed" : formatCalendarDate(rfq.requiredStartDate)
                       }
@@ -502,62 +459,45 @@ function InternalRfqDetailPage() {
                       label="Duration"
                       value={`${rfq.durationValue} ${rfq.durationUnit === "MONTHS" ? "month(s)" : "day(s)"}`}
                     />
-                    <ReadOnlyValue label="Configuration" value={rfq.configuration ?? "—"} />
                     <ReadOnlyValue
-                      label="Sent"
-                      value={rfq.sentAt ? formatDateTime(rfq.sentAt) : "Not sent yet"}
+                      label="Submission deadline"
+                      value={`${formatDeadline(rfq.submissionDeadline)} ${DEADLINE_ZONE_LABEL}`}
                     />
                   </dl>
+                  {requirementExtras(rfq).length > 0 ? (
+                    <dl className="grid gap-4 border-t border-ink-800 pt-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {requirementExtras(rfq).map(([label, value]) => (
+                        <ReadOnlyValue key={label} label={label} value={value} />
+                      ))}
+                    </dl>
+                  ) : null}
+                  <p className="border-t border-ink-800 pt-3 text-[14px] text-slate-500">
+                    Enquiry{" "}
+                    <Link
+                      to="/app/enquiries"
+                      search={{ q: rfq.enquiryNo }}
+                      className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
+                    >
+                      {rfq.enquiryNo}/{rfq.lineNo}
+                    </Link>
+                    {rfq.enquiryLineId ? (
+                      <>
+                        {" · "}
+                        <Link
+                          to="/app/enquiries/lines/$lineId/edit"
+                          params={{ lineId: rfq.enquiryLineId }}
+                          className="font-medium text-accent-400 underline-offset-2 hover:text-accent-500 hover:underline"
+                        >
+                          Open line item
+                        </Link>
+                      </>
+                    ) : null}
+                    {" · "}
+                    {rfq.sentAt ? `Sent ${formatDateTime(rfq.sentAt)}` : "Not sent yet"}
+                  </p>
                 </Section>
 
-                <Section title="Commercial terms">
-                  <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <ReadOnlyValue label="OT charges" value={rfq.otCharges ?? "—"} />
-                    <ReadOnlyValue label="Breakdown charges" value={rfq.breakdownTerms ?? "—"} />
-                    <ReadOnlyValue label="Diesel scope" value={rfq.dieselScope ?? "—"} />
-                    <ReadOnlyValue label="Working hours / shift" value={rfq.workingHoursShift ?? "—"} />
-                    <ReadOnlyValue
-                      label="Crane age criteria"
-                      value={rfq.craneAgeCriteriaYears === null ? "—" : `${rfq.craneAgeCriteriaYears} years`}
-                    />
-                    <ReadOnlyValue
-                      label="Accommodation & conveyance"
-                      value={rfq.accommodationConveyance ?? "—"}
-                    />
-                    <ReadOnlyValue label="Payment terms" value={rfq.paymentTerms ?? "—"} />
-                    <ReadOnlyValue
-                      label="Mobilisation & demobilisation"
-                      value={rfq.mobilisationTerms ?? "—"}
-                    />
-                    <ReadOnlyValue label="Support crane" value={rfq.supportCrane ?? "—"} />
-                    <ReadOnlyValue
-                      label="Steel mats & ground prep"
-                      value={rfq.steelMatsGroundPrep ?? "—"}
-                    />
-                    <ReadOnlyValue label="EHS / HR requirements" value={rfq.ehsHrRequirements ?? "—"} />
-                    <ReadOnlyValue label="Insurance" value={rfq.insuranceTerms ?? "—"} />
-                    <ReadOnlyValue label="Extension clause" value={rfq.extensionClause ?? "—"} />
-                    <ReadOnlyValue label="Notes" value={rfq.notes ?? "—"} />
-                  </dl>
-                  <div className="border-t border-ink-800 pt-3">
-                    <p className="text-xs font-medium text-slate-500">SML contact</p>
-                    <p className="mt-0.5 text-sm text-slate-900">
-                      {rfq.smlContactName ?? "—"}
-                      {rfq.smlContactMobile ? ` · ${rfq.smlContactMobile}` : ""}
-                      {rfq.smlContactEmail ? ` · ${rfq.smlContactEmail}` : ""}
-                    </p>
-                  </div>
-                  {rfq.attachments.length > 0 ? (
-                    <div>
-                      <p className="text-xs font-medium text-slate-500">Attachments</p>
-                      <ul className="mt-1 space-y-0.5 text-sm text-slate-700">
-                        {rfq.attachments.map((file) => (
-                          <li key={file.id}>{file.fileName}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </Section>
+                <CommercialTerms rfq={rfq} />
               </div>
 
               <div className={cn("space-y-5", tab !== "vendors" && "hidden")}>
@@ -615,26 +555,501 @@ function InternalRfqDetailPage() {
                 />
               </div>
 
+              <div className={cn("space-y-5", tab !== "audit" && "hidden")}>
+                <AuditTrailSection rfqId={rfqId} active={tab === "audit"} />
+              </div>
+
               <div className={cn("space-y-5", tab !== "replies" && "hidden")}>
                 <InboundRepliesSection rfqId={rfqId} />
               </div>
 
               <div className={cn("space-y-5", tab !== "quotations" && "hidden")}>
-                <QuotationsSection
+                <NegotiationsSection
                   rfqId={rfqId}
-                  quotations={rfq.quotations}
-                  canAward={user?.role === "admin_user"}
+                  negotiations={negotiationThreads}
+                  loading={negotiations.isLoading}
+                  canCounter={canCounter}
                   closed={isCancelled || rfq.status === "CLOSED"}
-                  startDateTbc={rfq.startDateTbc}
-                  defaultStartDate={rfq.requiredStartDate?.slice(0, 10) ?? ""}
+                  deadlinePassed={deadlinePassed}
+                  submissionDeadline={rfq.submissionDeadline}
                   onDone={invalidate}
+                  onStartCounter={() =>
+                    document
+                      .getElementById("rfq-quotations-list")
+                      ?.scrollIntoView({ block: "start", behavior: "smooth" })
+                  }
                 />
+                <div id="rfq-quotations-list">
+                  <QuotationsSection
+                    rfqId={rfqId}
+                    quotations={rfq.quotations}
+                    canAward={canAward}
+                    canCounter={canCounter}
+                    negotiatingQuotationIds={negotiatingQuotationIds}
+                    closed={isCancelled || rfq.status === "CLOSED"}
+                    deadlinePassed={deadlinePassed}
+                    startDateTbc={rfq.startDateTbc}
+                    defaultStartDate={rfq.requiredStartDate?.slice(0, 10) ?? ""}
+                    onDone={invalidate}
+                  />
+                </div>
               </div>
             </div>
           </>
         )}
       </div>
     </div>
+  );
+}
+
+// --- summary ---------------------------------------------------------------
+
+type RfqView = RfqDetail;
+
+/** Optional requirement fields, shown only when the RFQ actually has them. */
+function requirementExtras(rfq: RfqView): Array<[string, string]> {
+  const rows: Array<[string, string | null]> = [
+    ["Capacity note", rfq.capacityNote],
+    ["Application", rfq.applicationDescription],
+    ["Load details", rfq.loadDescription],
+    ["Lift load", rfq.liftLoadT !== null ? `${rfq.liftLoadT} t` : null],
+    ["Working radius", rfq.workingRadiusM !== null ? `${rfq.workingRadiusM} m` : null],
+    ["Main boom", rfq.mainBoomM !== null ? `${rfq.mainBoomM} m` : null],
+    ["Fixed jib", rfq.fixedJibM !== null ? `${rfq.fixedJibM} m` : null],
+    ["Luffing jib", rfq.luffingJibM !== null ? `${rfq.luffingJibM} m` : null],
+    ["Wind jib", rfq.windJibM !== null ? `${rfq.windJibM} m` : null],
+    ["Jib length", rfq.jibLengthM !== null ? `${rfq.jibLengthM} m` : null],
+    ["Configuration", rfq.configuration],
+    ["Pincode", rfq.sitePincode],
+  ];
+  return rows.filter((row): row is [string, string] => Boolean(row[1]));
+}
+
+/**
+ * Where this RFQ stands and what to do about it: one headline, one button, and
+ * four counters that double as shortcuts to the matching section.
+ */
+function NextStepBanner({
+  rfqId,
+  status,
+  isDraft,
+  deadline,
+  deadlinePassed,
+  relative,
+  recipientCount,
+  responded,
+  quotationCount,
+  cancelReason,
+  onGoTo,
+}: {
+  rfqId: string;
+  status: RfqStatus;
+  isDraft: boolean;
+  deadline: string;
+  deadlinePassed: boolean;
+  relative: { label: string; tone: string } | null;
+  recipientCount: number;
+  responded: number;
+  quotationCount: number;
+  cancelReason: string | null;
+  onGoTo: (tab: DetailTab) => void;
+}) {
+  let title: string;
+  let body: string;
+  let dot = "bg-amber-500";
+  let action: { label: string; tab: DetailTab } | null = null;
+
+  if (status === "CANCELLED") {
+    title = "This RFQ was cancelled";
+    body = cancelReason ?? "No further action is needed.";
+    dot = "bg-slate-500";
+  } else if (status === "CLOSED") {
+    title = "Awarded";
+    body = "A quotation was awarded and every vendor has been told.";
+    dot = "bg-emerald-500";
+    action = { label: "View quotations", tab: "quotations" };
+  } else if (isDraft) {
+    title = "Ready to choose vendors";
+    body = deadlinePassed
+      ? "The deadline has passed. Edit the draft before sending."
+      : "Pick who should receive this RFQ, then send it.";
+    dot = deadlinePassed ? "bg-red-500" : "bg-amber-500";
+    action = { label: "Choose vendors", tab: "vendors" };
+  } else if (quotationCount > 0) {
+    title = `${quotationCount} quotation${quotationCount === 1 ? "" : "s"} ready to review`;
+    body = `${responded} of ${recipientCount} vendors have responded.`;
+    dot = "bg-emerald-500";
+    action = { label: "Review quotations", tab: "quotations" };
+  } else {
+    title = "Waiting for vendors to reply";
+    body = `${responded} of ${recipientCount} vendors have responded.`;
+    action = { label: "See vendors", tab: "vendors" };
+  }
+
+  const overdue = relative?.tone === "overdue";
+  const soon = relative?.tone === "soon";
+
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-800 bg-ink-900 px-5 py-4 shadow-sm">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={cn("size-2.5 shrink-0 rounded-full", dot)} aria-hidden />
+          <div className="min-w-0">
+            <p className="text-[18px] font-semibold tracking-tight text-slate-900">{title}</p>
+            <p className="text-[15px] text-slate-500">{body}</p>
+            {status === "CANCELLED" ? null : (
+              <p
+                title={formatDeadlineExact(deadline)}
+                className={cn(
+                  "mt-0.5 text-[14px]",
+                  overdue
+                    ? "font-medium text-red-500"
+                    : soon
+                      ? "font-medium text-amber-500"
+                      : "text-slate-500",
+                )}
+              >
+                Deadline {formatDeadline(deadline)} · {relative?.label}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isDraft ? (
+            <Link to="/app/rfqs/$rfqId/edit" params={{ rfqId }} className="btn-secondary px-3.5 py-2 text-[15px]">
+              Edit draft
+            </Link>
+          ) : null}
+          {action ? (
+            <button
+              type="button"
+              className="btn-primary px-4 py-2 text-[15px]"
+              onClick={() => onGoTo(action.tab)}
+            >
+              {action.label}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+    </section>
+  );
+}
+
+/** Commercial terms: only what was filled in, collapsed until wanted. */
+function CommercialTerms({ rfq }: { rfq: RfqView }) {
+  const rows: Array<[string, string | null]> = [
+    ["Payment terms", rfq.paymentTerms],
+    ["OT charges", rfq.otCharges],
+    ["Breakdown charges", rfq.breakdownTerms],
+    ["Mobilisation & demobilisation", rfq.mobilisationTerms],
+    ["Diesel scope", rfq.dieselScope],
+    ["Working hours / shift", rfq.workingHoursShift],
+    [
+      "Crane age criteria",
+      rfq.craneAgeCriteriaYears === null ? null : `${rfq.craneAgeCriteriaYears} years`,
+    ],
+    ["Accommodation & conveyance", rfq.accommodationConveyance],
+    ["Support crane", rfq.supportCrane],
+    ["Steel mats & ground prep", rfq.steelMatsGroundPrep],
+    ["EHS / HR requirements", rfq.ehsHrRequirements],
+    ["Insurance", rfq.insuranceTerms],
+    ["Extension clause", rfq.extensionClause],
+    ["Notes", rfq.notes],
+  ];
+  for (const term of extraTermRows(rfq.commercialTermsExtra)) {
+    rows.push([term.label, term.value]);
+  }
+  const filled = rows.filter((row): row is [string, string] => Boolean(row[1]));
+  const hasContact = Boolean(rfq.smlContactName || rfq.smlContactMobile || rfq.smlContactEmail);
+
+  return (
+    <details className="card group overflow-hidden" open={filled.length > 0 && filled.length <= 4}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3">
+        <span className="text-sm font-semibold text-slate-900">Commercial terms</span>
+        <span className="text-[14px] text-slate-500">
+          {filled.length === 0 ? "None specified" : `${filled.length} specified`}
+        </span>
+      </summary>
+      <div className="space-y-4 border-t border-ink-800 p-4">
+        {filled.length > 0 ? (
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filled.map(([label, value]) => (
+              <ReadOnlyValue key={label} label={label} value={value} />
+            ))}
+          </dl>
+        ) : (
+          <p className="text-sm text-slate-500">No commercial terms were added to this RFQ.</p>
+        )}
+        {hasContact ? (
+          <div className="border-t border-ink-800 pt-3">
+            <p className="text-xs font-medium text-slate-500">SML contact</p>
+            <p className="mt-0.5 text-sm text-slate-900">
+              {[rfq.smlContactName, rfq.smlContactMobile, rfq.smlContactEmail]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+        ) : null}
+        {rfq.attachments.length > 0 ? (
+          <div className="border-t border-ink-800 pt-3">
+            <p className="text-xs font-medium text-slate-500">Attachments</p>
+            <ul className="mt-1 space-y-0.5 text-sm text-slate-700">
+              {rfq.attachments.map((file) => (
+                <li key={file.id}>{file.fileName}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+// --- audit trail -----------------------------------------------------------
+
+const AUDIT_FIELD_LABELS: Record<string, string> = {
+  submissionDeadline: "Deadline",
+  capacityT: "Capacity",
+  quantity: "Quantity",
+  siteLocation: "Site",
+  requiredStartDate: "Start date",
+  notes: "Notes",
+};
+
+function asString(value: unknown): string | null {
+  return typeof value === "string" && value !== "" ? value : null;
+}
+
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
+}
+
+/** One human sentence per event, plus an optional line of detail beneath it. */
+function describeAudit(
+  event: RfqAuditEvent,
+  names: Record<string, string>,
+): { title: string; detail?: string; tone: "neutral" | "good" | "warn" | "bad" } {
+  const value = (event.newValue ?? {}) as Record<string, unknown>;
+  const vendor = (event.vendorId ? names[event.vendorId] : null) ??
+    (typeof value.vendorId === "string" ? names[value.vendorId] : null) ??
+    "A vendor";
+
+  if (event.entity === "negotiation") {
+    const total =
+      typeof value.totalQuotedValue === "number"
+        ? `₹${value.totalQuotedValue.toLocaleString("en-IN")}`
+        : null;
+    const round = value.roundNumber ? `round ${String(value.roundNumber)}` : null;
+    const detail = [round, total].filter(Boolean).join(" · ") || undefined;
+    switch (event.action) {
+      case "counter_sml":
+        return { title: `SML countered ${vendor}`, detail, tone: "neutral" };
+      case "counter_vendor":
+        return { title: `${vendor} sent a counter-offer`, detail, tone: "neutral" };
+      case "log_vendor_offer":
+        return {
+          title: `${vendor}'s offer was logged from ${String(value.channel ?? "an offline channel").toLowerCase()}`,
+          detail,
+          tone: "neutral",
+        };
+      case "accept":
+        return { title: `${vendor}'s offer was accepted`, detail, tone: "good" };
+      case "reject":
+        return {
+          title: `SML rejected ${vendor}'s counter`,
+          detail: asString(value.reason) ?? undefined,
+          tone: "bad",
+        };
+      case "decline":
+        return {
+          title: `${vendor} declined the counter`,
+          detail: asString(value.reason) ?? undefined,
+          tone: "bad",
+        };
+      case "expire":
+        return { title: `Negotiation with ${vendor} expired`, tone: "warn" };
+      case "cancel":
+        return { title: `Negotiation with ${vendor} was closed`, tone: "neutral" };
+      default:
+        return {
+          title: `Negotiation with ${vendor}: ${event.action.replaceAll("_", " ")}`,
+          detail,
+          tone: "neutral",
+        };
+    }
+  }
+
+  if (event.entity === "quotation") {
+    const total =
+      typeof value.totalQuotedValue === "number"
+        ? `₹${value.totalQuotedValue.toLocaleString("en-IN")}`
+        : null;
+    switch (event.action) {
+      case "submit":
+        return { title: `${vendor} submitted a quotation`, detail: total ?? undefined, tone: "good" };
+      case "inbound_capture":
+        return {
+          title: `A quotation from ${vendor} was captured from ${String(value.source ?? "a reply").toLowerCase()}`,
+          detail: total ?? undefined,
+          tone: "good",
+        };
+      case "revise":
+        return {
+          title: `${vendor} revised their quotation to v${event.quotationVersion ?? "?"}`,
+          detail: total ?? undefined,
+          tone: "neutral",
+        };
+      case "award":
+        return {
+          title: `Quotation from ${vendor} was awarded`,
+          detail: value.partial
+            ? `Partial award: ${String(value.awardedCount)} of ${String(value.quantity)}`
+            : "RFQ closed",
+          tone: "good",
+        };
+      default:
+        return { title: `${vendor}: quotation ${event.action.replaceAll("_", " ")}`, tone: "neutral" };
+    }
+  }
+
+  switch (event.action) {
+    case "create":
+      return { title: "RFQ created", tone: "neutral" };
+    case "update":
+      return { title: "Draft edited", tone: "neutral" };
+    case "confirm_site_pin":
+    case "site_pin":
+      return { title: "Job-site pin confirmed", tone: "neutral" };
+    case "send": {
+      const sent = Array.isArray(value.vendors)
+        ? (value.vendors as Array<{ vendorName?: string; craneIds?: string[]; status?: string }>)
+        : [];
+      const failures = typeof value.failures === "number" ? value.failures : 0;
+      return {
+        title: `Sent to ${plural(sent.length || Number(value.recipients ?? 0), "vendor")}`,
+        detail:
+          sent.length > 0
+            ? sent
+                .map((entry) => {
+                  const count = entry.craneIds?.length ?? 0;
+                  return `${entry.vendorName ?? "Vendor"}${count ? ` (${plural(count, "crane")} tagged)` : ""}`;
+                })
+                .join(", ") + (failures > 0 ? ` · ${failures} failed to deliver` : "")
+            : failures > 0
+              ? `${failures} failed to deliver`
+              : undefined,
+        tone: failures > 0 ? "warn" : "good",
+      };
+    }
+    case "viewed":
+      return { title: `${vendor} opened the RFQ`, tone: "neutral" };
+    case "decline":
+      return {
+        title: `${vendor} declined`,
+        detail: [asString(value.reason), asString(value.note)].filter(Boolean).join(" · ") || undefined,
+        tone: "bad",
+      };
+    case "remind": {
+      const ids = Array.isArray(value.vendorIds) ? (value.vendorIds as string[]) : [];
+      return {
+        title: `Reminder sent to ${plural(Number(value.recipients ?? ids.length), "vendor")}`,
+        detail: ids.length > 0 ? ids.map((id) => names[id] ?? "A vendor").join(", ") : undefined,
+        tone: "neutral",
+      };
+    }
+    case "extend_deadline":
+    case "extend": {
+      const next = asString(value.submissionDeadline) ?? asString(value.deadline);
+      return {
+        title: "Deadline extended",
+        detail: [next ? `New deadline ${formatDateTime(next)}` : null, asString(value.reason)]
+          .filter(Boolean)
+          .join(" · ") || undefined,
+        tone: "neutral",
+      };
+    }
+    case "cancel":
+      return { title: "RFQ cancelled", detail: asString(value.reason) ?? undefined, tone: "bad" };
+    case "expire":
+    case "expire_pending":
+      return { title: "Pending vendors expired at the deadline", tone: "warn" };
+    default: {
+      const changed = Object.keys(value)
+        .map((key) => AUDIT_FIELD_LABELS[key] ?? null)
+        .filter(Boolean);
+      return {
+        title: event.action.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase()),
+        detail: changed.length > 0 ? changed.join(", ") : undefined,
+        tone: "neutral",
+      };
+    }
+  }
+}
+
+/**
+ * Everything that has happened to this RFQ, in place. It reads the same audit
+ * log the rest of the portal writes to, so nothing here is a second source of
+ * truth that could drift from what was actually recorded.
+ */
+function AuditTrailSection({ rfqId, active }: { rfqId: string; active: boolean }) {
+  const audit = useQuery({
+    queryKey: ["rfq-audit", rfqId],
+    queryFn: () => getRfqAudit(rfqId),
+    enabled: active,
+    refetchOnMount: "always",
+  });
+
+  const events = audit.data?.events ?? [];
+  const names = audit.data?.vendorNames ?? {};
+  const dots = {
+    neutral: "bg-slate-400",
+    good: "bg-emerald-500",
+    warn: "bg-amber-500",
+    bad: "bg-red-500",
+  } as const;
+
+  return (
+    <Section
+      title="Audit trail"
+      description="Every action on this RFQ, newest first: who did it and when."
+    >
+      {audit.isLoading ? (
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <Spinner /> Loading the audit trail
+        </div>
+      ) : audit.error ? (
+        <Alert title="Could not load the audit trail">{(audit.error as Error).message}</Alert>
+      ) : events.length === 0 ? (
+        <p className="text-sm text-slate-500">Nothing has been recorded for this RFQ yet.</p>
+      ) : (
+        <ol className="relative space-y-0 border-l border-ink-800 pl-6">
+          {events.map((event) => {
+            const info = describeAudit(event, names);
+            return (
+              <li key={event.id} className="relative pb-5 last:pb-0">
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute top-1.5 -left-[31px] size-2.5 rounded-full ring-4 ring-ink-850",
+                    dots[info.tone],
+                  )}
+                />
+                <p className="text-[15px] font-medium text-slate-900">{info.title}</p>
+                {info.detail ? (
+                  <p className="mt-0.5 text-[14px] text-slate-600">{info.detail}</p>
+                ) : null}
+                <p className="mt-0.5 text-[13px] text-slate-500">
+                  {formatDateTime(event.at)}
+                  {event.actor ? ` · ${event.actor}` : ""}
+                  {event.onBehalfOfVendor ? " · on behalf of the vendor" : ""}
+                </p>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </Section>
   );
 }
 
@@ -656,6 +1071,7 @@ function RfqHeaderActions({
   isCancelled,
   onCancel,
   onExtend,
+  onAudit,
 }: {
   rfqId: string;
   isDraft: boolean;
@@ -663,6 +1079,7 @@ function RfqHeaderActions({
   isCancelled: boolean;
   onCancel: () => void;
   onExtend: () => void;
+  onAudit: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement | null>(null);
@@ -701,9 +1118,9 @@ function RfqHeaderActions({
         </button>
       ) : null}
 
-      <Link to="/app/communications" search={{ rfqId }} className={quiet}>
-        Communication history
-      </Link>
+      <button type="button" className={quiet} onClick={onAudit}>
+        Audit trail
+      </button>
 
       {isCancelled ? null : (
         <div ref={menu} className="relative">
@@ -1157,268 +1574,419 @@ function InboundRepliesSection({ rfqId }: { rfqId: string }) {
  * books the winning crane, closes the RFQ and emails every vendor on the
  * invitation, so the confirm step names its consequences before it runs.
  */
+const SOURCE_LABELS: Record<string, string> = {
+  PORTAL: "Portal",
+  WHATSAPP: "WhatsApp",
+  EMAIL: "Email",
+  MANUAL: "Manual",
+  NEGOTIATED: "Negotiated",
+};
+
+function money(value: number): string {
+  return value.toLocaleString("en-IN");
+}
+
 function QuotationsSection({
   rfqId,
   quotations,
   canAward,
+  canCounter,
+  negotiatingQuotationIds,
   closed,
+  deadlinePassed,
   startDateTbc,
   defaultStartDate,
   onDone,
 }: {
   rfqId: string;
-  /**
-   * `ReceivedQuotation` rather than a hand-written copy: an inline shape drifts
-   * from the payload, and when it did, `warnings` was typed `string[]` while the
-   * server sends `{ code, message }`. The copy typechecked, and React only found
-   * out at runtime.
-   */
   quotations: ReceivedQuotation[];
   canAward: boolean;
+  canCounter: boolean;
+  negotiatingQuotationIds: Set<string>;
   closed: boolean;
+  deadlinePassed: boolean;
   startDateTbc: boolean;
   defaultStartDate: string;
   onDone: () => void;
 }) {
-  const [awarding, setAwarding] = useState<string | null>(null);
+  const [awarding, setAwarding] = useState<ReceivedQuotation | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // Current offers first, cheapest on top; superseded versions sink to the end.
+  const sorted = [...quotations].sort((left, right) => {
+    if (left.isLatest !== right.isLatest) return left.isLatest ? -1 : 1;
+    return left.totalQuotedValue - right.totalQuotedValue;
+  });
+  const current = sorted.filter((quotation) => quotation.isLatest);
+  const lowestId =
+    current.length > 1 ? current[0]?.quotationId : null;
 
   return (
-    <Section
-      title="Received quotations"
-      description={
-        closed
-          ? "This RFQ is finalised. The vendors have been told the outcome."
-          : "Comparison stays out of scope (brief 2); selection is the admin award action below."
-      }
-    >
+    <div className="space-y-4">
+      {notice ? (
+        <Alert tone="success" title="Awarded">
+          {notice}
+        </Alert>
+      ) : null}
+
       {quotations.length === 0 ? (
-        <p className="text-sm text-slate-500">
-          No quotations yet. They appear here as vendors submit them.
-        </p>
-      ) : (
-        <div>
-          <Table className="min-w-[62rem]">
-            <THead>
-              <tr>
-                <TH>Vendor</TH>
-                <TH>Source</TH>
-                <TH>Crane</TH>
-                <TH align="right">Rate</TH>
-                <TH align="right">Mobilisation</TH>
-                <TH align="right">Demob.</TH>
-                <TH>Tax</TH>
-                <TH align="right">Total</TH>
-                <TH>Distance</TH>
-                <TH>Advisories</TH>
-                <TH>Outcome</TH>
-              </tr>
-            </THead>
-            <TBody>
-              {quotations.map((quotation) => (
-                <TR key={quotation.quotationId} className="align-top">
-                  <TD>
-                    <p className="font-medium text-slate-800">{quotation.vendorName}</p>
-                    <p className="text-[13px] text-slate-500">
-                      v{quotation.version}
-                      {!quotation.isLatest ? " · superseded" : ""} ·{" "}
-                      {formatDate(quotation.submittedAt)}
-                    </p>
-                  </TD>
-                  <TD>
-                    <Badge tone="neutral">
-                      {quotation.source === "PORTAL"
-                        ? "Portal"
-                        : quotation.source === "WHATSAPP"
-                          ? "WhatsApp"
-                          : quotation.source === "EMAIL"
-                            ? "Email"
-                            : "Manual"}
-                    </Badge>
-                  </TD>
-                  <TD className="text-xs text-slate-700">{quotation.craneDescription}</TD>
-                  <TD align="right" className="text-xs text-slate-700 tabular-nums">
-                    {quotation.rentalRate.toLocaleString("en-IN")}{" "}
-                    <span className="text-slate-500">
-                      {quotation.rateBasis.replaceAll("_", " ").toLowerCase()}
-                    </span>
-                  </TD>
-                  <TD align="right" className="text-xs text-slate-700 tabular-nums">
-                    {quotation.mobilisationCharges.toLocaleString("en-IN")}
-                  </TD>
-                  <TD align="right" className="text-xs text-slate-700 tabular-nums">
-                    {quotation.demobilisationCharges.toLocaleString("en-IN")}
-                  </TD>
-                  <TD className="text-xs text-slate-700">
-                    {quotation.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"}
-                  </TD>
-                  <TD align="right" className="text-sm font-semibold text-slate-900 tabular-nums">
-                    {quotation.totalQuotedValue.toLocaleString("en-IN")}
-                  </TD>
-                  <TD className="text-xs text-slate-600">
-                    {formatDistance(quotation.distanceToSiteKm, quotation.distanceApproximate)}
-                  </TD>
-                  <TD className="text-xs">
-                    {quotation.warnings.length === 0 ? (
-                      <span className="text-slate-400">—</span>
-                    ) : (
-                      <ul className="list-disc space-y-0.5 pl-4 text-amber-700">
-                        {quotation.warnings.map((warning) => (
-                          <li key={warning.code}>{warning.message}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </TD>
-                  <TD>
-                    <StatusBadge status={quotation.status} />
-                    {canAward && !closed ? (
-                      <AwardControl
-                        rfqId={rfqId}
-                        quotationId={quotation.quotationId}
-                        awardable={quotation.isLatest && quotation.status === "SUBMITTED"}
-                        startDateTbc={startDateTbc}
-                        defaultStartDate={defaultStartDate}
-                        open={awarding === quotation.quotationId}
-                        onToggle={() =>
-                          setAwarding(
-                            awarding === quotation.quotationId ? null : quotation.quotationId,
-                          )
-                        }
-                        onDone={() => {
-                          setAwarding(null);
-                          onDone();
-                        }}
-                      />
-                    ) : null}
-                  </TD>
-                </TR>
-              ))}
-            </TBody>
-          </Table>
+        <div className="card px-6 py-12 text-center">
+          <p className="text-[16px] font-medium text-slate-900">No quotations yet</p>
+          <p className="mt-1 text-sm text-slate-500">
+            They appear here as vendors submit them.
+          </p>
         </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-[17px] font-semibold text-slate-900">
+              {current.length} quotation{current.length === 1 ? "" : "s"}
+              <span className="ml-2 text-[14px] font-normal text-slate-500">
+                {closed ? "This RFQ is finalised." : "Lowest total first."}
+              </span>
+            </h2>
+          </div>
+
+          <ul className="space-y-3">
+            {sorted.map((quotation) => {
+              const awardable = quotation.isLatest && quotation.status === "SUBMITTED";
+              return (
+                <li
+                  key={quotation.quotationId}
+                  className={cn(
+                    "card p-5 transition-colors",
+                    !quotation.isLatest && "opacity-70",
+                    quotation.quotationId === lowestId && "border-emerald-500/40",
+                  )}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-[17px] font-semibold text-slate-900">
+                          {quotation.vendorName}
+                        </h3>
+                        {quotation.quotationId === lowestId ? (
+                          <Badge tone="emerald">Lowest total</Badge>
+                        ) : null}
+                        {!quotation.isLatest ? <Badge tone="neutral">Superseded</Badge> : null}
+                      </div>
+                      <p className="mt-1 text-[14px] text-slate-500">
+                        {quotation.craneDescription} ·{" "}
+                        {SOURCE_LABELS[quotation.source] ?? "Manual"} · v{quotation.version} ·{" "}
+                        {formatDate(quotation.submittedAt)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+                        Total quoted
+                      </p>
+                      <p className="text-[28px] leading-8 font-semibold text-slate-900 tabular-nums">
+                        ₹{money(quotation.totalQuotedValue)}
+                      </p>
+                      <p className="text-[13px] text-slate-500">
+                        {quotation.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <dl className="mt-4 grid grid-cols-2 gap-4 rounded-xl bg-ink-900 p-4 sm:grid-cols-3 xl:grid-cols-4">
+                    <QuoteFact
+                      label="Rate"
+                      value={`₹${money(quotation.rentalRate)}`}
+                      hint={quotation.rateBasis.replaceAll("_", " ").toLowerCase()}
+                    />
+                    <QuoteFact
+                      label="GST"
+                      value={
+                        quotation.taxBasis === "INCLUSIVE_OF_GST"
+                          ? "Inclusive of GST"
+                          : "Exclusive of GST"
+                      }
+                      hint="tax basis declared by vendor"
+                    />
+                    <QuoteFact
+                      label="Mobilisation"
+                      value={`₹${money(quotation.mobilisationCharges)}`}
+                    />
+                    <QuoteFact
+                      label="Demobilisation"
+                      value={`₹${money(quotation.demobilisationCharges)}`}
+                    />
+                    <QuoteFact
+                      label="Distance to site"
+                      value={formatDistance(quotation.distanceToSiteKm, quotation.distanceApproximate)}
+                    />
+                    <QuoteFact
+                      label="Validity"
+                      value={formatDate(quotation.validityDate)}
+                      hint="quote valid until"
+                    />
+                    <QuoteFact
+                      label="Availability"
+                      value={
+                        quotation.availabilityConfirmed
+                          ? quotation.availableFrom
+                            ? formatDate(quotation.availableFrom)
+                            : "Confirmed"
+                          : "Not confirmed"
+                      }
+                      hint={
+                        quotation.availabilityConfirmed && quotation.availableFrom
+                          ? "available from"
+                          : undefined
+                      }
+                    />
+                    <QuoteFact
+                      label="Commercial terms"
+                      value={quotation.acceptsCommercialTerms ? "Accepted" : "Deviation stated"}
+                      hint={quotation.acceptsCommercialTerms ? undefined : "see deviation below"}
+                    />
+                  </dl>
+
+                  {!quotation.acceptsCommercialTerms ||
+                  quotation.remarks?.trim() ||
+                  quotation.calculationNote?.trim() ? (
+                  <div className="mt-4 grid gap-3 rounded-xl border border-ink-800 p-4 text-[14px] sm:grid-cols-2">
+                    {!quotation.acceptsCommercialTerms ? (
+                      <div>
+                        <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
+                          Deviation
+                        </p>
+                        <p className="mt-0.5 whitespace-pre-wrap font-medium text-amber-600">
+                          {quotation.deviationText?.trim() || "Deviation stated"}
+                        </p>
+                      </div>
+                    ) : null}
+                    {quotation.remarks?.trim() ? (
+                      <div>
+                        <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
+                          Vendor remarks
+                        </p>
+                        <p className="mt-0.5 whitespace-pre-wrap text-slate-900">
+                          {quotation.remarks}
+                        </p>
+                      </div>
+                    ) : null}
+                    {quotation.calculationNote?.trim() ? (
+                      <div className="sm:col-span-2">
+                        <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
+                          Calculation
+                        </p>
+                        <p className="mt-0.5 whitespace-pre-wrap text-slate-500">
+                          {quotation.calculationNote}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                  ) : null}
+
+                  {quotation.warnings.length > 0 ? (
+                    <ul className="mt-3 flex flex-wrap gap-2">
+                      {quotation.warnings.map((warning) => (
+                        <li
+                          key={warning.code}
+                          className="rounded-full bg-amber-500/10 px-3 py-1 text-[13px] text-amber-600"
+                        >
+                          {warning.message}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 pt-4">
+                    <StatusBadge status={quotation.status} />
+                    <div className="flex flex-wrap gap-2">
+                      {canCounter && !closed && !deadlinePassed ? (
+                        <CounterButton
+                          rfqId={rfqId}
+                          quotation={quotation}
+                          disabled={!awardable || negotiatingQuotationIds.has(quotation.quotationId)}
+                          disabledReason={
+                            negotiatingQuotationIds.has(quotation.quotationId)
+                              ? "This quotation already has an open negotiation — respond in Negotiations above"
+                              : undefined
+                          }
+                          onDone={onDone}
+                        />
+                      ) : null}
+                      {canAward && !closed ? (
+                        <button
+                          type="button"
+                          className="btn-primary px-4 py-2 text-[15px]"
+                          disabled={!awardable}
+                          title={
+                            awardable ? undefined : "Only the latest Submitted version can be awarded"
+                          }
+                          onClick={() => {
+                            setNotice(null);
+                            setAwarding(quotation);
+                          }}
+                        >
+                          Award this quotation
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
-    </Section>
+
+      {awarding ? (
+        <AwardDialog
+          rfqId={rfqId}
+          quotation={awarding}
+          startDateTbc={startDateTbc}
+          defaultStartDate={defaultStartDate}
+          onClose={() => setAwarding(null)}
+          onDone={(message) => {
+            setAwarding(null);
+            setNotice(message);
+            onDone();
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function QuoteFact({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">{label}</dt>
+      <dd className="mt-0.5 text-[16px] font-medium text-slate-900 tabular-nums">{value}</dd>
+      {hint ? <dd className="text-[13px] text-slate-500">{hint}</dd> : null}
+    </div>
   );
 }
 
 /**
- * The award affordance for one row. Superseded or non-Submitted versions cannot
- * be awarded (the backend refuses them), so the button appears on an awardable
- * row at all and disappears from the ones that are not.
+ * Awarding is final, so it gets its own confirmation instead of a form wedged
+ * into a table cell. Rendered inside the page (not a portal) so it follows this
+ * screen's light/dark choice.
  */
-function AwardControl({
+function AwardDialog({
   rfqId,
-  quotationId,
-  awardable,
+  quotation,
   startDateTbc,
   defaultStartDate,
-  open,
-  onToggle,
+  onClose,
   onDone,
 }: {
   rfqId: string;
-  quotationId: string;
-  awardable: boolean;
+  quotation: ReceivedQuotation;
   startDateTbc: boolean;
   defaultStartDate: string;
-  open: boolean;
-  onToggle: () => void;
-  onDone: () => void;
+  onClose: () => void;
+  onDone: (message: string) => void;
 }) {
   const [reason, setReason] = useState("");
   const [startDate, setStartDate] = useState(startDateTbc ? defaultStartDate : "");
   const [endDate, setEndDate] = useState("");
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const award = useMutation({
     mutationFn: () =>
-      awardQuotation(
-        rfqId,
-        quotationId,
-        { reason, dates: startDateTbc ? { startDate, endDate } : undefined },
-      ),
+      awardQuotation(rfqId, quotation.quotationId, {
+        reason,
+        dates: startDateTbc ? { startDate, endDate } : undefined,
+      }),
     onSuccess: (result) => {
-      onDone();
       const detail = result.result.partial
         ? `Partial award (${result.result.awardedCount} of ${result.result.quantity}); the other quotations stay open.`
         : `${result.result.notAwardedCount} other quotation(s) marked Not Awarded and the RFQ finalised.`;
-      window.alert(
-        `Awarded. ${detail} ` +
-          `${result.result.notifiedAwarded} award email(s) and ${result.result.notifiedNotAwarded} ` +
-          `not-awarded email(s) sent.`,
+      onDone(
+        `${detail} ${result.result.notifiedAwarded} award email(s) and ${result.result.notifiedNotAwarded} not-awarded email(s) sent.`,
       );
     },
   });
 
-  if (open) {
-    return (
-      <div className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-        <p className="text-xs text-slate-600">
-          Selects this quotation, reserves the crane for the requirement window and emails
-          the vendor. Other quotations stay open until the RFQ's quantity is awarded, when
-          the RFQ is finalised.
-        </p>
-        {startDateTbc ? (
-          <>
-            <Field label="Reservation start" htmlFor={`award-start-${quotationId}`} required>
-              <TextInput
-                id={`award-start-${quotationId}`}
-                type="date"
-                value={startDate}
-                onChange={setStartDate}
-              />
-            </Field>
-            <Field label="Reservation end" htmlFor={`award-end-${quotationId}`} required>
-              <TextInput
-                id={`award-end-${quotationId}`}
-                type="date"
-                value={endDate}
-                onChange={setEndDate}
-              />
-            </Field>
-          </>
-        ) : null}
-        <Field label="Remarks" htmlFor={`award-reason-${quotationId}`} hint="Optional echo into the emails.">
-          <TextInput
-            id={`award-reason-${quotationId}`}
-            value={reason}
-            onChange={setReason}
-          />
-        </Field>
-        {award.isError ? (
-          <Alert title="Not awarded">{(award.error as Error).message}</Alert>
-        ) : null}
-        <div className="flex items-center gap-2">
+  const datesMissing = startDateTbc && (startDate === "" || endDate === "");
+
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/50 p-0 backdrop-blur-[1px] sm:items-center sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="award-title"
+        className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-ink-800 bg-ink-900 shadow-2xl sm:max-w-lg sm:rounded-2xl"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-ink-800 px-6 py-4">
+          <div className="min-w-0">
+            <h2 id="award-title" className="text-[18px] font-semibold text-slate-900">
+              Award to {quotation.vendorName}
+            </h2>
+            <p className="mt-0.5 text-[14px] text-slate-500">
+              {quotation.craneDescription} · ₹{money(quotation.totalQuotedValue)}{" "}
+              {quotation.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"}
+            </p>
+          </div>
           <button
             type="button"
-            className="btn-primary px-3 py-1.5 text-xs"
+            aria-label="Close"
+            onClick={onClose}
+            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-ink-800 bg-ink-850 text-slate-500 hover:text-slate-900"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
+
+        <div className="space-y-4 overflow-y-auto px-6 py-5">
+          <ul className="space-y-1.5 text-[15px] text-slate-600">
+            <li>• Reserves the crane for the requirement window</li>
+            <li>• Emails the vendor about the award</li>
+            <li>• Other quotations stay open until the full quantity is awarded</li>
+          </ul>
+
+          {startDateTbc ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Reservation start" htmlFor="award-start" required>
+                <TextInput id="award-start" type="date" value={startDate} onChange={setStartDate} />
+              </Field>
+              <Field label="Reservation end" htmlFor="award-end" required>
+                <TextInput id="award-end" type="date" value={endDate} onChange={setEndDate} />
+              </Field>
+            </div>
+          ) : null}
+
+          <Field label="Remarks" htmlFor="award-reason" hint="Optional. Included in the emails.">
+            <TextArea id="award-reason" value={reason} onChange={setReason} rows={2} />
+          </Field>
+
+          {award.isError ? (
+            <Alert title="Not awarded">{(award.error as Error).message}</Alert>
+          ) : null}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-ink-800 bg-ink-850 px-6 py-3">
+          <button type="button" className="btn-secondary px-4 py-2 text-[15px]" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-primary px-4 py-2 text-[15px]"
             onClick={() => award.mutate()}
-            disabled={award.isPending}
+            disabled={award.isPending || datesMissing}
           >
             {award.isPending ? <Spinner /> : null}
             Confirm award
           </button>
-          <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={onToggle}>
-            Back
-          </button>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="mt-2">
-      <button
-        type="button"
-        className="btn-secondary px-2.5 py-1.5 text-xs"
-        onClick={onToggle}
-        disabled={!awardable}
-        title={
-          !awardable
-            ? "Only the latest Submitted version can be awarded"
-            : undefined
-        }
-      >
-        Award
-      </button>
     </div>
   );
 }

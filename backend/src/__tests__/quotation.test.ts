@@ -365,10 +365,12 @@ describe("vendor quotation access", () => {
         "durationUnit",
         "durationValue",
         "enquiryNo",
+        "fixedJibM",
         "jibLengthM",
         "lineNo",
         "loadDescription",
         "locked",
+        "luffingJibM",
         "mainBoomM",
         "notes",
         "quantity",
@@ -382,6 +384,11 @@ describe("vendor quotation access", () => {
         "smlContact",
         "startDateTbc",
         "submissionDeadline",
+        // Cranes SML tagged for this vendor, already part of the vendor view.
+        "taggedCraneIds",
+        "windJibM",
+        "workingRadiusM",
+        "liftLoadT",
       ].sort(),
     );
 
@@ -1264,6 +1271,41 @@ describe("quotation versions", () => {
     });
     expect(rows.filter((r) => r.craneId === ctx.a.craneId)).toHaveLength(2);
     expect(rows.filter((r) => r.craneId === second.id)).toHaveLength(1);
+  });
+
+  it("lets a vendor quote more than one crane on the same RFQ", async () => {
+    const rfq = await dispatchedRfq();
+    const second = await addCrane();
+    await giveLoadChart(second.id);
+
+    const first = await submitQuote(rfq.id);
+    expect(first.status).toBe(201);
+
+    // The first quote must not close the vendor's form: only the crane already
+    // quoted is removed from the picker, not the whole RFQ.
+    const afterFirst = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenA,
+    });
+    expect(afterFirst.body.response.responseStatus).toBe("QUOTED");
+    expect(afterFirst.body.response.canRespond).toBe(true);
+
+    const other = await submitQuote(rfq.id, { craneId: second.id });
+    expect(other.status, `second quote failed: ${JSON.stringify(other.body)}`).toBe(201);
+
+    const detail = await call(app, "GET", `/api/vendor/rfqs/${rfq.id}`, {
+      token: ctx.vendorTokenA,
+    });
+    expect(detail.body.quotations).toHaveLength(2);
+    expect(detail.body.response.canRespond).toBe(true);
+
+    // A quoted vendor can add cranes but cannot turn the response into a decline.
+    const decline = await call(
+      app,
+      "POST",
+      `/api/vendor/rfqs/${rfq.id}/decline`,
+      { token: ctx.vendorTokenA, body: { reason: "Too far" } },
+    );
+    expect(decline.status).toBe(409);
   });
 
   it("re-checks the crane on revision, so a booked crane cannot collect a new price", async () => {

@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { CountdownChip } from "@/components/ui/countdown-chip";
-import { LifecycleStepper } from "@/components/ui/lifecycle-stepper";
 import { Menu } from "@/components/ui/menu";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
@@ -94,20 +93,33 @@ export function SummaryBar({
       : rfq.locked
         ? "This RFQ is finalised. You can still read it and your quotes remain on record."
         : status === "QUOTED"
-          ? "Quote received. You can revise it until the deadline."
+          ? "Quote received. You can revise it or quote another crane until the deadline."
           : status === "DECLINED"
             ? "You declined this RFQ."
             : status === "EXPIRED"
               ? "This RFQ expired without a quote from you."
               : countdown.label;
 
-  const steps = [
-    { key: "received", label: "Received" },
-    { key: "answered", label: status === "DECLINED" ? "Declined" : "Quoted" },
-    { key: "decision", label: "Decision" },
-  ] as const;
-  const current =
-    status === "FINALISED" ? 2 : status === "QUOTED" || status === "DECLINED" ? 1 : 0;
+  const title =
+    status === "PENDING"
+      ? response.canRespond
+        ? "Your quote is due"
+        : "No longer accepting quotes"
+      : status === "QUOTED"
+        ? "Quote sent"
+        : status === "DECLINED"
+          ? "You declined this RFQ"
+          : status === "EXPIRED"
+            ? "This RFQ expired"
+            : "Finalised";
+  const dot =
+    status === "QUOTED"
+      ? "bg-emerald-500"
+      : status === "DECLINED" || status === "EXPIRED"
+        ? "bg-red-500"
+        : status === "FINALISED"
+          ? "bg-slate-500"
+          : "bg-amber-500";
 
   const primary = !response.canRespond
     ? null
@@ -234,40 +246,40 @@ export function SummaryBar({
         </div>
       </section>
 
-      {/* Everything explanatory stays in the flow below the sticky row, where it
-          can wrap without making the bar taller than the rail can clear. */}
-      <div className="space-y-2.5 rounded-xl border border-ink-800 bg-ink-900/60 px-4 py-3 print:hidden">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <p className="text-xs text-slate-500">
+      {/* Everything explanatory stays in the flow below the sticky row. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-2xl border border-ink-800 bg-ink-900 px-5 py-4 shadow-sm print:hidden">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={cn("size-2.5 shrink-0 rounded-full", dot)} aria-hidden />
+          <div className="min-w-0">
+            <p className="text-[18px] font-semibold tracking-tight text-slate-900">{title}</p>
+            <p className="text-[15px] text-slate-500">
+              {showMessage
+                ? message
+                : `Quotes due ${formatDateTime(rfq.submissionDeadline)}`}
+              {response.respondedAt && status !== "PENDING"
+                ? ` You responded ${formatDateTime(response.respondedAt)}.`
+                : ""}
+            </p>
+            {response.reminderCount > 0 ? (
+              <p className="mt-0.5 text-[13px] text-amber-700">
+                SML sent {response.reminderCount} reminder
+                {response.reminderCount === 1 ? "" : "s"} about this RFQ
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <div className="text-right text-[14px] text-slate-500">
+          <p>
             {rfq.enquiryNo}
-            {rfq.lineNo ? ` · line ${rfq.lineNo}` : ""} · quotes due{" "}
-            {formatDateTime(rfq.submissionDeadline)}
+            {rfq.lineNo ? ` · line ${rfq.lineNo}` : ""}
             {!response.canRespond && !rfq.locked ? " · no longer accepted" : ""}
           </p>
-          <p className="text-[13px] text-slate-500">
+          <p>
             {rfq.startDateTbc
               ? "Start date to be confirmed"
               : `Start ${formatDateTime(rfq.requiredStartDate).split(",")[0]}`}
           </p>
         </div>
-
-        {showMessage ? (
-          <p className="text-sm text-slate-700">
-            {message}
-            {response.respondedAt && status !== "PENDING"
-              ? ` You responded ${formatDateTime(response.respondedAt)}.`
-              : ""}
-          </p>
-        ) : null}
-
-        {response.reminderCount > 0 ? (
-          <p className="text-[13px] text-amber-700">
-            SML sent {response.reminderCount} reminder
-            {response.reminderCount === 1 ? "" : "s"} about this RFQ
-          </p>
-        ) : null}
-
-        <LifecycleStepper steps={steps} current={current} />
       </div>
 
       {/* Below `lg` the primary action stays under the thumb. */}
@@ -298,4 +310,3 @@ export function SummaryBar({
     </>
   );
 }
-

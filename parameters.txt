@@ -127,7 +127,6 @@ geocodedAt              When the pin was set
 -- Availability
 availableFrom           Required when status is ENGAGED; cleared when AVAILABLE
 expectedReadyDate       Optional; when status is UNDER_MAINTENANCE
-updatedOnBehalf *       True if an SML user made the last change (default false)
 
 -- Load chart
 loadChartFileRef        Stored file reference
@@ -136,14 +135,11 @@ loadChartMimeType       File type
 loadChartSizeBytes      File size
 
 -- Other
-ownershipType *         VENDOR / SML (default VENDOR)
 isActive *              Active or not (default true)
 remarks                 Remarks
-approvalStatus *        APPROVED / PENDING (default APPROVED)
 statusUpdatedAt *       Last status / location / availability change
                         (drives the 30-day "due" and 60-day "stale" flags)
 createdAt, updatedAt    Timestamps (generated)
-updatedBy               Who last updated it
 
 
 ======================================================================

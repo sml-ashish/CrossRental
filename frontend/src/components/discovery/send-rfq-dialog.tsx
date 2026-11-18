@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/alert";
+import { RfqLineFieldPicker, useRfqLineFieldSelection } from "@/components/rfq-line-field-picker";
 import { Field, TextInput } from "@/components/ui/form";
 import { ApiError } from "@/lib/api";
 import { createRfqFromLine } from "@/lib/enquiries";
@@ -15,11 +16,11 @@ import { cn } from "@/lib/cn";
  * Send an RFQ to the vendors that own the cranes ticked in the recommendation
  * list.
  *
- * The RFQ itself is always raised from the enquiry line (the backend prefills the
- * vendor-safe fields; only the deadline is sent) and then dispatched to the
- * chosen vendors by id. Picking a crane picks its vendor: a vendor with three
- * ticked cranes gets one RFQ, not three, and a vendor with no ticked crane is
- * never contacted.
+ * The RFQ itself is always raised from the enquiry line (the backend prefills
+ * the core requirement; the deadline and the chosen fields are sent) and then
+ * dispatched to the chosen vendors by id. Picking a crane picks its vendor: a
+ * vendor with three ticked cranes gets one RFQ, not three, and a vendor with no
+ * ticked crane is never contacted.
  */
 
 export interface SendRfqDialogProps {
@@ -71,6 +72,11 @@ export function SendRfqDialog({
   /** Set once the RFQ exists, so a failed send is retried without a duplicate. */
   const [rfq, setRfq] = useState<{ id: string; rfqNumber: string } | null>(null);
   const [result, setResult] = useState<SendResult | null>(null);
+  const fields = useRfqLineFieldSelection({
+    lineId,
+    enabled: open,
+    resetKey: open ? "open" : "closed",
+  });
 
   // A fresh dialog is a fresh RFQ.
   useEffect(() => {
@@ -84,12 +90,13 @@ export function SendRfqDialog({
   }, [open, lineId, startWithAll]);
 
   async function submit() {
+    if (!rfq && !fields.ready) return;
     setBusy(true);
     setError(null);
     try {
       let target = rfq;
       if (!target) {
-        const created = await createRfqFromLine(lineId, deadline);
+        const created = await createRfqFromLine(lineId, deadline, fields.keys);
         target = { id: created.rfq.id, rfqNumber: created.rfq.rfqNumber };
         setRfq(target);
       }
@@ -146,7 +153,9 @@ export function SendRfqDialog({
             <button
               type="button"
               onClick={() => void submit()}
-              disabled={busy || (!allApproved && vendors.length === 0) || !deadline}
+              disabled={
+                busy || (!allApproved && vendors.length === 0) || !deadline || (!rfq && (!fields.ready || fields.error))
+              }
               className="rounded-lg bg-accent-500 px-3 py-2 text-[15px] font-semibold text-[#fff] transition-colors hover:bg-accent-600 disabled:opacity-50"
             >
               {busy
@@ -233,6 +242,28 @@ export function SendRfqDialog({
               ))}
             </ul>
 
+            {!rfq && !done ? (
+              <details className="rounded-xl border border-ink-800 bg-ink-850/40">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-[15px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+                  <span>Choose which line fields to send</span>
+                  <span className="text-[13px] text-slate-500 tabular-nums">
+                    {fields.ready ? `${fields.keys.length} selected` : fields.loading ? "Loading…" : "—"}
+                  </span>
+                </summary>
+                <div className="max-h-72 overflow-y-auto border-t border-ink-800 p-2.5">
+                  <RfqLineFieldPicker
+                    line={fields.line}
+                    selected={fields.keys}
+                    onToggle={fields.toggle}
+                    loading={fields.loading}
+                    error={fields.error}
+                    onRetry={fields.retry}
+                    variant="plain"
+                  />
+                </div>
+              </details>
+            ) : null}
+
             <div className="flex flex-wrap items-end gap-2">
               <Field label="Submission deadline" htmlFor="send-rfq-deadline">
                 <TextInput
@@ -265,7 +296,8 @@ export function SendRfqDialog({
 
             <p className="text-[14px] text-slate-500">
               One RFQ is raised from this enquiry line and emailed {allApproved ? "to every approved vendor, with no crane tagged" : "only to the vendors above"}.
-              Customer name, address and the internal budget are never sent.
+              Only the fields you tick are copied; customer name, address and the internal budget
+              are never sent.
             </p>
           </>
         )}

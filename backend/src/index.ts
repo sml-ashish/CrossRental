@@ -18,6 +18,7 @@ import reservationsRoutes from "./routes/reservations.routes";
 import discoveryRoutes from "./routes/discovery.routes";
 import communicationRoutes from "./routes/communication.routes";
 import vendorQuotationRoutes from "./routes/vendorQuotation.routes";
+import vendorNegotiationRoutes from "./routes/vendorNegotiation.routes";
 import vendorDashboardRoutes from "./routes/vendorDashboard.routes";
 import adminRoutes from "./routes/admin.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
@@ -81,6 +82,7 @@ export function createApp() {
   app.use("/api/discovery", discoveryRoutes);
   app.use("/api/communications", communicationRoutes);
   app.use("/api/vendor/rfqs", vendorQuotationRoutes);
+  app.use("/api/vendor/negotiations", vendorNegotiationRoutes);
   app.use("/api/vendor/dashboard", vendorDashboardRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/dashboard", dashboardRoutes);

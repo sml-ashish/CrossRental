@@ -260,6 +260,26 @@ export interface GoogleGeoProviderOptions {
 }
 
 /**
+ * The city part of a site string, for the Google city + state lookup.
+ *
+ * Site text often already ends in the state ("Bhuj, Gujarat"). Dropping that
+ * trailing duplicate keeps the address a clean "Bhuj, Gujarat, India" instead
+ * of "Bhuj, Gujarat, Gujarat, India". A single-part location is kept as-is so
+ * the lookup never ends up with no place at all.
+ */
+function cityOnly(location: string, state: string): string {
+  const parts = location
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (state) {
+    const name = state.toLowerCase();
+    while (parts.length > 1 && parts.at(-1)?.toLowerCase() === name) parts.pop();
+  }
+  return parts.join(", ");
+}
+
+/**
  * Google Maps: Geocoding API for addresses, Routes API for road distance.
  *
  * Both calls are bounded by a timeout because an unreachable Google is the same
@@ -301,10 +321,14 @@ export class GoogleGeoProvider implements GeoProvider {
       return { ok: false, reason: "No location text to geocode" };
     }
 
-    // Google is tolerant of a state code, but a full country name anchors the
-    // search so "Pune" does not resolve to a Pune outside India.
+    // Look up by city + state. The pincode is deliberately left out: a wrong or
+    // stale pincode makes Google return ZERO_RESULTS for an otherwise valid
+    // city, and the site text plus the state already identify the place.
+    // A full country name anchors the search so "Pune" does not resolve to a
+    // Pune outside India.
     const country = this.region === "IN" ? "India" : this.region;
-    const address = [input.location, input.pincode, input.state, country]
+    const state = (input.state ?? "").trim();
+    const address = [cityOnly(input.location, state), state, country]
       .map((part) => (part ?? "").toString().trim())
       .filter(Boolean)
       .join(", ");

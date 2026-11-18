@@ -3,6 +3,7 @@ import type { Prisma } from "../generated/prisma/client";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
 import { recordAudit } from "./audit.service";
+import { cancelAllNegotiations } from "./negotiation.service";
 import { nextRfqNumber } from "./rfqNumber.service";
 import { candidatesForRfq, type CandidateCrane } from "./candidate.service";
 import { invalidateDistancesFrom } from "./distance.service";
@@ -115,6 +116,11 @@ const RFQ_SELECT = {
   loadDescription: true,
   mainBoomM: true,
   jibLengthM: true,
+  liftLoadT: true,
+  workingRadiusM: true,
+  fixedJibM: true,
+  luffingJibM: true,
+  windJibM: true,
   startDateTbc: true,
   workingDaysPerMonth: true,
   quantity: true,
@@ -191,6 +197,11 @@ export function toRfqView(row: Record<string, unknown>) {
     capacityT: num(row.capacityT) ?? 0,
     mainBoomM: num(row.mainBoomM),
     jibLengthM: num(row.jibLengthM),
+    liftLoadT: num(row.liftLoadT),
+    workingRadiusM: num(row.workingRadiusM),
+    fixedJibM: num(row.fixedJibM),
+    luffingJibM: num(row.luffingJibM),
+    windJibM: num(row.windJibM),
     durationValue: num(row.durationValue) ?? 0,
     siteLatitude: num(row.siteLatitude),
     siteLongitude: num(row.siteLongitude),
@@ -202,10 +213,11 @@ export function toRfqView(row: Record<string, unknown>) {
 /**
  * Resolve the job-site pin (brief 6.9).
  *
- * A pin the sales user supplied wins outright — they have confirmed it, and a
- * fresh lookup must not overwrite a human correction. Otherwise the site is
- * geocoded, and a failure is not fatal: the RFQ saves without coordinates and
- * the picker says distances are unavailable until someone confirms the pin.
+ * A pin supplied by the caller wins outright — either one the sales user
+ * confirmed, or one inherited from the source enquiry's already-geocoded site.
+ * A fresh lookup must not overwrite either. Otherwise the site is geocoded, and
+ * a failure is not fatal: the RFQ saves without coordinates and the picker says
+ * distances are unavailable until someone confirms the pin.
  */
 async function resolveSite(input: {
   siteLocation: string;
@@ -213,6 +225,12 @@ async function resolveSite(input: {
   sitePincode: string | null;
   siteLatitude?: number | null;
   siteLongitude?: number | null;
+  /**
+   * Set when the pin was inherited from another record (an enquiry line's
+   * geocoded site) rather than confirmed by the user on this RFQ. Keeps the
+   * provenance instead of relabelling a provider pin as `manual`.
+   */
+  siteCoordinateSource?: CoordinateSource | null;
   stateName: string;
 }): Promise<{
   siteLatitude: number | null;
@@ -223,7 +241,7 @@ async function resolveSite(input: {
     return {
       siteLatitude: input.siteLatitude,
       siteLongitude: input.siteLongitude,
-      siteCoordinateSource: CoordinateSource.manual,
+      siteCoordinateSource: input.siteCoordinateSource ?? CoordinateSource.manual,
     };
   }
 
@@ -346,7 +364,11 @@ async function lineIdentityOf(enquiryLineId: string) {
   };
 }
 
-export async function createRfq(raw: unknown, actor: Actor) {
+export async function createRfq(
+  raw: unknown,
+  actor: Actor,
+  options: { siteCoordinateSource?: CoordinateSource | null } = {},
+) {
   assertInternal(actor);
   const input: CreateRfqInput = createRfqSchema.parse(raw);
   await assertCraneType(input.craneType);
@@ -367,6 +389,7 @@ export async function createRfq(raw: unknown, actor: Actor) {
     sitePincode: input.sitePincode,
     siteLatitude: input.siteLatitude ?? null,
     siteLongitude: input.siteLongitude ?? null,
+    siteCoordinateSource: options.siteCoordinateSource,
     stateName,
   });
 
@@ -388,6 +411,11 @@ export async function createRfq(raw: unknown, actor: Actor) {
     loadDescription: input.loadDescription,
     mainBoomM: input.mainBoomM ?? null,
     jibLengthM: input.jibLengthM ?? null,
+    liftLoadT: input.liftLoadT ?? null,
+    workingRadiusM: input.workingRadiusM ?? null,
+    fixedJibM: input.fixedJibM ?? null,
+    luffingJibM: input.luffingJibM ?? null,
+    windJibM: input.windJibM ?? null,
     startDateTbc: input.startDateTbc,
     workingDaysPerMonth: input.workingDaysPerMonth ?? null,
     quantity: input.quantity,
@@ -768,7 +796,13 @@ async function listQuotationsForRfq(rfqId: string) {
       demobilisationCharges: true,
       taxBasis: true,
       totalQuotedValue: true,
+      calculationNote: true,
+      availabilityConfirmed: true,
+      availableFrom: true,
       validityDate: true,
+      acceptsCommercialTerms: true,
+      deviationText: true,
+      remarks: true,
       distanceToSiteKm: true,
       distanceMethod: true,
       warnings: true,
@@ -802,7 +836,13 @@ async function listQuotationsForRfq(rfqId: string) {
     demobilisationCharges: num(r.demobilisationCharges) ?? 0,
     taxBasis: r.taxBasis,
     totalQuotedValue: num(r.totalQuotedValue) ?? 0,
+    calculationNote: r.calculationNote,
+    availabilityConfirmed: r.availabilityConfirmed,
+    availableFrom: r.availableFrom?.toISOString() ?? null,
     validityDate: r.validityDate,
+    acceptsCommercialTerms: r.acceptsCommercialTerms,
+    deviationText: r.deviationText,
+    remarks: r.remarks,
     distanceToSiteKm: num(r.distanceToSiteKm),
     distanceMethod: r.distanceMethod,
     distanceApproximate: r.distanceMethod === DistanceMethod.straight_line,
@@ -1146,6 +1186,13 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
     whatsappStatus: string | null;
     error?: string;
   }> = [];
+  // What the sales user chose, per vendor, kept for the RFQ's audit trail.
+  const sentTo: Array<{
+    vendorId: string;
+    vendorName: string;
+    craneIds: string[];
+    status: string;
+  }> = [];
 
   for (const recipient of recipients) {
     const offered = [
@@ -1275,6 +1322,12 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
       whatsappStatus,
       error: error ?? undefined,
     });
+    sentTo.push({
+      vendorId: recipient.vendorId,
+      vendorName: recipient.vendorName,
+      craneIds: taggedCraneIds,
+      status: overall,
+    });
   }
 
   await prisma.rfq.update({
@@ -1296,6 +1349,8 @@ export async function sendRfq(rfqId: string, raw: unknown, actor: Actor) {
     entityId: rfqId,
     action: "send",
     newValue: {
+      vendors: sentTo,
+      channels,
       recipients: results.length,
       failures: results.filter((r) => r.status === EmailDeliveryStatus.FAILED)
         .length,
@@ -1461,6 +1516,13 @@ export async function cancelRfq(rfqId: string, raw: unknown, actor: Actor) {
     },
   });
 
+  // Counter-quotes: cancelling the RFQ ends every open negotiation on it.
+  try {
+    await cancelAllNegotiations(rfqId, "RFQ cancelled");
+  } catch (error) {
+    console.error("[rfq] negotiation cancellation failed", error);
+  }
+
   const portalBase = process.env.PORTAL_BASE_URL ?? "http://localhost:5173";
   const recipients = await prisma.rfqVendorRecipient.findMany({
     where: {
@@ -1528,7 +1590,7 @@ export async function remindRfq(rfqId: string, raw: unknown, actor: Actor) {
       responseStatus: ResponseStatus.PENDING,
       ...(input.recipientIds?.length ? { id: { in: input.recipientIds } } : {}),
     },
-    select: { id: true, emails: true, reminderCount: true },
+    select: { id: true, vendorId: true, emails: true, reminderCount: true },
   });
 
   const portalBase = process.env.PORTAL_BASE_URL ?? "http://localhost:5173";
@@ -1564,7 +1626,11 @@ export async function remindRfq(rfqId: string, raw: unknown, actor: Actor) {
     entity: "rfq",
     entityId: rfqId,
     action: "remind",
-    newValue: { recipients: recipients.length, sent },
+    newValue: {
+      recipients: recipients.length,
+      sent,
+      vendorIds: recipients.map((recipient) => recipient.vendorId),
+    },
     actor: auditActor(actor),
   });
 
@@ -1723,3 +1789,102 @@ export async function runAutomaticRfqReminders(
 
 export type { CandidateCrane };
 
+
+
+/**
+ * Everything that has happened to one RFQ, newest first: the RFQ's own events
+ * (created, edited, sent, reminded, extended, cancelled, viewed, declined) and
+ * its quotations' (submitted, revised, awarded). Vendors are named here so the
+ * screen never has to show a bare id.
+ */
+export async function getRfqAudit(rfqId: string, actor: Actor) {
+  assertInternal(actor);
+
+  const rfq = await prisma.rfq.findUnique({ where: { id: rfqId }, select: { id: true } });
+  if (!rfq) throw AppError.notFound("RFQ not found");
+
+  const quotations = await prisma.quotation.findMany({
+    where: { rfqId },
+    select: { id: true, vendorId: true, version: true },
+  });
+  const quotationById = new Map(quotations.map((quotation) => [quotation.id, quotation]));
+  // Counter-quotes: negotiation events are keyed by thread id, so include every
+  // thread on this RFQ in the audit read.
+  const negotiations = await prisma.quotationNegotiation.findMany({
+    where: { rfqId },
+    select: { id: true },
+  });
+
+  const rows = await prisma.auditLog.findMany({
+    where: {
+      OR: [
+        { entity: "rfq", entityId: rfqId },
+        ...(quotations.length > 0
+          ? [{ entity: "quotation", entityId: { in: quotations.map((quotation) => quotation.id) } }]
+          : []),
+        ...(negotiations.length > 0
+          ? [{ entity: "negotiation", entityId: { in: negotiations.map((thread) => thread.id) } }]
+          : []),
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 500,
+    select: {
+      id: true,
+      entity: true,
+      entityId: true,
+      action: true,
+      oldValue: true,
+      newValue: true,
+      actorRole: true,
+      actorName: true,
+      onBehalfOfVendor: true,
+      createdAt: true,
+      actor: { select: { fullName: true, email: true } },
+    },
+  });
+
+  const vendorIds = new Set<string>();
+  for (const quotation of quotations) vendorIds.add(quotation.vendorId);
+  for (const row of rows) {
+    const value = row.newValue as { vendorId?: unknown; vendorIds?: unknown } | null;
+    if (typeof value?.vendorId === "string") vendorIds.add(value.vendorId);
+    if (Array.isArray(value?.vendorIds)) {
+      for (const id of value.vendorIds) if (typeof id === "string") vendorIds.add(id);
+    }
+  }
+  const vendors = vendorIds.size
+    ? await prisma.vendor.findMany({
+        where: { id: { in: [...vendorIds] } },
+        select: { id: true, name: true },
+      })
+    : [];
+  const vendorNames = Object.fromEntries(
+    vendors.map((vendor) => [vendor.id, vendor.name ?? "A vendor"]),
+  );
+
+  return {
+    events: rows.map((row) => {
+      const quotation = row.entity === "quotation" ? quotationById.get(row.entityId) : undefined;
+      const payload = row.newValue as { vendorId?: unknown; quotationVersion?: unknown } | null;
+      return {
+        id: row.id,
+        at: row.createdAt.toISOString(),
+        entity: row.entity,
+        action: row.action,
+        actor: row.actor?.fullName ?? row.actor?.email ?? row.actorName ?? null,
+        actorRole: row.actorRole,
+        onBehalfOfVendor: row.onBehalfOfVendor,
+        vendorId:
+          quotation?.vendorId ??
+          (typeof payload?.vendorId === "string" ? payload.vendorId : null),
+        quotationVersion:
+          quotation?.version ??
+          (typeof payload?.quotationVersion === "number" ? payload.quotationVersion : null),
+        oldValue: row.oldValue,
+        newValue: row.newValue,
+      };
+    }),
+    vendorNames,
+  };
+}

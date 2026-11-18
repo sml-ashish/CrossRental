@@ -37,6 +37,7 @@ import {
   AttachmentKind,
   CraneStatus,
   DistanceMethod,
+  NegotiationStatus,
   QuotationStatus,
   QuoteSource,
   RateBasis,
@@ -44,6 +45,7 @@ import {
   ResponseStatus,
   RfqRollupStatus,
   RfqStatus,
+  RoundOutcome,
 } from "../generated/prisma/client";
 import { storage } from "../lib/storage";
 import type { ValidatedUpload } from "../middleware/upload";
@@ -76,7 +78,7 @@ export interface Actor {
   vendorId: string | null;
 }
 
-function auditActor(actor: Actor): AuthedRequest["user"] {
+export function auditActor(actor: Actor): AuthedRequest["user"] {
   return {
     id: actor.id,
     email: actor.email,
@@ -90,7 +92,7 @@ function auditActor(actor: Actor): AuthedRequest["user"] {
  * A vendor account without one is a provisioning fault, and failing open here
  * would put one vendor's RFQs in front of another.
  */
-function requireVendorId(actor: Actor): string {
+export function requireVendorId(actor: Actor): string {
   if (!actor.vendorId) {
     throw AppError.forbidden("Your account is not linked to a vendor");
   }
@@ -102,7 +104,7 @@ function requireVendorId(actor: Actor): string {
  * change them. Internal access to this file at all is for the award service,
  * which arrives with M7.
  */
-function assertVendor(actor: Actor): void {
+export function assertVendor(actor: Actor): void {
   if (actor.role !== "vendor_user") {
     throw AppError.forbidden("Only a vendor can answer an RFQ");
   }
@@ -138,6 +140,11 @@ const RECIPIENT_SELECT = {
       loadDescription: true,
       mainBoomM: true,
       jibLengthM: true,
+      liftLoadT: true,
+      workingRadiusM: true,
+      fixedJibM: true,
+      luffingJibM: true,
+      windJibM: true,
       startDateTbc: true,
       workingDaysPerMonth: true,
       quantity: true,
@@ -170,6 +177,7 @@ const RECIPIENT_SELECT = {
       smlContactEmail: true,
       submissionDeadline: true,
       status: true,
+      createdById: true,
       createdAt: true,
       siteState: { select: { name: true } },
       craneTypeRef: { select: { name: true } },
@@ -177,7 +185,7 @@ const RECIPIENT_SELECT = {
   },
 } satisfies Prisma.RfqVendorRecipientSelect;
 
-type RecipientRow = Prisma.RfqVendorRecipientGetPayload<{
+export type RecipientRow = Prisma.RfqVendorRecipientGetPayload<{
   select: typeof RECIPIENT_SELECT;
 }>;
 
@@ -186,7 +194,7 @@ type RecipientRow = Prisma.RfqVendorRecipientGetPayload<{
  * month conversion applies, and the RFQ supplies its own working-days figure.
  * Cached by the settings module, so fetching it per call is fine.
  */
-async function dayBasisFor(rfq: RecipientRow["rfq"]) {
+export async function dayBasisFor(rfq: RecipientRow["rfq"]) {
   const settings = await getSettings();
   return {
     rateDayBasis: settings.rateDayBasis,
@@ -258,7 +266,7 @@ async function liveQuotationsByRfq(
  * A cancelled RFQ is still readable: the vendor needs to see why it stopped, and
  * an empty inbox entry would be a worse answer than an explanation.
  */
-async function loadRecipient(
+export async function loadRecipient(
   rfqId: string,
   actor: Actor,
 ): Promise<RecipientRow> {
@@ -273,6 +281,19 @@ async function loadRecipient(
   return recipient;
 }
 
+/** The same scoped read for an SML user who already knows the vendor id. */
+export async function loadRecipientByVendor(
+  rfqId: string,
+  vendorId: string,
+): Promise<RecipientRow> {
+  const recipient = await prisma.rfqVendorRecipient.findFirst({
+    where: { rfqId, vendorId },
+    select: RECIPIENT_SELECT,
+  });
+  if (!recipient) throw AppError.notFound("That vendor was not sent this RFQ");
+  return recipient;
+}
+
 /**
  * A cancelled *or closed* RFQ is readable but dead: the vendor must see why it
  * stopped, and no action can be taken on it even if the deadline has not passed
@@ -283,7 +304,7 @@ async function loadRecipient(
  * revising, withdrawing, declining or quoting after an award would contradict
  * the outcome every vendor has already been told about by email.
  */
-function assertOpen(recipient: RecipientRow): void {
+export function assertOpen(recipient: RecipientRow): void {
   if (recipient.rfq.status === RfqStatus.CANCELLED) {
     throw AppError.conflict(
       "SML cancelled this RFQ, so it can no longer be quoted. Contact SML if that looks wrong.",
@@ -303,7 +324,7 @@ function assertOpen(recipient: RecipientRow): void {
  * so an internal user extending the deadline genuinely reopens the RFQ for
  * everyone still Pending — which is the point of extending it.
  */
-function assertBeforeDeadline(recipient: RecipientRow, now = new Date()): void {
+export function assertBeforeDeadline(recipient: RecipientRow, now = new Date()): void {
   if (recipient.rfq.submissionDeadline.getTime() <= now.getTime()) {
     throw AppError.conflict(
       "The deadline for this RFQ has passed, so quotations can no longer be submitted or changed.",
@@ -316,7 +337,7 @@ function assertBeforeDeadline(recipient: RecipientRow, now = new Date()): void {
  * (brief A3): without a fixed start the question has no answer, so the vendor
  * is warned in `computeWarnings` instead of being blocked here.
  */
-function assertAvailability(
+export function assertAvailability(
   rfq: RecipientRow["rfq"],
   input: { availabilityConfirmed?: boolean | null },
 ): void {
@@ -370,7 +391,7 @@ const CRANE_SELECT = {
   state: { select: { name: true } },
 } satisfies Prisma.CraneSelect;
 
-type QuotingCrane = Prisma.CraneGetPayload<{ select: typeof CRANE_SELECT }>;
+export type QuotingCrane = Prisma.CraneGetPayload<{ select: typeof CRANE_SELECT }>;
 
 /**
  * Loads a crane and checks it is the vendor's to quote.
@@ -379,11 +400,22 @@ type QuotingCrane = Prisma.CraneGetPayload<{ select: typeof CRANE_SELECT }>;
  * who posts another vendor's crane id gets the same 404 as a nonexistent one, so
  * the endpoint cannot be used to discover that a particular crane exists.
  */
-async function loadQuotingCrane(
+export async function loadQuotingCrane(
   craneId: string,
   actor: Actor,
 ): Promise<QuotingCrane> {
-  const vendorId = requireVendorId(actor);
+  return loadCraneForVendor(craneId, requireVendorId(actor));
+}
+
+/**
+ * The same scoped read without a vendor actor. Negotiation acceptance is done
+ * by SML, but the availability check still needs the crane to be resolved
+ * through its owner so a forged crane id cannot pass.
+ */
+export async function loadCraneForVendor(
+  craneId: string,
+  vendorId: string,
+): Promise<QuotingCrane> {
   const crane = await prisma.crane.findFirst({
     where: { id: craneId, vendorId },
     select: CRANE_SELECT,
@@ -402,7 +434,7 @@ async function loadQuotingCrane(
  * legacy guard for pre-reservation rows that the phase B migration has not
  * touched (normally none).
  */
-async function assertCraneQuotable(
+export async function assertCraneQuotable(
   crane: QuotingCrane,
   rfq: RecipientRow["rfq"],
 ): Promise<void> {
@@ -694,7 +726,7 @@ export async function previewQuotation(
  * when either end has no pin — the same honest "unavailable" the picker uses,
  * rather than a straight-line figure presented as though it were road distance.
  */
-async function distanceToSite(rfq: RecipientRow["rfq"], crane: QuotingCrane) {
+export async function distanceToSite(rfq: RecipientRow["rfq"], crane: QuotingCrane) {
   if (
     rfq.siteLatitude === null ||
     rfq.siteLongitude === null ||
@@ -710,7 +742,7 @@ async function distanceToSite(rfq: RecipientRow["rfq"], crane: QuotingCrane) {
 }
 
 /** Crane state at the moment of quoting, so history can show what was offered. */
-function craneSnapshot(crane: QuotingCrane) {
+export function craneSnapshot(crane: QuotingCrane) {
   return {
     craneId: crane.id,
     serialRegistrationNo: crane.serialRegistrationNo,
@@ -783,16 +815,46 @@ export async function listVendorRfqs(rawQuery: unknown, actor: Actor) {
     vendorId,
   );
 
+  // Counter-quotes: surface threads awaiting this vendor's response so the inbox
+  // can show "Counter-offer received" and sort them first. Scoped by vendorId.
+  const awaiting = await prisma.quotationNegotiation.findMany({
+    where: {
+      vendorId,
+      status: NegotiationStatus.AWAITING_VENDOR,
+      rfqId: { in: recipients.map((recipient) => recipient.rfq.id) },
+      rounds: { some: { outcome: RoundOutcome.OPEN } },
+    },
+    select: {
+      rfqId: true,
+      rounds: {
+        where: { outcome: RoundOutcome.OPEN },
+        orderBy: { respondBy: "asc" },
+        select: { respondBy: true },
+        take: 1,
+      },
+    },
+  });
+  const respondByByRfq = new Map<string, string>();
+  for (const thread of awaiting) {
+    const respondBy = thread.rounds[0]?.respondBy?.toISOString();
+    if (respondBy && (!respondByByRfq.has(thread.rfqId) || respondByByRfq.get(thread.rfqId)! > respondBy)) {
+      respondByByRfq.set(thread.rfqId, respondBy);
+    }
+  }
+
   const now = Date.now();
   return {
     rfqs: recipients.map((recipient) => {
-      const live = (liveByRfq.get(recipient.rfq.id) ?? []).filter((q) =>
-        isVendorLive(q.status),
-      );
+      // An award (SELECTED) or a loss (NOT_AWARDED) is still a quote the vendor
+      // sent. The inbox reports what is on record, so these stay counted and the
+      // row keeps reading "Quoted". Editability is a separate verdict, computed
+      // for the detail screen by isVendorLive().
+      const onRecord = liveByRfq.get(recipient.rfq.id) ?? [];
       return {
         recipientId: recipient.id,
         rfqId: recipient.rfq.id,
         rfqNumber: recipient.rfq.rfqNumber,
+        rfqStatus: recipient.rfq.status,
         craneType: recipient.rfq.craneType,
         craneTypeName: recipient.rfq.craneTypeRef.name,
         capacityT: Number(recipient.rfq.capacityT),
@@ -812,11 +874,16 @@ export async function listVendorRfqs(rawQuery: unknown, actor: Actor) {
         overdue: recipient.rfq.submissionDeadline.getTime() < now,
         // Whether the vendor may still act, so the UI does not offer a button the
         // backend will refuse.
+        // A cancelled or finalised RFQ is not actionable even if the recipient
+        // was never moved off Pending, so the inbox cannot offer "quote" on it.
         canRespond:
+          recipient.rfq.status === RfqStatus.SENT &&
           recipient.rfq.submissionDeadline.getTime() > now &&
           recipient.responseStatus === ResponseStatus.PENDING,
-        quotationCount: live.length,
-        latestQuotationTotal: live[0] ? Number(live[0].totalQuotedValue) : null,
+        quotationCount: onRecord.length,
+        latestQuotationTotal: onRecord[0] ? Number(onRecord[0].totalQuotedValue) : null,
+        counterOffer: respondByByRfq.has(recipient.rfq.id),
+        respondBy: respondByByRfq.get(recipient.rfq.id) ?? null,
       };
     }),
   };
@@ -934,10 +1001,39 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
     orderBy: [{ craneId: "asc" }, { version: "desc" }],
   });
 
+  // Counter-quotes: the soonest open respond-by across this vendor's threads.
+  const awaiting = await prisma.quotationNegotiation.findMany({
+    where: {
+      rfqId,
+      vendorId,
+      status: NegotiationStatus.AWAITING_VENDOR,
+      rounds: { some: { outcome: RoundOutcome.OPEN } },
+    },
+    select: {
+      rounds: {
+        where: { outcome: RoundOutcome.OPEN },
+        orderBy: { respondBy: "asc" },
+        select: { respondBy: true },
+        take: 1,
+      },
+    },
+  });
+  const respondBy = awaiting
+    .map((thread) => thread.rounds[0]?.respondBy)
+    .filter((date): date is Date => Boolean(date))
+    .sort((a, b) => a.getTime() - b.getTime())[0];
+
   if (recipient.firstViewedAt === null) {
     await prisma.rfqVendorRecipient.update({
       where: { id: recipient.id },
       data: { firstViewedAt: new Date() },
+    });
+    await recordAudit({
+      entity: "rfq",
+      entityId: rfqId,
+      action: "viewed",
+      newValue: { vendorId },
+      actor: auditActor(actor),
     });
   }
 
@@ -964,6 +1060,11 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       loadDescription: rfq.loadDescription,
       mainBoomM: rfq.mainBoomM === null ? null : Number(rfq.mainBoomM),
       jibLengthM: rfq.jibLengthM === null ? null : Number(rfq.jibLengthM),
+      liftLoadT: rfq.liftLoadT === null ? null : Number(rfq.liftLoadT),
+      workingRadiusM: rfq.workingRadiusM === null ? null : Number(rfq.workingRadiusM),
+      fixedJibM: rfq.fixedJibM === null ? null : Number(rfq.fixedJibM),
+      luffingJibM: rfq.luffingJibM === null ? null : Number(rfq.luffingJibM),
+      windJibM: rfq.windJibM === null ? null : Number(rfq.windJibM),
       startDateTbc: rfq.startDateTbc,
       quantity: rfq.quantity,
       siteLocation: rfq.siteLocation,
@@ -1008,9 +1109,17 @@ export async function getVendorRfqDetail(rfqId: string, actor: Actor) {
       declineNote: recipient.declineNote,
       respondedAt: recipient.respondedAt?.toISOString() ?? null,
       reminderCount: recipient.reminderCount,
-      // False once declined, so the UI stops offering to decline.
+      // A quoted RFQ stays open for other cranes in the vendor's fleet: the
+      // submit endpoint already allows one quotation per crane, and the picker
+      // hides the cranes already quoted. Declining is still PENDING-only, and
+      // the summary bar checks that status before offering it.
       canRespond:
-        !locked && recipient.responseStatus === ResponseStatus.PENDING,
+        !locked &&
+        (recipient.responseStatus === ResponseStatus.PENDING ||
+          recipient.responseStatus === ResponseStatus.QUOTED),
+      // Counter-quote: an open SML offer this vendor must answer.
+      counterOffer: Boolean(respondBy),
+      respondBy: respondBy?.toISOString() ?? null,
     },
     // Every version, newest first, per crane series (brief 6.7: "all versions
     // stay in history").
@@ -1626,6 +1735,21 @@ export async function reviseQuotation(
   assertBeforeDeadline(recipient);
   assertAvailability(recipient.rfq, input);
 
+  // Counter-quotes: while a thread is open the vendor must answer that offer
+  // rather than edit the base quotation underneath it (spec rule 9). Checked
+  // inline to avoid a circular import from negotiation.service.
+  const openThread = await prisma.quotationNegotiation.count({
+    where: {
+      rfqId: existing.rfqId,
+      vendorId: existing.vendorId,
+      craneId: existing.craneId,
+      status: { in: [NegotiationStatus.AWAITING_VENDOR, NegotiationStatus.AWAITING_SML] },
+    },
+  });
+  if (openThread > 0) {
+    throw AppError.conflict("Respond to the open offer instead.");
+  }
+
   // A withdrawn latest version may be revised, and that is the only way back.
   // `submitQuotation` refuses a second quote for a crane that already has one —
   // correctly, since a double submission is not a revision — so if withdrawal
@@ -1825,6 +1949,34 @@ export async function withdrawQuotation(
     data: { status: QuotationStatus.WITHDRAWN, isLatest: false },
     select: { id: true, version: true },
   });
+
+  // Counter-quotes: withdrawing the base quotation ends its open thread. Done
+  // inline to avoid a circular import from negotiation.service, which depends
+  // on the helpers in this file.
+  const openThreads = await prisma.quotationNegotiation.findMany({
+    where: {
+      status: { in: [NegotiationStatus.AWAITING_VENDOR, NegotiationStatus.AWAITING_SML] },
+      OR: [{ baseQuotationId: quotationId }, { agreedQuotationId: quotationId }],
+    },
+    select: { id: true },
+  });
+  for (const thread of openThreads) {
+    await prisma.$transaction([
+      prisma.negotiationRound.updateMany({
+        where: { negotiationId: thread.id, outcome: RoundOutcome.OPEN },
+        data: { outcome: RoundOutcome.CANCELLED, respondedAt: new Date() },
+      }),
+      prisma.quotationNegotiation.update({
+        where: { id: thread.id },
+        data: {
+          status: NegotiationStatus.CANCELLED,
+          closedReason: "The vendor withdrew the quotation",
+          closedAt: new Date(),
+          version: { increment: 1 },
+        },
+      }),
+    ]);
+  }
 
   // The reason has no column of its own — there is nowhere on the quotation for
   // it — so it is kept in the audit trail, which is where "why did this vendor
@@ -2176,4 +2328,3 @@ export async function listQuotationAttachments(
 }
 
 /** Exported for the internal tracking screen: a quotation's own attachments. */
-
