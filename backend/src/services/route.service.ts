@@ -1,7 +1,16 @@
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
 import { env } from "../config/env";
-import { straightLineKm, tryGeocode, tryRoadRoutes, type GeoPoint } from "../lib/geo";
+import { CoordinateSource } from "../generated/prisma/client";
+import {
+  getGeoProvider,
+  straightLineKm,
+  tryGeocode,
+  tryRoadRoutes,
+  type GeoPoint,
+  type RouteWaypoint,
+  type RoutesResult,
+} from "../lib/geo";
 import type { Actor } from "./rfq.service";
 
 /**
@@ -50,6 +59,19 @@ export interface LineRoute {
   approximate: boolean;
   siteLabel: string;
   craneLabel: string;
+  /** Where the route ends, so the map can draw a crane that has no stored pin. */
+  destination: GeoPoint;
+  /** Where the route starts (the job site), for the same reason. */
+  origin: GeoPoint;
+  /**
+   * True when an end has no stored pin and was worked out from its place name
+   * (for example "Nagpur, Maharashtra"), either by the geocoder or by the router
+   * itself. It is the place, not the yard, so the screen labels it as an
+   * estimate. `destinationEstimated` is the crane end, `originEstimated` the
+   * job site.
+   */
+  destinationEstimated: boolean;
+  originEstimated: boolean;
   /**
    * Why the route is a straight line, or null for a real road route. One of
    * `provider_stub`, `provider_disabled`, `route_polyline_off`, or
@@ -156,6 +178,7 @@ export async function getLineRoute(
     select: {
       enquiry: {
         select: {
+          id: true,
           siteLocation: true,
           siteStateCode: true,
           sitePincode: true,
@@ -176,24 +199,76 @@ export async function getLineRoute(
       serialRegistrationNo: true,
       latitude: true,
       longitude: true,
+      currentLocation: true,
+      stateCode: true,
+      pincode: true,
+      state: { select: { name: true } },
     },
   });
   if (!crane) throw AppError.notFound("That crane does not exist");
 
-  const destination = point(crane.latitude, crane.longitude);
-  if (!destination) throw new AppError("This crane has no pin", 422, "NO_PIN");
+  // An end with no stored pin is looked up from its place name, the way Google
+  // Maps takes "Pune, Maharashtra". The geocoder is tried first. If it cannot
+  // place the name (no geocoder, or a failed lookup), the router is given the
+  // name itself and reports where it put the end. Read-only: no record is
+  // changed, so a crane stays "unverified" until a pin is dropped.
+  const placeName = (text: string, state: string): string => {
+    const parts = [text.trim()];
+    if (state && !text.toLowerCase().includes(state.toLowerCase())) parts.push(state);
+    return [...parts, "India"].filter(Boolean).join(", ");
+  };
 
-  let origin = point(line.enquiry.siteLatitude, line.enquiry.siteLongitude);
+  const storedOrigin = point(line.enquiry.siteLatitude, line.enquiry.siteLongitude);
+  let origin = storedOrigin;
+  let originEstimated = false;
   if (!origin) {
+    originEstimated = true;
     const geocoded = await tryGeocode({
       location: line.enquiry.siteLocation,
       state: line.enquiry.siteStateCode,
       pincode: line.enquiry.sitePincode,
     });
-    if (!geocoded.ok) throw new AppError("The job site has no pin", 422, "NO_PIN");
-    // Read-only: the recommendation pass is what stores a site pin, and a route
-    // is only asked for after a line has been evaluated.
-    origin = geocoded.point;
+    if (geocoded.ok) origin = geocoded.point;
+  }
+
+  let destination = point(crane.latitude, crane.longitude);
+  let destinationEstimated = false;
+  if (!destination) {
+    destinationEstimated = true;
+    const geocoded = await tryGeocode({
+      location: crane.currentLocation,
+      state: crane.state?.name ?? crane.stateCode,
+      pincode: crane.pincode,
+    });
+    if (geocoded.ok) destination = geocoded.point;
+  }
+
+  const noPin = () =>
+    new AppError(
+      origin ? "This crane has no pin" : "The job site has no pin",
+      422,
+      "NO_PIN",
+    );
+
+  // Still an end without a point: ask the router to find it from the name.
+  let namedRoad: RoutesResult | null = null;
+  if (!origin || !destination) {
+    if (!env.route.polyline) throw noPin();
+    const originWaypoint: RouteWaypoint = origin ?? {
+      address: placeName(
+        line.enquiry.siteLocation,
+        line.enquiry.siteState?.name ?? line.enquiry.siteStateCode,
+      ),
+    };
+    const destinationWaypoint: RouteWaypoint = destination ?? {
+      address: placeName(crane.currentLocation, crane.state?.name ?? crane.stateCode),
+    };
+    namedRoad = await tryRoadRoutes(originWaypoint, destinationWaypoint);
+    if (!namedRoad.ok) throw noPin();
+    // The map needs both ends as points, and the router reports them.
+    origin = origin ?? namedRoad.origin ?? null;
+    destination = destination ?? namedRoad.destination ?? null;
+    if (!origin || !destination) throw noPin();
   }
 
   const siteLabel = label(
@@ -205,15 +280,40 @@ export async function getLineRoute(
     crane.serialRegistrationNo?.trim() || "Crane",
   );
 
+  const ends = { origin, destination, originEstimated, destinationEstimated };
+
+  // The router just placed the job site, so keep that as the site's pin. Without
+  // it every other crane in the list still reads "Distance unavailable", because
+  // list distances need a saved site pin. Only an enquiry with no pin is written
+  // to, and never a crane: a site is one place, a crane's pin is the vendor's.
+  if (!storedOrigin) {
+    try {
+      await prisma.enquiry.update({
+        where: { id: line.enquiry.id },
+        data: {
+          siteLatitude: origin.lat,
+          siteLongitude: origin.lng,
+          siteCoordinateSource: getGeoProvider().isAuthoritative
+            ? CoordinateSource.auto
+            : CoordinateSource.manual,
+        },
+      });
+    } catch (err) {
+      // The route is still good; the next open tries again.
+      console.error("[route] could not save the site pin", err);
+    }
+  }
+
   const key = routeKey(origin, destination);
-  const cached = cacheGet(key);
-  if (cached) return { ...cached, siteLabel, craneLabel };
+  const cached = namedRoad ? null : cacheGet(key);
+  if (cached) return { ...cached, siteLabel, craneLabel, ...ends };
 
   const fallback = (reason: string): LineRoute => ({
     method: "straight_line",
     approximate: true,
     siteLabel,
     craneLabel,
+    ...ends,
     reason,
     routes: [
       {
@@ -234,7 +334,7 @@ export async function getLineRoute(
   // made at all.
   if (!env.route.polyline) return fallback("route_polyline_off");
 
-  const road = await tryRoadRoutes(origin, destination);
+  const road = namedRoad ?? (await tryRoadRoutes(origin, destination));
   if (!road.ok) {
     if (env.geo.provider === "stub") return fallback("provider_stub");
     if (env.geo.provider === "disabled") return fallback("provider_disabled");
@@ -258,6 +358,7 @@ export async function getLineRoute(
     })),
   };
   cacheSet(key, geometry);
-  return { ...geometry, siteLabel, craneLabel };
+  return { ...geometry, siteLabel, craneLabel, ...ends };
 }
+
 

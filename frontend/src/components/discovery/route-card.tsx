@@ -39,6 +39,8 @@ export interface RouteSummary {
   fallback: boolean;
   /** Why the route is a straight line, shown beside the fallback label. */
   fallbackReason?: string | null;
+  /** The crane has no stored pin; its end of the route is its location text. */
+  estimatedPin?: boolean;
   /** True while a fresh route is in flight; the previous one stays visible. */
   loading: boolean;
   siteLabel: string;
@@ -257,6 +259,12 @@ export function RouteCard({
             {route.via ? (
               <p className="mt-0.5 truncate text-[13px] text-neutral-500">via {route.via}</p>
             ) : null}
+            {route.estimatedPin ? (
+              <p className="mt-0.5 text-[13px] text-amber-700">
+                This route runs between place names, not exact pins. Drop a pin on the job site
+                or the crane for the exact yard.
+              </p>
+            ) : null}
             {showDetails && route.alternatives && route.alternatives.length > 1 ? (
               <ul className="mt-2 space-y-1">
                 {route.alternatives.map((alternative) => (
@@ -394,3 +402,4 @@ function shortDate(iso: string | null): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" });
 }
+

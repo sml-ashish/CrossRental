@@ -232,6 +232,8 @@ export type RfqLineFieldKey = (typeof RFQ_LINE_FIELD_KEYS)[number];
 export const rfqFromLineSchema = z.object({
   submissionDeadline: submissionDeadlineField,
   includeFields: z.array(z.enum(RFQ_LINE_FIELD_KEYS)).optional(),
+  /** Optional sales remark. Lands in the RFQ's vendor-visible notes. */
+  remark: optionalText(1000),
 });
 
 export type RfqFromLineInput = z.infer<typeof rfqFromLineSchema>;
@@ -286,3 +288,4 @@ export const lineRouteQuerySchema = z.object({
 });
 
 export type LineRouteQuery = z.infer<typeof lineRouteQuerySchema>;
+

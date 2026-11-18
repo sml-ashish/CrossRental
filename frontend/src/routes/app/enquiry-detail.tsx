@@ -195,11 +195,11 @@ export function EnquiryDetailPage() {
     await queryClient.invalidateQueries({ queryKey: ["raisable-lines"] });
   }
 
-  async function raiseRfq(lineId: string, fields: RfqLineFieldKey[]) {
+  async function raiseRfq(lineId: string, fields: RfqLineFieldKey[], remark?: string) {
     setBusy(true);
     setError(null);
     try {
-      const created = await createRfqFromLine(lineId, rfqDeadline, fields);
+      const created = await createRfqFromLine(lineId, rfqDeadline, fields, remark);
       await refresh();
       void navigate({ to: "/app/rfqs/$rfqId", params: { rfqId: created.rfq.id } });
     } catch (err) {
@@ -716,7 +716,7 @@ export function EnquiryDetailPage() {
                             onDeadline={setRfqDeadline}
                             pending={busy}
                             error={rfqFor === line.id ? error : null}
-                            onConfirm={(keys) => void raiseRfq(line.id, keys)}
+                            onConfirm={(keys, remark) => void raiseRfq(line.id, keys, remark)}
                             onClose={() => setRfqFor(null)}
                           />
 
@@ -1228,3 +1228,4 @@ function LoadingPage({ wide }: { wide: boolean }) {
     </div>
   );
 }
+

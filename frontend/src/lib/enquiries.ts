@@ -573,12 +573,14 @@ export function createRfqFromLine(
   lineId: string,
   submissionDeadline: string,
   includeFields?: readonly string[],
+  remark?: string,
 ): Promise<{ rfq: { id: string; rfqNumber: string; enquiryLineId: string } }> {
   return api(`/enquiries/lines/${lineId}/rfq`, {
     method: "POST",
     body: {
       submissionDeadline: new Date(submissionDeadline).toISOString(),
       ...(includeFields ? { includeFields: [...includeFields] } : {}),
+      ...(remark?.trim() ? { remark: remark.trim() } : {}),
     },
   });
 }
@@ -721,3 +723,4 @@ export function importBulkLines(
     method: "POST",
   });
 }
+

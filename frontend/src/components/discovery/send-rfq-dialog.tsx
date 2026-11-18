@@ -88,14 +88,14 @@ export function SendRfqDialog({
     setFieldsOpen(false);
   }, [open, lineId, startWithAll]);
 
-  async function submit(fieldKeys?: RfqLineFieldKey[]) {
+  async function submit(fieldKeys?: RfqLineFieldKey[], remark?: string) {
     if (!rfq && !fieldKeys) return;
     setBusy(true);
     setError(null);
     try {
       let target = rfq;
       if (!target) {
-        const created = await createRfqFromLine(lineId, deadline, fieldKeys);
+        const created = await createRfqFromLine(lineId, deadline, fieldKeys, remark);
         target = { id: created.rfq.id, rfqNumber: created.rfq.rfqNumber };
         setRfq(target);
       }
@@ -160,7 +160,7 @@ export function SendRfqDialog({
                 : rfq
                   ? "Retry sending"
                   : allApproved
-                    ? "Email all approved vendors"
+                    ? "Email all vendors"
                     : `Email ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`}
             </button>
           )}
@@ -288,17 +288,18 @@ export function SendRfqDialog({
         onDeadline={setDeadline}
         confirmLabel={
           allApproved
-            ? "Raise and email all approved vendors"
+            ? "Raise and email all vendors"
             : `Raise and email ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`
         }
         pending={busy}
         error={error}
-        onConfirm={(keys) => {
+        onConfirm={(keys, remark) => {
           setFieldsOpen(false);
-          void submit(keys);
+          void submit(keys, remark);
         }}
         onClose={() => setFieldsOpen(false)}
       />
     </Dialog>
   );
 }
+

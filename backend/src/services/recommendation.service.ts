@@ -594,7 +594,21 @@ export async function getOrEvaluateLatest(
 ): Promise<RecommendationResult> {
   assertInternal(actor);
   const latest = await getLatestRecommendation(lineId);
-  if (latest) return latest;
+  if (latest) {
+    // A snapshot taken while the job site could not be pinned (no geocoder
+    // configured yet, or a lookup that failed) keeps showing "no pin" and no
+    // distances forever. Retry the pin; only when it now succeeds is the list
+    // re-evaluated, so a geocoder that is still down does not add a snapshot on
+    // every open.
+    const { latitude, longitude } = latest.site;
+    if (latitude === null || longitude === null) {
+      const pin = await ensureSitePin(await loadLine(lineId));
+      if (pin.latitude !== null && pin.longitude !== null) {
+        return evaluateAndStore(lineId, actor, "refresh");
+      }
+    }
+    return latest;
+  }
   return evaluateAndStore(lineId, actor, "initial");
 }
 
@@ -632,3 +646,4 @@ export async function getRecommendation(
     ...built,
   };
 }
+

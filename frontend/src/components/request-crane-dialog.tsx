@@ -416,7 +416,7 @@ function LineCard({
   deadline: string;
   error?: string;
   onDeadline: (value: string) => void;
-  onCreate: (fields: RfqLineFieldKey[]) => void;
+  onCreate: (fields: RfqLineFieldKey[], remark?: string) => void;
 }) {
   const { line, match } = row;
   const today = todayKey();
@@ -535,9 +535,9 @@ function LineCard({
         confirmLabel="Create RFQ and invite"
         pending={pending}
         error={error ?? null}
-        onConfirm={(keys) => {
+        onConfirm={(keys, remark) => {
           setFieldsOpen(false);
-          onCreate(keys);
+          onCreate(keys, remark);
         }}
         onClose={() => setFieldsOpen(false)}
       />
@@ -747,11 +747,13 @@ export function RequestCraneDialog({
       line,
       deadline,
       fields,
+      remark,
     }: {
       line: RaisableLine;
       deadline: string;
       fields: RfqLineFieldKey[];
-    }) => createRfqFromLine(line.id, deadline, fields),
+      remark?: string;
+    }) => createRfqFromLine(line.id, deadline, fields, remark),
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ["rfqs"] });
       void queryClient.invalidateQueries({ queryKey: ["raisable-lines"] });
@@ -958,7 +960,9 @@ export function RequestCraneDialog({
                         onDeadline={(value) =>
                           setDeadlines((previous) => ({ ...previous, [row.line.id]: value }))
                         }
-                        onCreate={(fields) => raise.mutate({ line: row.line, deadline, fields })}
+                        onCreate={(fields, remark) =>
+                          raise.mutate({ line: row.line, deadline, fields, remark })
+                        }
                       />
                     );
                   })
@@ -1010,11 +1014,12 @@ export function RequestCraneDialog({
                         onDeadline={(value) =>
                           setDeadlines((previous) => ({ ...previous, [row.line.id]: value }))
                         }
-                        onCreate={(fields) =>
+                        onCreate={(fields, remark) =>
                           raise.mutate({
                             line: row.line,
                             deadline: deadlines[row.line.id] ?? deadlineInDays(5),
                             fields,
+                            remark,
                           })
                         }
                       />
@@ -1031,3 +1036,4 @@ export function RequestCraneDialog({
     </Dialog>
   );
 }
+

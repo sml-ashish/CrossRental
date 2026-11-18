@@ -9,7 +9,6 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
-  MessageSquare,
   Menu,
   ShieldCheck,
   Truck,
@@ -63,12 +62,6 @@ const NAV_ITEMS: NavItem[] = [
     roles: ["vendor_user", "sales_user", "admin_user"],
   },
   {
-    to: "/app/quotes",
-    label: "Quotations",
-    icon: MessageSquare,
-    roles: ["sales_user", "admin_user"],
-  },
-  {
     to: "/app/bookings",
     label: "Bookings",
     icon: CalendarDays,
@@ -87,12 +80,6 @@ const NAV_ITEMS: NavItem[] = [
     label: "Reports",
     icon: BarChart3,
     roles: ["admin_user", "sales_user", "management_viewer"],
-  },
-  {
-    to: "/app/admin/replies",
-    label: "Reply queue",
-    icon: MessageSquare,
-    roles: ["admin_user"],
   },
   { to: "/app/settings", label: "Settings", icon: ShieldCheck, roles: ["admin_user"] },
 ];

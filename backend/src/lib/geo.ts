@@ -60,8 +60,26 @@ export interface RouteOption {
   encodedPolyline: string | null;
 }
 
+/**
+ * One end of a route: a coordinate, or a place name for the router to find
+ * itself (the way Google Maps accepts "Pune, Maharashtra"). A place name is
+ * used only when there is no stored pin and the geocoder could not make one.
+ */
+export type RouteWaypoint = GeoPoint | { address: string };
+
+function isPointWaypoint(waypoint: RouteWaypoint): waypoint is GeoPoint {
+  return "lat" in waypoint;
+}
+
 export type RoutesResult =
-  | { ok: true; routes: RouteOption[]; provider: string }
+  | {
+      ok: true;
+      routes: RouteOption[];
+      provider: string;
+      /** Where the router placed each end. Present when Google reports it. */
+      origin?: GeoPoint;
+      destination?: GeoPoint;
+    }
   | { ok: false; reason: string };
 
 /** The address pieces a reverse lookup can return, all optional in practice. */
@@ -92,7 +110,7 @@ export interface GeoProvider {
    * higher SKU): a provider or deployment that has not opted in simply has no
    * route to draw, and the screen keeps its labelled straight line.
    */
-  roadRoutes?(origin: GeoPoint, destination: GeoPoint): Promise<RoutesResult>;
+  roadRoutes?(origin: RouteWaypoint, destination: RouteWaypoint): Promise<RoutesResult>;
   /**
    * Turns a coordinate back into an address. Optional on purpose: a provider
    * that cannot do this (the stub, the disabled provider) leaves it out, so an
@@ -245,6 +263,10 @@ interface GoogleRoutesResponse {
     /** Google's own short description, e.g. "NH 48". */
     description?: string;
     polyline?: { encodedPolyline?: string };
+    legs?: Array<{
+      startLocation?: { latLng?: { latitude?: number; longitude?: number } };
+      endLocation?: { latLng?: { latitude?: number; longitude?: number } };
+    }>;
   }>;
   error?: { code?: number; message?: string; status?: string };
 }
@@ -556,14 +578,14 @@ export class GoogleGeoProvider implements GeoProvider {
    * 1,000 km route to tell the difference, and the smaller payload is the one
    * that actually arrives.
    */
-  async roadRoutes(origin: GeoPoint, destination: GeoPoint): Promise<RoutesResult> {
-    if (
-      !Number.isFinite(origin.lat) ||
-      !Number.isFinite(origin.lng) ||
-      !Number.isFinite(destination.lat) ||
-      !Number.isFinite(destination.lng)
-    ) {
-      return { ok: false, reason: "Both ends of the route need a coordinate" };
+  async roadRoutes(origin: RouteWaypoint, destination: RouteWaypoint): Promise<RoutesResult> {
+    for (const end of [origin, destination]) {
+      const usable = isPointWaypoint(end)
+        ? Number.isFinite(end.lat) && Number.isFinite(end.lng)
+        : end.address.trim() !== "";
+      if (!usable) {
+        return { ok: false, reason: "Both ends of the route need a coordinate or a place name" };
+      }
     }
 
     const detailed = await this.requestRoutes(origin, destination, "HIGH_QUALITY");
@@ -581,15 +603,17 @@ export class GoogleGeoProvider implements GeoProvider {
 
   /** One Compute Routes call at a chosen polyline quality. */
   private async requestRoutes(
-    origin: GeoPoint,
-    destination: GeoPoint,
+    origin: RouteWaypoint,
+    destination: RouteWaypoint,
     polylineQuality: "HIGH_QUALITY" | "OVERVIEW",
   ): Promise<RoutesResult> {
+    const waypoint = (end: RouteWaypoint) =>
+      isPointWaypoint(end)
+        ? { location: { latLng: { latitude: end.lat, longitude: end.lng } } }
+        : { address: end.address.trim() };
     const body = {
-      origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
-      destination: {
-        location: { latLng: { latitude: destination.lat, longitude: destination.lng } },
-      },
+      origin: waypoint(origin),
+      destination: waypoint(destination),
       travelMode: "DRIVE",
       // Same preference as `roadDistance`, so the list figure and the route
       // figure are planning numbers from the same table.
@@ -609,7 +633,7 @@ export class GoogleGeoProvider implements GeoProvider {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": this.apiKey,
           "X-Goog-FieldMask":
-            "routes.distanceMeters,routes.duration,routes.description,routes.polyline.encodedPolyline",
+            "routes.distanceMeters,routes.duration,routes.description,routes.polyline.encodedPolyline,routes.legs.startLocation,routes.legs.endLocation",
         },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(this.timeoutMs),
@@ -640,6 +664,8 @@ export class GoogleGeoProvider implements GeoProvider {
     }
 
     const routes: RouteOption[] = [];
+    let resolvedOrigin: GeoPoint | undefined;
+    let resolvedDestination: GeoPoint | undefined;
     for (const route of parsed.routes ?? []) {
       const meters = Number(route?.distanceMeters);
       const encoded = route?.polyline?.encodedPolyline?.trim();
@@ -651,6 +677,18 @@ export class GoogleGeoProvider implements GeoProvider {
         Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds / 60) : null;
       const description = route?.description?.trim();
       const index = routes.length;
+
+      if (index === 0) {
+        const legs = route?.legs ?? [];
+        const start = legs[0]?.startLocation?.latLng;
+        const end = legs[legs.length - 1]?.endLocation?.latLng;
+        if (Number.isFinite(start?.latitude) && Number.isFinite(start?.longitude)) {
+          resolvedOrigin = { lat: Number(start?.latitude), lng: Number(start?.longitude) };
+        }
+        if (Number.isFinite(end?.latitude) && Number.isFinite(end?.longitude)) {
+          resolvedDestination = { lat: Number(end?.latitude), lng: Number(end?.longitude) };
+        }
+      }
 
       routes.push({
         id: `r${index}`,
@@ -666,7 +704,13 @@ export class GoogleGeoProvider implements GeoProvider {
     if (routes.length === 0) {
       return { ok: false, reason: "Google routing found no drivable route" };
     }
-    return { ok: true, routes, provider: this.name };
+    return {
+      ok: true,
+      routes,
+      provider: this.name,
+      ...(resolvedOrigin ? { origin: resolvedOrigin } : {}),
+      ...(resolvedDestination ? { destination: resolvedDestination } : {}),
+    };
   }
 }
 
@@ -749,8 +793,8 @@ export async function tryRoadDistance(
  * approximation and keeps the straight-line label.
  */
 export async function tryRoadRoutes(
-  origin: GeoPoint,
-  destination: GeoPoint,
+  origin: RouteWaypoint,
+  destination: RouteWaypoint,
 ): Promise<RoutesResult> {
   const geo = getGeoProvider();
   if (!geo.roadRoutes) {
@@ -760,10 +804,21 @@ export async function tryRoadRoutes(
     };
   }
   try {
-    if (!isInsideIndia(origin) || !isInsideIndia(destination)) {
-      return { ok: false, reason: "Both ends of the route must be inside India" };
+    // Only coordinates can be checked up front; a place name is checked on the
+    // points the router resolves it to, below.
+    for (const end of [origin, destination]) {
+      if (isPointWaypoint(end) && !isInsideIndia(end)) {
+        return { ok: false, reason: "Both ends of the route must be inside India" };
+      }
     }
     const result = await geo.roadRoutes(origin, destination);
+    if (
+      result.ok &&
+      ((result.origin && !isInsideIndia(result.origin)) ||
+        (result.destination && !isInsideIndia(result.destination)))
+    ) {
+      return { ok: false, reason: "A place name resolved to a point outside India" };
+    }
     // A silent fallback is the hardest failure to diagnose, so every refusal is
     // logged with Google's own status and message. The reason never contains
     // the API key.

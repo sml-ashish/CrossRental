@@ -427,7 +427,7 @@ export function RecommendationPanel({
             className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2 text-[14px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
           >
             <Mail className="size-3.5" aria-hidden />
-            Email all approved vendors
+            Email all vendors
           </button>
         </div>
       ) : null}

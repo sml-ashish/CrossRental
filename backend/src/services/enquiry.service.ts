@@ -1011,6 +1011,19 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
   const pick = (lineKey: RfqLineFieldKey, rfqKey: string, value: unknown) =>
     want(lineKey) ? { [rfqKey]: value } : {};
 
+  // The RFQ's vendor-visible notes hold the ticked "Other terms" and the sales
+  // user's optional remark, in that order.
+  const notes =
+    [want("otherTerms") ? line.otherTerms : null, input.remark]
+      .map((part) => part?.trim())
+      .filter((part): part is string => Boolean(part))
+      .join("\n\n") || null;
+  if (notes && notes.length > 2000) {
+    throw AppError.badRequest(
+      "The other terms and remark together are too long for an RFQ's notes. Shorten the remark or untick Other terms.",
+    );
+  }
+
   const rfq = await createRfq(
     {
       // Core facts are never optional: without them the vendor cannot quote.
@@ -1060,7 +1073,7 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
       ...pick("ehsHrCompliance", "ehsHrRequirements", line.ehsHrCompliance),
       ...pick("insuranceTerms", "insuranceTerms", line.insuranceTerms),
       ...pick("extensionClause", "extensionClause", line.extensionClause),
-      ...pick("otherTerms", "notes", line.otherTerms),
+      notes: notes ?? undefined,
       ...pick("requiredFixedJibM", "fixedJibM", num(line.requiredFixedJibM) ?? undefined),
       ...pick("requiredLuffingJibM", "luffingJibM", num(line.requiredLuffingJibM) ?? undefined),
       ...pick("requiredWindJibM", "windJibM", num(line.requiredWindJibM) ?? undefined),
@@ -1136,4 +1149,5 @@ export async function getLineRoute(
 export function getLineComparison(lineId: string, actor: Actor) {
   return compareQuotationsForLine(lineId, actor);
 }
+
 

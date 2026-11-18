@@ -161,10 +161,12 @@ export function RfqNewPage() {
     mutationFn: ({
       line,
       fields,
+      remark,
     }: {
       line: RaisableLine;
       fields: RfqLineFieldKey[];
-    }) => createRfqFromLine(line.id, deadline, fields),
+      remark?: string;
+    }) => createRfqFromLine(line.id, deadline, fields, remark),
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ["raisable-lines"] });
       void queryClient.invalidateQueries({ queryKey: ["enquiries"] });
@@ -475,10 +477,10 @@ export function RfqNewPage() {
         confirmLabel="Create draft RFQ"
         pending={raise.isPending}
         error={error}
-        onConfirm={(keys) => {
+        onConfirm={(keys, remark) => {
           if (!selected) return;
           setError(null);
-          raise.mutate({ line: selected, fields: keys });
+          raise.mutate({ line: selected, fields: keys, remark });
         }}
         onClose={() => setFieldsOpen(false)}
       />
@@ -775,3 +777,4 @@ function PreviewFact({ label, value, mono }: { label: string; value: string; mon
     </div>
   );
 }
+

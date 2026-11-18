@@ -409,7 +409,10 @@ export function DiscoveryPage() {
   /**
    * The server draws the route, not the browser.
    *
-   * The query only runs for a selected crane that has a pin and a pinned site,
+   * The query runs for any selected crane. An end without a stored pin (the job
+   * site or the crane) is worked out from its place name by the server, as
+   * Google Maps would, and the answer says so (`originEstimated` /
+   * `destinationEstimated`),
    * and TanStack cancels a stale request through the `AbortSignal` when the
    * selection changes quickly. The previous response is kept as placeholder data
    * so the map can fade the old shape instead of blinking empty.
@@ -418,11 +421,25 @@ export function DiscoveryPage() {
     queryKey: ["discovery", "route", lineId, selectedCraneId],
     queryFn: ({ signal }) =>
       getLineRoute(lineId as string, selectedCraneId as string, signal),
-    enabled: Boolean(lineId && selectedCraneId && craneHasPin && sitePoint),
+    enabled: Boolean(lineId && selectedCraneId),
     staleTime: 10 * 60_000,
     retry: false,
     placeholderData: (previous) => previous,
   });
+
+  // When the route placed an unpinned job site, the server saves that pin. The
+  // list was built without it, so ask for it again once per line: that is what
+  // gives every other crane its distance.
+  const sitePinnedByRoute = Boolean(
+    lineId && !sitePoint && !routeQuery.isPlaceholderData && routeQuery.data?.origin,
+  );
+  const refreshedSiteFor = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!sitePinnedByRoute || !lineId || refreshedSiteFor.current.has(lineId)) return;
+    refreshedSiteFor.current.add(lineId);
+    void recommendationQuery.refetch();
+    void raisable.refetch();
+  }, [sitePinnedByRoute, lineId, recommendationQuery, raisable]);
 
   const routeLoading = routeQuery.isFetching || routeQuery.isPlaceholderData;
   // Placeholder data belongs to the previous crane: useful as a faded map shape,
@@ -461,13 +478,16 @@ export function DiscoveryPage() {
     if (primary) setSelectedRouteId(primary.id);
   }, [currentRoute, selectedRouteId]);
 
-  const routeMissing: "site" | "crane" | null = !lineId
-    ? null
-    : !sitePoint
-      ? "site"
-      : !craneHasPin
-        ? "crane"
-        : null;
+  // "No pin" is reported only after the server could not place the name
+  // either; a missing pin alone no longer blocks the route.
+  const routeMissing: "site" | "crane" | null =
+    !lineId || !routeQuery.isError
+      ? null
+      : !sitePoint
+        ? "site"
+        : !craneHasPin
+          ? "crane"
+          : null;
 
   /**
    * The card's route block.
@@ -510,6 +530,7 @@ export function DiscoveryPage() {
           : formatRouteDistance(selectedRoute.km, selectedRoute.durationMin),
         methodLabel: fallback ? "approx." : "road",
         fallback,
+        estimatedPin: Boolean(currentRoute.destinationEstimated || currentRoute.originEstimated),
         fallbackReason: fallback ? (currentRoute.reason ?? null) : null,
         loading: routeLoading,
         siteLabel: currentRoute.siteLabel || siteLabel,
@@ -599,8 +620,19 @@ export function DiscoveryPage() {
 
   const mapRoute = useMemo<GoogleMapRoute | null>(() => {
     if (multiActive) return null;
-    if (!lineId || !selectedCrane || !sitePoint || !craneHasPin) return null;
+    if (!lineId || !selectedCrane) return null;
     const active = displayRoute;
+    // A site with no stored pin starts where the server placed it.
+    const siteEnd = sitePoint
+      ? { lat: sitePoint.latitude, lng: sitePoint.longitude }
+      : (active?.origin ?? null);
+    if (!siteEnd) return null;
+    // A crane with no stored pin is drawn at the point the server looked up
+    // from its location text; with neither there is nothing to draw.
+    const craneEnd = craneHasPin
+      ? { lat: Number(selectedCrane.latitude), lng: Number(selectedCrane.longitude) }
+      : (active?.destination ?? null);
+    if (!craneEnd) return null;
     // A failed request still gets a labelled dashed line, using the list
     // distance the server already returned. The client never measures.
     const failedOption =
@@ -625,13 +657,13 @@ export function DiscoveryPage() {
 
     return {
       from: {
-        lat: sitePoint.latitude,
-        lng: sitePoint.longitude,
+        lat: siteEnd.lat,
+        lng: siteEnd.lng,
         label: recommendations?.site.siteLocation ?? "Job site",
       },
       to: {
-        lat: Number(selectedCrane.latitude),
-        lng: Number(selectedCrane.longitude),
+        lat: craneEnd.lat,
+        lng: craneEnd.lng,
         label: `${selectedCrane.make} ${selectedCrane.model}`,
         craneId: selectedCrane.craneId,
       },
@@ -1034,10 +1066,14 @@ export function DiscoveryPage() {
     <div className={cn("isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6", theme === "light" ? "theme-light" : "theme-dark")}>
       {isDesktop ? (
       <div className="flex min-h-0 flex-1 gap-4 p-4">
+        {/* 30 / 30 / 40: the enquiry lines and the cranes get three tenths each,
+            the map takes the other four. Collapsing the lines panel hands its
+            width to the cranes, so the map stays at 40%. */}
+        <div className="flex min-h-0 min-w-0 flex-[3] gap-4">
         <aside
           className={cn(
-            "flex min-h-0 shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm",
-            linePanelCollapsed ? "w-14" : "w-[320px]",
+            "flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm",
+            linePanelCollapsed ? "w-14 shrink-0" : "flex-1",
           )}
         >
           <LinePanel
@@ -1047,11 +1083,12 @@ export function DiscoveryPage() {
           />
         </aside>
 
-        <aside className="flex min-h-0 w-[400px] shrink-0 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm">
+        <aside className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm">
           {lineId ? recommendationPanel : browseRail}
         </aside>
+        </div>
 
-        <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl border border-ink-800">
+        <main className="relative min-h-0 min-w-0 flex-[2] overflow-hidden rounded-2xl border border-ink-800">
           <GoogleCraneMap
             key={theme}
             theme={theme}
@@ -1491,6 +1528,7 @@ function MoreFilters({
     </div>
   );
 }
+
 
 
 

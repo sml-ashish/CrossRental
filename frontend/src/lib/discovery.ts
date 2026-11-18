@@ -330,6 +330,14 @@ export interface LineRoute {
   approximate: boolean;
   siteLabel: string;
   craneLabel: string;
+  /** Where the route ends; used to place a crane that has no stored pin. */
+  destination?: { lat: number; lng: number };
+  /** Where the route starts (the job site), for a site with no stored pin. */
+  origin?: { lat: number; lng: number };
+  /** True when the crane's end was worked out from its place name. */
+  destinationEstimated?: boolean;
+  /** True when the job site's end was worked out from its place name. */
+  originEstimated?: boolean;
   /**
    * Why this is a straight line, or null for a real road route:
    * `provider_stub`, `provider_disabled`, `route_polyline_off` or
@@ -494,4 +502,5 @@ export function formatRouteDistance(
   const drive = formatDriveTime(durationMin);
   return drive ? `${distance} · about ${drive}` : distance;
 }
+
 

@@ -491,8 +491,12 @@ export function EnquiryIndexPage() {
   });
 
   const createRfq = useMutation({
-    mutationFn: (input: { lineId: string; deadline: string; fields: RfqLineFieldKey[] }) =>
-      createRfqFromLine(input.lineId, input.deadline, input.fields),
+    mutationFn: (input: {
+      lineId: string;
+      deadline: string;
+      fields: RfqLineFieldKey[];
+      remark?: string;
+    }) => createRfqFromLine(input.lineId, input.deadline, input.fields, input.remark),
     onSuccess: async () => {
       setRfqLine(null);
       await queryClient.invalidateQueries({ queryKey: ["enquiries"] });
@@ -1163,12 +1167,13 @@ export function EnquiryIndexPage() {
               : "The RFQ could not be created."
             : null
         }
-        onConfirm={(keys) => {
+        onConfirm={(keys, remark) => {
           if (!rfqLine) return;
           createRfq.mutate({
             lineId: rfqLine.id,
             deadline: new Date(`${deadline}T18:00:00`).toISOString(),
             fields: keys,
+            remark,
           });
         }}
         onClose={() => setRfqLine(null)}
@@ -1176,3 +1181,4 @@ export function EnquiryIndexPage() {
     </div>
   );
 }
+
