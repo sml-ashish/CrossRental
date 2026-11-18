@@ -201,7 +201,7 @@ export function RfqLineFieldPicker({
                       className={cn(
                         "flex cursor-pointer items-start gap-2 rounded-lg border px-2.5 py-2 text-[13px] transition-colors",
                         checked
-                          ? "border-accent-500/40 bg-accent-500/10 text-slate-200"
+                          ? "border-accent-500/40 bg-accent-500/10 text-slate-900"
                           : "border-ink-800 text-slate-500 hover:border-ink-700",
                       )}
                     >

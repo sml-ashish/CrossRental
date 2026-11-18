@@ -15,11 +15,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
-import {
-  RfqLineFieldPicker,
-  useRfqLineFieldSelection,
-  type RfqLineFieldKey,
-} from "@/components/rfq-line-field-picker";
+import { RfqFieldsScreen } from "@/components/rfq-fields-screen";
+import type { RfqLineFieldKey } from "@/lib/rfqLineFields";
 import { Badge } from "@/components/ui/badge";
 import { CountdownChip } from "@/components/ui/countdown-chip";
 import { Dialog } from "@/components/ui/dialog";
@@ -409,8 +406,6 @@ function LineCard({
   pending,
   deadline,
   error,
-  fieldsEnabled,
-  fieldsResetKey,
   onDeadline,
   onCreate,
 }: {
@@ -420,18 +415,12 @@ function LineCard({
   pending: boolean;
   deadline: string;
   error?: string;
-  fieldsEnabled: boolean;
-  fieldsResetKey: string;
   onDeadline: (value: string) => void;
   onCreate: (fields: RfqLineFieldKey[]) => void;
 }) {
   const { line, match } = row;
   const today = todayKey();
-  const fields = useRfqLineFieldSelection({
-    lineId: line.id,
-    enabled: fieldsEnabled,
-    resetKey: fieldsResetKey,
-  });
+  const [fieldsOpen, setFieldsOpen] = useState(false);
 
   return (
     <RowShell
@@ -474,26 +463,6 @@ function LineCard({
         <Fact label="Quantity" value={String(line.quantity)} />
       </dl>
 
-      <details className="mt-3 rounded-xl border border-ink-800 bg-ink-900/40">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[14px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
-          <span>Choose the line fields to send</span>
-          <span className="text-[13px] text-slate-500 tabular-nums">
-            {fields.ready ? `${fields.keys.length} selected` : fields.loading ? "Loading…" : fields.error ? "Unavailable" : "—"}
-          </span>
-        </summary>
-        <div className="max-h-72 overflow-y-auto border-t border-ink-800 p-2.5">
-          <RfqLineFieldPicker
-            line={fields.line}
-            selected={fields.keys}
-            onToggle={fields.toggle}
-            loading={fields.loading}
-            error={fields.error}
-            onRetry={fields.retry}
-            variant="plain"
-          />
-        </div>
-      </details>
-
       <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
         <label className="flex flex-col gap-1">
           <span className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
@@ -535,16 +504,12 @@ function LineCard({
         <button
           type="button"
           className="btn-primary ml-auto px-3 py-1.5 text-xs"
-          onClick={() => onCreate(fields.keys)}
-          disabled={
-            vendorBlocked || pending || deadline === "" || deadline < today || !fields.ready || fields.error
-          }
+          onClick={() => setFieldsOpen(true)}
+          disabled={vendorBlocked || pending || deadline === "" || deadline < today}
           title={
             vendorBlocked
               ? "This vendor is not approved or is inactive."
-              : fields.error
-                ? "The line's fields could not be loaded."
-                : "Create the RFQ, then send it with this vendor selected."
+              : "Choose the line fields, then create the RFQ with this vendor selected."
           }
         >
           {pending ? <Spinner /> : <Plus className="size-3.5" aria-hidden />}
@@ -557,6 +522,25 @@ function LineCard({
           <Alert title="The RFQ was not created">{error}</Alert>
         </div>
       ) : null}
+
+      <RfqFieldsScreen
+        open={fieldsOpen}
+        lineId={line.id}
+        title={`Create RFQ and invite ${vendorName}`}
+        lineLabel={`${line.enquiryNo} · line ${line.lineNo} · ${craneTypeLabel(line.craneTypeName)}${
+          line.capacityT === null ? "" : ` · ${line.capacityT} t`
+        }`}
+        deadline={deadline}
+        onDeadline={onDeadline}
+        confirmLabel="Create RFQ and invite"
+        pending={pending}
+        error={error ?? null}
+        onConfirm={(keys) => {
+          setFieldsOpen(false);
+          onCreate(keys);
+        }}
+        onClose={() => setFieldsOpen(false)}
+      />
     </RowShell>
   );
 }
@@ -971,8 +955,6 @@ export function RequestCraneDialog({
                         pending={raise.isPending && raise.variables?.line.id === row.line.id}
                         deadline={deadline}
                         error={createError[row.line.id]}
-                        fieldsEnabled={open}
-                        fieldsResetKey={`${crane.craneId}:${crane.vendorId}:${open}`}
                         onDeadline={(value) =>
                           setDeadlines((previous) => ({ ...previous, [row.line.id]: value }))
                         }
@@ -1025,8 +1007,6 @@ export function RequestCraneDialog({
                         pending={raise.isPending && raise.variables?.line.id === row.line.id}
                         deadline={deadlines[row.line.id] ?? deadlineInDays(5)}
                         error={createError[row.line.id]}
-                        fieldsEnabled={open}
-                        fieldsResetKey={`${crane.craneId}:${crane.vendorId}:${open}`}
                         onDeadline={(value) =>
                           setDeadlines((previous) => ({ ...previous, [row.line.id]: value }))
                         }
@@ -1051,4 +1031,3 @@ export function RequestCraneDialog({
     </Dialog>
   );
 }
-

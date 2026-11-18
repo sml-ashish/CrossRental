@@ -17,11 +17,8 @@ import {
   listRaisableLines,
   type RaisableLine,
 } from "@/lib/enquiries";
-import {
-  RfqLineFieldPicker,
-  useRfqLineFieldSelection,
-  type RfqLineFieldSelection,
-} from "@/components/rfq-line-field-picker";
+import { RfqFieldsScreen } from "@/components/rfq-fields-screen";
+import type { RfqLineFieldKey } from "@/lib/rfqLineFields";
 import { ApiError } from "@/lib/api";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -157,9 +154,8 @@ export function RfqNewPage() {
     queryFn: () => listRaisableLines(search),
   });
 
-  // The picker is keyed to a line so switching lines cannot carry a stale
-  // selection across. It is populated once the full line arrives.
-  const fieldSelection = useRfqLineFieldSelection({ lineId: selectedId });
+  // Clicking "Raise" opens the field-selection screen before anything is created.
+  const [fieldsOpen, setFieldsOpen] = useState(false);
 
   const raise = useMutation({
     mutationFn: ({
@@ -167,12 +163,13 @@ export function RfqNewPage() {
       fields,
     }: {
       line: RaisableLine;
-      fields: RfqLineFieldSelection["keys"];
+      fields: RfqLineFieldKey[];
     }) => createRfqFromLine(line.id, deadline, fields),
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ["raisable-lines"] });
       void queryClient.invalidateQueries({ queryKey: ["enquiries"] });
       void queryClient.invalidateQueries({ queryKey: ["rfqs"] });
+      setFieldsOpen(false);
       void navigate({ to: "/app/rfqs/$rfqId", params: { rfqId: created.rfq.id } });
     },
     onError: (err) => {
@@ -231,8 +228,6 @@ export function RfqNewPage() {
   }, [rows, selectedId]);
 
   const selected = rows.find((line) => line.id === selectedId) ?? null;
-  const fullLine = fieldSelection.line;
-  const selectedFields = fieldSelection.keys;
 
   const warnings = lineWarnings(selected);
   const days = daysToRespond(deadline);
@@ -245,9 +240,9 @@ export function RfqNewPage() {
   }
 
   function startRaise() {
-    if (!selected || !fullLine) return;
+    if (!selected) return;
     setError(null);
-    raise.mutate({ line: selected, fields: selectedFields });
+    setFieldsOpen(true);
   }
 
   const listKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -279,8 +274,7 @@ export function RfqNewPage() {
       days={days}
       warnings={warnings}
       error={error}
-      pending={raise.isPending || fieldSelection.loading}
-      fieldSelection={fieldSelection}
+      pending={raise.isPending}
       onCreate={startRaise}
     />
   );
@@ -464,6 +458,30 @@ export function RfqNewPage() {
           </div>
         </div>
       ) : null}
+
+      <RfqFieldsScreen
+        open={fieldsOpen && Boolean(selected)}
+        lineId={selected?.id ?? null}
+        title="Raise an RFQ"
+        lineLabel={
+          selected
+            ? `${selected.enquiryNo} / line ${selected.lineNo} · ${selected.quantity} × ${
+                selected.craneTypeName ?? selected.craneTypeCode ?? "Crane"
+              } · ${capacityLabel(selected)}`
+            : undefined
+        }
+        deadline={deadline}
+        onDeadline={setDeadline}
+        confirmLabel="Create draft RFQ"
+        pending={raise.isPending}
+        error={error}
+        onConfirm={(keys) => {
+          if (!selected) return;
+          setError(null);
+          raise.mutate({ line: selected, fields: keys });
+        }}
+        onClose={() => setFieldsOpen(false)}
+      />
     </div>
   );
 }
@@ -579,7 +597,6 @@ function DraftPreview({
   warnings,
   error,
   pending,
-  fieldSelection,
   onCreate,
 }: {
   line: RaisableLine | null;
@@ -589,7 +606,6 @@ function DraftPreview({
   warnings: string[];
   error: string | null;
   pending: boolean;
-  fieldSelection: RfqLineFieldSelection;
   onCreate: () => void;
 }) {
   if (!line) {
@@ -648,15 +664,6 @@ function DraftPreview({
             mono={Boolean(line.sitePincode)}
           />
         </dl>
-
-        <RfqLineFieldPicker
-          line={fieldSelection.line}
-          selected={fieldSelection.keys}
-          onToggle={fieldSelection.toggle}
-          loading={fieldSelection.loading}
-          error={fieldSelection.error}
-          onRetry={fieldSelection.retry}
-        />
 
         <p className="rounded-lg border border-ink-800 bg-ink-850 px-3 py-2 text-[13px] leading-relaxed text-slate-500">
           Customer name and address, the rental budget, internal notes and the Sales
@@ -737,18 +744,15 @@ function DraftPreview({
         <button
           type="button"
           onClick={onCreate}
-          disabled={pending || deadline === "" || !fieldSelection.ready || fieldSelection.error}
+          disabled={pending || deadline === ""}
           className="btn-primary w-full py-2 text-[15px]"
         >
           {pending ? <Spinner /> : <Send className="size-4" aria-hidden />}
-          {fieldSelection.error
-            ? "Line details unavailable"
-            : pending
-              ? "Creating the draft"
-              : "Create draft RFQ"}
+          {pending ? "Creating the draft" : "Choose fields and raise RFQ"}
         </button>
         <p className="mt-2 text-center text-[13px] text-slate-500">
-          Creates a draft. Vendors are not emailed until you choose them and send.
+          You choose which line fields to send next. Vendors are not emailed until you pick
+          them and send.
         </p>
       </div>
     </div>
@@ -771,4 +775,3 @@ function PreviewFact({ label, value, mono }: { label: string; value: string; mon
     </div>
   );
 }
-

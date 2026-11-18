@@ -476,4 +476,3 @@ export const candidateQuerySchema = z.object({
 });
 
 export type CandidateQuery = z.infer<typeof candidateQuerySchema>;
-

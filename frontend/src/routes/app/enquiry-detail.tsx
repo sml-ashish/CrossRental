@@ -33,7 +33,6 @@ import { classifyRange } from "@/lib/availability";
 import {
   LINE_STEPS,
   addDays,
-  daysUntil,
   enquirySummaryText,
   formatLongDate,
   formatShortDate,
@@ -65,15 +64,11 @@ import { cn } from "@/lib/cn";
 import { SiteMap } from "@/components/site-map";
 import { EnquiryBulkLines } from "@/components/enquiry-bulk-lines";
 import { Alert } from "@/components/ui/alert";
-import {
-  RfqLineFieldPicker,
-  useRfqLineFieldSelection,
-} from "@/components/rfq-line-field-picker";
+import { RfqFieldsScreen } from "@/components/rfq-fields-screen";
+import type { RfqLineFieldKey } from "@/lib/rfqLineFields";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Field, TextInput } from "@/components/ui/form";
 import { Menu, type MenuItem } from "@/components/ui/menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 
 /**
  * Enquiry detail (P1).
@@ -193,10 +188,6 @@ export function EnquiryDetailPage() {
   const [copyState, setCopyState] = useState<"copied" | "failed" | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  // This screen already has the full line, so the picker needs no extra fetch.
-  const rfqLine =
-    enquiry.data?.enquiry.lines.find((line) => line.id === rfqFor) ?? null;
-  const rfqFields = useRfqLineFieldSelection({ line: rfqLine, enabled: Boolean(rfqFor) });
 
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: ["enquiry", params.enquiryId] });
@@ -204,12 +195,11 @@ export function EnquiryDetailPage() {
     await queryClient.invalidateQueries({ queryKey: ["raisable-lines"] });
   }
 
-  async function raiseRfq(lineId: string) {
-    if (!rfqFields.ready || rfqFields.error) return;
+  async function raiseRfq(lineId: string, fields: RfqLineFieldKey[]) {
     setBusy(true);
     setError(null);
     try {
-      const created = await createRfqFromLine(lineId, rfqDeadline, rfqFields.keys);
+      const created = await createRfqFromLine(lineId, rfqDeadline, fields);
       await refresh();
       void navigate({ to: "/app/rfqs/$rfqId", params: { rfqId: created.rfq.id } });
     } catch (err) {
@@ -235,7 +225,6 @@ export function EnquiryDetailPage() {
   }
 
   function openRaise(lineId: string) {
-    rfqFields.reset();
     setRfqFor(lineId);
     setRfqDeadline(defaultDeadline());
     setCancelFor(null);
@@ -718,96 +707,18 @@ export function EnquiryDetailPage() {
                             </div>
                           ) : null}
 
-                          {rfqFor === line.id ? (
-                            <div className="mt-4 rounded-lg border border-ink-800 bg-ink-900 p-4">
-                              <p className="text-[15px] font-medium text-slate-900">
-                                Raise an RFQ for {lineShort(line)}
-                              </p>
-                              <p className="mt-1 text-[14px] text-slate-500">
-                                Choose which optional fields to copy. The customer name,
-                                address and internal budget are never sent.
-                              </p>
-
-                              <details className="mt-3 rounded-lg border border-ink-800 bg-ink-850/40">
-                                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[14px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
-                                  <span>Choose which line fields to send</span>
-                                  <span className="text-[13px] text-slate-500 tabular-nums">
-                                    {rfqFields.keys.length} selected
-                                  </span>
-                                </summary>
-                                <div className="max-h-72 overflow-y-auto border-t border-ink-800 p-2.5">
-                                  <RfqLineFieldPicker
-                                    line={rfqFields.line}
-                                    selected={rfqFields.keys}
-                                    onToggle={rfqFields.toggle}
-                                    loading={rfqFields.loading}
-                                    error={rfqFields.error}
-                                    onRetry={rfqFields.retry}
-                                    variant="plain"
-                                  />
-                                </div>
-                              </details>
-
-                              <div className="mt-3 flex flex-wrap items-end gap-2">
-                                <Field
-                                  label="Submission deadline"
-                                  htmlFor={`rfq-deadline-${line.id}`}
-                                >
-                                  <TextInput
-                                    id={`rfq-deadline-${line.id}`}
-                                    type="date"
-                                    value={rfqDeadline}
-                                    onChange={setRfqDeadline}
-                                  />
-                                </Field>
-                                <div className="flex gap-1.5">
-                                  {[3, 7, 14].map((days) => (
-                                    <button
-                                      key={days}
-                                      type="button"
-                                      onClick={() =>
-                                        setRfqDeadline(addDays(todayDay(), days))
-                                      }
-                                      className={cn(
-                                        "rounded-lg border px-2.5 py-2 text-[14px] font-medium transition-colors",
-                                        rfqDeadline === addDays(todayDay(), days)
-                                          ? "border-accent-500 bg-accent-500/10 text-accent-400"
-                                          : "border-ink-800 bg-ink-850 text-slate-500 hover:border-ink-700 hover:text-slate-800",
-                                      )}
-                                    >
-                                      +{days} days
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-
-                              <p className="mt-2 text-[14px] text-slate-500">
-                                {Math.max(0, daysUntil(rfqDeadline))}{" "}
-                                {plural(Math.max(0, daysUntil(rfqDeadline)), "day")} to
-                                respond
-                              </p>
-
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                <button
-                                  type="button"
-                                  className="btn-primary"
-                                  disabled={busy || !rfqFields.ready || rfqFields.error}
-                                  onClick={() => void raiseRfq(line.id)}
-                                >
-                                  {busy ? <Spinner /> : null}
-                                  Raise RFQ
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn-secondary"
-                                  disabled={busy}
-                                  onClick={() => setRfqFor(null)}
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : null}
+                          <RfqFieldsScreen
+                            open={rfqFor === line.id}
+                            line={line}
+                            title="Raise RFQ"
+                            lineLabel={lineShort(line)}
+                            deadline={rfqDeadline}
+                            onDeadline={setRfqDeadline}
+                            pending={busy}
+                            error={rfqFor === line.id ? error : null}
+                            onConfirm={(keys) => void raiseRfq(line.id, keys)}
+                            onClose={() => setRfqFor(null)}
+                          />
 
                           {cancelFor === line.id ? (
                             <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
@@ -1317,4 +1228,3 @@ function LoadingPage({ wide }: { wide: boolean }) {
     </div>
   );
 }
-

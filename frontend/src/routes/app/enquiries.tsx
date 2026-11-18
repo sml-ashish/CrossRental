@@ -24,11 +24,8 @@ import {
   type EnquirySummaryCounts,
 } from "@/lib/enquiries";
 import { Alert } from "@/components/ui/alert";
-import {
-  RfqLineFieldPicker,
-  useRfqLineFieldSelection,
-  type RfqLineFieldKey,
-} from "@/components/rfq-line-field-picker";
+import { RfqFieldsScreen } from "@/components/rfq-fields-screen";
+import type { RfqLineFieldKey } from "@/lib/rfqLineFields";
 import { EnquiryBulkUpload } from "@/components/enquiry-bulk-upload";
 import { SiteMap } from "@/components/site-map";
 import { Spinner } from "@/components/ui/spinner";
@@ -492,10 +489,6 @@ export function EnquiryIndexPage() {
     queryFn: () => getEnquiry(selectedId as string),
     enabled: Boolean(selectedId),
   });
-
-  // The enquiry panel already carries the full line, so this selection does not
-  // need another fetch. It is reset whenever the RFQ dialog is opened.
-  const rfqFields = useRfqLineFieldSelection({ line: rfqLine, enabled: Boolean(rfqLine) });
 
   const createRfq = useMutation({
     mutationFn: (input: { lineId: string; deadline: string; fields: RfqLineFieldKey[] }) =>
@@ -1077,7 +1070,6 @@ export function EnquiryIndexPage() {
                                 type="button"
                                 onClick={() => {
                                   createRfq.reset();
-                                  rfqFields.reset();
                                   setRfqLine(line);
                                 }}
                                 className={actionClass}
@@ -1149,113 +1141,38 @@ export function EnquiryIndexPage() {
       </aside>
 
       {/* ------------------------------------------------------- RFQ dialog */}
-      {rfqLine ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Cancel"
-            className="absolute inset-0 bg-black/60 backdrop-blur-[1px]"
-            onClick={() => setRfqLine(null)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Create RFQ"
-            className="relative max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-ink-800 bg-ink-900 p-5 shadow-2xl"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-[17px] font-semibold text-white">Create RFQ</h2>
-                <p className="mt-1 text-[15px] text-slate-500">
-                  Line {rfqLine.lineNo} · {rfqLine.quantity} ×{" "}
-                  {craneTypeLabel(rfqLine.craneTypeName)}
-                  {rfqLine.capacityT !== null ? ` · ${rfqLine.capacityT} t` : ""}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setRfqLine(null)}
-                aria-label="Close"
-                className="rounded-md p-1 text-slate-500 transition-colors hover:bg-ink-850 hover:text-white"
-              >
-                <X className="size-4" aria-hidden />
-              </button>
-            </div>
-
-            <label className="field-label mt-4" htmlFor="rfq-deadline">
-              Quotes due
-            </label>
-            <input
-              id="rfq-deadline"
-              type="date"
-              value={deadline}
-              onChange={(event) => setDeadline(event.target.value)}
-              className="field-input"
-            />
-
-            <details className="mt-4 rounded-xl border border-ink-800 bg-ink-850/40">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-[15px] font-medium text-slate-600 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
-                <span>Choose which line fields to send</span>
-                <span className="text-[13px] text-slate-500 tabular-nums">
-                  {rfqFields.keys.length} selected
-                </span>
-              </summary>
-              <div className="max-h-72 overflow-y-auto border-t border-ink-800 p-2.5">
-                <RfqLineFieldPicker
-                  line={rfqFields.line}
-                  selected={rfqFields.keys}
-                  onToggle={rfqFields.toggle}
-                  loading={rfqFields.loading}
-                  error={rfqFields.error}
-                  onRetry={rfqFields.retry}
-                  variant="plain"
-                />
-              </div>
-            </details>
-
-            <p className="mt-2 text-[15px] leading-relaxed text-slate-500">
-              Only the fields you tick are copied into the RFQ. The customer, address and budget
-              are never sent to vendors.
-            </p>
-
-            {createRfq.isError ? (
-              <div className="mt-3">
-                <Alert tone="error">
-                  {createRfq.error instanceof Error
-                    ? createRfq.error.message
-                    : "The RFQ could not be created."}
-                </Alert>
-              </div>
-            ) : null}
-
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-lg border border-ink-800 px-4 py-2 text-[15px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
-                onClick={() => setRfqLine(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="rounded-lg bg-accent-500 px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={!deadline || createRfq.isPending || !rfqFields.ready || rfqFields.error}
-                onClick={() => {
-                  if (!rfqLine || !rfqFields.ready) return;
-                  createRfq.mutate({
-                    lineId: rfqLine.id,
-                    deadline: new Date(`${deadline}T18:00:00`).toISOString(),
-                    fields: rfqFields.keys,
-                  });
-                }}
-              >
-                {createRfq.isPending ? "Sending…" : "Send RFQ"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <RfqFieldsScreen
+        open={Boolean(rfqLine)}
+        line={rfqLine}
+        title="Create RFQ"
+        lineLabel={
+          rfqLine
+            ? `Line ${rfqLine.lineNo} · ${rfqLine.quantity} × ${craneTypeLabel(rfqLine.craneTypeName)}${
+                rfqLine.capacityT !== null ? ` · ${rfqLine.capacityT} t` : ""
+              }`
+            : undefined
+        }
+        deadline={deadline}
+        onDeadline={setDeadline}
+        confirmLabel="Create RFQ"
+        pending={createRfq.isPending}
+        error={
+          createRfq.isError
+            ? createRfq.error instanceof Error
+              ? createRfq.error.message
+              : "The RFQ could not be created."
+            : null
+        }
+        onConfirm={(keys) => {
+          if (!rfqLine) return;
+          createRfq.mutate({
+            lineId: rfqLine.id,
+            deadline: new Date(`${deadline}T18:00:00`).toISOString(),
+            fields: keys,
+          });
+        }}
+        onClose={() => setRfqLine(null)}
+      />
     </div>
   );
 }
-
