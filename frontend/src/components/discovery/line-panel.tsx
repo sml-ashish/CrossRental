@@ -139,6 +139,7 @@ function lineMatches(line: RaisableLine, query: string): boolean {
     line.craneTypeCode,
     line.siteLocation,
     line.siteStateName,
+    line.sitePincode,
   ]
     .filter(Boolean)
     .join(" ")
@@ -150,8 +151,8 @@ type LineFilter = "all" | "rfq" | "no-rfq";
 
 const LINE_FILTERS: Array<{ value: LineFilter; label: string }> = [
   { value: "all", label: "All" },
-  { value: "rfq", label: "RFQ raised" },
-  { value: "no-rfq", label: "No RFQ yet" },
+  { value: "rfq", label: "Enquiries raised" },
+  { value: "no-rfq", label: "No enquiries yet" },
 ];
 
 export interface LinePanelProps {
@@ -165,9 +166,6 @@ export interface LinePanelProps {
   onToggleCollapsed: () => void;
   theme: DiscoveryTheme;
   onToggleTheme: () => void;
-  /** "To": the enquiry site typed on the screen. Lists the enquiries going there. */
-  toText: string;
-  onToChange: (value: string) => void;
   onPickLine: (lineId: string) => void;
   onClear: () => void;
   onRetry: () => void;
@@ -186,8 +184,6 @@ export function LinePanel({
   onToggleCollapsed,
   theme,
   onToggleTheme,
-  toText,
-  onToChange,
   onPickLine,
   onClear,
   onRetry,
@@ -199,13 +195,13 @@ export function LinePanel({
 
   const matches = useMemo(() => {
     const needle = query.trim();
-    return linesToSite(lines ?? [], toText).filter((line) => {
+    return (lines ?? []).filter((line) => {
       if (!lineMatches(line, needle)) return false;
       if (filter === "rfq") return line.rfqCount > 0;
       if (filter === "no-rfq") return line.rfqCount === 0;
       return true;
     });
-  }, [lines, query, filter, toText]);
+  }, [lines, query, filter]);
 
   const groups = useMemo(() => {
     const byEnquiry = new Map<string, { enquiryNo: string; lines: RaisableLine[] }>();
@@ -283,43 +279,11 @@ export function LinePanel({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Enquiry no., site or crane type"
-            aria-label="Search enquiry lines"
+            placeholder="Search enquiry no., site or crane type"
+            aria-label="Search enquiry lines by number, site or crane type"
             className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
           />
         </div>
-
-        <div className="relative mt-2">
-          <MapPin
-            className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-neutral-500"
-            aria-hidden
-          />
-          <input
-            type="text"
-            value={toText}
-            onChange={(event) => onToChange(event.target.value)}
-            placeholder="To: enquiry site, e.g. Vadodara"
-            aria-label="To: show enquiries for this site"
-            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-8 pl-9 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
-          />
-          {toText ? (
-            <button
-              type="button"
-              onClick={() => onToChange("")}
-              aria-label="Clear To"
-              className="absolute top-1/2 right-2 flex size-5 -translate-y-1/2 items-center justify-center rounded text-neutral-500 hover:text-white"
-            >
-              <X className="size-3.5" aria-hidden />
-            </button>
-          ) : null}
-        </div>
-
-        {toText.trim() ? (
-          <p className="mt-2 px-0.5 text-[14px] text-neutral-400" aria-live="polite">
-            <span className="font-semibold text-white tabular-nums">{matches.length}</span>{" "}
-            enquiry line{matches.length === 1 ? "" : "s"} to {toText.trim()}
-          </p>
-        ) : null}
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {LINE_FILTERS.map((option) => (
@@ -374,12 +338,8 @@ export function LinePanel({
         ) : groups.length === 0 ? (
           <EmptyState
             icon={<Compass className="size-4" aria-hidden />}
-            title={toText.trim() ? `No enquiries to ${toText.trim()}` : "No open lines match"}
-            description={
-              toText.trim()
-                ? "No open enquiry line has its site there. Try a nearby town or clear To."
-                : "Clear the search, or open the enquiry to add a line."
-            }
+            title="No open lines match"
+            description="Clear the search, or open the enquiry to add a line."
             className="px-2 py-10 [&_p]:text-neutral-200 [&_p:last-child]:text-neutral-500"
           />
         ) : (
@@ -519,5 +479,3 @@ function Fact({
     </div>
   );
 }
-
-

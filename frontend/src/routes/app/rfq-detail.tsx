@@ -132,14 +132,10 @@ function useRfqTheme(): [RfqTheme, () => void] {
   return [theme, toggle];
 }
 
+// The picker always recommends from the technical list now; distance is a sort
+// on that list, so an old stored "distance" choice is ignored.
 function readStoredMode(): CandidateMode {
-  try {
-    return window.localStorage.getItem("sml.rfq.picker.mode") === "distance"
-      ? "distance"
-      : "technical";
-  } catch {
-    return "technical";
-  }
+  return "technical";
 }
 
 function InternalRfqDetailPage() {

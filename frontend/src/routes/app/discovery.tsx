@@ -24,6 +24,7 @@ import {
   type DiscoveryCrane,
   type DiscoveryFilters,
   type RecommendationMode,
+  type DistanceSort,
 } from "@/lib/discovery";
 import {
   GoogleCraneMap,
@@ -244,9 +245,9 @@ export function DiscoveryPage() {
   const [lineId, setLineId] = useState<string | null>(() =>
     typeof routeSearch.line === "string" && routeSearch.line !== "" ? routeSearch.line : null,
   );
-  const [mode, setMode] = useState<RecommendationMode>(() =>
-    routeSearch.mode === "distance" ? "distance" : "technical",
-  );
+  // The list is always the technical one; distance only re-orders it.
+  const [mode, setMode] = useState<RecommendationMode>("technical");
+  const [distanceSort, setDistanceSort] = useState<DistanceSort>("best");
   /** Which of the server's route options is highlighted. Null = the primary. */
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   /** Cranes ticked in the recommendation list, to send an RFQ to their vendors. */
@@ -316,7 +317,7 @@ export function DiscoveryPage() {
         ? routeSearch.line
         : null,
     );
-    setMode(routeSearch.mode === "distance" ? "distance" : "technical");
+    setMode("technical");
     setSelectedCraneId(
       typeof routeSearch.crane === "string" ? routeSearch.crane : null,
     );
@@ -350,7 +351,9 @@ export function DiscoveryPage() {
   // the same query keys, so the list is fetched once and both see it.
   const raisable = useRaisableLines();
   const recommendationQuery = useLineRecommendations(lineId, mode);
-  const recommendations = recommendationQuery.data?.recommendations;
+  // Only a selected enquiry has recommendations. Once it is cleared the query's
+  // last answer can linger in the cache, and with it the old job site's pin.
+  const recommendations = lineId ? recommendationQuery.data?.recommendations : undefined;
 
   const committedQuery = useMemo(() => toQuery(committed), [committed]);
   const results = useQuery({
@@ -371,13 +374,13 @@ export function DiscoveryPage() {
   const recommendedCranes = useMemo(
     () =>
       filterRecommended(
-        cranesLocatedIn(orderedRecommendationCranes(recommendations, mode, requiredT), filters.location),
+        cranesLocatedIn(orderedRecommendationCranes(recommendations, mode, requiredT, distanceSort), filters.location),
         availableOnly,
         searchText,
       )
         .slice(0, TOP_RECOMMENDED_CRANES)
         .map(toDisplayCrane),
-    [recommendations, filters.location, mode, availableOnly, searchText, requiredT],
+    [recommendations, filters.location, mode, distanceSort, availableOnly, searchText, requiredT],
   );
   const cranes = lineId ? recommendedCranes : browseCranes;
   const highlightedCraneId = selectedCraneId;
@@ -396,10 +399,10 @@ export function DiscoveryPage() {
       }
       return null;
     }
-    // A line answers its own site; a stale browse site must not leak into it.
-    if (lineId) return null;
-    return data?.site ?? null;
-  }, [recommendations, data, lineId]);
+    // A line answers its own site; browsing has no job site at all, so nothing
+    // from a previous enquiry (or a stale browse query) is drawn.
+    return null;
+  }, [recommendations, lineId]);
 
   const craneHasPin =
     selectedCrane !== null &&
@@ -753,6 +756,7 @@ export function DiscoveryPage() {
   };
 
   const clearLine = () => {
+    setFilters((prev) => (prev.siteLocation ? { ...prev, siteLocation: "" } : prev));
     setCheckedIds(new Set());
     setLineId(null);
     setMode("technical");
@@ -805,8 +809,6 @@ export function DiscoveryPage() {
     displayName,
     theme,
     onToggleTheme: toggleTheme,
-    toText: filters.siteLocation,
-    onToChange: (value: string) => set("siteLocation", value),
     onPickLine: pickLine,
     onClear: clearLine,
     onRetry: () => void raisable.refetch(),
@@ -817,6 +819,8 @@ export function DiscoveryPage() {
       lineId={lineId as string}
       line={selectedLine}
       mode={mode}
+      distanceSort={distanceSort}
+      onDistanceSortChange={setDistanceSort}
       recommendations={recommendations}
       isPending={recommendationQuery.isPending}
       isError={recommendationQuery.isError}
@@ -1191,6 +1195,10 @@ export function DiscoveryPage() {
 
       {moreOpen ? (
         <MoreFilters
+          craneTypes={(facets.data?.craneTypes ?? []).map((type) => ({
+            value: type.code,
+            label: type.name,
+          }))}
           filters={filters}
           set={set}
           halfWindow={halfWindow}
@@ -1360,6 +1368,7 @@ function SkeletonRows() {
  * that window still reaches the crane's own screen.
  */
 function MoreFilters({
+  craneTypes,
   filters,
   set,
   halfWindow,
@@ -1367,6 +1376,7 @@ function MoreFilters({
   onClear,
   onClose,
 }: {
+  craneTypes: Array<{ value: string; label: string }>;
   filters: FilterState;
   set: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
   halfWindow: boolean;
@@ -1409,6 +1419,51 @@ function MoreFilters({
         </div>
 
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
+          <fieldset className="space-y-3">
+            <legend className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+              Crane type and status
+            </legend>
+            <div className="grid grid-cols-2 gap-2">
+              <Select
+                id="more-type"
+                value={filters.craneType}
+                onChange={(value) => set("craneType", value)}
+                placeholder="Any crane type"
+                options={craneTypes}
+              />
+              <TextInput
+                id="more-capacity"
+                value={filters.capacityT}
+                onChange={(value) => set("capacityT", value)}
+                inputMode="decimal"
+                placeholder="Min capacity (t)"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Chip active={filters.availability === ""} onClick={() => set("availability", "")}>
+                All
+              </Chip>
+              <Chip
+                active={filters.availability === "AVAILABLE"}
+                onClick={() => set("availability", "AVAILABLE")}
+              >
+                Available
+              </Chip>
+              <Chip
+                active={filters.availability === "ENGAGED"}
+                onClick={() => set("availability", "ENGAGED")}
+              >
+                Engaged
+              </Chip>
+              <Chip
+                active={filters.availability === "UNDER_MAINTENANCE"}
+                onClick={() => set("availability", "UNDER_MAINTENANCE")}
+              >
+                Maintenance
+              </Chip>
+            </div>
+          </fieldset>
+
           <fieldset className="space-y-3">
             <legend className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Hire window
@@ -1528,7 +1583,3 @@ function MoreFilters({
     </div>
   );
 }
-
-
-
-

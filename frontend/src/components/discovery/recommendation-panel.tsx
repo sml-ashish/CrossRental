@@ -16,16 +16,16 @@ import {
   type LineRecommendationsResponse,
   type RecommendationCrane,
   type RecommendationMode,
+  type DistanceSort,
+  DISTANCE_SORT_OPTIONS,
   TOP_RECOMMENDED_CRANES,
   filterRecommended,
-  capacityFloorT,
 } from "@/lib/discovery";
 import type { RaisableLine } from "@/lib/enquiries";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs } from "@/components/ui/tabs";
 import { CRANE_PATH, craneFill } from "@/components/crane-glyph";
 import { capacityText, lineReference } from "@/components/discovery/line-panel";
 import type { RouteSummary } from "@/components/discovery/route-card";
@@ -93,6 +93,9 @@ export interface RecommendationPanelProps {
   lineId: string;
   line: RaisableLine | null;
   mode: RecommendationMode;
+  /** Order of the list: technical best fit, or by distance either way. */
+  distanceSort: DistanceSort;
+  onDistanceSortChange: (sort: DistanceSort) => void;
   recommendations: LineRecommendations | undefined;
   isPending: boolean;
   isError: boolean;
@@ -121,6 +124,8 @@ export function RecommendationPanel({
   lineId,
   line,
   mode,
+  distanceSort,
+  onDistanceSortChange,
   recommendations,
   isPending,
   isError,
@@ -144,7 +149,12 @@ export function RecommendationPanel({
   const noticeId = useId();
   const [sendOpen, setSendOpen] = useState(false);
   const [sendAll, setSendAll] = useState(false);
-  const allCranes = orderedRecommendationCranes(recommendations, mode, line?.capacityT);
+  const allCranes = orderedRecommendationCranes(
+    recommendations,
+    mode,
+    line?.capacityT,
+    distanceSort,
+  );
   const cranes = filterRecommended(
     cranesLocatedIn(allCranes, fromText),
     availableOnly,
@@ -152,7 +162,6 @@ export function RecommendationPanel({
   ).slice(0, TOP_RECOMMENDED_CRANES);
   const total = cranes.length;
   const filteredOut = allCranes.length > 0 && total === 0 && (Boolean(fromText.trim()) || availableOnly || Boolean(searchText.trim()));
-  const siteLabel = recommendations?.site.siteLocation ?? line?.siteLocation ?? "";
   // Only ticks that are still on the visible list count: a crane filtered out by
   // "From" must not silently receive an RFQ.
   const checkedCranes = cranes.filter((crane) => checkedIds.has(crane.craneId));
@@ -188,17 +197,32 @@ export function RecommendationPanel({
           </button>
         </div>
 
-        <Tabs
-          value={mode}
-          onChange={onModeChange}
-          label="Recommendation view"
-          idPrefix="recommendation"
-          className="mt-3"
-          tabs={[
-            { value: "technical", label: "Technical" },
-            { value: "distance", label: "Distance" },
-          ]}
-        />
+        <div
+          role="group"
+          aria-label="Sort recommended cranes"
+          className="mt-3 flex flex-wrap items-center gap-1.5"
+        >
+          <span className="mr-1 text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            Sort
+          </span>
+          {DISTANCE_SORT_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={distanceSort === option.value}
+              onClick={() => onDistanceSortChange(option.value)}
+              className={cn(
+                "rounded-full px-3 py-1 text-[14px] font-medium transition-colors",
+                distanceSort === option.value
+                  ? "bg-white text-ink-950"
+                  : "border border-ink-700 text-neutral-400 hover:text-white",
+              )}
+            >
+              {option.label}
+              {option.value === "nearest" ? " ↑" : option.value === "farthest" ? " ↓" : ""}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
@@ -229,44 +253,6 @@ export function RecommendationPanel({
               </div>
             ) : null}
 
-            <div className="mb-4 grid grid-cols-2 gap-2">
-              <label className="min-w-0">
-                <span className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-                  From
-                </span>
-                <span className="relative mt-1.5 block">
-                  <input
-                    type="text"
-                    value={fromText}
-                    onChange={(event) => onFromChange(event.target.value)}
-                    placeholder="Crane location, e.g. Pune"
-                    className="w-full rounded-lg border border-ink-800 bg-ink-850 py-2 pr-7 pl-3 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
-                  />
-                  {fromText ? (
-                    <button
-                      type="button"
-                      onClick={() => onFromChange("")}
-                      aria-label="Clear from location"
-                      className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center rounded text-neutral-500 hover:text-white"
-                    >
-                      <X className="size-3.5" aria-hidden />
-                    </button>
-                  ) : null}
-                </span>
-              </label>
-              <div className="min-w-0">
-                <span className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-                  To
-                </span>
-                <p
-                  className="mt-1.5 truncate rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[15px] text-neutral-300"
-                  title={siteLabel}
-                >
-                  {siteLabel || "Enquiry site"}
-                </p>
-              </div>
-            </div>
-
             <div className="mb-4 flex items-center gap-3">
               <input
                 type="search"
@@ -293,19 +279,19 @@ export function RecommendationPanel({
                   {fromText.trim() ? ` in ${fromText.trim()}` : ""}
                   <span className="font-normal text-neutral-500">
                     {" · "}
-                    {mode === "distance" ? "nearest first" : "smallest adequate first"}
+                    {distanceSort === "nearest"
+                      ? "nearest first"
+                      : distanceSort === "farthest"
+                        ? "farthest first"
+                        : "smallest adequate first"}
                   </span>
                 </p>
                 <p className="mt-0.5 text-[13px] text-neutral-500" title={recommendations.capacityRule}>
-                  {mode === "distance"
-                    ? capacityFloorT(line?.capacityT) !== null
-                      ? `Nearest first · only ${capacityFloorT(line?.capacityT)} t and above`
-                      : "Nearest first"
-                    : recommendations.evaluatedAt
-                      ? recommendations.snapshotId
-                        ? evaluatedLabel(recommendations.evaluatedAt)
-                        : "Live evaluation"
-                      : null}
+                  {recommendations.evaluatedAt
+                    ? recommendations.snapshotId
+                      ? evaluatedLabel(recommendations.evaluatedAt)
+                      : "Live evaluation"
+                    : null}
                 </p>
               </div>
               {mode === "technical" ? (
@@ -332,28 +318,9 @@ export function RecommendationPanel({
             ) : total === 0 ? (
               <EmptyState
                 icon={<SlidersHorizontal className="size-4" aria-hidden />}
-                title={
-                  mode === "technical"
-                    ? "No crane passes the technical check"
-                    : "No cranes are near this site"
-                }
-                description={
-                  mode === "technical"
-                    ? "Switch to Distance to see nearby cranes that are short on capacity."
-                    : "Add pins to the vendor fleet, or widen the line's crane type."
-                }
+                title="No crane passes the technical check"
+                description="Check the line's crane type and capacity, or press Refresh to re-run the evaluation."
                 className="px-0 py-10 [&_p]:text-neutral-200 [&_p:last-child]:text-neutral-500"
-                action={
-                  mode === "technical" ? (
-                    <button
-                      type="button"
-                      onClick={() => onModeChange("distance")}
-                      className="rounded-lg border border-ink-700 px-3 py-1.5 text-[14px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
-                    >
-                      Try Distance
-                    </button>
-                  ) : null
-                }
               />
             ) : (
               <>
@@ -644,5 +611,3 @@ function RefreshButton({
     </div>
   );
 }
-
-

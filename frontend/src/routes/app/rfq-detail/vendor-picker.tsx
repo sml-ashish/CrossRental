@@ -20,6 +20,8 @@ import { TopCranesTable } from "./crane-table";
 import { dayMonth } from "./datetime";
 import {
   MODE_HINTS,
+  PICKER_SORT_OPTIONS,
+  type PickerSort,
   TOP_CRANES,
   buildContactedIndex,
   contactFor,
@@ -70,7 +72,6 @@ export function VendorPickerSection({
   alreadySent,
   disabled,
   mode,
-  onModeChange,
   candidates,
   sendBlockedReason,
   onSent,
@@ -82,7 +83,8 @@ export function VendorPickerSection({
   /** Set when the signed-in account lacks the `rfq:dispatch` capability. */
   sendBlockedReason?: string | null;
   mode: CandidateMode;
-  onModeChange: (mode: CandidateMode) => void;
+  /** Kept for the screen that owns the mode; the picker no longer switches it. */
+  onModeChange?: (mode: CandidateMode) => void;
   candidates: UseQueryResult<{ candidates: CandidateList }, Error>;
   onSent: (outcome: SendOutcome) => void;
   onPinConfirmed: () => void;
@@ -100,6 +102,7 @@ export function VendorPickerSection({
   const preselectionApplied = useRef(false);
   const [view, setView] = useState<"recommended" | "approved">("recommended");
   const [vendorSearch, setVendorSearch] = useState("");
+  const [sort, setSort] = useState<PickerSort>("best");
   const [announce, setAnnounce] = useState("");
 
   const summary = useQuery({
@@ -165,7 +168,7 @@ export function VendorPickerSection({
   });
 
   // The recommendation: the ten best cranes for the ranking in force.
-  const topRows = useMemo(() => topCraneRows(located, mode, TOP_CRANES), [located, mode]);
+  const topRows = useMemo(() => topCraneRows(located, mode, TOP_CRANES, sort), [located, mode, sort]);
   const totalCranes = useMemo(() => craneRows(located).length, [located]);
   const topVendorIds = useMemo(() => vendorIdsOf(topRows), [topRows]);
 
@@ -411,24 +414,19 @@ export function VendorPickerSection({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <Segmented
-                value={mode}
-                onChange={onModeChange}
-                label="Recommendation ranking"
-                options={[
-                  { value: "technical", label: "Technical" },
-                  { value: "distance", label: "Distance" },
-                ]}
+                value={sort}
+                onChange={setSort}
+                label="Sort recommended cranes"
+                options={PICKER_SORT_OPTIONS}
               />
-              <p className="text-[15px] text-slate-500">{MODE_HINTS[mode]}</p>
+              <p className="text-[15px] text-slate-500">
+                {sort === "best"
+                  ? MODE_HINTS[mode]
+                  : `Same cranes, ordered by distance from the job site — ${
+                      sort === "nearest" ? "nearest" : "farthest"
+                    } first.`}
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setView("approved")}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[15px] font-medium text-accent-400 transition-colors hover:bg-ink-850 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
-            >
-              Not right? Choose from all approved vendors
-              <ChevronRight className="size-3.5" aria-hidden />
-            </button>
           </div>
 
           {!hasPin ? <ConfirmPinCard rfqId={rfq.id} onDone={onPinConfirmed} /> : null}
@@ -443,15 +441,6 @@ export function VendorPickerSection({
                   : "No approved vendor has a crane of this type on record."}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {mode === "technical" ? (
-                  <button
-                    type="button"
-                    className="btn-secondary px-3 py-1.5 text-[14px]"
-                    onClick={() => onModeChange("distance")}
-                  >
-                    Switch to Distance
-                  </button>
-                ) : null}
                 <button
                   type="button"
                   className="btn-secondary px-3 py-1.5 text-[14px]"
@@ -468,14 +457,24 @@ export function VendorPickerSection({
                   Top {topRows.length} of {totalCranes} matching crane
                   {totalCranes === 1 ? "" : "s"}
                 </p>
-                <button
-                  type="button"
-                  onClick={toggleAllTop}
-                  disabled={selectableTopCranes.length === 0}
-                  className="rounded-md px-2 py-1 text-[14px] font-medium text-slate-600 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
-                >
-                  {allTopCranesSelected ? "Clear these" : "Select all"}
-                </button>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <button
+                    type="button"
+                    onClick={() => setView("approved")}
+                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[14px] font-medium text-accent-400 transition-colors hover:bg-ink-850 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                  >
+                    Not right? Choose from all approved vendors
+                    <ChevronRight className="size-3.5" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleAllTop}
+                    disabled={selectableTopCranes.length === 0}
+                    className="rounded-md px-2 py-1 text-[14px] font-medium text-slate-600 transition-colors hover:bg-ink-850 hover:text-white disabled:opacity-50"
+                  >
+                    {allTopCranesSelected ? "Clear these" : "Select all"}
+                  </button>
+                </div>
               </div>
 
               <TopCranesTable

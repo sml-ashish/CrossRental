@@ -25,6 +25,15 @@ export const MODE_HINTS: Record<CandidateMode, string> = {
   distance: "Cranes nearest to the job site first, including lighter cranes.",
 };
 
+/** Best fit is the technical order; nearest/farthest order the same cranes by distance. */
+export type PickerSort = "best" | "nearest" | "farthest";
+
+export const PICKER_SORT_OPTIONS: ReadonlyArray<{ value: PickerSort; label: string }> = [
+  { value: "best", label: "Best fit" },
+  { value: "nearest", label: "Nearest first ↑" },
+  { value: "farthest", label: "Farthest first ↓" },
+];
+
 /** A row-sized distance: "≈ 291 km" keeps the approximation visible. */
 export function shortDistance(km: number | null, approximate: boolean): string {
   if (km === null) return "—";
@@ -89,12 +98,25 @@ export function topCraneRows(
   groups: CandidateGroup[],
   mode: CandidateMode,
   limit: number = TOP_CRANES,
+  sort: PickerSort = "best",
 ): CraneRow[] {
   const km = (row: CraneRow) => row.crane.distanceKm ?? Number.POSITIVE_INFINITY;
   const byFit = (a: CraneRow, b: CraneRow) =>
     compareFit(a.crane, b.crane) || a.group.vendorName.localeCompare(b.group.vendorName);
 
   const rows = craneRows(groups);
+  if (sort !== "best") {
+    // A crane with no distance sits last whichever way the list runs.
+    const byDistance = (a: CraneRow, b: CraneRow) => {
+      const x = a.crane.distanceKm;
+      const y = b.crane.distanceKm;
+      if (x === null && y === null) return 0;
+      if (x === null) return 1;
+      if (y === null) return -1;
+      return sort === "nearest" ? x - y : y - x;
+    };
+    return rows.sort((a, b) => byDistance(a, b) || byFit(a, b)).slice(0, limit);
+  }
   const sorted =
     mode === "distance"
       ? rows.sort((a, b) => {

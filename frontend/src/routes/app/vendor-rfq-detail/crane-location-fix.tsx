@@ -8,13 +8,21 @@ import {
   fetchReferenceData,
   isBusyStatus,
   isSystemLocked,
+  previewLocationFromLink,
   quickUpdateCrane,
   type Crane,
   type VendorCraneStatus,
 } from "@/lib/fleet";
 
 /**
- * Mid-quote location fix (the "we don't know where this crane is" case).
+ * Mid-quote crane location card.
+ *
+ * Every quote now shows where SML will understand the crane to be, so the vendor
+ * can confirm it or correct it before sending. When the location is missing or
+ * unverified the card is amber and asks for it; when it is on file the card is
+ * neutral and offers "Confirm location" / "Update location".
+ *
+ * Original purpose (the "we don't know where this crane is" case):
  *
  * A crane can be perfectly quotable and still have no city, state or map pin.
  * Asking the vendor to leave the RFQ and find it on My Fleet is how that data
@@ -25,11 +33,15 @@ import {
  * Only location fields are edited here. Status and its availability date are
  * carried across unchanged, because this form is not a second status editor.
  */
+const PINCODE_RE = /^[1-9]\d{5}$/;
+
 export function craneNeedsLocation(crane: Crane): boolean {
   if (isSystemLocked(crane)) return false;
   return (
     !crane.currentLocation?.trim() ||
     !crane.stateCode?.trim() ||
+    // The pincode is compulsory: SML uses it to price distance and mobilisation.
+    !PINCODE_RE.test(crane.pincode?.trim() ?? "") ||
     crane.locationUnverified
   );
 }
@@ -43,10 +55,39 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
   });
 
   const [open, setOpen] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<null | "confirmed" | "updated">(null);
   const [currentLocation, setCurrentLocation] = useState(crane.currentLocation ?? "");
   const [stateCode, setStateCode] = useState(crane.stateCode ?? "");
   const [pincode, setPincode] = useState(crane.pincode ?? "");
+  // The pin is never shown to the vendor. It is only set when a Google Maps link
+  // supplied it, and it is only sent when it did; typing an address by hand
+  // leaves the pin to the server, so a stale pin is never saved against it.
+  const [pin, setPin] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [mapsLink, setMapsLink] = useState("");
+  const [linkNote, setLinkNote] = useState<{ text: string; failed: boolean } | null>(null);
+
+  // Reads the pasted Google Maps link on the server and fills whatever it
+  // knows. Values the link does not know are left exactly as the vendor typed.
+  const fillFromLink = useMutation({
+    mutationFn: () => previewLocationFromLink(mapsLink.trim()),
+    onSuccess: ({ location }) => {
+      if (location.currentLocation) setCurrentLocation(location.currentLocation);
+      if (location.stateCode) setStateCode(location.stateCode);
+      if (location.pincode) setPincode(location.pincode);
+      if (location.latitude !== null && location.longitude !== null) {
+        setPin({ latitude: location.latitude, longitude: location.longitude });
+      }
+      setLinkNote({
+        text: location.note ?? "Filled from the link. Please check the details below.",
+        failed: false,
+      });
+    },
+    onError: (err: unknown) =>
+      setLinkNote({
+        text: err instanceof Error ? err.message : "That link could not be read.",
+        failed: true,
+      }),
+  });
 
   // The quick-update schema requires busy cranes to carry an availability date
   // that is today or later. A stale crane often has a date in the past; carrying
@@ -59,74 +100,164 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
     ? todayKey()
     : crane.availableFrom ?? null;
 
+  const needsFix = craneNeedsLocation(crane);
+  const locked = isSystemLocked(crane);
+
+  // `confirm` re-saves the values already on file so the crane's last-updated
+  // date moves forward; `edit` saves what the vendor typed in the form.
   const update = useMutation({
-    mutationFn: () =>
+    mutationFn: (kind: "confirm" | "edit") =>
       quickUpdateCrane(crane.id, {
         currentStatus: crane.currentStatus as VendorCraneStatus,
-        currentLocation,
-        stateCode,
-        pincode: pincode || null,
+        currentLocation: kind === "confirm" ? (crane.currentLocation ?? "") : currentLocation,
+        stateCode: kind === "confirm" ? (crane.stateCode ?? "") : stateCode,
+        pincode: (kind === "confirm" ? crane.pincode ?? "" : pincode).trim() || null,
+        ...(kind === "edit" && pin ? pin : {}),
         // Carry the status fields across untouched: the quick-update schema
         // validates the whole status/location pair, so omitting them would
         // clear a date the vendor never edited.
         availableFrom: availabilityDate,
         expectedReadyDate: crane.expectedReadyDate ?? null,
       }),
-    onSuccess: () => {
-      setSaved(true);
+    onSuccess: (_data, kind) => {
+      setSaved(kind === "confirm" ? "confirmed" : "updated");
       setOpen(false);
       void queryClient.invalidateQueries({ queryKey: ["cranes"] });
     },
   });
 
   const error = update.error as ApiError | null;
-  const canSave = currentLocation.trim().length >= 3 && stateCode !== "";
+  const pincodeValid = PINCODE_RE.test(pincode.trim());
+  const canSave = currentLocation.trim().length >= 3 && stateCode !== "" && pincodeValid;
   const states = (reference.data?.states ?? []).map((state) => ({
     value: state.code,
     label: state.name,
   }));
 
+  const stateName =
+    states.find((state) => state.value === (crane.stateCode ?? ""))?.label ?? crane.stateCode ?? "";
+  const onFile = [crane.currentLocation?.trim(), stateName, crane.pincode?.trim()]
+    .filter(Boolean)
+    .join(", ");
+
   if (saved) {
+    const shown = [currentLocation.trim(), states.find((s) => s.value === stateCode)?.label, pincode.trim()]
+      .filter(Boolean)
+      .join(", ");
     return (
-      <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-[13px] text-emerald-800">
-        Location updated for this crane. The quote will use the details you just saved.
+      <div className="card mt-4 p-4">
+        <p className="flex items-center gap-2 text-sm text-slate-500">
+          <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
+          {saved === "confirmed" ? "Location confirmed" : "Location updated"}
+        </p>
+        <p className="mt-1 text-[15px] font-medium text-slate-900">{shown || onFile}</p>
+        <p className="mt-1 text-sm text-slate-500">The quote will use these details.</p>
       </div>
     );
   }
 
   return (
-    <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="text-[13px] font-medium text-amber-900">
-            SML needs this crane&apos;s location
+    <div className="card mt-4">
+      <div className="flex flex-wrap items-start justify-between gap-4 p-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3 sm:justify-start">
+            <p className="text-sm font-medium text-slate-500">Crane location</p>
+            <p className="flex items-center gap-1.5 text-sm text-slate-600">
+              <span
+                className={`size-1.5 rounded-full ${needsFix ? "bg-amber-500" : "bg-emerald-500"}`}
+                aria-hidden
+              />
+              {needsFix ? "Needs details" : locked ? "Managed by SML" : "On file"}
+            </p>
+          </div>
+          <p className="mt-1 break-words text-[15px] font-medium text-slate-900">
+            {onFile || "Not set yet"}
           </p>
-          <p className="mt-0.5 text-xs text-amber-800">
-            Its city, state or map pin is missing. You can add them now, then continue with the quote.
+          <p className="mt-1 text-sm text-slate-500">
+            {needsFix
+              ? "The city, state, pincode or map pin is missing or unverified. Add it before you send the quote."
+              : locked
+                ? "This crane is on an active booking, so SML manages its location."
+                : "Confirm this is where the crane will be sent from, or update it if it has moved."}
           </p>
+          {update.isError && !open ? (
+            <p className="mt-1 text-sm text-red-600">{(update.error as ApiError).message}</p>
+          ) : null}
           {refreshAvailability ? (
-            <p className="mt-0.5 text-xs text-amber-800">
+            <p className="mt-1 text-sm text-slate-500">
               Its saved availability date has passed, so it will be refreshed to today when you save.
             </p>
           ) : null}
         </div>
-        {!open ? (
-          <button
-            type="button"
-            className="btn-secondary min-h-9 px-3 py-1.5 text-xs"
-            onClick={() => setOpen(true)}
-          >
-            Update location
-          </button>
+
+        {!open && !locked ? (
+          <div className="flex flex-wrap gap-2">
+            {!needsFix ? (
+              <button
+                type="button"
+                className="btn-primary min-h-10 px-4 py-2 text-sm"
+                disabled={update.isPending}
+                onClick={() => update.mutate("confirm")}
+              >
+                {update.isPending ? "Saving…" : "Confirm location"}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={`${needsFix ? "btn-primary" : "btn-secondary"} min-h-10 px-4 py-2 text-sm`}
+              disabled={update.isPending}
+              onClick={() => setOpen(true)}
+            >
+              {needsFix ? "Add location" : "Update"}
+            </button>
+          </div>
         ) : null}
       </div>
 
       {open ? (
-        <div className="mt-3 space-y-3">
-          {error ? <Alert title="Could not save the location">{error.message}</Alert> : null}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="border-t border-ink-800 p-4">
+          {error ? (
+            <div className="mb-4">
+              <Alert title="Could not save the location">{error.message}</Alert>
+            </div>
+          ) : null}
+
+          <Field
+            label="Google Maps link"
+            htmlFor="location-fix-link"
+            hint="Optional. Open the crane's spot in Google Maps, choose Share, and paste the link. We fill in the city, state and pincode."
+          >
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="min-w-0 flex-1">
+                <TextInput
+                  id="location-fix-link"
+                  value={mapsLink}
+                  onChange={(value) => {
+                    setMapsLink(value);
+                    setLinkNote(null);
+                  }}
+                  placeholder="https://maps.app.goo.gl/…"
+                />
+              </div>
+              <button
+                type="button"
+                className="btn-secondary shrink-0 px-4 py-2.5 text-sm"
+                disabled={fillFromLink.isPending || mapsLink.trim() === ""}
+                onClick={() => fillFromLink.mutate()}
+              >
+                {fillFromLink.isPending ? "Reading…" : "Fill from link"}
+              </button>
+            </div>
+          </Field>
+          {linkNote ? (
+            <div className="mt-3">
+              <Alert tone={linkNote.failed ? "error" : "info"}>{linkNote.text}</Alert>
+            </div>
+          ) : null}
+
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Field
-              label="City / current location"
+              label="City / location"
               htmlFor="location-fix-city"
               required
               error={error?.fieldError("currentLocation")}
@@ -135,7 +266,7 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
                 id="location-fix-city"
                 value={currentLocation}
                 onChange={setCurrentLocation}
-                placeholder="e.g. Ahmedabad Yard"
+                placeholder="e.g. Indore"
                 invalid={Boolean(error?.fieldError("currentLocation"))}
               />
             </Field>
@@ -155,37 +286,49 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
               />
             </Field>
             <Field
-              label="Pincode (optional)"
+              label="Pincode"
               htmlFor="location-fix-pincode"
-              error={error?.fieldError("pincode")}
+              required
+              error={
+                error?.fieldError("pincode") ??
+                (pincode.trim() !== "" && !pincodeValid ? "Enter a valid six-digit pincode." : undefined)
+              }
             >
               <TextInput
                 id="location-fix-pincode"
                 value={pincode}
                 onChange={setPincode}
                 inputMode="numeric"
-                placeholder="Six digits"
-                invalid={Boolean(error?.fieldError("pincode"))}
+                placeholder="6 digits"
+                invalid={Boolean(error?.fieldError("pincode")) || (pincode.trim() !== "" && !pincodeValid)}
               />
             </Field>
           </div>
-          <div className="flex flex-wrap gap-2">
+
+          <div className="mt-5 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              className="btn-primary min-h-10 px-3 py-1.5 text-xs"
+              className="btn-primary min-h-10 px-4 py-2 text-sm"
               disabled={!canSave || update.isPending}
-              onClick={() => update.mutate()}
+              onClick={() => update.mutate("edit")}
             >
-              {update.isPending ? "Saving…" : "Save location"}
+              {update.isPending ? "Saving…" : "Confirm location"}
             </button>
             <button
               type="button"
-              className="btn-secondary min-h-10 px-3 py-1.5 text-xs"
+              className="btn-secondary min-h-10 px-4 py-2 text-sm"
               onClick={() => setOpen(false)}
               disabled={update.isPending}
             >
               Cancel
             </button>
+            {!canSave && !update.isPending ? (
+              <span className="text-sm text-slate-500">
+                {currentLocation.trim().length < 3 || stateCode === ""
+                  ? "Add the city and state to confirm."
+                  : "Enter a six-digit pincode to confirm."}
+              </span>
+            ) : null}
           </div>
         </div>
       ) : null}

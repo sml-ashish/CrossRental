@@ -138,7 +138,7 @@ export function VendorDashboardPage() {
   const firstTime = isFirstTime(data);
 
   return (
-    <div className="mx-auto max-w-[1120px]">
+    <div className="mx-auto max-w-[1320px]">
       <DashboardHeader
         name={vendorName}
         status={firstTime ? null : statusSentence(data)}
@@ -154,7 +154,7 @@ export function VendorDashboardPage() {
           />
         </div>
       ) : (
-        <div className="mt-6 flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-10">
+        <div className="mt-6 flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start lg:gap-10">
           <div className="contents lg:block lg:min-w-0 lg:space-y-8">
             <div className="order-1 lg:order-none">
               <WaitingSection data={data} cranes={craneList} bookedCraneIds={bookedCraneIds} now={now} />
@@ -942,9 +942,9 @@ function ComingUpSection({ data, now }: { data: VendorDashboard; now: number }) 
   const { thisWeek, later } = buildComingUp(data, now);
 
   return (
-    <section className="card p-4">
+    <section className="card p-6">
       <div className="flex items-start justify-between gap-2">
-        <h2 className="text-base font-semibold text-slate-900">Coming up</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Coming up</h2>
         <Link
           to="/app/calendar"
           className="inline-flex items-center gap-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900"
@@ -984,14 +984,14 @@ function ComingUpGroup({
         {items.map((item) => (
           <li key={item.key} className="flex gap-3">
             <span
-              className="w-20 shrink-0 text-[15px] tabular-nums text-slate-500"
+              className="w-28 shrink-0 text-[15px] tabular-nums text-slate-500"
               title={item.full}
             >
               {item.dateLabel}
             </span>
             <div className="min-w-0">
-              <p className="text-sm text-slate-900">{item.label}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-[15px] font-medium text-slate-900">{item.label}</p>
+              <p className="text-[13px] text-slate-500">
                 {item.detail ? `${item.detail} · ` : ""}
                 {item.note}
               </p>

@@ -176,6 +176,19 @@ export function searchDiscoveryCalendar(
  */
 export type RecommendationMode = "technical" | "distance";
 
+/**
+ * How the recommended list is ordered. `best` is the technical order (smallest
+ * adequate capacity first); `nearest` and `farthest` re-order the same cranes by
+ * distance from the job site, ascending or descending.
+ */
+export type DistanceSort = "best" | "nearest" | "farthest";
+
+export const DISTANCE_SORT_OPTIONS: ReadonlyArray<{ value: DistanceSort; label: string }> = [
+  { value: "best", label: "Best fit" },
+  { value: "nearest", label: "Nearest first" },
+  { value: "farthest", label: "Farthest first" },
+];
+
 export interface RecommendationParticipation {
   invitations: number;
   quoted: number;
@@ -440,6 +453,7 @@ export function orderedRecommendationCranes(
   recommendations: LineRecommendations | undefined,
   mode: RecommendationMode,
   requiredT?: number | null,
+  sort: DistanceSort = "best",
 ): RecommendationCrane[] {
   const floor = mode === "distance" ? capacityFloorT(requiredT) : null;
   const km = (crane: RecommendationCrane) =>
@@ -455,6 +469,17 @@ export function orderedRecommendationCranes(
   return [...recommendationCranes(recommendations)]
     .filter((crane) => floor === null || crane.capacityT >= floor)
     .sort((a, b) => {
+    if (sort !== "best") {
+      // A crane with no distance sits last whichever way the list runs.
+      const x = km(a);
+      const y = km(b);
+      if (x !== y) {
+        if (x === Number.POSITIVE_INFINITY) return 1;
+        if (y === Number.POSITIVE_INFINITY) return -1;
+        return sort === "nearest" ? x - y : y - x;
+      }
+      return a.capacityT - b.capacityT || a.vendorName.localeCompare(b.vendorName);
+    }
     if (mode === "technical" && a.capacityT !== b.capacityT) return a.capacityT - b.capacityT;
     return byDistance(a, b) || a.vendorName.localeCompare(b.vendorName);
   });
@@ -502,5 +527,3 @@ export function formatRouteDistance(
   const drive = formatDriveTime(durationMin);
   return drive ? `${distance} · about ${drive}` : distance;
 }
-
-

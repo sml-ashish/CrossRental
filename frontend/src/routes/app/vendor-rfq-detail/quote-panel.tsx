@@ -26,7 +26,7 @@ import {
 } from "@/lib/quotations";
 import { listCranes, type Crane } from "@/lib/fleet";
 import { fitLabel, fleetFit, type FitVerdict } from "./fit";
-import { CraneLocationFix, craneNeedsLocation } from "./crane-location-fix";
+import { CraneLocationFix } from "./crane-location-fix";
 
 /**
  * The quote panel: pick a crane, price it, read the server's total, send it.
@@ -465,9 +465,7 @@ export function QuoteForm({
         />
       </Field>
 
-      {!craneLocked && selectedCrane && craneNeedsLocation(selectedCrane) ? (
-        <CraneLocationFix key={selectedCrane.id} crane={selectedCrane} />
-      ) : null}
+      {selectedCrane ? <CraneLocationFix key={selectedCrane.id} crane={selectedCrane} /> : null}
 
       <StepHeading n={2} title="Set your price" />
 
