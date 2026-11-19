@@ -9,7 +9,6 @@ import {
   awardQuotation,
   cancelRfq,
   extendDeadline,
-  formatDistance,
   getCandidates,
   getRfq,
   getRfqAudit,
@@ -44,6 +43,7 @@ import {
 } from "./rfq-detail/negotiations";
 import { DEADLINE_ZONE_LABEL, dayMonth, formatDeadline, formatDeadlineExact } from "./rfq-detail/datetime";
 import { VendorPickerSection, type SendOutcome } from "./rfq-detail/vendor-picker";
+import { QuoteComparisonTable } from "./rfq-detail/quote-comparison";
 
 /**
  * One RFQ: pick vendors, dispatch, and track (brief 7.9).
@@ -509,7 +509,6 @@ function InternalRfqDetailPage() {
                     onModeChange={setMode}
                     candidates={candidates}
                     onSent={handleSent}
-                    onPinConfirmed={invalidate}
                   />
                 ) : null}
 
@@ -1616,6 +1615,42 @@ function QuotationsSection({
   const current = sorted.filter((quotation) => quotation.isLatest);
   const lowestId =
     current.length > 1 ? current[0]?.quotationId : null;
+  const superseded = sorted.filter((quotation) => !quotation.isLatest);
+
+  const renderActions = (quotation: ReceivedQuotation) => {
+    const awardable = quotation.isLatest && quotation.status === "SUBMITTED";
+    return (
+      <>
+        {canCounter && !closed && !deadlinePassed ? (
+          <CounterButton
+            rfqId={rfqId}
+            quotation={quotation}
+            disabled={!awardable || negotiatingQuotationIds.has(quotation.quotationId)}
+            disabledReason={
+              negotiatingQuotationIds.has(quotation.quotationId)
+                ? "This quotation already has an open negotiation — respond in Negotiations above"
+                : undefined
+            }
+            onDone={onDone}
+          />
+        ) : null}
+        {canAward && !closed ? (
+          <button
+            type="button"
+            className="btn-primary px-4 py-2 text-[15px]"
+            disabled={!awardable}
+            title={awardable ? undefined : "Only the latest Submitted version can be awarded"}
+            onClick={() => {
+              setNotice(null);
+              setAwarding(quotation);
+            }}
+          >
+            Award this quotation
+          </button>
+        ) : null}
+      </>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -1643,190 +1678,31 @@ function QuotationsSection({
             </h2>
           </div>
 
-          <ul className="space-y-3">
-            {sorted.map((quotation) => {
-              const awardable = quotation.isLatest && quotation.status === "SUBMITTED";
-              return (
-                <li
-                  key={quotation.quotationId}
-                  className={cn(
-                    "card p-5 transition-colors",
-                    !quotation.isLatest && "opacity-70",
-                    quotation.quotationId === lowestId && "border-emerald-500/40",
-                  )}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-[17px] font-semibold text-slate-900">
-                          {quotation.vendorName}
-                        </h3>
-                        {quotation.quotationId === lowestId ? (
-                          <Badge tone="emerald">Lowest total</Badge>
-                        ) : null}
-                        {!quotation.isLatest ? <Badge tone="neutral">Superseded</Badge> : null}
-                      </div>
-                      <p className="mt-1 text-[14px] text-slate-500">
-                        {quotation.craneDescription} ·{" "}
-                        {SOURCE_LABELS[quotation.source] ?? "Manual"} · v{quotation.version} ·{" "}
-                        {formatDate(quotation.submittedAt)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-                        Total quoted
-                      </p>
-                      <p className="text-[28px] leading-8 font-semibold text-slate-900 tabular-nums">
-                        ₹{money(quotation.totalQuotedValue)}
-                      </p>
-                      <p className="text-[13px] text-slate-500">
-                        {quotation.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"}
-                      </p>
-                    </div>
-                  </div>
+          {current.length > 0 ? (
+            <QuoteComparisonTable
+              quotations={current}
+              lowestId={lowestId ?? null}
+              sourceLabel={(quotation) => SOURCE_LABELS[quotation.source] ?? "Manual"}
+              renderActions={renderActions}
+            />
+          ) : null}
 
-                  <dl className="mt-4 grid grid-cols-2 gap-4 rounded-xl bg-ink-900 p-4 sm:grid-cols-3 xl:grid-cols-4">
-                    <QuoteFact
-                      label="Rate"
-                      value={`₹${money(quotation.rentalRate)}`}
-                      hint={quotation.rateBasis.replaceAll("_", " ").toLowerCase()}
-                    />
-                    <QuoteFact
-                      label="GST"
-                      value={
-                        quotation.taxBasis === "INCLUSIVE_OF_GST"
-                          ? "Inclusive of GST"
-                          : "Exclusive of GST"
-                      }
-                      hint="tax basis declared by vendor"
-                    />
-                    <QuoteFact
-                      label="Mobilisation"
-                      value={`₹${money(quotation.mobilisationCharges)}`}
-                    />
-                    <QuoteFact
-                      label="Demobilisation"
-                      value={`₹${money(quotation.demobilisationCharges)}`}
-                    />
-                    <QuoteFact
-                      label="Distance to site"
-                      value={formatDistance(quotation.distanceToSiteKm, quotation.distanceApproximate)}
-                    />
-                    <QuoteFact
-                      label="Validity"
-                      value={formatDate(quotation.validityDate)}
-                      hint="quote valid until"
-                    />
-                    <QuoteFact
-                      label="Availability"
-                      value={
-                        quotation.availabilityConfirmed
-                          ? quotation.availableFrom
-                            ? formatDate(quotation.availableFrom)
-                            : "Confirmed"
-                          : "Not confirmed"
-                      }
-                      hint={
-                        quotation.availabilityConfirmed && quotation.availableFrom
-                          ? "available from"
-                          : undefined
-                      }
-                    />
-                    <QuoteFact
-                      label="Commercial terms"
-                      value={quotation.acceptsCommercialTerms ? "Accepted" : "Deviation stated"}
-                      hint={quotation.acceptsCommercialTerms ? undefined : "see deviation below"}
-                    />
-                  </dl>
-
-                  {!quotation.acceptsCommercialTerms ||
-                  quotation.remarks?.trim() ||
-                  quotation.calculationNote?.trim() ? (
-                  <div className="mt-4 grid gap-3 rounded-xl border border-ink-800 p-4 text-[14px] sm:grid-cols-2">
-                    {!quotation.acceptsCommercialTerms ? (
-                      <div>
-                        <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
-                          Deviation
-                        </p>
-                        <p className="mt-0.5 whitespace-pre-wrap font-medium text-amber-600">
-                          {quotation.deviationText?.trim() || "Deviation stated"}
-                        </p>
-                      </div>
-                    ) : null}
-                    {quotation.remarks?.trim() ? (
-                      <div>
-                        <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
-                          Vendor remarks
-                        </p>
-                        <p className="mt-0.5 whitespace-pre-wrap text-slate-900">
-                          {quotation.remarks}
-                        </p>
-                      </div>
-                    ) : null}
-                    {quotation.calculationNote?.trim() ? (
-                      <div className="sm:col-span-2">
-                        <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
-                          Calculation
-                        </p>
-                        <p className="mt-0.5 whitespace-pre-wrap text-slate-500">
-                          {quotation.calculationNote}
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-                  ) : null}
-
-                  {quotation.warnings.length > 0 ? (
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {quotation.warnings.map((warning) => (
-                        <li
-                          key={warning.code}
-                          className="rounded-full bg-amber-500/10 px-3 py-1 text-[13px] text-amber-600"
-                        >
-                          {warning.message}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 pt-4">
-                    <StatusBadge status={quotation.status} />
-                    <div className="flex flex-wrap gap-2">
-                      {canCounter && !closed && !deadlinePassed ? (
-                        <CounterButton
-                          rfqId={rfqId}
-                          quotation={quotation}
-                          disabled={!awardable || negotiatingQuotationIds.has(quotation.quotationId)}
-                          disabledReason={
-                            negotiatingQuotationIds.has(quotation.quotationId)
-                              ? "This quotation already has an open negotiation — respond in Negotiations above"
-                              : undefined
-                          }
-                          onDone={onDone}
-                        />
-                      ) : null}
-                      {canAward && !closed ? (
-                        <button
-                          type="button"
-                          className="btn-primary px-4 py-2 text-[15px]"
-                          disabled={!awardable}
-                          title={
-                            awardable ? undefined : "Only the latest Submitted version can be awarded"
-                          }
-                          onClick={() => {
-                            setNotice(null);
-                            setAwarding(quotation);
-                          }}
-                        >
-                          Award this quotation
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          {superseded.length > 0 ? (
+            <details className="group">
+              <summary className="cursor-pointer text-[14px] font-medium text-slate-500 hover:text-slate-900">
+                Superseded versions ({superseded.length})
+              </summary>
+              <div className="mt-2">
+                <QuoteComparisonTable
+                  quotations={superseded}
+                  lowestId={null}
+                  sourceLabel={(quotation) => SOURCE_LABELS[quotation.source] ?? "Manual"}
+                  renderActions={renderActions}
+                  muted
+                />
+              </div>
+            </details>
+          ) : null}
         </>
       )}
 
@@ -1844,16 +1720,6 @@ function QuotationsSection({
           }}
         />
       ) : null}
-    </div>
-  );
-}
-
-function QuoteFact({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">{label}</dt>
-      <dd className="mt-0.5 text-[16px] font-medium text-slate-900 tabular-nums">{value}</dd>
-      {hint ? <dd className="text-[13px] text-slate-500">{hint}</dd> : null}
     </div>
   );
 }

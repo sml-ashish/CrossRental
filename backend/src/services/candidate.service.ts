@@ -1,6 +1,7 @@
 import { prisma } from "../lib/database";
 import { BUSY_STATUSES, isBusyStatus } from "../validation/craneFields";
 import { distancesTo, type Distance } from "./distance.service";
+import { getGeoProvider, tryGeocode } from "../lib/geo";
 import { getSettings } from "../utils/settings";
 import { reservationWindowForRfq } from "./reservations.service";
 import {
@@ -74,6 +75,8 @@ export interface CandidateCrane {
   daysSinceUpdate: number;
   /** When the crane's details were last edited, for the picker's freshness line. */
   lastUpdatedAt: string;
+  /** When the crane's location (or status / release date) was last updated. */
+  locationUpdatedAt: string;
   distanceKm: number | null;
   distanceMethod: string | null;
   distanceApproximate: boolean;
@@ -291,8 +294,23 @@ export async function candidatesForRfq(
     rows = rows.filter((row) => !busy.has(row.id));
   }
 
-  const siteLat = num(rfq.siteLatitude);
-  const siteLng = num(rfq.siteLongitude);
+  let siteLat = num(rfq.siteLatitude);
+  let siteLng = num(rfq.siteLongitude);
+
+  // No stored pin: fall back to the job-site city (city + state, never the
+  // pincode) so distances still rank instead of asking sales for coordinates.
+  // Kept in memory only — nothing is written on a read — and skipped for a
+  // non-authoritative provider, which would invent a point for the city.
+  if ((siteLat === null || siteLng === null) && getGeoProvider().isAuthoritative) {
+    const city = await tryGeocode({
+      location: rfq.siteLocation,
+      state: rfq.site.name,
+    });
+    if (city.ok) {
+      siteLat = city.point.lat;
+      siteLng = city.point.lng;
+    }
+  }
   const siteUnverified = siteLat === null || siteLng === null;
 
   const located: CandidateRow[] = [];
@@ -354,6 +372,7 @@ export async function candidatesForRfq(
       stale: days >= settings.staleFlagDays,
       daysSinceUpdate: days,
       lastUpdatedAt: row.updatedAt.toISOString(),
+      locationUpdatedAt: row.statusUpdatedAt.toISOString(),
       distanceKm: distance?.km ?? null,
       distanceMethod: distance?.method ?? null,
       distanceApproximate: distance?.approximate ?? false,

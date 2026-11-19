@@ -29,7 +29,7 @@ import {
   topCraneRows,
   vendorIdsOf,
 } from "./picker-model";
-import { ConfirmPinCard, SendBar, type SelectedVendor } from "./send-rail";
+import { SendBar, type SelectedVendor } from "./send-rail";
 
 /**
  * Choosing vendors for a draft.
@@ -75,7 +75,6 @@ export function VendorPickerSection({
   candidates,
   sendBlockedReason,
   onSent,
-  onPinConfirmed,
 }: {
   rfq: RfqDetail;
   alreadySent: string[];
@@ -87,7 +86,6 @@ export function VendorPickerSection({
   onModeChange?: (mode: CandidateMode) => void;
   candidates: UseQueryResult<{ candidates: CandidateList }, Error>;
   onSent: (outcome: SendOutcome) => void;
-  onPinConfirmed: () => void;
 }) {
   const queryClient = useQueryClient();
   const routeSearch = useSearch({ strict: false }) as { vendor?: string };
@@ -130,8 +128,6 @@ export function VendorPickerSection({
   const notice = candidates.data?.candidates.notice ?? null;
   const startLabel = dayMonth(rfq.requiredStartDate);
   const deadlinePassed = new Date(rfq.submissionDeadline).getTime() <= Date.now();
-  const hasPin =
-    !rfq.siteLocationUnverified && rfq.siteLatitude !== null && rfq.siteLongitude !== null;
 
   // A vendor can be picked from the approved list and have no crane in the
   // recommendation, so names come from every source we have.
@@ -428,8 +424,6 @@ export function VendorPickerSection({
               </p>
             </div>
           </div>
-
-          {!hasPin ? <ConfirmPinCard rfqId={rfq.id} onDone={onPinConfirmed} /> : null}
 
           {notice ? <p className="text-[14px] text-slate-500">{notice}</p> : null}
 

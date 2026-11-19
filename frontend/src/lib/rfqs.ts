@@ -244,6 +244,12 @@ export interface CandidateCrane {
   stateName: string;
   availableFrom: string | null;
   loadChartFileName: string | null;
+  /** The crane's own boom and jib lengths, in metres (null when not recorded). */
+  mainBoomM: number | null;
+  fixedJibM: number | null;
+  luffingJibM: number | null;
+  windJibM: number | null;
+  ownershipType: "VENDOR" | "SML";
   /** Engaged, but released on or before the required start date. */
   availableInTime: boolean;
   locationUnverified: boolean;
@@ -251,6 +257,8 @@ export interface CandidateCrane {
   daysSinceUpdate: number;
   /** When the crane's details were last edited (ISO). */
   lastUpdatedAt: string;
+  /** When the crane's location (or status / release date) was last updated (ISO). */
+  locationUpdatedAt: string;
   distanceKm: number | null;
   distanceMethod: string | null;
   distanceApproximate: boolean;
