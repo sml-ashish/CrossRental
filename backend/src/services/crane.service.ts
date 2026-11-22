@@ -1160,7 +1160,84 @@ export async function duplicateCranePrefill(actor: Actor, craneId: string) {
     stateCode: row.stateCode,
     pincode: row.pincode,
     remarks: row.remarks,
+    // Told to the form so it can say the chart will come along; the file itself
+    // is copied by `copyLoadChart` once the new crane exists.
+    loadChart: row.loadChartFileName
+      ? {
+          fileName: row.loadChartFileName,
+          mimeType: row.loadChartMimeType ?? "application/octet-stream",
+          sizeBytes: row.loadChartSizeBytes ?? null,
+        }
+      : null,
   };
+}
+
+/**
+ * "Duplicate this crane" also duplicates its load chart. The new crane gets its
+ * own stored file, not a pointer to the original's, so replacing or removing
+ * one crane's chart can never take the other's with it.
+ *
+ * Both cranes go through `loadScoped`, and they must belong to the same vendor:
+ * a chart is never copied across vendors.
+ */
+export async function copyLoadChart(
+  targetCraneId: string,
+  sourceCraneId: string,
+  actor: Actor,
+) {
+  const target = await loadScoped(actor, targetCraneId);
+  const source = await loadScoped(actor, sourceCraneId);
+
+  if (target.vendorId !== source.vendorId) {
+    throw AppError.badRequest("A load chart can only be copied between cranes of the same vendor");
+  }
+  if (!source.loadChartFileRef) {
+    throw AppError.notFound("The crane being copied has no load chart");
+  }
+
+  const buffer = await storage().read(source.loadChartFileRef);
+  const stored = await storage().save(buffer, {
+    fileName: source.loadChartFileName ?? "load-chart",
+    mimeType: source.loadChartMimeType ?? "application/octet-stream",
+    scope: `vendors/${target.vendorId}/cranes/${targetCraneId}`,
+  });
+
+  const previousRef = target.loadChartFileRef;
+
+  const row = await prisma.crane.update({
+    where: { id: targetCraneId },
+    data: {
+      loadChartFileRef: stored.fileRef,
+      loadChartFileName: stored.fileName,
+      loadChartMimeType: stored.mimeType,
+      loadChartSizeBytes: stored.sizeBytes,
+      updatedBy: actor.id,
+    },
+    select: { ...CRANE_SELECT, vendor: { select: { name: true } } },
+  });
+
+  if (previousRef && previousRef !== stored.fileRef) {
+    try {
+      await storage().remove(previousRef);
+    } catch (err) {
+      console.error("[crane] could not remove the replaced load chart", err);
+    }
+  }
+
+  await recordAudit({
+    entity: "crane",
+    entityId: targetCraneId,
+    action: "crane_load_chart_copied",
+    newValue: {
+      fileName: stored.fileName,
+      sizeBytes: stored.sizeBytes,
+      copiedFromCraneId: sourceCraneId,
+    },
+    craneId: targetCraneId,
+    actor: auditActor(actor),
+  });
+
+  return await toView(row);
 }
 
 /**

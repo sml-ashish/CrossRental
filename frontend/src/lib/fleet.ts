@@ -298,8 +298,18 @@ export function quickUpdateCrane(craneId: string, input: QuickUpdate): Promise<{
 }
 
 /** Returns a prefill for the add form. The vendor still reviews and submits it. */
-export function duplicateCrane(craneId: string): Promise<{ prefill: Partial<CraneForm> }> {
+export function duplicateCrane(craneId: string): Promise<{
+  prefill: Partial<CraneForm> & {
+    /** The chart on the crane being copied, so the form can say it comes along. */
+    loadChart?: { fileName: string; mimeType: string; sizeBytes: number | null } | null;
+  };
+}> {
   return api(`/cranes/${craneId}/duplicate`);
+}
+
+/** Gives `craneId` its own copy of `sourceCraneId`'s load chart. */
+export function copyLoadChart(craneId: string, sourceCraneId: string): Promise<{ crane: Crane }> {
+  return api(`/cranes/${craneId}/load-chart/copy`, { method: "POST", body: { sourceCraneId } });
 }
 
 export function confirmCraneAccurate(craneId: string): Promise<{ crane: Crane }> {

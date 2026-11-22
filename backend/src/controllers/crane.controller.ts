@@ -136,6 +136,17 @@ export const uploadChart = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+/** Copies another crane's load chart onto this one (used by "duplicate this crane"). */
+export const copyChart = asyncHandler(async (req: Request, res: Response) => {
+  const sourceCraneId = (req.body as { sourceCraneId?: unknown } | undefined)?.sourceCraneId;
+  if (typeof sourceCraneId !== "string" || sourceCraneId.trim() === "") {
+    throw AppError.badRequest("sourceCraneId is required");
+  }
+  res.status(201).json({
+    crane: await cranes.copyLoadChart(param(req, "craneId"), sourceCraneId.trim(), actorOf(req)),
+  });
+});
+
 export const downloadChart = asyncHandler(async (req: Request, res: Response) => {
   const file = await cranes.readLoadChart(actorOf(req), param(req, "craneId"));
   res.setHeader("Content-Type", file.mimeType);

@@ -102,6 +102,16 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
 
   const needsFix = craneNeedsLocation(crane);
   const locked = isSystemLocked(crane);
+  // A location the vendor can confirm as it stands: city and state are on file,
+  // and the pincode is either blank (the server stores that as "not given") or
+  // well-formed. A malformed pincode would be rejected on re-save, and a missing
+  // city or state leaves nothing to confirm, so those must be changed instead.
+  const storedPincode = crane.pincode?.trim() ?? "";
+  const hasDetails =
+    Boolean(crane.currentLocation?.trim()) &&
+    Boolean(crane.stateCode?.trim()) &&
+    (storedPincode === "" || PINCODE_RE.test(storedPincode));
+  const pincodeMissing = storedPincode === "";
 
   // `confirm` re-saves the values already on file so the crane's last-updated
   // date moves forward; `edit` saves what the vendor typed in the form.
@@ -148,7 +158,7 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
       <div className="card mt-4 p-4">
         <p className="flex items-center gap-2 text-sm text-slate-500">
           <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
-          {saved === "confirmed" ? "Location confirmed" : "Location updated"}
+          {saved === "confirmed" ? "Current location confirmed" : "Current location changed"}
         </p>
         <p className="mt-1 text-[15px] font-medium text-slate-900">{shown || onFile}</p>
         <p className="mt-1 text-sm text-slate-500">The quote will use these details.</p>
@@ -161,7 +171,7 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
       <div className="flex flex-wrap items-start justify-between gap-4 p-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3 sm:justify-start">
-            <p className="text-sm font-medium text-slate-500">Crane location</p>
+            <p className="text-sm font-medium text-slate-500">Crane current location</p>
             <p className="flex items-center gap-1.5 text-sm text-slate-600">
               <span
                 className={`size-1.5 rounded-full ${needsFix ? "bg-amber-500" : "bg-emerald-500"}`}
@@ -175,10 +185,14 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
           </p>
           <p className="mt-1 text-sm text-slate-500">
             {needsFix
-              ? "The city, state, pincode or map pin is missing or unverified. Add it before you send the quote."
+              ? hasDetails
+                ? pincodeMissing
+                  ? "The pincode is missing. Confirm this is where the crane is now, or change the location to add the pincode, before you send the quote."
+                  : "We could not place this location on the map. Confirm it is where the crane is now, or change it, before you send the quote."
+                : "The city, state or pincode is missing or not valid. Change the current location to fix it before you send the quote."
               : locked
                 ? "This crane is on an active booking, so SML manages its location."
-                : "Confirm this is where the crane will be sent from, or update it if it has moved."}
+                : "Confirm this is where the crane is now and will be sent from, or change it if it has moved."}
           </p>
           {update.isError && !open ? (
             <p className="mt-1 text-sm text-red-600">{(update.error as ApiError).message}</p>
@@ -192,23 +206,23 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
 
         {!open && !locked ? (
           <div className="flex flex-wrap gap-2">
-            {!needsFix ? (
+            {hasDetails ? (
               <button
                 type="button"
                 className="btn-primary min-h-10 px-4 py-2 text-sm"
                 disabled={update.isPending}
                 onClick={() => update.mutate("confirm")}
               >
-                {update.isPending ? "Saving…" : "Confirm location"}
+                {update.isPending ? "Saving…" : "Confirm current location"}
               </button>
             ) : null}
             <button
               type="button"
-              className={`${needsFix ? "btn-primary" : "btn-secondary"} min-h-10 px-4 py-2 text-sm`}
+              className={`${hasDetails ? "btn-secondary" : "btn-primary"} min-h-10 px-4 py-2 text-sm`}
               disabled={update.isPending}
               onClick={() => setOpen(true)}
             >
-              {needsFix ? "Add location" : "Update"}
+              Change current location
             </button>
           </div>
         ) : null}
@@ -312,7 +326,7 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
               disabled={!canSave || update.isPending}
               onClick={() => update.mutate("edit")}
             >
-              {update.isPending ? "Saving…" : "Confirm location"}
+              {update.isPending ? "Saving…" : "Save current location"}
             </button>
             <button
               type="button"
@@ -325,8 +339,8 @@ export function CraneLocationFix({ crane }: { crane: Crane }) {
             {!canSave && !update.isPending ? (
               <span className="text-sm text-slate-500">
                 {currentLocation.trim().length < 3 || stateCode === ""
-                  ? "Add the city and state to confirm."
-                  : "Enter a six-digit pincode to confirm."}
+                  ? "Add the city and state to save."
+                  : "Enter a six-digit pincode to save."}
               </span>
             ) : null}
           </div>

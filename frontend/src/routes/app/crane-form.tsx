@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api";
 import {
   createCrane,
   craneToForm,
+  copyLoadChart,
   duplicateCrane,
   EMPTY_CRANE_FORM,
   fetchReferenceData,
@@ -135,12 +136,28 @@ export function CraneFormPage() {
           : form.currentStatus === "AVAILABLE"
             ? null
             : undefined;
-      return isEdit
-        ? updateCrane(craneId as string, form, { availableFrom: editAvailableFrom })
-        : createCrane(payload, {
-            vendorId: onBehalfVendorId,
-            availableFrom: payload.availableFrom,
-          });
+      if (isEdit) {
+        return updateCrane(craneId as string, form, { availableFrom: editAvailableFrom }).then(
+          (result) => ({ ...result, chartCopyFailed: false }),
+        );
+      }
+      return createCrane(payload, {
+        vendorId: onBehalfVendorId,
+        availableFrom: payload.availableFrom,
+      }).then(async (result) => {
+        // A duplicate brings the original's load chart along. The crane is
+        // already saved by now, so a failed copy must not undo it or report the
+        // save as failed: it is flagged and the vendor can upload the chart.
+        let chartCopyFailed = false;
+        if (duplicateOf && duplicate.data?.prefill.loadChart) {
+          try {
+            await copyLoadChart(result.crane.id, duplicateOf);
+          } catch {
+            chartCopyFailed = true;
+          }
+        }
+        return { ...result, chartCopyFailed };
+      });
     },
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ["fleet"] });
@@ -152,7 +169,14 @@ export function CraneFormPage() {
         });
         return;
       }
-      void navigate({ to: "/app/fleet", search: { notice: `${result.crane.serialRegistrationNo} saved` } });
+      void navigate({
+        to: "/app/fleet",
+        search: {
+          notice: result.chartCopyFailed
+            ? `${result.crane.serialRegistrationNo} saved, but its load chart could not be copied. Upload it from the fleet list.`
+            : `${result.crane.serialRegistrationNo} saved`,
+        },
+      });
     },
     onError: (error: unknown) => {
       setFormError(error instanceof Error ? error.message : "The crane could not be saved.");
@@ -218,6 +242,9 @@ export function CraneFormPage() {
       {duplicateOf ? (
         <Alert tone="info" title="Copied from an existing crane">
           This is a new record. Check every field and give it its own serial or registration number.
+          {duplicate.data?.prefill.loadChart
+            ? ` The load chart (${duplicate.data.prefill.loadChart.fileName}) will be copied to the new crane when you save.`
+            : ""}
         </Alert>
       ) : null}
 

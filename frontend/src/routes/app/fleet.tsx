@@ -18,8 +18,10 @@ import {
   deactivateCrane,
   downloadLoadChart,
   fetchReferenceData,
+  isBusyStatus,
   isSystemLocked,
   listCranes,
+  previewLocationFromLink,
   quickUpdateCrane,
   reactivateCrane,
   uploadLoadChart,
@@ -181,6 +183,7 @@ interface CraneActions {
   busy: boolean;
   onQuickUpdate: (crane: Crane, input: QuickUpdate) => Promise<void>;
   onConfirm: (crane: Crane) => void;
+  onConfirmLocation: (crane: Crane) => void;
   onDuplicate: (crane: Crane) => void;
   onDeactivate: (crane: Crane) => void;
   onReactivate: (crane: Crane) => void;
@@ -356,6 +359,11 @@ export function FleetPage() {
       confirmAccurate.mutate({
         run: () => confirmCraneAccurate(crane.id),
         success: "Current status confirmed.",
+      }),
+    onConfirmLocation: (crane) =>
+      confirmAccurate.mutate({
+        run: () => confirmCraneAccurate(crane.id),
+        success: "Current location confirmed.",
       }),
     onDuplicate: (crane) =>
       void navigate({
@@ -755,6 +763,270 @@ function LocationCell({ crane }: { crane: Crane }) {
       </p>
       {crane.locationUnverified ? (
         <span className="text-[14px] text-amber-700">No map pin</span>
+      ) : null}
+    </div>
+  );
+}
+
+const PINCODE_RE = /^[1-9]\d{5}$/;
+
+/**
+ * The Location column: where the crane is, plus the two things a vendor does
+ * with it — confirm it is still right, or change it. Confirm re-stamps the
+ * crane as checked without touching any data; Update opens a small form for the
+ * city, state and pincode (or a pasted Google Maps link). Cranes on an SML
+ * contract are Booked or Hired, SML owns their location, and they show it
+ * read-only.
+ */
+function LocationControl({ crane, actions }: { crane: Crane; actions: CraneActions }) {
+  const reference = useQuery({
+    queryKey: ["fleet", "reference-data"],
+    queryFn: fetchReferenceData,
+    staleTime: 5 * 60_000,
+  });
+  const [open, setOpen] = useState(false);
+  const [city, setCity] = useState("");
+  const [stateCode, setStateCode] = useState("");
+  const [pincode, setPincode] = useState("");
+  // Set only when a Google Maps link supplied it; a hand-typed address leaves
+  // the pin to the server so a stale pin is never saved against a new address.
+  const [pin, setPin] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [mapsLink, setMapsLink] = useState("");
+  const [linkNote, setLinkNote] = useState<{ text: string; failed: boolean } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [reading, setReading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [updated, setUpdated] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  if (isSystemLocked(crane)) {
+    return (
+      <div className="min-w-0" title="Set by SML while the crane is on a contract">
+        <LocationCell crane={crane} />
+      </div>
+    );
+  }
+
+  const states = (reference.data?.states ?? []).map((state) => ({
+    value: state.code,
+    label: state.name,
+  }));
+  const pincodeValid = PINCODE_RE.test(pincode.trim());
+  const canSave = city.trim().length >= 3 && stateCode !== "" && pincodeValid;
+
+  const close = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const openEditor = () => {
+    setCity(crane.currentLocation ?? "");
+    setStateCode(crane.stateCode ?? "");
+    setPincode(crane.pincode ?? "");
+    setPin(null);
+    setMapsLink("");
+    setLinkNote(null);
+    setError(null);
+    setUpdated(false);
+    setOpen(true);
+  };
+
+  const fillFromLink = async () => {
+    setReading(true);
+    setLinkNote(null);
+    try {
+      const { location } = await previewLocationFromLink(mapsLink.trim());
+      if (location.currentLocation) setCity(location.currentLocation);
+      if (location.stateCode) setStateCode(location.stateCode);
+      if (location.pincode) setPincode(location.pincode);
+      if (location.latitude !== null && location.longitude !== null) {
+        setPin({ latitude: location.latitude, longitude: location.longitude });
+      }
+      setLinkNote({
+        text: location.note ?? "Filled from the link. Check the details.",
+        failed: false,
+      });
+    } catch (caught) {
+      setLinkNote({
+        text: caught instanceof Error ? caught.message : "That link could not be read.",
+        failed: true,
+      });
+    } finally {
+      setReading(false);
+    }
+  };
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      // A quick update validates the whole status/location pair, so the status
+      // goes across unchanged. A busy crane needs an availability date of today
+      // or later; a stale one is refreshed rather than failing a pure location fix.
+      const storedFrom = crane.availableFrom?.slice(0, 10) ?? "";
+      const availableFrom = isBusyStatus(crane.currentStatus)
+        ? !storedFrom || storedFrom < todayKey()
+          ? todayKey()
+          : storedFrom
+        : null;
+      await actions.onQuickUpdate(crane, {
+        currentStatus: crane.currentStatus,
+        currentLocation: city.trim(),
+        stateCode,
+        pincode: pincode.trim() || null,
+        ...(pin ?? {}),
+        availableFrom,
+        expectedReadyDate: crane.expectedReadyDate ?? null,
+      });
+      setUpdated(true);
+      setOpen(false);
+      triggerRef.current?.focus();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update the location.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Nothing to confirm without a city and state; the vendor has to add them.
+  const storedPincode = crane.pincode?.trim() ?? "";
+  const canConfirm =
+    Boolean(crane.currentLocation?.trim()) &&
+    Boolean(crane.stateCode?.trim()) &&
+    (storedPincode === "" || PINCODE_RE.test(storedPincode));
+
+  const inputClass =
+    "mt-1 w-full rounded-md border border-white/10 bg-transparent px-2 py-1 text-[15px] text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40";
+
+  return (
+    <div className="relative min-w-0">
+      <LocationCell crane={crane} />
+      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[14px]">
+        {canConfirm ? (
+          <button
+            type="button"
+            onClick={() => actions.onConfirmLocation(crane)}
+            disabled={actions.busy}
+            className="text-emerald-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 disabled:text-slate-500"
+          >
+            Confirm
+          </button>
+        ) : null}
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={() => (open ? close() : openEditor())}
+          className="text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+        >
+          Update
+        </button>
+        {updated && !open ? <span className="text-emerald-700">Updated</span> : null}
+      </div>
+
+      {open ? (
+        <>
+          <div className="fixed inset-0 z-20" aria-hidden onClick={close} />
+          <div
+            role="dialog"
+            aria-label={`Update location for ${craneName(crane)}`}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                close();
+              }
+            }}
+            className="absolute top-full left-0 z-30 mt-2 w-72 rounded-lg border border-white/10 bg-ink-900 p-3 shadow-xl"
+          >
+            <label className="block text-[14px] text-slate-500">
+              Google Maps link (optional)
+              <div className="mt-1 flex gap-2">
+                <input
+                  type="text"
+                  value={mapsLink}
+                  onChange={(event) => {
+                    setMapsLink(event.target.value);
+                    setLinkNote(null);
+                  }}
+                  placeholder="https://maps.app.goo.gl/…"
+                  className={cn(inputClass, "mt-0 min-w-0 flex-1")}
+                />
+                <button
+                  type="button"
+                  onClick={() => void fillFromLink()}
+                  disabled={reading || mapsLink.trim() === ""}
+                  className="btn-secondary shrink-0 px-2 py-1 text-[14px]"
+                >
+                  {reading ? "Reading…" : "Fill"}
+                </button>
+              </div>
+            </label>
+            {linkNote ? (
+              <p className={cn("mt-1 text-[14px]", linkNote.failed ? "text-rose-200" : "text-slate-500")}>
+                {linkNote.text}
+              </p>
+            ) : null}
+
+            <label className="mt-3 block text-[14px] text-slate-500">
+              City / location
+              <input
+                type="text"
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+                placeholder="e.g. Indore"
+                autoFocus
+                className={inputClass}
+              />
+            </label>
+            <div className="mt-3 text-[14px] text-slate-500">
+              <label htmlFor={`loc-state-${crane.id}`}>State</label>
+              <div className="mt-1">
+                <Select
+                  id={`loc-state-${crane.id}`}
+                  value={stateCode}
+                  onChange={setStateCode}
+                  options={states}
+                  placeholder="Select a state"
+                />
+              </div>
+            </div>
+            <label className="mt-3 block text-[14px] text-slate-500">
+              Pincode
+              <input
+                type="text"
+                inputMode="numeric"
+                value={pincode}
+                onChange={(event) => setPincode(event.target.value)}
+                placeholder="6 digits"
+                className={inputClass}
+              />
+            </label>
+            {pincode.trim() !== "" && !pincodeValid ? (
+              <p className="mt-1 text-[14px] text-rose-200">Enter a valid six-digit pincode.</p>
+            ) : null}
+
+            {error ? <p className="mt-2 text-[14px] text-rose-200">{error}</p> : null}
+
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={close}
+                className="rounded-md px-2 py-1 text-[15px] text-slate-700 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void save()}
+                disabled={saving || !canSave}
+                className="btn-primary px-3 py-1 text-[15px]"
+              >
+                {saving ? "Saving…" : "Save location"}
+              </button>
+            </div>
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -1176,7 +1448,7 @@ function FleetRow({ crane, actions }: { crane: Crane; actions: CraneActions }) {
       </div>
 
       <StatusControl crane={crane} actions={actions} />
-      <LocationCell crane={crane} />
+      <LocationControl crane={crane} actions={actions} />
       <FreshnessCell
         crane={crane}
         busy={actions.busy}
@@ -1269,7 +1541,7 @@ function MobileFleetList({
           </div>
 
           <div className="mt-2">
-            <LocationCell crane={crane} />
+            <LocationControl crane={crane} actions={actions} />
           </div>
           <div className="mt-1">
             <FreshnessCell

@@ -85,6 +85,8 @@ router.post(
   uploadSingle("file"),
   crane.uploadChart,
 );
+// Duplicating a crane copies its chart too: the body names the crane to copy from.
+router.post("/:craneId/load-chart/copy", canWriteFleet, crane.copyChart);
 router.get("/:craneId/load-chart", canReadFleet, crane.downloadChart);
 
 // --- internal read + fleet approval (brief 6.4) ---

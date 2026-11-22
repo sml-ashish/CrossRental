@@ -22,6 +22,7 @@ import {
   type DiscoveryAvailability,
   type DiscoveryCrane,
   type DiscoveryFilters,
+  type RecommendationCrane,
   type RecommendationMode,
   type DistanceSort,
 } from "@/lib/discovery";
@@ -192,6 +193,81 @@ function searchKeyOf(search: Record<string, unknown>): string {
   const lineId = typeof search.line === "string" && search.line !== "" ? search.line : null;
   const mode: RecommendationMode = search.mode === "distance" ? "distance" : "technical";
   return JSON.stringify(toSearch(fromSearch(search), craneId, lineId, mode));
+}
+
+/**
+ * The browse filters (type, capacity, status, YOM, vendor, hire window) applied
+ * to an enquiry's recommended cranes. The recommendation list comes from the
+ * server already ranked for the line, so these narrow it on the client rather
+ * than re-querying — which is why they keep working once an enquiry is chosen.
+ */
+function lineFilterActive(filters: FilterState): boolean {
+  return Boolean(
+    filters.craneType ||
+      filters.capacityT.trim() ||
+      filters.availability ||
+      filters.vendorName.trim() ||
+      filters.yomFrom.trim() ||
+      filters.yomTo.trim() ||
+      (filters.availableFrom && filters.availableTo),
+  );
+}
+
+function matchesLineFilters(crane: RecommendationCrane, filters: FilterState): boolean {
+  if (filters.craneType && crane.typeOfCraneCode !== filters.craneType) return false;
+
+  const capacity = Number(filters.capacityT);
+  if (filters.capacityT.trim() && Number.isFinite(capacity)) {
+    if (filters.capacityRule === "EXACT" ? crane.capacityT !== capacity : crane.capacityT < capacity) {
+      return false;
+    }
+  }
+
+  if (filters.availability && crane.currentStatus !== filters.availability) return false;
+
+  const vendor = filters.vendorName.trim().toLowerCase();
+  if (vendor && !crane.vendorName.toLowerCase().includes(vendor)) return false;
+
+  const yomFrom = Number(filters.yomFrom);
+  const yomTo = Number(filters.yomTo);
+  if (filters.yomFrom.trim() && Number.isFinite(yomFrom) && (crane.yom === null || crane.yom < yomFrom)) {
+    return false;
+  }
+  if (filters.yomTo.trim() && Number.isFinite(yomTo) && (crane.yom === null || crane.yom > yomTo)) {
+    return false;
+  }
+
+  // Hire window: the crane must already be free by the first day. A crane with
+  // no stated free-from date counts only when it is available right now.
+  if (filters.availableFrom && filters.availableTo) {
+    if (crane.availableFrom) {
+      if (crane.availableFrom.slice(0, 10) > filters.availableFrom) return false;
+    } else if (crane.currentStatus !== "AVAILABLE") {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** Standard crane capacities, in tonnes, offered by the capacity filter. */
+const CAPACITY_STEPS_T = [
+  10, 20, 25, 30, 40, 50, 60, 75, 80, 100, 120, 150, 200, 250, 300, 400, 500, 600, 800, 1000,
+];
+
+/**
+ * The capacity dropdown's options. A shared link or an old filter can carry a
+ * tonnage that is not one of the standard steps; it is kept as an option so the
+ * select shows it instead of silently going blank.
+ */
+function capacityOptions(current: string): Array<{ value: string; label: string }> {
+  const steps = new Set(CAPACITY_STEPS_T.map(String));
+  const values = [...CAPACITY_STEPS_T.map(String)];
+  const trimmed = current.trim();
+  if (trimmed && !steps.has(trimmed) && Number.isFinite(Number(trimmed))) {
+    values.push(trimmed);
+    values.sort((a, b) => Number(a) - Number(b));
+  }
+  return values.map((value) => ({ value, label: `${value} t` }));
 }
 
 function countMore(filters: FilterState): number {
@@ -377,8 +453,9 @@ export function DiscoveryPage() {
         availableOnly,
         searchText,
       )
+        .filter((crane) => matchesLineFilters(crane, filters))
         .map(toDisplayCrane),
-    [recommendations, filters.location, mode, distanceSort, availableOnly, searchText, requiredT],
+    [recommendations, filters, mode, distanceSort, availableOnly, searchText, requiredT],
   );
   const cranes = lineId ? recommendedCranes : browseCranes;
   const highlightedCraneId = selectedCraneId;
@@ -812,6 +889,15 @@ export function DiscoveryPage() {
     onRetry: () => void raisable.refetch(),
   };
 
+  const lineFilterCount = lineFilterActive(filters);
+  const clearLineFilters = () =>
+    setFilters((prev) => ({
+      ...EMPTY_FILTERS,
+      // Keep what the enquiry itself owns: the pinned site and the From box.
+      siteLocation: prev.siteLocation,
+      location: prev.location,
+    }));
+
   const recommendationPanel = (
     <RecommendationPanel
       lineId={lineId as string}
@@ -836,36 +922,20 @@ export function DiscoveryPage() {
       onToggleChecked={toggleChecked}
       onSetChecked={(ids) => setCheckedIds(new Set(ids))}
       onModeChange={changeMode}
+      extraFilter={(crane) => matchesLineFilters(crane, filters)}
+      extraFilterActive={lineFilterCount}
+      onClearFilters={clearLineFilters}
       onClear={clearLine}
       onRetry={() => void recommendationQuery.refetch()}
     />
   );
 
-  /* Browse mode: the filters and the crane list, unchanged by the line picker.
-     It is the whole of panel 2 when no line is selected. */
-  const browseRail = (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 px-4 pt-3">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[14px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-            Browse cranes
-          </p>
-          <button
-            type="button"
-            onClick={() => setCalendar((value) => !value)}
-            aria-pressed={calendar}
-            className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[14px] transition-colors",
-              calendar
-                ? "bg-ink-850 text-white"
-                : "text-neutral-400 hover:bg-ink-850 hover:text-white",
-            )}
-          >
-            <CalendarDays className="size-3.5" aria-hidden />
-            Calendar
-          </button>
-        </div>
-
+  /* Type, capacity, status chips and "More". Shared by the browse rail and the
+     enquiry (recommendation) rail so the filters do not vanish once a line is
+     picked. In browse mode they drive the server search; in enquiry mode they
+     narrow the recommended cranes (see matchesLineFilters). */
+  const filterBar = (
+    <>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <Select
             id="discovery-type"
@@ -877,12 +947,12 @@ export function DiscoveryPage() {
               label: type.name,
             }))}
           />
-          <TextInput
+          <Select
             id="discovery-capacity"
             value={filters.capacityT}
             onChange={(value) => set("capacityT", value)}
-            inputMode="decimal"
             placeholder="Min capacity (t)"
+            options={capacityOptions(filters.capacityT)}
           />
         </div>
 
@@ -928,6 +998,35 @@ export function DiscoveryPage() {
             ) : null}
           </button>
         </div>
+    </>
+  );
+
+  /* Browse mode: the filters and the crane list, unchanged by the line picker.
+     It is the whole of panel 2 when no line is selected. */
+  const browseRail = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 px-4 pt-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[14px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+            Browse cranes
+          </p>
+          <button
+            type="button"
+            onClick={() => setCalendar((value) => !value)}
+            aria-pressed={calendar}
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-[14px] transition-colors",
+              calendar
+                ? "bg-ink-850 text-white"
+                : "text-neutral-400 hover:bg-ink-850 hover:text-white",
+            )}
+          >
+            <CalendarDays className="size-3.5" aria-hidden />
+            Calendar
+          </button>
+        </div>
+
+        {filterBar}
       </div>
 
       <div className="mt-2 flex shrink-0 items-center justify-between gap-2 border-y border-ink-800 px-4 py-2">
@@ -993,6 +1092,15 @@ export function DiscoveryPage() {
       </div>
     </div>
   );
+
+  /* Enquiry mode: the same filters above the line's recommendations. */
+  const enquiryRail = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 border-b border-ink-800 px-4 pt-3 pb-3">{filterBar}</div>
+      <div className="min-h-0 flex-1">{recommendationPanel}</div>
+    </div>
+  );
+  const leftRail = lineId ? enquiryRail : browseRail;
 
   /* The calendar is a view of the same result set, opened over the workspace.
      Kept as an overlay rather than swapping the map out so the map keeps its
@@ -1086,7 +1194,7 @@ export function DiscoveryPage() {
         </aside>
 
         <aside className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-ink-800 bg-ink-900 shadow-sm">
-          {lineId ? recommendationPanel : browseRail}
+          {leftRail}
         </aside>
         </div>
 
@@ -1183,7 +1291,7 @@ export function DiscoveryPage() {
           ) : null}
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            {lineId ? recommendationPanel : browseRail}
+            {leftRail}
           </div>
         </div>
       </div>
@@ -1429,12 +1537,12 @@ function MoreFilters({
                 placeholder="Any crane type"
                 options={craneTypes}
               />
-              <TextInput
+              <Select
                 id="more-capacity"
                 value={filters.capacityT}
                 onChange={(value) => set("capacityT", value)}
-                inputMode="decimal"
                 placeholder="Min capacity (t)"
+                options={capacityOptions(filters.capacityT)}
               />
             </div>
             <div className="flex flex-wrap items-center gap-1.5">

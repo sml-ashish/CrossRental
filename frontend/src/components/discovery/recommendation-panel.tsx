@@ -116,6 +116,10 @@ export interface RecommendationPanelProps {
   onToggleChecked: (craneId: string) => void;
   onSetChecked: (craneIds: string[]) => void;
   onModeChange: (mode: RecommendationMode) => void;
+  /** Extra client-side filter (type, capacity, status, YOM, vendor, window). */
+  extraFilter?: (crane: RecommendationCrane) => boolean;
+  extraFilterActive?: boolean;
+  onClearFilters?: () => void;
   onClear: () => void;
   onRetry: () => void;
 }
@@ -143,6 +147,9 @@ export function RecommendationPanel({
   onToggleChecked,
   onSetChecked,
   onModeChange,
+  extraFilter,
+  extraFilterActive = false,
+  onClearFilters,
   onClear,
   onRetry,
 }: RecommendationPanelProps) {
@@ -161,12 +168,12 @@ export function RecommendationPanel({
     cranesLocatedIn(allCranes, fromText),
     availableOnly,
     searchText,
-  );
+  ).filter((crane) => (extraFilter ? extraFilter(crane) : true));
   const cranes = matching.slice(0, shown);
   const total = cranes.length;
   const matchCount = matching.length;
   const hiddenCount = matchCount - total;
-  const filteredOut = allCranes.length > 0 && matchCount === 0 && (Boolean(fromText.trim()) || availableOnly || Boolean(searchText.trim()));
+  const filteredOut = allCranes.length > 0 && matchCount === 0 && (Boolean(fromText.trim()) || availableOnly || Boolean(searchText.trim()) || extraFilterActive);
   // Only ticks that are still on the visible list count: a crane filtered out by
   // "From" must not silently receive an RFQ.
   const checkedCranes = matching.filter((crane) => checkedIds.has(crane.craneId));
@@ -299,16 +306,23 @@ export function RecommendationPanel({
             {filteredOut ? (
               <EmptyState
                 icon={<SlidersHorizontal className="size-4" aria-hidden />}
-                title={`No cranes in ${fromText.trim()}`}
-                description="None of the recommended cranes are located there. Try a nearby city or clear it."
+                title={fromText.trim() ? `No cranes in ${fromText.trim()}` : "No cranes match your filters"}
+                description={
+                  fromText.trim()
+                    ? "None of the recommended cranes are located there. Try a nearby city or clear it."
+                    : "None of the recommended cranes pass the filters. Widen them or clear them."
+                }
                 className="px-0 py-10 [&_p]:text-neutral-200 [&_p:last-child]:text-neutral-500"
                 action={
                   <button
                     type="button"
-                    onClick={() => onFromChange("")}
+                    onClick={() => {
+                      onFromChange("");
+                      onClearFilters?.();
+                    }}
                     className="rounded-lg border border-ink-700 px-3 py-1.5 text-[14px] font-medium text-neutral-300 transition-colors hover:bg-ink-850 hover:text-white"
                   >
-                    Clear From
+                    {fromText.trim() && !extraFilterActive ? "Clear From" : "Clear filters"}
                   </button>
                 }
               />
