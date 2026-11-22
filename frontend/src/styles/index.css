@@ -586,3 +586,134 @@
     break-inside: avoid;
   }
 }
+
+
+/*
+ * Enquiry workspace — warm, airy surface.
+ *
+ * Scoped to `.enq` so no other screen changes. In light mode the workspace
+ * swaps the cool grey surfaces for a warm paper tone with deep indigo ink, and
+ * lifts content onto soft white cards. In dark mode the existing ink tokens are
+ * kept; only the mesh glow and card treatment apply. Because every component
+ * reads tokens, nothing in the page needs a `dark:` variant.
+ */
+.enq {
+  --enq-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Charter, Georgia,
+    serif;
+  --enq-card-shadow: none;
+  --enq-card-shadow-hover: none;
+  --enq-card-border: var(--color-ink-800);
+  --enq-mesh-opacity: 0.2;
+}
+
+.enq.theme-light {
+  --color-white: #1d1a3a;
+
+  --color-ink-950: #fcf9f4;
+  --color-ink-900: #fffdf9;
+  --color-ink-850: #ffffff;
+  --color-ink-800: #ece6db;
+  --color-ink-700: #d8d0c1;
+
+  --color-slate-500: #66627e;
+  --color-slate-600: #4f4b68;
+  --color-slate-700: #3a3654;
+  --color-neutral-200: #2a2745;
+
+  --enq-card-shadow: 0 1px 2px rgba(45, 30, 80, 0.04), 0 10px 28px -14px rgba(45, 30, 80, 0.16);
+  --enq-card-shadow-hover: 0 1px 2px rgba(45, 30, 80, 0.05), 0 16px 34px -14px rgba(45, 30, 80, 0.24);
+  --enq-card-border: #efe8dc;
+  --enq-mesh-opacity: 0.7;
+}
+
+.enq-serif {
+  font-family: var(--enq-serif);
+  font-feature-settings: "kern", "liga";
+}
+
+/* Soft colour wash behind the page header. Decorative and static: it fades out
+   downwards so the list always sits on a calm surface. */
+.enq-mesh {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 260px;
+  pointer-events: none;
+  opacity: var(--enq-mesh-opacity);
+  background:
+    radial-gradient(34% 70% at 12% 28%, rgba(240, 177, 62, 0.75), transparent 72%),
+    radial-gradient(32% 78% at 42% 8%, rgba(246, 110, 84, 0.6), transparent 72%),
+    radial-gradient(34% 70% at 74% 30%, rgba(160, 146, 244, 0.6), transparent 72%),
+    radial-gradient(28% 60% at 96% 12%, rgba(120, 170, 245, 0.55), transparent 72%);
+  filter: blur(36px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+}
+
+.enq-card {
+  background: var(--color-ink-850);
+  border: 1px solid var(--enq-card-border);
+  border-radius: 1rem;
+  box-shadow: var(--enq-card-shadow);
+  transition:
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.enq-card[data-selected="true"] {
+  border-color: var(--color-accent-500);
+  box-shadow:
+    0 0 0 1px var(--color-accent-500),
+    var(--enq-card-shadow-hover);
+}
+
+.enq-card[data-interactive="true"]:hover {
+  box-shadow: var(--enq-card-shadow-hover);
+}
+
+/* The little blurred "orb" that marks each stage. */
+.enq-orb {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  color: #2a2745;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.85), transparent 55%),
+    linear-gradient(140deg, var(--orb-a), var(--orb-b));
+  box-shadow: 0 6px 16px -6px var(--orb-b);
+}
+
+.enq-orb[data-tone="pending"] {
+  --orb-a: #ffc9bd;
+  --orb-b: #f48a73;
+}
+.enq-orb[data-tone="awaiting"] {
+  --orb-a: #ffe3a6;
+  --orb-b: #f1b64a;
+}
+.enq-orb[data-tone="quotes"] {
+  --orb-a: #d9d3ff;
+  --orb-b: #9a8ef0;
+}
+.enq-orb[data-tone="finalised"] {
+  --orb-a: #c8f1dc;
+  --orb-b: #5fcf9d;
+}
+
+/* The enquiry slide-over eases in from the right. Reduced motion is handled by
+   the global rule above. */
+@keyframes enq-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.enq-slide {
+  animation: enq-slide-in 180ms ease-out;
+}

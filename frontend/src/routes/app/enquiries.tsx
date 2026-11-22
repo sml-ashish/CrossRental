@@ -1,15 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useRouterState, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
+  CircleCheck,
   Compass,
+  Hourglass,
   Inbox,
   MapPin,
   Plus,
+  Receipt,
   RotateCcw,
   Search,
+  Send,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import {
   createRfqFromLine,
@@ -21,23 +26,22 @@ import {
   type EnquiryListRow,
   type EnquiryOverallStatus,
   type EnquirySort,
-  type EnquirySummaryCounts,
 } from "@/lib/enquiries";
 import { Alert } from "@/components/ui/alert";
 import { RfqFieldsScreen } from "@/components/rfq-fields-screen";
 import type { RfqLineFieldKey } from "@/lib/rfqLineFields";
 import { EnquiryBulkUpload } from "@/components/enquiry-bulk-upload";
-import { SiteMap } from "@/components/site-map";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/cn";
 import { cityOf, craneTypeLabel, titleCase } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 
 /**
  * The enquiry workspace.
  *
- * Two columns, both full height: the list on the left, the selected enquiry's
- * requirements on the right. The page answers "what needs attention", "how far
+ * A board: one column per sourcing stage, compact cards, and a slide-over for
+ * the selected enquiry's requirements. The page answers "what needs attention", "how far
  * along is this" and "what is the next action" without leaving the screen — the
  * old table made every one of those a navigation.
  *
@@ -87,12 +91,13 @@ function statusTone(status: EnquiryOverallStatus): {
 const KPI_CARDS: Array<{
   bucket: Exclude<EnquiryBucket, "closed">;
   label: string;
+  icon: LucideIcon;
   accent?: boolean;
 }> = [
-  { bucket: "pending", label: "Pending sourcing", accent: true },
-  { bucket: "awaiting", label: "Awaiting quotes" },
-  { bucket: "quotes", label: "Quotes in" },
-  { bucket: "finalised", label: "Finalised" },
+  { bucket: "pending", label: "Pending sourcing", icon: Hourglass, accent: true },
+  { bucket: "awaiting", label: "Awaiting quotes", icon: Send },
+  { bucket: "quotes", label: "Quotes in", icon: Receipt },
+  { bucket: "finalised", label: "Finalised", icon: CircleCheck },
 ];
 
 /**
@@ -103,17 +108,6 @@ const KPI_CARDS: Array<{
 const STATUS_LABEL = Object.fromEntries(
   STATUS_FILTERS.map((filter) => [filter.value, filter.label]),
 ) as Record<EnquiryOverallStatus, string>;
-
-function kpiValue(
-  counts: EnquirySummaryCounts | undefined,
-  bucket: Exclude<EnquiryBucket, "closed">,
-): number {
-  if (!counts) return 0;
-  if (bucket === "pending") return counts.pendingSourcing;
-  if (bucket === "awaiting") return counts.awaitingQuotes;
-  if (bucket === "quotes") return counts.quotesIn;
-  return counts.finalised;
-}
 
 /**
  * A line's next action, derived from the trail. The button changes with the
@@ -207,13 +201,6 @@ function shortDate(value: string | null): string {
   return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-function fullDate(value: string | null): string {
-  if (!value) return "Not set";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Not set";
-  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
-
 function daysUntil(value: string | null): number | null {
   if (!value) return null;
   const date = new Date(value);
@@ -233,100 +220,50 @@ function durationLabel(line: EnquiryLine): string {
 }
 
 /**
- * Numbers tick up once, on first load. A filter click must not re-animate the
- * strip: the count is not the news, the list is. Reduced motion skips it.
+ * A line is "awarded" once a vendor has been chosen or the line is closed.
+ * From then on, offering to find more cranes for it is noise.
  */
-function useCountUp(value: number, duration = 550, enabled = true): number {
-  const [display, setDisplay] = useState(0);
-  const done = useRef(false);
-
-  useEffect(() => {
-    if (!enabled) return;
-    if (done.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      done.current = true;
-      setDisplay(value);
-      return;
-    }
-    let frame = 0;
-    const start = performance.now();
-    const step = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(value * eased));
-      if (t < 1) {
-        frame = requestAnimationFrame(step);
-      } else {
-        done.current = true;
-        setDisplay(value);
-      }
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [value, duration, enabled]);
-
-  return done.current ? value : display;
+function isAwarded(status: EnquiryLine["trailStatus"]): boolean {
+  return (
+    status === "VENDOR_FINALISED" ||
+    status === "BOOKED" ||
+    status === "FULFILLED_INTERNALLY" ||
+    status === "CLOSED" ||
+    status === "CANCELLED"
+  );
 }
 
 /**
- * One quarter of the KPI strip. The strip is a single band divided by hairlines,
- * not four boxes: the numbers are the hierarchy, the labels are the caption.
+ * The start-date warning for an enquiry that still has unsourced lines.
+ * A date in the past is its own, louder state: the old copy printed
+ * "Starts in -3 days", which is both wrong and the most urgent case.
  */
-function KpiStat({
-  label,
-  value,
-  delta,
-  accent,
-  active,
-  loading,
-  onClick,
-}: {
-  label: string;
-  value: number;
-  delta: number;
-  accent?: boolean;
-  active: boolean;
-  loading?: boolean;
-  onClick: () => void;
-}) {
-  const shown = useCountUp(value, 550, !loading);
+function startNote(row: EnquiryListRow): { label: string; tone: "late" | "soon" } | null {
+  if (row.overallStatus === "CLOSED" || row.sourcedPercent >= 100) return null;
+  const days = daysUntil(row.nextUnsourcedStart);
+  if (days === null) return null;
+  if (days < 0) {
+    const ago = -days;
+    return {
+      label: `Start date passed ${ago} ${ago === 1 ? "day" : "days"} ago`,
+      tone: "late",
+    };
+  }
+  if (days === 0) return { label: "Starts today", tone: "soon" };
+  if (days <= 14) return { label: `Starts in ${days} ${days === 1 ? "day" : "days"}`, tone: "soon" };
+  return null;
+}
 
+function NoteChip({ note }: { note: { label: string; tone: "late" | "soon" } }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      aria-busy={loading}
-      className="group relative flex flex-col items-start px-4 py-4 text-left transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 sm:px-6 sm:first:pl-0"
-    >
-      {loading ? (
-        <span
-          aria-hidden
-          className="mt-1 h-7 w-8 animate-pulse rounded bg-ink-800 motion-reduce:animate-none"
-        />
-      ) : (
-        <span
-          className={cn(
-            "text-[28px] leading-none font-semibold tabular-nums",
-            accent && value > 0 ? "text-accent-400" : "text-white",
-          )}
-        >
-          {shown}
-        </span>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[14px] font-medium",
+        note.tone === "late" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700",
       )}
-      <span className="mt-2 flex flex-wrap items-baseline gap-x-2 text-[15px] text-slate-500 transition-colors group-hover:text-slate-700">
-        {label}
-        {delta > 0 ? (
-          <span className="text-[14px] text-slate-500 tabular-nums">{delta} new today</span>
-        ) : null}
-      </span>
-      <span
-        aria-hidden
-        className={cn(
-          "absolute inset-x-0 bottom-0 h-0.5 transition-colors duration-150",
-          active ? "bg-accent-500" : "bg-transparent",
-        )}
-      />
-    </button>
+    >
+      {note.label}
+    </span>
   );
 }
 
@@ -344,37 +281,14 @@ function ProgressBar({ row }: { row: EnquiryListRow }) {
       aria-valuemax={100}
       aria-valuenow={row.sourcedPercent}
       aria-label={`${row.sourcedPercent}% sourced`}
-      className="flex h-1 w-full gap-0.5 overflow-hidden rounded-full bg-ink-800"
+      className="flex h-1.5 w-full gap-1 overflow-hidden rounded-full"
     >
       {Array.from({ length: lines }).map((_, index) => (
         <span
           key={index}
-          className={cn("h-full flex-1", index < filled ? fill : "bg-ink-800")}
+          className={cn("h-full flex-1 rounded-full", index < filled ? fill : "bg-ink-800")}
         />
       ))}
-    </div>
-  );
-}
-
-function RowSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-3 border-b border-ink-800 py-4 md:grid-cols-[minmax(0,1fr)_220px_260px_150px] md:items-center md:gap-6">
-      <div className="animate-pulse space-y-1.5 motion-reduce:animate-none">
-        <div className="h-2.5 w-24 rounded bg-ink-800" />
-        <div className="h-3.5 w-52 rounded bg-ink-800" />
-        <div className="h-2.5 w-40 rounded bg-ink-800" />
-      </div>
-      <div className="animate-pulse space-y-1.5 motion-reduce:animate-none">
-        <div className="h-3 w-32 rounded bg-ink-800" />
-        <div className="h-2.5 w-24 rounded bg-ink-800" />
-      </div>
-      <div className="animate-pulse space-y-1.5 motion-reduce:animate-none">
-        <div className="h-1 w-full rounded bg-ink-800" />
-        <div className="h-2.5 w-36 rounded bg-ink-800" />
-      </div>
-      <div className="animate-pulse motion-reduce:animate-none">
-        <div className="h-3 w-20 rounded bg-ink-800" />
-      </div>
     </div>
   );
 }
@@ -383,8 +297,18 @@ function RowSkeleton() {
 // page
 // ---------------------------------------------------------------------------
 
+type Stage = Exclude<EnquiryBucket, "closed">;
+
+const STAGE_HINT: Record<Stage, string> = {
+  pending: "New enquiries wait here until sourcing starts.",
+  awaiting: "RFQs are out. Replies will land here.",
+  quotes: "Quotes are in and ready to compare.",
+  finalised: "Vendors are chosen. Nothing left to source.",
+};
+
 export function EnquiryIndexPage() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const routeSearch = useSearch({ strict: false }) as Record<string, unknown>;
@@ -392,23 +316,18 @@ export function EnquiryIndexPage() {
 
   const canCreate = user?.role === "sales_user" || user?.role === "admin_user";
 
-  const [status, setStatus] = useState<EnquiryOverallStatus | "ALL">(() => {
-    const value = routeSearch.status;
-    return typeof value === "string" &&
-      STATUS_FILTERS.some((filter) => filter.value === value && value !== "ALL")
-      ? (value as EnquiryOverallStatus)
-      : "ALL";
-  });
-  const [bucket, setBucket] = useState<EnquiryBucket | null>(() => {
-    const value = routeSearch.bucket;
-    return value === "pending" || value === "awaiting" || value === "quotes" || value === "finalised"
-      ? value
-      : null;
-  });
+  const [status, setStatus] = useState<EnquiryOverallStatus | "ALL">(() =>
+    routeSearch.status === "CLOSED" ? "CLOSED" : "ALL",
+  );
+  const [stage, setStage] = useState<Stage>("pending");
+  const [stageTouched, setStageTouched] = useState(false);
   const [sort, setSort] = useState<EnquirySort>(() => {
     const value = routeSearch.sort;
     return value === "startDate" || value === "progress" ? value : "newest";
   });
+  const [urgentOnly, setUrgentOnly] = useState(
+    () => routeSearch.urgent === true || routeSearch.urgent === "true",
+  );
   const [searchInput, setSearchInput] = useState(() =>
     typeof routeSearch.q === "string" ? routeSearch.q : "",
   );
@@ -437,15 +356,25 @@ export function EnquiryIndexPage() {
     void navigate({
       to: pathname,
       search: {
-        ...(status === "ALL" ? {} : { status }),
-        ...(bucket ? { bucket } : {}),
+        ...(status === "CLOSED" ? { status } : {}),
         ...(search ? { q: search } : {}),
         ...(sort === "newest" ? {} : { sort }),
+        ...(urgentOnly ? { urgent: true } : {}),
         ...(selectedId ? { selected: selectedId } : {}),
       },
       replace: true,
     });
-  }, [status, bucket, search, sort, selectedId, navigate, pathname]);
+  }, [status, search, sort, urgentOnly, selectedId, navigate, pathname]);
+
+  // Escape closes the slide-over.
+  useEffect(() => {
+    if (!selectedId) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !rfqLine) setSelectedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedId, rfqLine]);
 
   const summary = useQuery({
     queryKey: ["enquiries", "summary"],
@@ -463,26 +392,29 @@ export function EnquiryIndexPage() {
     placeholderData: (previous) => previous,
   });
 
-  const rows = useMemo(() => {
-    const all = list.data?.enquiries ?? [];
-    return bucket ? all.filter((row) => row.bucket === bucket) : all;
-  }, [list.data, bucket]);
+  const allRows = list.data?.enquiries ?? [];
 
-  // Select the first row once the list arrives, so the panel is never empty
-  // while there is something to look at.
-  useEffect(() => {
-    if (selectedId || rows.length === 0) return;
-    if (list.isPending) return;
-    const first = rows[0];
-    if (first) setSelectedId(first.id);
-  }, [rows, selectedId, list.isPending]);
+  const rows = useMemo(
+    () => (urgentOnly ? allRows.filter((row) => startNote(row) !== null) : allRows),
+    [allRows, urgentOnly],
+  );
 
-  // A selection that no longer matches the filters is a dead panel.
+  const columns = useMemo(
+    () =>
+      KPI_CARDS.map((card) => ({
+        ...card,
+        rows: rows.filter((row) => row.bucket === card.bucket),
+      })),
+    [rows],
+  );
+
+  // On a phone only one stage shows at a time. Start on the first stage that
+  // has something in it, unless the person has already picked one.
   useEffect(() => {
-    if (!selectedId || list.isPending) return;
-    if (rows.some((row) => row.id === selectedId)) return;
-    setSelectedId(rows[0]?.id ?? null);
-  }, [rows, selectedId, list.isPending]);
+    if (stageTouched || list.isPending) return;
+    const first = columns.find((column) => column.rows.length > 0);
+    if (first && first.bucket !== stage) setStage(first.bucket);
+  }, [columns, stage, stageTouched, list.isPending]);
 
   const detail = useQuery({
     queryKey: ["enquiries", "detail", selectedId],
@@ -504,252 +436,228 @@ export function EnquiryIndexPage() {
   });
 
   const counts = summary.data?.summary;
-  const selectedRow = rows.find((row) => row.id === selectedId) ?? null;
   const enquiry = detail.data?.enquiry ?? null;
+  const selectedRow = allRows.find((row) => row.id === selectedId) ?? null;
+  const showingClosed = status === "CLOSED";
+  const activeFilters = Boolean(search || urgentOnly);
+  const nothingAtAll = (counts?.total ?? 0) === 0;
+  const urgentCount = allRows.filter((row) => startNote(row) !== null).length;
 
   const clearFilters = () => {
     setStatus("ALL");
-    setBucket(null);
+    setUrgentOnly(false);
     setSearch("");
     setSearchInput("");
     setSort("newest");
   };
 
-  const listRef = useRef<HTMLDivElement | null>(null);
+  const findCranesHref = (row: EnquiryListRow | null, line: EnquiryLine | null) => ({
+    to: "/app/discovery" as const,
+    search: {
+      ...(line ? { line: line.id } : {}),
+      ...(row?.siteLocation ? { siteLocation: row.siteLocation } : {}),
+      ...(line?.craneTypeCode ? { craneType: line.craneTypeCode } : {}),
+      ...(line?.capacityT ? { capacityT: line.capacityT } : {}),
+      ...(line?.capacityT ? { capacityRule: "AT_LEAST" } : {}),
+    },
+  });
 
-  // Up/down move the selection; Enter opens the full enquiry. The list is a
-  // listbox, so this is the keyboard behaviour a listbox is expected to have.
-  const onListKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Enter") return;
-    if (rows.length === 0) return;
-    const index = rows.findIndex((row) => row.id === selectedId);
+  const chip =
+    "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[15px] whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500";
+  const chipOff = "border-ink-800 bg-ink-850/80 text-slate-600 hover:border-ink-700 hover:text-white";
 
-    if (event.key === "Enter") {
-      if (selectedId) {
-        event.preventDefault();
-        void navigate({ to: "/app/enquiries/$enquiryId", params: { enquiryId: selectedId } });
-      }
-      return;
-    }
-
-    event.preventDefault();
-    const next =
-      event.key === "ArrowDown"
-        ? rows[Math.min(index + 1, rows.length - 1)]
-        : rows[Math.max(index - 1, 0)];
-    if (!next) return;
-    setSelectedId(next.id);
-    document.getElementById(`enquiry-row-${next.id}`)?.scrollIntoView({ block: "nearest" });
-  };
-
-  const findCranesHref = (row: EnquiryListRow | null, line: EnquiryLine | null) => {
-    return {
-      to: "/app/discovery" as const,
-      search: {
-        ...(line ? { line: line.id } : {}),
-        ...(row?.siteLocation ? { siteLocation: row.siteLocation } : {}),
-        ...(line?.craneTypeCode ? { craneType: line.craneTypeCode } : {}),
-        ...(line?.capacityT ? { capacityT: line.capacityT } : {}),
-        ...(line?.capacityT ? { capacityRule: "AT_LEAST" } : {}),
-      },
-    };
-  };
-
-  const activeFilters = Boolean(bucket || search) || status !== "ALL";
-  const nothingAtAll = (counts?.total ?? 0) === 0;
-
-  const allRows = list.data?.enquiries ?? [];
-
-  // Per-tab counts are only honest while the "All" view is loaded: a filtered
-  // request returns one status, and the summary counts sourcing buckets rather
-  // than overall status. Showing them on the unfiltered view is better than
-  // inventing a number for the others.
-  const tabCounts = useMemo(() => {
-    if (status !== "ALL") return null;
-    const map: Partial<Record<EnquiryOverallStatus | "ALL", number>> = {
-      ALL: allRows.length,
-    };
-    for (const row of allRows) {
-      map[row.overallStatus] = (map[row.overallStatus] ?? 0) + 1;
-    }
-    return map;
-  }, [allRows, status]);
-
-  // Grouping only makes sense in the server's newest-first order. The other
-  // sorts are answers to a question ("what starts soonest?"), and cutting them
-  // into status sections would undo the sort the user asked for.
-  const groups = useMemo(() => {
-    if (sort !== "newest") return null;
-    return [
-      {
-        key: "needs-sourcing",
-        label: "Needs sourcing",
-        rows: rows.filter((row) => row.bucket === "pending"),
-      },
-      {
-        key: "in-progress",
-        label: "In progress",
-        rows: rows.filter((row) => row.bucket === "awaiting" || row.bucket === "quotes"),
-      },
-      {
-        key: "done",
-        label: "Done",
-        rows: rows.filter((row) => row.bucket === "finalised" || row.bucket === "closed"),
-      },
-    ].filter((group) => group.rows.length > 0);
-  }, [rows, sort]);
-
-  const hiddenClosed =
-    status !== "CLOSED" && !search && !bucket ? (counts?.closed ?? 0) : 0;
-
-  const renderRow = (row: EnquiryListRow) => {
+  // ------------------------------------------------------------ board card
+  const renderCard = (row: EnquiryListRow) => {
     const tone = statusTone(row.overallStatus);
+    const note = startNote(row);
     const selected = row.id === selectedId;
-    const days = daysUntil(row.nextUnsourcedStart);
-    const urgent = days !== null && days <= 14 && row.sourcedPercent < 100;
-    const project = row.project ?? row.siteLocation;
     const site = row.siteStateName
       ? `${cityOf(row)}, ${titleCase(row.siteStateName)}`
       : cityOf(row);
 
     return (
-      <div
-        key={row.id}
-        id={`enquiry-row-${row.id}`}
-        role="listitem"
-        aria-current={selected ? "true" : undefined}
-        className={cn(
-          "group relative transition-colors duration-150 motion-reduce:transition-none",
-          selected ? "bg-ink-850" : "hover:bg-ink-850/60",
-        )}
-      >
-        {selected ? (
-          <span className="absolute inset-y-0 left-0 w-0.5 bg-accent-500" aria-hidden />
-        ) : null}
-
+      <li key={row.id} className="list-none">
         <button
           type="button"
           onClick={() => setSelectedId(row.id)}
-          onDoubleClick={() =>
-            void navigate({
-              to: "/app/enquiries/$enquiryId",
-              params: { enquiryId: row.id },
-            })
-          }
-          aria-label={`${row.enquiryNo} · ${row.customerName}`}
-          className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-500"
-        />
+          aria-haspopup="dialog"
+          data-selected={selected}
+          data-interactive="true"
+          className="enq-card block w-full p-4 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+        >
+          <span className="block text-[14px] text-slate-500 tabular-nums">{row.enquiryNo}</span>
+          <span
+            className="mt-1 block truncate text-[17px] leading-tight font-semibold text-white"
+            title={row.customerName}
+          >
+            {row.customerName}
+          </span>
+          <span className="mt-0.5 block truncate text-[15px] text-slate-500">
+            {row.project ?? row.siteLocation}
+          </span>
 
-        {/* Below 1024 the fixed 220/260/150 tracks would squeeze the customer
-            column to nothing, so the row folds to two lines: identity across
-            the top, site/progress/status beneath. From lg it is the table. */}
-        <div className="pointer-events-none relative grid grid-cols-1 gap-x-6 gap-y-2 py-3 pr-3 pl-3 sm:pl-4 md:grid-cols-[minmax(0,160px)_minmax(0,1fr)_140px] md:items-center lg:grid-cols-[minmax(0,1fr)_220px_260px_150px]">
-          <div className="min-w-0 md:col-span-3 md:row-start-1 lg:col-span-1 lg:col-start-1">
-            <p className="font-mono text-[14px] leading-tight text-slate-500">{row.enquiryNo}</p>
-            <p
-              className="mt-0.5 truncate text-[17px] leading-tight font-semibold text-white"
-              title={row.customerName}
-            >
-              {row.customerName}
-            </p>
-            <p className="truncate text-[15px] leading-tight text-slate-500" title={project}>
-              {project}
-            </p>
-          </div>
+          <span className="mt-3 flex items-center gap-1.5 text-[15px] text-slate-700">
+            <MapPin className="size-4 shrink-0 text-slate-500" aria-hidden />
+            <span className="truncate">{site}</span>
+          </span>
+          <span className="mt-0.5 block pl-[22px] text-[14px] text-slate-500 tabular-nums">
+            {row.craneCount} {row.craneCount === 1 ? "crane" : "cranes"}, {row.lineCount}{" "}
+            {row.lineCount === 1 ? "line" : "lines"}
+          </span>
 
-          <div className="min-w-0 text-[15px] leading-tight md:col-start-1 md:row-start-2 lg:col-start-2 lg:row-start-1">
-            <p className="truncate text-slate-600" title={site}>
-              {site}
-            </p>
-            <p className="mt-0.5 text-[14px] leading-tight text-slate-500 tabular-nums">
-              {row.craneCount} {row.craneCount === 1 ? "crane" : "cranes"} · {row.lineCount}{" "}
-              {row.lineCount === 1 ? "line" : "lines"}
-            </p>
-          </div>
-
-          <div className="min-w-0 md:col-start-2 md:row-start-2 lg:col-start-3 lg:row-start-1">
+          <span className="mt-3.5 block">
             <ProgressBar row={row} />
-            <p className="mt-1.5 text-[14px] leading-tight text-slate-500 tabular-nums">
-              {row.sourcedPercent === 0 ? "Nothing sourced yet" : `${row.sourcedPercent}% sourced`}
-              <span aria-hidden> · </span>
-              <span title={`Raised ${fullDate(row.enquiryDate)}`}>
-                raised {shortDate(row.enquiryDate)}
-              </span>
-            </p>
-            {urgent ? (
-              <p className="mt-0.5 text-[14px] font-medium text-amber-600">
-                {days === 0 ? "Starts today" : `Starts in ${days} ${days === 1 ? "day" : "days"}`}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="flex items-center gap-2 md:col-start-3 md:row-start-2 lg:col-start-4 lg:row-start-1">
-            <span className={cn("size-1.5 shrink-0 rounded-full", tone.dot)} aria-hidden />
-            <span className={cn("truncate text-[15px] font-medium", tone.text)}>
-              {STATUS_LABEL[row.overallStatus]}
+          </span>
+          <span className="mt-2 flex items-center justify-between gap-2 text-[14px]">
+            <span className={cn("inline-flex min-w-0 items-center gap-1.5 font-medium", tone.text)}>
+              <span className={cn("size-2 shrink-0 rounded-full", tone.dot)} aria-hidden />
+              <span className="truncate">{STATUS_LABEL[row.overallStatus]}</span>
             </span>
-            {/* With no side panel below 1280 there is nothing to select into,
-                so the row carries its own way in. */}
-            <Link
-              to="/app/enquiries/$enquiryId"
-              params={{ enquiryId: row.id }}
-              onClick={(event) => event.stopPropagation()}
-              className="pointer-events-auto ml-auto inline-flex shrink-0 items-center gap-1 text-[15px] text-slate-500 transition-colors hover:text-white xl:hidden"
-            >
-              Open
-              <ArrowRight className="size-3.5" aria-hidden />
-            </Link>
-          </div>
-        </div>
-
-        {/* Quick actions fade in over the status column on hover/focus. They are
-            plain text links: the row itself is already the primary target. */}
-        <div className="pointer-events-none absolute inset-y-0 right-3 z-10 hidden items-center gap-5 bg-gradient-to-l from-ink-850 via-ink-850 to-transparent pr-1 pl-12 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 motion-reduce:transition-none xl:flex">
-          <Link
-            {...findCranesHref(row, null)}
-            onClick={(event) => event.stopPropagation()}
-            className="inline-flex items-center gap-1 text-[15px] text-slate-500 transition-colors hover:text-white"
-          >
-            Find cranes
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-          <Link
-            to="/app/enquiries/$enquiryId"
-            params={{ enquiryId: row.id }}
-            className="inline-flex items-center gap-1 text-[15px] font-medium text-white"
-          >
-            Open
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        </div>
-      </div>
+            <span className="shrink-0 text-slate-500 tabular-nums">{row.sourcedPercent}%</span>
+          </span>
+          {note ? (
+            <span className="mt-2.5 block">
+              <NoteChip note={note} />
+            </span>
+          ) : null}
+        </button>
+      </li>
     );
   };
 
-  return (
-    <div className="theme-dark -mx-4 -my-6 flex h-[calc(100dvh-49px)] overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6">
-      {/* ------------------------------------------------------------ list */}
-      <section className="flex min-w-0 flex-1 flex-col">
-        <div className="shrink-0 px-4 pt-5 sm:px-8">
-          <div className="w-full max-w-[1180px]">
-            <p className="text-[15px] text-slate-500">
-              {greeting()}
-              {user?.fullName ? `, ${user.fullName.split(" ")[0]}` : ""}
-              {counts
-                ? ` · ${counts.active} active ${counts.active === 1 ? "request" : "requests"}`
-                : ""}
-            </p>
+  // -------------------------------------------------- slide-over: one line
+  const renderLine = (line: EnquiryLine, row: EnquiryListRow | null) => {
+    const action = lineAction(line);
+    const awarded = isAwarded(line.trailStatus);
+    const lineDays = daysUntil(line.requiredStartDate);
+    const late = !awarded && lineDays !== null && lineDays < 0;
+    const actionClass =
+      "inline-flex items-center gap-1.5 rounded-full bg-accent-500/10 px-3.5 py-1.5 text-[15px] font-medium text-accent-400 transition-colors hover:bg-accent-500/20";
 
-            <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
-              <h1 className="text-[30px] leading-[1.1] font-semibold tracking-[-0.02em] text-white">
-                Who needs a lift?
-              </h1>
+    return (
+      <li key={line.id} className="enq-card p-4">
+        <div className="flex items-start justify-between gap-3">
+          <p className="min-w-0 text-[17px] leading-snug font-semibold text-white">
+            {line.quantity} × {craneTypeLabel(line.craneTypeName)},{" "}
+            {line.capacityT !== null ? `${line.capacityT} t` : "capacity TBC"}
+          </p>
+          <span className="shrink-0 text-[14px] text-slate-500">Line {line.lineNo}</span>
+        </div>
+        <p
+          className={cn("mt-1 text-[15px]", late ? "font-medium text-red-700" : "text-slate-500")}
+        >
+          {line.requiredStartDate ? `From ${shortDate(line.requiredStartDate)}` : "Start date TBC"}
+          <span aria-hidden>, </span>
+          {durationLabel(line)}
+          {late ? " (start date passed)" : ""}
+        </p>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 text-[15px] text-slate-700">
+            <span className={cn("size-2 rounded-full", lineDot(line.trailStatus))} aria-hidden />
+            {lineState(line.trailStatus)}
+          </span>
+          {action.kind === "rfq" ? (
+            <button
+              type="button"
+              onClick={() => {
+                createRfq.reset();
+                setRfqLine(line);
+              }}
+              className={actionClass}
+            >
+              {action.label}
+              <ArrowRight className="size-4" aria-hidden />
+            </button>
+          ) : action.kind === "quotes" ? (
+            <Link
+              to="/app/enquiries/lines/$lineId/comparison"
+              params={{ lineId: line.id }}
+              className={actionClass}
+            >
+              {action.label}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          ) : action.kind === "booking" ? (
+            <Link to="/app/bookings" className={actionClass}>
+              {action.label}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          ) : (
+            <Link
+              to="/app/rfqs/$rfqId"
+              params={{ rfqId: line.rfqId as string }}
+              className={actionClass}
+            >
+              {action.label}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          )}
+        </div>
+        {awarded ? null : (
+          <Link
+            {...findCranesHref(row, line)}
+            className="mt-3 inline-flex items-center gap-1.5 text-[15px] text-slate-600 transition-colors hover:text-white"
+          >
+            <Compass className="size-4" aria-hidden />
+            Find cranes for this line
+          </Link>
+        )}
+      </li>
+    );
+  };
+
+  const selectedNote = selectedRow ? startNote(selectedRow) : null;
+
+  return (
+    <div
+      className={cn(
+        "enq -mx-4 -my-6 flex h-[calc(100dvh-49px)] overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6",
+        theme === "light" ? "theme-light" : "theme-dark",
+      )}
+    >
+      <section className="relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="enq-mesh" aria-hidden />
+
+        {/* ---------------------------------------------------- header */}
+        <div className="relative px-4 pt-7 sm:px-8">
+          <div className="mx-auto w-full max-w-[1400px]">
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+              <div className="min-w-0">
+                <p className="text-[15px] text-slate-600">
+                  {greeting()}
+                  {user?.fullName ? `, ${user.fullName.split(" ")[0]}` : ""}
+                </p>
+                <h1 className="enq-serif mt-1 text-[38px] leading-[1.05] font-medium tracking-[-0.015em] text-white sm:text-[46px]">
+                  Who needs a lift?
+                </h1>
+                <p className="mt-2 text-[16px] text-slate-600">
+                  {counts
+                    ? `${counts.active} active ${counts.active === 1 ? "request" : "requests"}`
+                    : "Loading your requests"}
+                  {counts && urgentCount > 0 ? (
+                    <>
+                      <span aria-hidden>, </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStatus("ALL");
+                          setUrgentOnly((current) => !current);
+                        }}
+                        className="font-medium text-accent-400 underline decoration-accent-500/40 underline-offset-4 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                      >
+                        {urgentCount} {urgentCount === 1 ? "needs" : "need"} attention
+                      </button>
+                    </>
+                  ) : null}
+                </p>
+              </div>
+
               {canCreate ? (
-                <div className="flex items-center gap-1">
-                  <EnquiryBulkUpload triggerClassName="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] font-medium text-slate-500 transition-colors hover:bg-ink-850 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500" />
+                <div className="flex items-center gap-2">
+                  <EnquiryBulkUpload triggerClassName="inline-flex items-center gap-2 rounded-full border border-ink-800 bg-ink-850/80 px-4 py-2 text-[15px] font-medium text-slate-700 backdrop-blur transition-colors hover:border-ink-700 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500" />
                   <Link
                     to="/app/enquiries/new"
-                    className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                    className="inline-flex items-center gap-2 rounded-full bg-accent-500 px-5 py-2 text-[15px] font-medium text-white shadow-[0_8px_20px_-8px_rgba(196,68,63,0.7)] transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
                   >
                     <Plus className="size-4" aria-hidden />
                     New enquiry
@@ -758,35 +666,18 @@ export function EnquiryIndexPage() {
               ) : null}
             </div>
 
-            <div className="mt-5 grid grid-cols-2 border-y border-ink-800 sm:grid-cols-4 sm:divide-x sm:divide-ink-800">
-              {KPI_CARDS.map((card) => (
-                <KpiStat
-                  key={card.bucket}
-                  label={card.label}
-                  value={kpiValue(counts, card.bucket)}
-                  delta={counts?.raisedTodayByBucket[card.bucket] ?? 0}
-                  accent={card.accent}
-                  active={bucket === card.bucket}
-                  loading={summary.isPending}
-                  onClick={() =>
-                    setBucket((current) => (current === card.bucket ? null : card.bucket))
-                  }
-                />
-              ))}
-            </div>
-
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <div className="relative w-full max-w-[380px]">
+            <div className="mt-6 flex flex-wrap items-center gap-2.5">
+              <div className="relative w-full max-w-[380px] flex-1">
                 <Search
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-500"
+                  className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-slate-500"
                   aria-hidden
                 />
                 <input
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
-                  placeholder="Enquiry no, customer, reference"
+                  placeholder="Search by enquiry no, customer or reference"
                   aria-label="Search enquiries"
-                  className="field-input h-9 py-0 pl-10 text-[15px]"
+                  className="field-input h-10 rounded-full py-0 pr-10 pl-10 text-[15px]"
                 />
                 {searchInput ? (
                   <button
@@ -796,353 +687,363 @@ export function EnquiryIndexPage() {
                       setSearch("");
                     }}
                     aria-label="Clear search"
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-slate-500 transition-colors hover:text-white"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-slate-500 transition-colors hover:text-white"
                   >
                     <X className="size-4" aria-hidden />
                   </button>
                 ) : null}
               </div>
 
-              <label className="sr-only" htmlFor="enquiry-sort">
-                Sort enquiries
-              </label>
-              <select
-                id="enquiry-sort"
-                value={sort}
-                onChange={(event) => setSort(event.target.value as EnquirySort)}
-                className="field-input ml-auto h-9 w-auto py-0 pr-8 text-[15px]"
+              <button
+                type="button"
+                aria-pressed={urgentOnly}
+                onClick={() => {
+                  setStatus("ALL");
+                  setUrgentOnly((current) => !current);
+                }}
+                className={cn(
+                  chip,
+                  urgentOnly ? "border-red-200 bg-red-50 font-medium text-red-700" : chipOff,
+                )}
               >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mt-4 flex items-end justify-between gap-4 border-b border-ink-800">
-              <div
-                role="tablist"
-                aria-label="Enquiry status"
-                className="flex min-w-0 gap-5 overflow-x-auto"
+                Starting soon
+                <span className="text-[14px] tabular-nums opacity-80">{urgentCount}</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={showingClosed}
+                onClick={() => setStatus((current) => (current === "CLOSED" ? "ALL" : "CLOSED"))}
+                className={cn(
+                  chip,
+                  showingClosed ? "border-white bg-white font-medium text-ink-950" : chipOff,
+                )}
               >
-                {STATUS_FILTERS.map((filter) => {
-                  const active = status === filter.value;
-                  const count = tabCounts?.[filter.value];
-                  return (
-                    <button
-                      key={filter.value}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      onClick={() => setStatus(filter.value)}
-                      className={cn(
-                        "-mb-px shrink-0 border-b-2 pb-2.5 text-[15px] whitespace-nowrap transition-colors duration-150",
-                        active
-                          ? "border-accent-500 font-medium text-white"
-                          : "border-transparent text-slate-500 hover:text-white",
-                      )}
-                    >
-                      {filter.label}
-                      {typeof count === "number" ? (
-                        <span className="ml-1.5 text-[14px] text-slate-500 tabular-nums">
-                          {count}
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-              <span className="hidden shrink-0 pb-2.5 text-[14px] text-slate-500 tabular-nums sm:block">
-                {rows.length} shown
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div
-          ref={listRef}
-          role="list"
-          aria-label="Enquiries"
-          tabIndex={0}
-          onKeyDown={onListKeyDown}
-          className="min-h-0 flex-1 overflow-y-auto focus:outline-none"
-        >
-          <div className="w-full max-w-[1180px] px-4 pb-6 sm:px-8">
-            {list.isPending ? (
-              <>
-                <RowSkeleton />
-                <RowSkeleton />
-                <RowSkeleton />
-                <RowSkeleton />
-              </>
-            ) : list.isError ? (
-              <div className="mt-6">
-                <Alert tone="error">
-                  {list.error instanceof Error ? list.error.message : "Could not load enquiries."}
-                </Alert>
+                Closed
+                <span className="text-[14px] tabular-nums opacity-80">{counts?.closed ?? 0}</span>
+              </button>
+              {activeFilters ? (
                 <button
                   type="button"
-                  onClick={() => void list.refetch()}
-                  className="btn-secondary mt-3 py-1.5 text-[15px]"
+                  onClick={clearFilters}
+                  className="px-1 text-[15px] font-medium text-accent-400 transition-colors hover:text-white"
                 >
-                  <RotateCcw className="size-4" aria-hidden />
-                  Retry
+                  Clear filters
                 </button>
-              </div>
-            ) : rows.length === 0 ? (
-              <div className="flex flex-col items-center px-6 py-24 text-center">
-                <Inbox className="size-6 text-slate-600" aria-hidden />
-                <p className="mt-3 text-[17px] font-medium text-white">
-                  {nothingAtAll ? "No enquiries yet" : "No enquiries match your filters"}
-                </p>
-                <p className="mt-1 max-w-sm text-[15px] leading-relaxed text-slate-500">
-                  {nothingAtAll
-                    ? "Raise the first requirement and it will appear here, ready to source."
-                    : "Clear the search and status filters, or pick another view."}
-                </p>
-                {nothingAtAll && canCreate ? (
-                  <Link
-                    to="/app/enquiries/new"
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
-                  >
-                    <Plus className="size-4" aria-hidden />
-                    Raise your first enquiry
-                  </Link>
-                ) : activeFilters ? (
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className="mt-5 inline-flex items-center gap-2 rounded-lg border border-ink-800 px-4 py-2 text-[15px] font-medium text-slate-600 transition-colors hover:border-ink-700 hover:text-white"
-                  >
-                    Clear filters
-                  </button>
-                ) : null}
-              </div>
-            ) : (
-              <>
-                {groups ? (
-                  groups.map((group) => (
-                    <section key={group.key} aria-label={group.label}>
-                      <h2 className="flex items-baseline justify-between gap-4 pt-5 pb-2 text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-                        {group.label}
-                        <span className="tabular-nums">{group.rows.length}</span>
-                      </h2>
-                      <div className="divide-y divide-ink-800 border-t border-ink-800">
-                        {group.rows.map(renderRow)}
-                      </div>
-                    </section>
-                  ))
-                ) : (
-                  <div className="mt-5 divide-y divide-ink-800 border-y border-ink-800">
-                    {rows.map(renderRow)}
-                  </div>
-                )}
+              ) : null}
 
-                <div className="flex items-center justify-between gap-4 border-t border-ink-800 py-3 text-[14px] text-slate-500 tabular-nums">
-                  <span>
-                    {rows.length} {rows.length === 1 ? "enquiry" : "enquiries"}
-                    {hiddenClosed > 0 ? ` · ${hiddenClosed} closed hidden` : ""}
-                  </span>
-                  <span>{SORT_OPTIONS.find((option) => option.value === sort)?.label}</span>
-                </div>
-              </>
-            )}
+              <div className="ml-auto flex items-center gap-2 text-[15px] text-slate-600">
+                <label htmlFor="enquiry-sort">Sort by</label>
+                <select
+                  id="enquiry-sort"
+                  value={sort}
+                  onChange={(event) => setSort(event.target.value as EnquirySort)}
+                  className="field-input h-10 w-auto rounded-full py-0 pr-8 pl-4 text-[15px]"
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* ----------------------------------------------------------- panel */}
-      <aside
-        aria-label="Enquiry detail"
-        className="hidden w-[375px] shrink-0 flex-col border-l border-ink-800 bg-ink-900 xl:flex 2xl:w-[420px]"
-      >
-        {detail.isPending && selectedId ? (
-          <div className="flex flex-1 items-center justify-center">
-            <Spinner />
-          </div>
-        ) : detail.isError ? (
-          <div className="p-6">
+        {/* ------------------------------------------------------ board */}
+        {list.isError ? (
+          <div className="relative mx-auto mt-6 w-full max-w-[1400px] px-4 sm:px-8">
             <Alert tone="error">
-              {detail.error instanceof Error
-                ? detail.error.message
-                : "Could not load this enquiry."}
+              {list.error instanceof Error ? list.error.message : "Could not load enquiries."}
             </Alert>
+            <button
+              type="button"
+              onClick={() => void list.refetch()}
+              className="btn-secondary mt-3 rounded-full py-1.5 text-[15px]"
+            >
+              <RotateCcw className="size-4" aria-hidden />
+              Retry
+            </button>
           </div>
-        ) : !enquiry ? (
-          <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-            <Compass className="size-6 text-slate-600" aria-hidden />
-            <p className="mt-3 text-[17px] font-medium text-white">Nothing selected</p>
-            <p className="mt-1 text-[15px] text-slate-500">
-              Select an enquiry to see its crane requirements.
-            </p>
+        ) : showingClosed ? (
+          <div className="relative mx-auto mt-6 w-full max-w-[1400px] px-4 pb-12 sm:px-8">
+            <h2 className="flex items-baseline gap-2 pb-3 text-[16px] font-medium text-slate-700">
+              Closed enquiries
+              <span className="text-[15px] font-normal text-slate-500 tabular-nums">
+                {rows.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setStatus("ALL")}
+                className="ml-3 text-[15px] font-medium text-accent-400 hover:text-white"
+              >
+                Back to board
+              </button>
+            </h2>
+            {rows.length === 0 ? (
+              <p className="py-12 text-center text-[15px] text-slate-500">
+                No closed enquiries match.
+              </p>
+            ) : (
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{rows.map(renderCard)}</ul>
+            )}
           </div>
         ) : (
           <>
-            <div key={enquiry.id} className="panel-in min-h-0 flex-1 overflow-y-auto">
-              {/* site */}
-              <div className="relative">
-                {enquiry.siteLatitude !== null && enquiry.siteLongitude !== null ? (
-                  <SiteMap
-                    latitude={enquiry.siteLatitude}
-                    longitude={enquiry.siteLongitude}
-                    label={`Map of ${enquiry.siteLocation}`}
-                    className="h-[180px]"
-                    onOpen={() => void navigate(findCranesHref(selectedRow, null))}
-                  />
-                ) : (
-                  <div className="flex h-[180px] w-full items-center justify-center bg-ink-950">
-                    <MapPin className="size-5 text-slate-600" aria-hidden />
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => void navigate(findCranesHref(selectedRow, null))}
-                  className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-black/65 px-2 py-1 text-[14px] text-neutral-200 backdrop-blur-sm transition-colors hover:bg-black/80"
-                >
-                  <MapPin className="size-4 text-accent-400" aria-hidden />
-                  {cityOf(enquiry)}
-                </button>
-              </div>
-
-              {/* summary */}
-              <div className="px-6 py-5">
-                <p className="font-mono text-[14px] text-slate-500">{enquiry.enquiryNo}</p>
-                <h2 className="mt-1 text-[22px] leading-tight font-semibold text-white">
-                  {enquiry.customerName}
-                </h2>
-                <p
-                  className="mt-1 truncate text-[16px] text-slate-500"
-                  title={selectedRow?.project ?? enquiry.siteLocation}
-                >
-                  {selectedRow?.project ?? enquiry.siteLocation}
-                </p>
-                <p className="mt-2 text-[15px] text-slate-500">
-                  {cityOf(enquiry)}
-                  <span aria-hidden> · </span>
-                  Raised {shortDate(enquiry.enquiryDate)}
-                </p>
-              </div>
-
-              {/* requirements */}
-              <div className="border-t border-ink-800 px-6 py-5">
-                <p className="text-[14px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-                  Crane requirements
-                </p>
-
-                {enquiry.lines.length === 0 ? (
-                  <p className="py-8 text-center text-[15px] text-slate-500">
-                    This enquiry has no lines yet.
-                  </p>
-                ) : (
-                  <ul className="mt-1 divide-y divide-ink-800">
-                    {enquiry.lines.map((line) => {
-                      const action = lineAction(line);
-                      const actionClass =
-                        "inline-flex items-center gap-1 text-[15px] font-medium text-accent-400 transition-colors hover:text-accent-300";
-                      return (
-                        <li key={line.id} className="py-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="min-w-0 text-[17px] font-medium text-white">
-                              {line.quantity} × {craneTypeLabel(line.craneTypeName)} ·{" "}
-                              {line.capacityT !== null ? `${line.capacityT} t` : "capacity TBC"}
-                            </p>
-                            <span className="shrink-0 text-[14px] text-slate-500">
-                              Line {line.lineNo}
-                            </span>
-                          </div>
-
-                          <p className="mt-1 text-[15px] text-slate-500">
-                            {line.requiredStartDate
-                              ? `From ${shortDate(line.requiredStartDate)}`
-                              : "Start date TBC"}
-                            <span aria-hidden> · </span>
-                            {durationLabel(line)}
-                          </p>
-
-                          <div className="mt-3 flex items-center justify-between gap-3">
-                            <span className="inline-flex items-center gap-2 text-[15px] text-slate-600">
-                              <span
-                                className={cn("size-1.5 rounded-full", lineDot(line.trailStatus))}
-                                aria-hidden
-                              />
-                              {lineState(line.trailStatus)}
-                            </span>
-
-                            {action.kind === "rfq" ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  createRfq.reset();
-                                  setRfqLine(line);
-                                }}
-                                className={actionClass}
-                              >
-                                {action.label}
-                                <ArrowRight className="size-4" aria-hidden />
-                              </button>
-                            ) : action.kind === "quotes" ? (
-                              <Link
-                                to="/app/enquiries/lines/$lineId/comparison"
-                                params={{ lineId: line.id }}
-                                className={actionClass}
-                              >
-                                {action.label}
-                                <ArrowRight className="size-4" aria-hidden />
-                              </Link>
-                            ) : action.kind === "booking" ? (
-                              <Link to="/app/bookings" className={actionClass}>
-                                {action.label}
-                                <ArrowRight className="size-4" aria-hidden />
-                              </Link>
-                            ) : (
-                              <Link
-                                to="/app/rfqs/$rfqId"
-                                params={{ rfqId: line.rfqId as string }}
-                                className={actionClass}
-                              >
-                                {action.label}
-                                <ArrowRight className="size-4" aria-hidden />
-                              </Link>
-                            )}
-                          </div>
-
-                          <Link
-                            {...findCranesHref(selectedRow, line)}
-                            className="mt-2 inline-flex items-center gap-1.5 text-[15px] text-slate-500 transition-colors hover:text-white"
-                          >
-                            <Compass className="size-4" aria-hidden />
-                            Find cranes for this line
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+            {/* phone: one stage at a time */}
+            <div className="sticky top-0 z-20 mt-5 border-b border-ink-800 bg-ink-950/90 px-4 py-2 backdrop-blur-md sm:px-8 lg:hidden">
+              <div role="tablist" aria-label="Stage" className="flex gap-1 overflow-x-auto">
+                {columns.map((column) => (
+                  <button
+                    key={column.bucket}
+                    type="button"
+                    role="tab"
+                    aria-selected={stage === column.bucket}
+                    onClick={() => {
+                      setStageTouched(true);
+                      setStage(column.bucket);
+                    }}
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[15px] whitespace-nowrap",
+                      stage === column.bucket
+                        ? "bg-white font-medium text-ink-950"
+                        : "text-slate-600 hover:bg-ink-850 hover:text-white",
+                    )}
+                  >
+                    {column.label}
+                    <span className="text-[14px] tabular-nums opacity-70">
+                      {column.rows.length}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* pinned CTA */}
-            <div className="shrink-0 border-t border-ink-800 p-4">
-              <Link
-                {...findCranesHref(
-                  selectedRow,
-                  enquiry.lines.find(
-                    (line) =>
-                      line.trailStatus === "NEW" || line.trailStatus === "AVAILABILITY_CHECK",
-                  ) ??
-                    enquiry.lines[0] ??
-                    null,
-                )}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
-              >
-                Find cranes for this enquiry
-                <ArrowRight className="size-4" aria-hidden />
-              </Link>
+            {/* desktop: column headers stay pinned while the page scrolls */}
+            <div className="sticky top-0 z-20 mt-5 hidden border-b border-ink-800 bg-ink-950/90 px-8 py-3 backdrop-blur-md lg:block">
+              <div className="mx-auto grid w-full max-w-[1400px] grid-cols-4 gap-4">
+                {columns.map((column) => (
+                  <div key={column.bucket} className="flex items-center gap-2.5">
+                    <span className="enq-orb !size-8" data-tone={column.bucket} aria-hidden>
+                      <column.icon className="size-4" strokeWidth={1.75} />
+                    </span>
+                    <h2 className="text-[16px] font-medium text-white">{column.label}</h2>
+                    <span className="text-[15px] text-slate-500 tabular-nums">
+                      {summary.isPending && list.isPending ? "" : column.rows.length}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[1400px] px-4 pt-4 pb-12 sm:px-8">
+              {list.isPending ? (
+                <div className="grid gap-4 lg:grid-cols-4">
+                  {[0, 1, 2, 3].map((column) => (
+                    <div key={column} className={cn("space-y-3", column > 0 && "hidden lg:block")}>
+                      {[0, 1].map((card) => (
+                        <div key={card} className="enq-card animate-pulse p-4 motion-reduce:animate-none">
+                          <div className="h-2.5 w-24 rounded bg-ink-800" />
+                          <div className="mt-2.5 h-4 w-40 rounded bg-ink-800" />
+                          <div className="mt-2 h-2.5 w-28 rounded bg-ink-800" />
+                          <div className="mt-5 h-1.5 w-full rounded bg-ink-800" />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : rows.length === 0 ? (
+                <div className="enq-card mt-4 flex flex-col items-center px-6 py-20 text-center">
+                  <span className="enq-orb" data-tone="quotes" aria-hidden>
+                    <Inbox className="size-[18px]" strokeWidth={1.75} />
+                  </span>
+                  <p className="enq-serif mt-4 text-[24px] font-medium text-white">
+                    {nothingAtAll ? "No enquiries yet" : "No enquiries match these filters"}
+                  </p>
+                  <p className="mt-1 max-w-sm text-[15px] leading-relaxed text-slate-600">
+                    {nothingAtAll
+                      ? "Raise the first requirement and it will appear here, ready to source."
+                      : "Try a different search, or clear the filters to see everything."}
+                  </p>
+                  {nothingAtAll && canCreate ? (
+                    <Link
+                      to="/app/enquiries/new"
+                      className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent-500 px-5 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-accent-600"
+                    >
+                      <Plus className="size-4" aria-hidden />
+                      Raise your first enquiry
+                    </Link>
+                  ) : activeFilters ? (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink-800 px-5 py-2.5 text-[15px] font-medium text-slate-700 transition-colors hover:border-ink-700 hover:text-white"
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="grid items-start gap-4 lg:grid-cols-4">
+                  {columns.map((column) => (
+                    <ul
+                      key={column.bucket}
+                      aria-label={column.label}
+                      className={cn(
+                        "space-y-3",
+                        stage === column.bucket ? "block" : "hidden",
+                        "lg:block",
+                      )}
+                    >
+                      {column.rows.length === 0 ? (
+                        <li className="list-none rounded-2xl border border-dashed border-ink-700 px-4 py-8 text-center text-[15px] leading-relaxed text-slate-500">
+                          {STAGE_HINT[column.bucket]}
+                        </li>
+                      ) : (
+                        column.rows.map(renderCard)
+                      )}
+                    </ul>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}
-      </aside>
+      </section>
+
+      {/* ------------------------------------------------------ slide-over */}
+      {selectedId ? (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/30"
+            onClick={() => setSelectedId(null)}
+            aria-hidden
+          />
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Enquiry detail"
+            className="enq enq-slide fixed inset-y-0 right-0 z-50 flex w-full max-w-[480px] flex-col border-l border-ink-800 bg-ink-900 text-neutral-200 shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-3 px-6 pt-5">
+              <p className="text-[14px] text-slate-500 tabular-nums">
+                {selectedRow?.enquiryNo ?? enquiry?.enquiryNo ?? ""}
+              </p>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setSelectedId(null)}
+                aria-label="Close"
+                className="grid size-9 place-items-center rounded-full text-slate-600 transition-colors hover:bg-ink-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+              >
+                <X className="size-5" aria-hidden />
+              </button>
+            </div>
+
+            {detail.isPending ? (
+              <div className="flex flex-1 items-center justify-center">
+                <Spinner />
+              </div>
+            ) : detail.isError || !enquiry ? (
+              <div className="p-6">
+                <Alert tone="error">
+                  {detail.error instanceof Error
+                    ? detail.error.message
+                    : "Could not load this enquiry."}
+                </Alert>
+              </div>
+            ) : (
+              <>
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <div className="px-6 pt-2 pb-5">
+                    <h2 className="enq-serif text-[30px] leading-[1.1] font-medium tracking-[-0.01em] text-white">
+                      {enquiry.customerName}
+                    </h2>
+                    <p className="mt-1.5 text-[16px] text-slate-600">
+                      {selectedRow?.project ?? enquiry.siteLocation}
+                    </p>
+                    <p className="mt-1 flex items-center gap-1.5 text-[15px] text-slate-500">
+                      <MapPin className="size-4" aria-hidden />
+                      {cityOf(enquiry)}, raised {shortDate(enquiry.enquiryDate)}
+                    </p>
+
+                    {selectedRow ? (
+                      <div className="mt-4">
+                        <div className="mb-2 flex items-center gap-2 text-[15px]">
+                          <span
+                            className={cn(
+                              "size-2 rounded-full",
+                              statusTone(selectedRow.overallStatus).dot,
+                            )}
+                            aria-hidden
+                          />
+                          <span
+                            className={cn("font-medium", statusTone(selectedRow.overallStatus).text)}
+                          >
+                            {STATUS_LABEL[selectedRow.overallStatus]}
+                          </span>
+                          <span className="ml-auto text-[14px] text-slate-500 tabular-nums">
+                            {selectedRow.sourcedPercent}% sourced
+                          </span>
+                        </div>
+                        <ProgressBar row={selectedRow} />
+                        {selectedNote ? (
+                          <div className="mt-3">
+                            <NoteChip note={selectedNote} />
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="border-t border-ink-800 px-6 pt-5 pb-6">
+                    <h3 className="flex items-baseline gap-2 text-[16px] font-medium text-slate-700">
+                      Crane requirements
+                      <span className="text-[15px] font-normal text-slate-500 tabular-nums">
+                        {enquiry.lines.length}
+                      </span>
+                    </h3>
+                    {enquiry.lines.length === 0 ? (
+                      <p className="py-8 text-center text-[15px] text-slate-500">
+                        This enquiry has no lines yet.
+                      </p>
+                    ) : (
+                      <ul className="mt-3 space-y-3">
+                        {enquiry.lines.map((line) => renderLine(line, selectedRow))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 gap-2 border-t border-ink-800 bg-ink-900 p-4">
+                  <Link
+                    to="/app/enquiries/$enquiryId"
+                    params={{ enquiryId: enquiry.id }}
+                    className="inline-flex flex-1 items-center justify-center rounded-full border border-ink-800 px-4 py-3 text-[16px] font-medium text-slate-700 transition-colors hover:border-ink-700 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                  >
+                    Open full enquiry
+                  </Link>
+                  <Link
+                    {...findCranesHref(
+                      selectedRow,
+                      enquiry.lines.find(
+                        (line) =>
+                          line.trailStatus === "NEW" || line.trailStatus === "AVAILABILITY_CHECK",
+                      ) ??
+                        enquiry.lines[0] ??
+                        null,
+                    )}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-accent-500 px-4 py-3 text-[16px] font-medium text-white shadow-[0_10px_24px_-10px_rgba(196,68,63,0.75)] transition-colors hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500"
+                  >
+                    Find cranes
+                    <ArrowRight className="size-4" aria-hidden />
+                  </Link>
+                </div>
+              </>
+            )}
+          </aside>
+        </>
+      ) : null}
 
       {/* ------------------------------------------------------- RFQ dialog */}
       <RfqFieldsScreen
@@ -1181,4 +1082,3 @@ export function EnquiryIndexPage() {
     </div>
   );
 }
-
