@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox, Field, Select, TextArea, TextInput } from "@/components/ui/form";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/cn";
-import { formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import {
   needsWarningAcknowledgement,
   inr,
@@ -207,7 +207,7 @@ function ThreadCard({
         </p>
       ) : null}
 
-      <RoundTimeline rounds={thread.rounds} baseTotal={thread.baseQuotation.totalQuotedValue} />
+      <OfferComparison thread={thread} />
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 pt-4">
         <p className="text-[13px] text-slate-500">
@@ -309,70 +309,281 @@ function ThreadCard({
   );
 }
 
-function RoundTimeline({
-  rounds,
-  baseTotal,
+interface OfferColumn {
+  key: string;
+  title: string;
+  subtitle: string;
+  tone: "base" | "vendor" | "sml";
+  isFinal: boolean;
+  open: boolean;
+  total: number;
+  rentalRate: number;
+  rateBasis: string;
+  mobilisationCharges: number;
+  demobilisationCharges: number;
+  taxBasis: string;
+  validityDate: string;
+  availableFrom: string | null;
+  note: string | null;
+  warnings: NegotiationRound["warnings"];
+}
+
+/**
+ * The vendor's original quotation and every counter-offer side by side, oldest
+ * on the left. Each column is one offer; any figure that moved since the column
+ * before it is tinted and shows the change, so the negotiation reads straight
+ * across instead of down a list.
+ */
+export function OfferComparison({
+  thread,
+  viewer = "sml",
 }: {
-  rounds: NegotiationRound[];
-  baseTotal: number;
+  thread: NegotiationThread;
+  viewer?: "sml" | "vendor";
 }) {
-  if (!rounds.length) {
+  const base = thread.baseQuotation;
+  const columns: OfferColumn[] = [
+    {
+      key: "base",
+      title: "Original quote",
+      subtitle: viewer === "vendor" ? `Your quote · v${base.version}` : `Vendor · v${base.version}`,
+      tone: "base",
+      isFinal: false,
+      open: false,
+      total: base.totalQuotedValue,
+      rentalRate: base.rentalRate,
+      rateBasis: base.rateBasis,
+      mobilisationCharges: base.mobilisationCharges,
+      demobilisationCharges: base.demobilisationCharges,
+      taxBasis: base.taxBasis,
+      validityDate: base.validityDate,
+      availableFrom: base.availableFrom,
+      note: base.deviationText,
+      warnings: [],
+    },
+    ...thread.rounds.map(
+      (round): OfferColumn => ({
+        key: round.roundId,
+        title: `Round ${round.roundNumber}`,
+        subtitle:
+          round.offeredBy === "VENDOR"
+            ? viewer === "vendor"
+              ? "Your counter"
+              : round.onBehalfOfVendor
+                ? "Vendor (logged)"
+                : "Vendor counter"
+            : viewer === "vendor"
+              ? "Buyer counter"
+              : "SML counter",
+        tone: round.offeredBy === "VENDOR" ? "vendor" : "sml",
+        isFinal: round.isFinal,
+        open: round.outcome === "OPEN",
+        total: round.totalQuotedValue,
+        rentalRate: round.rentalRate,
+        rateBasis: round.rateBasis,
+        mobilisationCharges: round.mobilisationCharges,
+        demobilisationCharges: round.demobilisationCharges,
+        taxBasis: round.taxBasis,
+        validityDate: round.validityDate,
+        availableFrom: round.availableFrom,
+        note: round.message ?? round.deviationText,
+        warnings: round.warnings,
+      }),
+    ),
+  ];
+
+  const money = (value: number) => `₹${inr(value)}`;
+  const delta = (current: number, previous: number | undefined) => {
+    if (previous === undefined || current === previous) return null;
+    const diff = current - previous;
     return (
-      <p className="mt-3 text-[14px] text-slate-500">
-        No offers in this thread yet — the first counter will appear here.
-      </p>
+      <span
+        className={cn(
+          "block text-[12px] font-normal",
+          diff > 0 ? "text-amber-600" : "text-emerald-600",
+        )}
+      >
+        {diff > 0 ? "+" : "−"}
+        {money(Math.abs(diff))}
+      </span>
     );
+  };
+
+  interface Row {
+    label: string;
+    value: (column: OfferColumn, previous: OfferColumn | undefined) => React.ReactNode;
+    changed: (column: OfferColumn, previous: OfferColumn) => boolean;
   }
+
+  const rows: Row[] = [
+    {
+      label: "Rate",
+      value: (c, p) => (
+        <>
+          {money(c.rentalRate)}
+          <span className="block text-[12px] font-normal text-slate-500">
+            {c.rateBasis.replaceAll("_", " ").toLowerCase()}
+          </span>
+          {delta(c.rentalRate, p?.rentalRate)}
+        </>
+      ),
+      changed: (c, p) => c.rentalRate !== p.rentalRate || c.rateBasis !== p.rateBasis,
+    },
+    {
+      label: "Mobilisation",
+      value: (c, p) => (
+        <>
+          {money(c.mobilisationCharges)}
+          {delta(c.mobilisationCharges, p?.mobilisationCharges)}
+        </>
+      ),
+      changed: (c, p) => c.mobilisationCharges !== p.mobilisationCharges,
+    },
+    {
+      label: "Demobilisation",
+      value: (c, p) => (
+        <>
+          {money(c.demobilisationCharges)}
+          {delta(c.demobilisationCharges, p?.demobilisationCharges)}
+        </>
+      ),
+      changed: (c, p) => c.demobilisationCharges !== p.demobilisationCharges,
+    },
+    {
+      label: "GST",
+      value: (c) => (c.taxBasis === "INCLUSIVE_OF_GST" ? "Inclusive" : "Exclusive"),
+      changed: (c, p) => c.taxBasis !== p.taxBasis,
+    },
+    {
+      label: "Valid until",
+      value: (c) => formatDate(c.validityDate),
+      changed: (c, p) => c.validityDate.slice(0, 10) !== p.validityDate.slice(0, 10),
+    },
+    {
+      label: "Available from",
+      value: (c) => (c.availableFrom ? formatDate(c.availableFrom) : "—"),
+      changed: (c, p) => (c.availableFrom ?? "") !== (p.availableFrom ?? ""),
+    },
+  ];
+
+  const hasNotes = columns.some((column) => column.note?.trim() || column.warnings.length > 0);
+
+  const labelCell =
+    "sticky left-0 z-10 w-[130px] min-w-[130px] bg-ink-850 px-4 py-3 text-left align-top text-[12px] font-medium tracking-[0.08em] whitespace-nowrap text-slate-500 uppercase";
+  const valueCell = "min-w-[190px] px-4 py-3 align-top text-[15px] text-slate-700 tabular-nums";
+  const changedCell = "bg-amber-500/10 font-semibold text-slate-900";
+
   return (
-    <ol className="mt-4 space-y-2">
-      {rounds.map((round) => {
-        const index = rounds.indexOf(round);
-        const previousRound = index > 0 ? rounds[index - 1] : undefined;
-        const diff = round.totalQuotedValue - (previousRound?.totalQuotedValue ?? baseTotal);
-        const fromVendor = round.offeredBy === "VENDOR";
-        return (
-          <li
-            key={round.roundId}
-            className={cn(
-              "rounded-xl border px-4 py-3",
-              round.outcome === "OPEN" ? "border-accent-500/40 bg-accent-500/5" : "border-ink-800",
-            )}
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-[15px] font-medium text-slate-900">
-                Round {round.roundNumber} · {fromVendor ? (round.onBehalfOfVendor ? "Vendor (logged)" : "Vendor") : "SML"}
-                {round.isFinal ? <span className="ml-2 text-[13px] text-purple-400">final</span> : null}
-              </p>
-              <p className="text-[16px] font-semibold text-slate-900 tabular-nums">
-                ₹{inr(round.totalQuotedValue)}
-                {diff !== 0 ? (
-                  <span className={cn("ml-2 text-[13px] font-normal", diff > 0 ? "text-amber-500" : "text-emerald-400")}>
-                    {diff > 0 ? "+" : "−"}₹{inr(Math.abs(diff))}
+    <div className="mt-4 overflow-x-auto rounded-xl border border-ink-800">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b border-ink-800">
+            <th scope="col" className={cn(labelCell, "py-3")}>
+              Offer
+            </th>
+            {columns.map((column) => (
+              <th
+                key={column.key}
+                scope="col"
+                className={cn(
+                  "min-w-[190px] px-4 py-3 text-left align-top font-normal",
+                  column.open && "bg-accent-500/5",
+                )}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[15px] font-semibold text-slate-900">{column.title}</span>
+                  {column.isFinal ? <Badge tone="purple">Final</Badge> : null}
+                  {column.open ? <Badge tone="blue">Current</Badge> : null}
+                </div>
+                <p
+                  className={cn(
+                    "text-[13px] font-medium",
+                    column.tone === "sml"
+                      ? "text-blue-600"
+                      : column.tone === "vendor"
+                        ? "text-amber-600"
+                        : "text-slate-500",
+                  )}
+                >
+                  {column.subtitle}
+                </p>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-ink-800">
+          <tr className="bg-ink-900/60">
+            <th scope="row" className={cn(labelCell, "bg-ink-900")}>
+              Total
+            </th>
+            {columns.map((column, index) => {
+              const previous = columns[index - 1];
+              return (
+                <td key={column.key} className={valueCell}>
+                  <span className="block text-[22px] leading-7 font-semibold text-slate-900">
+                    {money(column.total)}
                   </span>
-                ) : null}
-              </p>
-            </div>
-            <p className="mt-0.5 text-[13px] text-slate-500">
-              {round.rateBasis.replaceAll("_", " ")} ·{" "}
-              {round.taxBasis === "INCLUSIVE_OF_GST" ? "incl. GST" : "excl. GST"} ·{" "}
-              {formatDateTime(round.createdAt)}
-            </p>
-            {round.message ? (
-              <p className="mt-2 text-[14px] text-slate-700">{round.message}</p>
-            ) : null}
-            {round.warnings.length > 0 ? (
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {round.warnings.map((warning) => (
-                  <li key={warning.code} className="rounded-full bg-amber-500/10 px-3 py-0.5 text-[12px] text-amber-500">
-                    {warning.message}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </li>
-        );
-      })}
-    </ol>
+                  {delta(column.total, previous?.total)}
+                  {index === 0 ? null : (
+                    <span className="block text-[12px] text-slate-500">
+                      {column.total === columns[0].total
+                        ? "same as original"
+                        : `${column.total < columns[0].total ? "−" : "+"}${money(Math.abs(column.total - columns[0].total))} vs original`}
+                    </span>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+
+          {rows.map((row) => (
+            <tr key={row.label}>
+              <th scope="row" className={labelCell}>
+                {row.label}
+              </th>
+              {columns.map((column, index) => {
+                const previous = columns[index - 1];
+                return (
+                  <td
+                    key={column.key}
+                    className={cn(valueCell, previous && row.changed(column, previous) && changedCell)}
+                  >
+                    {row.value(column, previous)}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+
+          {hasNotes ? (
+            <tr>
+              <th scope="row" className={labelCell}>
+                Notes
+              </th>
+              {columns.map((column) => (
+                <td key={column.key} className={valueCell}>
+                  {column.note?.trim() || column.warnings.length > 0 ? (
+                    <div className="space-y-1.5 text-[14px] whitespace-pre-wrap">
+                      {column.note?.trim() ? <p className="text-slate-700">{column.note}</p> : null}
+                      {column.warnings.map((warning) => (
+                        <p
+                          key={warning.code}
+                          className="rounded-md bg-amber-500/10 px-2 py-1 text-[12px] text-amber-600"
+                        >
+                          {warning.message}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
+                </td>
+              ))}
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -958,4 +1169,3 @@ function LogOfferDialog({
     </DialogShell>
   );
 }
-

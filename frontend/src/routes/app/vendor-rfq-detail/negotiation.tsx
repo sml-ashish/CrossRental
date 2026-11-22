@@ -1,28 +1,26 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DialogFooter, DialogShell } from "@/components/negotiation/dialog";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox, Field, Select, TextArea, TextInput } from "@/components/ui/form";
+import { Checkbox, Field, TextArea } from "@/components/ui/form";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
 import {
-  needsWarningAcknowledgement,
   inr,
   latestRound,
-  NEGOTIATION_STATUS_LABELS,
+  NEGOTIATION_STATUS_LABELS_VENDOR,
+  needsWarningAcknowledgement,
   negotiationTone,
   timeLeft,
 } from "@/lib/negotiation-display";
 import {
-  previewSmlCounter,
-  smlAccept,
-  smlCounter,
-  smlReject,
-  logVendorOffer,
+  getVendorRfqNegotiations,
+  previewVendorCounter,
+  vendorAccept,
+  vendorCounter,
+  vendorDecline,
   type NegotiationPreview,
-  type NegotiationRound,
   type NegotiationThread,
 } from "@/lib/negotiations";
 import {
@@ -32,213 +30,125 @@ import {
   type OfferFormValues,
 } from "@/components/negotiation/offer-fields";
 import { OfferPreview } from "@/components/negotiation/preview";
+import { OfferComparison } from "../rfq-detail/negotiations";
 
-/**
- * Counter-quote threads for one RFQ (phase 1 + 2).
- *
- * SML starts a thread from a vendor's quotation (see `CounterButton` in the
- * quotations list) and then answers each vendor offer here. Every offer is a set
- * of structured terms; the server prices it and returns the total, so this
- * screen only ever displays a computed figure.
- */
-export function NegotiationsSection({
+/** The buyer's counter-offers on this RFQ, compared side by side with your quote. */
+export function VendorNegotiations({
   rfqId,
-  negotiations,
-  loading,
-  canCounter,
-  closed,
-  deadlinePassed,
   submissionDeadline,
-  onDone,
-  onStartCounter,
 }: {
   rfqId: string;
-  negotiations: NegotiationThread[];
-  loading: boolean;
-  canCounter: boolean;
-  closed: boolean;
-  deadlinePassed: boolean;
   submissionDeadline: string;
-  onDone: () => void;
-  onStartCounter: () => void;
 }) {
-  const open = negotiations.filter((thread) =>
-    ["AWAITING_VENDOR", "AWAITING_SML", "AGREED"].includes(thread.status),
-  );
-  const awaiting = negotiations.filter((thread) => thread.status === "AWAITING_SML").length;
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: ["vendor-rfq-negotiations", rfqId],
+    queryFn: () => getVendorRfqNegotiations(rfqId),
+  });
+  const threads = query.data?.negotiations ?? [];
+  const deadlinePassed = new Date(submissionDeadline).getTime() < Date.now();
+  const refresh = () =>
+    void queryClient.invalidateQueries({ queryKey: ["vendor-rfq-negotiations", rfqId] });
 
-  const nearDeadline = !closed && !deadlinePassed &&
-    new Date(submissionDeadline).getTime() - Date.now() < 24 * 60 * 60 * 1000;
+  if (query.isLoading || threads.length === 0) return null;
 
   return (
-    <div className="space-y-4">
-      {nearDeadline ? (
-        <Alert tone="info" title="Deadline is close">
-          Counter-offers and acceptances are blocked once the submission deadline passes. Extend the
-          deadline if a negotiation still needs to finish.
-        </Alert>
-      ) : null}
-
-      {deadlinePassed && open.length > 0 ? (
-        <Alert tone="error" title="Submission deadline passed">
-          These threads can no longer be answered. Extend the deadline to resume an agreed offer or
-          an open negotiation.
-        </Alert>
-      ) : null}
-
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[17px] font-semibold text-slate-900">
-          Negotiations
-          <span className="ml-2 text-[14px] font-normal text-slate-500">
-            {awaiting > 0
-              ? `${awaiting} awaiting your response`
-              : "Counter-offers and agreed terms"}
-          </span>
-        </h2>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <Spinner /> Loading negotiations…
-        </div>
-      ) : negotiations.length === 0 ? (
-        <div className="card px-6 py-12 text-center">
-          <p className="text-[16px] font-medium text-slate-900">No counter-offers yet</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Start one from a vendor's quotation when you want to negotiate the price or terms.
-          </p>
-          {canCounter && !closed && !deadlinePassed ? (
-            <button
-              type="button"
-              className="btn-primary mt-4 px-4 py-2 text-[15px]"
-              onClick={onStartCounter}
-            >
-              Go to quotations
-            </button>
-          ) : null}
-        </div>
-      ) : (
-        <ul className="space-y-3">
-          {negotiations.map((thread) => (
-            <ThreadCard
-              key={thread.negotiationId}
-              rfqId={rfqId}
-              thread={thread}
-              canCounter={canCounter}
-              closed={closed}
-              deadlinePassed={deadlinePassed}
-              onDone={onDone}
-            />
-          ))}
-        </ul>
-      )}
-    </div>
+    <section className="space-y-3">
+      <h2 className="text-[17px] font-semibold text-slate-900">Negotiations</h2>
+      <ul className="space-y-3">
+        {threads.map((thread) => (
+          <VendorThreadCard
+            key={thread.negotiationId}
+            thread={thread}
+            deadlinePassed={deadlinePassed}
+            onDone={refresh}
+          />
+        ))}
+      </ul>
+    </section>
   );
 }
 
-function ThreadCard({
-  rfqId,
+function VendorThreadCard({
   thread,
-  canCounter,
-  closed,
   deadlinePassed,
   onDone,
 }: {
-  rfqId: string;
   thread: NegotiationThread;
-  canCounter: boolean;
-  closed: boolean;
   deadlinePassed: boolean;
   onDone: () => void;
 }) {
-  const [dialog, setDialog] = useState<"counter" | "accept" | "reject" | "log" | null>(null);
+  const [dialog, setDialog] = useState<"counter" | "accept" | "decline" | null>(null);
   const latest = latestRound(thread.rounds);
-  const blocked = closed || deadlinePassed || thread.deadlinePassed;
-  const canRespond = canCounter && !blocked;
-  const awaitingSml = thread.status === "AWAITING_SML";
-
+  const awaitingVendor = thread.status === "AWAITING_VENDOR";
+  const canRespond = awaitingVendor && !deadlinePassed && !thread.deadlinePassed;
   const responseDue = latest?.respondBy;
+  const done = () => {
+    setDialog(null);
+    onDone();
+  };
 
   return (
     <li className="card p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[17px] font-semibold text-slate-900">
-              {thread.vendorName ?? "Vendor"}
-            </h3>
+            <h3 className="text-[17px] font-semibold text-slate-900">{thread.craneLabel}</h3>
             <Badge tone={negotiationTone(thread.status)}>
-              {NEGOTIATION_STATUS_LABELS[thread.status]}
+              {NEGOTIATION_STATUS_LABELS_VENDOR[thread.status]}
             </Badge>
             {latest?.isFinal ? <Badge tone="purple">Final round</Badge> : null}
           </div>
           <p className="mt-1 text-[14px] text-slate-500">
-            {thread.craneLabel} · Round {thread.currentRound} of {thread.maxRounds} · v{thread.version}
+            Round {thread.currentRound} of {thread.maxRounds}
           </p>
         </div>
         <div className="text-right">
           <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-            {awaitingSml ? "Their latest offer" : thread.status === "AGREED" ? "Agreed total" : "Last offer"}
+            Latest offer
           </p>
           <p className="text-[24px] leading-7 font-semibold text-slate-900 tabular-nums">
             ₹{inr(latest?.totalQuotedValue ?? thread.baseQuotation.totalQuotedValue)}
           </p>
           <p className="text-[13px] text-slate-500">
-            vs ₹{inr(thread.baseQuotation.totalQuotedValue)} base
+            vs ₹{inr(thread.baseQuotation.totalQuotedValue)} your quote
           </p>
         </div>
       </div>
 
       {thread.status === "AGREED" && thread.agreedQuotation ? (
-        <div className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 px-4 py-3">
-          <p className="text-[15px] font-medium text-emerald-400">
-            Terms agreed at ₹{inr(thread.agreedQuotation.totalQuotedValue)}.
-          </p>
-          <p className="mt-0.5 text-[13px] text-slate-400">
-            Award quotation v{thread.agreedQuotation.version} from the Quotations tab to confirm.
-            Awarding closes this thread and cancels any other open offers for this RFQ.
-          </p>
-        </div>
+        <p className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 px-4 py-3 text-[15px] font-medium text-emerald-600">
+          Terms agreed at ₹{inr(thread.agreedQuotation.totalQuotedValue)}.
+        </p>
       ) : null}
-
       {["DECLINED", "EXPIRED", "CANCELLED"].includes(thread.status) ? (
         <p className="mt-3 text-[14px] text-slate-500">
           {thread.closedReason ?? "This negotiation is closed."}
         </p>
       ) : null}
 
-      <RoundTimeline rounds={thread.rounds} baseQuotation={thread.baseQuotation} />
+      <OfferComparison thread={thread} viewer="vendor" />
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 pt-4">
         <p className="text-[13px] text-slate-500">
-          {awaitingSml
+          {awaitingVendor
             ? responseDue
               ? `Respond by ${formatDateTime(responseDue)} · ${timeLeft(responseDue) ?? ""}`
               : "Your response is needed"
-            : thread.status === "AWAITING_VENDOR"
-              ? "Waiting for the vendor to respond"
+            : thread.status === "AWAITING_SML"
+              ? "Waiting for the buyer to respond"
               : "No action needed"}
         </p>
-        <div className="flex flex-wrap gap-2">
-          {thread.status === "AWAITING_VENDOR" && canRespond ? (
+        {canRespond ? (
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               className="btn-secondary px-3 py-2 text-[15px]"
-              onClick={() => setDialog("log")}
-              title="Record an offer the vendor sent by phone, WhatsApp or email"
+              onClick={() => setDialog("decline")}
             >
-              Log an offer
+              Decline
             </button>
-          ) : null}
-          {awaitingSml && canRespond ? (
-            <>
-              <button
-                type="button"
-                className="btn-secondary px-3 py-2 text-[15px]"
-                onClick={() => setDialog("reject")}
-              >
-                Reject
-              </button>
+            {thread.currentRound < thread.maxRounds ? (
               <button
                 type="button"
                 className="btn-secondary px-3 py-2 text-[15px]"
@@ -246,230 +156,41 @@ function ThreadCard({
               >
                 Counter
               </button>
-              <button
-                type="button"
-                className="btn-primary px-3 py-2 text-[15px]"
-                onClick={() => setDialog("accept")}
-              >
-                Accept offer
-              </button>
-            </>
-          ) : null}
-          {!canCounter ? (
-            <span className="text-[13px] text-slate-500">Your account cannot negotiate.</span>
-          ) : null}
-        </div>
+            ) : null}
+            <button
+              type="button"
+              className="btn-primary px-3 py-2 text-[15px]"
+              onClick={() => setDialog("accept")}
+            >
+              Accept offer
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {dialog === "counter" ? (
-        <CounterDialog
-          rfqId={rfqId}
-          thread={thread}
-          onClose={() => setDialog(null)}
-          onDone={() => {
-            setDialog(null);
-            onDone();
-          }}
-        />
+        <VendorCounterDialog thread={thread} onClose={() => setDialog(null)} onDone={done} />
       ) : null}
       {dialog === "accept" ? (
-        <AcceptDialog
-          rfqId={rfqId}
-          thread={thread}
-          onClose={() => setDialog(null)}
-          onDone={() => {
-            setDialog(null);
-            onDone();
-          }}
-        />
+        <VendorAcceptDialog thread={thread} onClose={() => setDialog(null)} onDone={done} />
       ) : null}
-      {dialog === "reject" ? (
-        <RejectDialog
-          rfqId={rfqId}
-          thread={thread}
-          onClose={() => setDialog(null)}
-          onDone={() => {
-            setDialog(null);
-            onDone();
-          }}
-        />
-      ) : null}
-      {dialog === "log" ? (
-        <LogOfferDialog
-          rfqId={rfqId}
-          thread={thread}
-          onClose={() => setDialog(null)}
-          onDone={() => {
-            setDialog(null);
-            onDone();
-          }}
-        />
+      {dialog === "decline" ? (
+        <VendorDeclineDialog thread={thread} onClose={() => setDialog(null)} onDone={done} />
       ) : null}
     </li>
   );
 }
 
-/**
- * The thread as a comparison table: the vendor's base quotation first, then
- * every counter-offer in order, with the same terms in the same columns so a
- * change between rounds is visible at a glance. Notes and warnings sit on a
- * line of their own under the round they belong to.
- */
-function RoundTimeline({
-  rounds,
-  baseQuotation,
-}: {
-  rounds: NegotiationRound[];
-  baseQuotation: NegotiationThread["baseQuotation"];
-}) {
-  if (!rounds.length) {
-    return (
-      <p className="mt-3 text-[14px] text-slate-500">
-        No offers in this thread yet — the first counter will appear here.
-      </p>
-    );
-  }
-  const baseTotal = baseQuotation.totalQuotedValue;
-  const lowest = Math.min(baseTotal, ...rounds.map((round) => round.totalQuotedValue));
-  const head =
-    "px-3 py-2 text-left text-[12px] font-medium tracking-[0.08em] whitespace-nowrap text-slate-500 uppercase";
-  const cell = "px-3 py-2.5 align-top text-[14px] text-slate-700 tabular-nums whitespace-nowrap";
-  const gst = (basis: string) => (basis === "INCLUSIVE_OF_GST" ? "Incl. GST" : "Excl. GST");
-
-  return (
-    <div className="mt-4 overflow-x-auto rounded-xl border border-ink-800">
-      <table className="w-full min-w-[820px] border-collapse">
-        <thead className="border-b border-ink-800 bg-ink-900/60">
-          <tr>
-            <th scope="col" className={head}>Round</th>
-            <th scope="col" className={head}>Offered by</th>
-            <th scope="col" className={head}>Rate</th>
-            <th scope="col" className={head}>GST</th>
-            <th scope="col" className={head}>Mobilisation</th>
-            <th scope="col" className={head}>Demobilisation</th>
-            <th scope="col" className={cn(head, "text-right")}>Total</th>
-            <th scope="col" className={cn(head, "text-right")}>Change</th>
-            <th scope="col" className={head}>Date</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-ink-800">
-          <tr>
-            <td className={cell}>
-              <span className="font-medium text-slate-900">Base</span>
-              <span className="block text-[13px] text-slate-500">v{baseQuotation.version}</span>
-            </td>
-            <td className={cell}>Vendor quotation</td>
-            <td className={cell}>
-              ₹{inr(baseQuotation.rentalRate)}
-              <span className="block text-[13px] text-slate-500">
-                {baseQuotation.rateBasis.replaceAll("_", " ").toLowerCase()}
-              </span>
-            </td>
-            <td className={cell}>{gst(baseQuotation.taxBasis)}</td>
-            <td className={cell}>₹{inr(baseQuotation.mobilisationCharges)}</td>
-            <td className={cell}>₹{inr(baseQuotation.demobilisationCharges)}</td>
-            <td className={cn(cell, "text-right font-semibold text-slate-900")}>₹{inr(baseTotal)}</td>
-            <td className={cn(cell, "text-right text-slate-400")}>—</td>
-            <td className={cell}>—</td>
-          </tr>
-          {rounds.map((round, index) => {
-            const previousRound = index > 0 ? rounds[index - 1] : undefined;
-            const diff = round.totalQuotedValue - (previousRound?.totalQuotedValue ?? baseTotal);
-            const fromVendor = round.offeredBy === "VENDOR";
-            const hasNote = Boolean(round.message) || round.warnings.length > 0;
-            const best = rounds.length > 0 && round.totalQuotedValue === lowest && lowest < baseTotal;
-            return (
-              <Fragment key={round.roundId}>
-                <tr className={round.outcome === "OPEN" ? "bg-accent-500/5" : undefined}>
-                  <td className={cell}>
-                    <span className="font-medium text-slate-900">Round {round.roundNumber}</span>
-                    {round.isFinal ? (
-                      <span className="block text-[13px] text-purple-400">final</span>
-                    ) : null}
-                  </td>
-                  <td className={cell}>
-                    {fromVendor ? (round.onBehalfOfVendor ? "Vendor (logged)" : "Vendor") : "SML"}
-                  </td>
-                  <td className={cell}>
-                    ₹{inr(round.rentalRate)}
-                    <span className="block text-[13px] text-slate-500">
-                      {round.rateBasis.replaceAll("_", " ").toLowerCase()}
-                    </span>
-                  </td>
-                  <td className={cell}>{gst(round.taxBasis)}</td>
-                  <td className={cell}>₹{inr(round.mobilisationCharges)}</td>
-                  <td className={cell}>₹{inr(round.demobilisationCharges)}</td>
-                  <td
-                    className={cn(
-                      cell,
-                      "text-right text-[15px] font-semibold",
-                      best ? "text-emerald-600" : "text-slate-900",
-                    )}
-                  >
-                    ₹{inr(round.totalQuotedValue)}
-                  </td>
-                  <td
-                    className={cn(
-                      cell,
-                      "text-right",
-                      diff > 0 ? "text-amber-500" : diff < 0 ? "text-emerald-600" : "text-slate-400",
-                    )}
-                  >
-                    {diff === 0 ? "—" : `${diff > 0 ? "+" : "−"}₹${inr(Math.abs(diff))}`}
-                  </td>
-                  <td className={cell}>{formatDateTime(round.createdAt)}</td>
-                </tr>
-                {hasNote ? (
-                  <tr className={round.outcome === "OPEN" ? "bg-accent-500/5" : undefined}>
-                    <td colSpan={9} className="px-3 pt-0 pb-3 text-[14px]">
-                      {round.message ? (
-                        <p className="text-slate-700">{round.message}</p>
-                      ) : null}
-                      {round.warnings.length > 0 ? (
-                        <ul className="mt-1.5 flex flex-wrap gap-2">
-                          {round.warnings.map((warning) => (
-                            <li
-                              key={warning.code}
-                              className="rounded-full bg-amber-500/10 px-3 py-0.5 text-[12px] text-amber-500"
-                            >
-                              {warning.message}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </td>
-                  </tr>
-                ) : null}
-              </Fragment>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// --- counter dialog ---------------------------------------------------------
-
-function defaultRespondBy(submissionDeadline: string): string {
-  const twoDays = Date.now() + 2 * 24 * 60 * 60 * 1000;
-  const cap = new Date(submissionDeadline).getTime();
-  const chosen = Number.isFinite(cap) ? Math.min(twoDays, cap - 60_000) : twoDays;
-  return new Date(chosen).toISOString().slice(0, 16);
-}
-
-function CounterDialog({
-  rfqId,
+function VendorCounterDialog({
   thread,
   onClose,
   onDone,
 }: {
-  rfqId: string;
   thread: NegotiationThread;
   onClose: () => void;
   onDone: () => void;
 }) {
-  const latest = latestRound(thread.rounds) ?? null;
+  const latest = latestRound(thread.rounds);
   const base = thread.baseQuotation;
   const [form, setForm] = useState<OfferFormValues>(() =>
     emptyOfferForm({
@@ -483,7 +204,6 @@ function CounterDialog({
       deviationText: latest?.deviationText ?? base.deviationText ?? "",
     }),
   );
-  const [respondBy, setRespondBy] = useState(() => defaultRespondBy(base.validityDate));
   const [acknowledged, setAcknowledged] = useState(false);
   const [preview, setPreview] = useState<NegotiationPreview | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -502,7 +222,7 @@ function CounterDialog({
     }
     setPreviewing(true);
     const timer = window.setTimeout(() => {
-      previewSmlCounter(rfqId, base.quotationId, offer)
+      previewVendorCounter(thread.negotiationId, offer)
         .then((response) => {
           if (id !== requestId.current) return;
           setPreview(response.preview);
@@ -518,229 +238,16 @@ function CounterDialog({
         });
     }, 350);
     return () => window.clearTimeout(timer);
-    // offerKey captures every field of the offer without retriggering on object identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rfqId, base.quotationId, offerKey]);
-
-  const warnings = preview?.warnings ?? [];
-  const blocking = needsWarningAcknowledgement(warnings);
-
-  const counter = useMutation({
-    mutationFn: () =>
-      smlCounter(rfqId, base.quotationId, {
-        ...offer,
-        expectedVersion: thread.version,
-        acknowledgeWarnings: acknowledged,
-        respondBy: new Date(respondBy).toISOString(),
-      }),
-    onSuccess: onDone,
-  });
-
-  const canSubmit =
-    preview !== null &&
-    !previewing &&
-    Boolean(offer.rentalRate) &&
-    Boolean(offer.validityDate) &&
-    Boolean(respondBy) &&
-    (!blocking || acknowledged) &&
-    !counter.isPending;
-
-  const isFinalRound = thread.currentRound + 1 >= thread.maxRounds;
-
-  return (
-    <DialogShell title={`Counter to ${thread.vendorName ?? "vendor"}`} onClose={onClose}>
-      <div className="space-y-4">
-        {isFinalRound ? (
-          <Alert tone="error" title="Final round">
-            Round {thread.maxRounds} is the last round. After this offer the thread can only be
-            accepted or rejected.
-          </Alert>
-        ) : null}
-
-        <OfferFieldsForm
-          prefix="sml-counter"
-          values={form}
-          onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          availabilityLabel="This offer confirms the crane is available for the full duration"
-        />
-
-        <Field
-          label="Vendor must respond by"
-          htmlFor="sml-respond-by"
-          required
-          hint="Capped automatically to the RFQ deadline and the offer validity."
-        >
-          <TextInput
-            id="sml-respond-by"
-            type="datetime-local"
-            value={respondBy}
-            onChange={setRespondBy}
-          />
-        </Field>
-
-        <OfferPreview preview={preview} loading={previewing} error={previewError} />
-
-        {blocking ? (
-          <Checkbox
-            id="sml-ack-warnings"
-            checked={acknowledged}
-            onChange={setAcknowledged}
-            label="I have reviewed the warnings above and want to send this offer anyway."
-          />
-        ) : null}
-
-        {counter.isError ? (
-          <Alert title="Counter not sent">{(counter.error as Error).message}</Alert>
-        ) : null}
-      </div>
-
-      <DialogFooter onClose={onClose}>
-        <button
-          type="button"
-          className="btn-primary px-4 py-2 text-[15px]"
-          disabled={!canSubmit}
-          onClick={() => counter.mutate()}
-        >
-          {counter.isPending ? <Spinner /> : null}
-          Send counter
-        </button>
-      </DialogFooter>
-    </DialogShell>
-  );
-}
-
-// --- counter from a quotation (starts a new thread) -------------------------
-
-/**
- * A button placed on each vendor quotation that starts (or continues) a
- * negotiation thread. The dialog owns its preview and submission.
- */
-export function CounterButton({
-  rfqId,
-  quotation,
-  disabled,
-  disabledReason = "Only the latest submitted quotation can be countered",
-  onDone,
-}: {
-  rfqId: string;
-  quotation: {
-    quotationId: string;
-    vendorName: string;
-    rentalRate: number;
-    rateBasis: string;
-    mobilisationCharges: number;
-    demobilisationCharges: number;
-    taxBasis: string;
-    validityDate: string;
-  };
-  disabled?: boolean;
-  disabledReason?: string;
-  onDone: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        className="btn-secondary px-3 py-2 text-[15px]"
-        disabled={disabled}
-        title={disabled ? disabledReason : undefined}
-        onClick={() => setOpen(true)}
-      >
-        Counter
-      </button>
-      {open ? (
-        <CounterFromQuoteDialog
-          rfqId={rfqId}
-          quotation={quotation}
-          onClose={() => setOpen(false)}
-          onDone={() => {
-            setOpen(false);
-            onDone();
-          }}
-        />
-      ) : null}
-    </>
-  );
-}
-
-function CounterFromQuoteDialog({
-  rfqId,
-  quotation,
-  onClose,
-  onDone,
-}: {
-  rfqId: string;
-  quotation: {
-    quotationId: string;
-    vendorName: string;
-    rentalRate: number;
-    rateBasis: string;
-    mobilisationCharges: number;
-    demobilisationCharges: number;
-    taxBasis: string;
-    validityDate: string;
-  };
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const [form, setForm] = useState<OfferFormValues>(() =>
-    emptyOfferForm({
-      rentalRate: String(quotation.rentalRate),
-      rateBasis: quotation.rateBasis,
-      mobilisationCharges: String(quotation.mobilisationCharges),
-      demobilisationCharges: String(quotation.demobilisationCharges),
-      taxBasis: quotation.taxBasis,
-      validityDate: quotation.validityDate.slice(0, 10),
-    }),
-  );
-  const [respondBy, setRespondBy] = useState(() => defaultRespondBy(quotation.validityDate));
-  const [acknowledged, setAcknowledged] = useState(false);
-  const [preview, setPreview] = useState<NegotiationPreview | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [previewing, setPreviewing] = useState(false);
-  const requestId = useRef(0);
-
-  const offer = toOfferFields(form);
-  const offerKey = JSON.stringify(offer);
-
-  useEffect(() => {
-    const id = ++requestId.current;
-    if (!offer.rentalRate || !offer.validityDate) {
-      setPreview(null);
-      return;
-    }
-    setPreviewing(true);
-    const timer = window.setTimeout(() => {
-      previewSmlCounter(rfqId, quotation.quotationId, offer)
-        .then((response) => {
-          if (id === requestId.current) {
-            setPreview(response.preview);
-            setPreviewError(null);
-          }
-        })
-        .catch((error: Error) => {
-          if (id === requestId.current) {
-            setPreview(null);
-            setPreviewError(error.message);
-          }
-        })
-        .finally(() => {
-          if (id === requestId.current) setPreviewing(false);
-        });
-    }, 350);
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rfqId, quotation.quotationId, offerKey]);
+  }, [thread.negotiationId, offerKey]);
 
   const blocking = needsWarningAcknowledgement(preview?.warnings ?? []);
   const counter = useMutation({
     mutationFn: () =>
-      smlCounter(rfqId, quotation.quotationId, {
+      vendorCounter(thread.negotiationId, {
         ...offer,
-        expectedVersion: 0,
+        expectedVersion: thread.version,
         acknowledgeWarnings: acknowledged,
-        respondBy: new Date(respondBy).toISOString(),
       }),
     onSuccess: onDone,
   });
@@ -750,40 +257,26 @@ function CounterFromQuoteDialog({
     !previewing &&
     Boolean(offer.rentalRate) &&
     Boolean(offer.validityDate) &&
-    Boolean(respondBy) &&
     (!blocking || acknowledged) &&
     !counter.isPending;
 
   return (
-    <DialogShell
-      title={`Counter to ${quotation.vendorName}`}
-      subtitle="Offer new terms instead of accepting this quotation outright."
-      onClose={onClose}
-    >
+    <DialogShell title="Send a counter-offer" onClose={onClose}>
       <div className="space-y-4">
+        {thread.currentRound + 1 >= thread.maxRounds ? (
+          <Alert tone="error" title="Final round">
+            This is the last round. After this offer the buyer can only accept or reject.
+          </Alert>
+        ) : null}
         <OfferFieldsForm
-          prefix="sml-new-counter"
+          prefix="vendor-counter"
           values={form}
           onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          availabilityLabel="This offer confirms the crane is available for the full duration"
         />
-        <Field
-          label="Vendor must respond by"
-          htmlFor="sml-new-respond-by"
-          required
-          hint="Capped automatically to the RFQ deadline and the offer validity."
-        >
-          <TextInput
-            id="sml-new-respond-by"
-            type="datetime-local"
-            value={respondBy}
-            onChange={setRespondBy}
-          />
-        </Field>
         <OfferPreview preview={preview} loading={previewing} error={previewError} />
         {blocking ? (
           <Checkbox
-            id="sml-new-ack"
+            id="vendor-ack-warnings"
             checked={acknowledged}
             onChange={setAcknowledged}
             label="I have reviewed the warnings above and want to send this offer anyway."
@@ -808,15 +301,11 @@ function CounterFromQuoteDialog({
   );
 }
 
-// --- accept / reject / log dialogs ------------------------------------------
-
-function AcceptDialog({
-  rfqId,
+function VendorAcceptDialog({
   thread,
   onClose,
   onDone,
 }: {
-  rfqId: string;
   thread: NegotiationThread;
   onClose: () => void;
   onDone: () => void;
@@ -825,10 +314,7 @@ function AcceptDialog({
   const [confirm, setConfirm] = useState(false);
   const accept = useMutation({
     mutationFn: () =>
-      smlAccept(rfqId, thread.negotiationId, {
-        expectedVersion: thread.version,
-        confirm: true,
-      }),
+      vendorAccept(thread.negotiationId, { expectedVersion: thread.version, confirm: true }),
     onSuccess: onDone,
   });
 
@@ -836,16 +322,18 @@ function AcceptDialog({
     <DialogShell title="Accept this offer" onClose={onClose}>
       <div className="space-y-4">
         <p className="text-[15px] text-slate-600">
-          Accepting ₹{inr(latest?.totalQuotedValue ?? 0)} creates an agreed quotation version. It does
-          not award the work — award it from the Quotations tab afterwards.
+          Accepting ₹{inr(latest?.totalQuotedValue ?? 0)} agrees these terms. The buyer then
+          confirms the award.
         </p>
         <Checkbox
-          id="sml-accept-confirm"
+          id="vendor-accept-confirm"
           checked={confirm}
           onChange={setConfirm}
           label="I have checked the offer terms and want to accept them."
         />
-        {accept.isError ? <Alert title="Not accepted">{(accept.error as Error).message}</Alert> : null}
+        {accept.isError ? (
+          <Alert title="Not accepted">{(accept.error as Error).message}</Alert>
+        ) : null}
       </div>
       <DialogFooter onClose={onClose}>
         <button
@@ -862,170 +350,47 @@ function AcceptDialog({
   );
 }
 
-function RejectDialog({
-  rfqId,
+function VendorDeclineDialog({
   thread,
   onClose,
   onDone,
 }: {
-  rfqId: string;
   thread: NegotiationThread;
   onClose: () => void;
   onDone: () => void;
 }) {
   const [reason, setReason] = useState("");
-  const reject = useMutation({
+  const decline = useMutation({
     mutationFn: () =>
-      smlReject(rfqId, thread.negotiationId, {
+      vendorDecline(thread.negotiationId, {
         expectedVersion: thread.version,
-        reason,
+        reason: reason.trim() || null,
       }),
     onSuccess: onDone,
   });
 
   return (
-    <DialogShell title="Reject this counter" onClose={onClose}>
+    <DialogShell title="Decline this negotiation" onClose={onClose}>
       <div className="space-y-4">
         <p className="text-[15px] text-slate-600">
-          Rejecting ends this negotiation. The vendor's original quotation stays on the RFQ.
+          Declining ends this negotiation. Your original quotation stays on the RFQ.
         </p>
-        <Field label="Reason" htmlFor="sml-reject-reason" required>
-          <TextArea
-            id="sml-reject-reason"
-            value={reason}
-            onChange={setReason}
-            rows={3}
-            placeholder="Why this counter cannot be accepted"
-          />
+        <Field label="Reason" htmlFor="vendor-decline-reason" hint="Optional.">
+          <TextArea id="vendor-decline-reason" value={reason} onChange={setReason} rows={3} />
         </Field>
-        {reject.isError ? <Alert title="Not rejected">{(reject.error as Error).message}</Alert> : null}
-      </div>
-      <DialogFooter onClose={onClose}>
-        <button
-          type="button"
-          className="btn-primary px-4 py-2 text-[15px]"
-          disabled={!reason.trim() || reject.isPending}
-          onClick={() => reject.mutate()}
-        >
-          {reject.isPending ? <Spinner /> : null}
-          Reject counter
-        </button>
-      </DialogFooter>
-    </DialogShell>
-  );
-}
-
-function LogOfferDialog({
-  rfqId,
-  thread,
-  onClose,
-  onDone,
-}: {
-  rfqId: string;
-  thread: NegotiationThread;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const base = thread.baseQuotation;
-  const [form, setForm] = useState<OfferFormValues>(() =>
-    emptyOfferForm({
-      rentalRate: String(base.rentalRate),
-      rateBasis: base.rateBasis,
-      mobilisationCharges: String(base.mobilisationCharges),
-      demobilisationCharges: String(base.demobilisationCharges),
-      taxBasis: base.taxBasis,
-      validityDate: base.validityDate.slice(0, 10),
-    }),
-  );
-  const [channel, setChannel] = useState("PHONE");
-  const [note, setNote] = useState("");
-  const [acknowledged, setAcknowledged] = useState(false);
-  const [preview, setPreview] = useState<NegotiationPreview | null>(null);
-  const requestId = useRef(0);
-  const offer = toOfferFields(form);
-  const offerKey = JSON.stringify(offer);
-
-  useEffect(() => {
-    const id = ++requestId.current;
-    if (!offer.rentalRate || !offer.validityDate) return;
-    previewSmlCounter(rfqId, base.quotationId, offer)
-      .then((response) => {
-        if (id === requestId.current) setPreview(response.preview);
-      })
-      .catch(() => {
-        if (id === requestId.current) setPreview(null);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rfqId, base.quotationId, offerKey]);
-
-  const blocking = needsWarningAcknowledgement(preview?.warnings ?? []);
-  const log = useMutation({
-    mutationFn: () =>
-      logVendorOffer(rfqId, thread.negotiationId, {
-        ...offer,
-        channel: channel as "PHONE" | "EMAIL" | "WHATSAPP" | "PORTAL",
-        note,
-        expectedVersion: thread.version,
-        acknowledgeWarnings: acknowledged,
-      }),
-    onSuccess: onDone,
-  });
-
-  return (
-    <DialogShell title="Log an offer received offline" onClose={onClose}>
-      <div className="space-y-4">
-        <p className="text-[14px] text-slate-500">
-          Record an offer the vendor sent by phone, WhatsApp or email. SML can then respond to it in
-          this thread.
-        </p>
-        <OfferFieldsForm
-          prefix="sml-log"
-          values={form}
-          onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          availabilityLabel="The vendor confirmed the crane is available for the full duration"
-        />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Channel" htmlFor="sml-log-channel" required>
-            <Select
-              id="sml-log-channel"
-              value={channel}
-              onChange={setChannel}
-              options={[
-                { value: "PHONE", label: "Phone" },
-                { value: "WHATSAPP", label: "WhatsApp" },
-                { value: "EMAIL", label: "Email" },
-                { value: "PORTAL", label: "Portal" },
-              ]}
-            />
-          </Field>
-          <Field label="Note" htmlFor="sml-log-note" required>
-            <TextInput id="sml-log-note" value={note} onChange={setNote} />
-          </Field>
-        </div>
-        <OfferPreview preview={preview} loading={false} />
-        {blocking ? (
-          <Checkbox
-            id="sml-log-ack"
-            checked={acknowledged}
-            onChange={setAcknowledged}
-            label="I have reviewed the warnings above and want to log this offer anyway."
-          />
-        ) : null}
-        {log.isError ? (
-          <Alert title="Not logged">{(log.error as Error).message}</Alert>
+        {decline.isError ? (
+          <Alert title="Not declined">{(decline.error as Error).message}</Alert>
         ) : null}
       </div>
       <DialogFooter onClose={onClose}>
         <button
           type="button"
           className="btn-primary px-4 py-2 text-[15px]"
-          disabled={
-            !preview || !offer.rentalRate || !note.trim() || (blocking && !acknowledged) || log.isPending
-          }
-          onClick={() => log.mutate()}
+          disabled={decline.isPending}
+          onClick={() => decline.mutate()}
         >
-          {log.isPending ? <Spinner /> : null}
-          Log offer
+          {decline.isPending ? <Spinner /> : null}
+          Decline
         </button>
       </DialogFooter>
     </DialogShell>
