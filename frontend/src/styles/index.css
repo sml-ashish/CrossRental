@@ -717,3 +717,49 @@
 .enq-slide {
   animation: enq-slide-in 180ms ease-out;
 }
+
+
+/*
+ * Enquiry workspace — SAP Fiori list-report treatment.
+ *
+ * Layered on top of the `.enq` tokens above. Flat surfaces, hairline borders
+ * and a cool neutral palette replace the warm, glowing look: the screen is a
+ * working tool, so the chrome stays quiet and the data carries the colour.
+ */
+.enq.enq-fiori.theme-light {
+  --color-white: #1d2d3e;
+
+  --color-ink-950: #f5f6f7;
+  --color-ink-900: #ffffff;
+  --color-ink-850: #ffffff;
+  --color-ink-800: #e4e7ea;
+  --color-ink-700: #c9ced3;
+
+  --color-slate-500: #5b6f82;
+  --color-slate-600: #475b6e;
+  --color-slate-700: #2f3f50;
+  --color-slate-800: #1d2d3e;
+  --color-neutral-200: #1d2d3e;
+}
+
+/* A table row is one enquiry. Hover and selection read as a full-width band,
+   and the selected row carries a 3px accent bar so it is findable at a glance
+   without relying on a tint alone. */
+.fiori-row {
+  transition: background-color 120ms ease;
+}
+
+.fiori-row:hover {
+  background: var(--color-ink-850);
+  background: color-mix(in srgb, var(--color-ink-800) 45%, transparent);
+}
+
+.fiori-row[data-selected="true"] {
+  background: color-mix(in srgb, var(--color-accent-500) 9%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-accent-500);
+}
+
+.fiori-row:focus-visible {
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: -2px;
+}

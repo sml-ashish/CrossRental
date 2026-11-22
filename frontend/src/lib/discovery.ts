@@ -497,8 +497,8 @@ export function filterRecommended<
   );
 }
 
-/** Only the best ten recommended cranes are shown and drawn. */
-export const TOP_RECOMMENDED_CRANES = 10;
+/** The recommendation list opens on the best ten and reveals this many more per click. */
+export const RECOMMENDED_PAGE_SIZE = 10;
 
 /** `412 km` — whole kilometres once the number is big enough to stop caring. */
 export function formatKm(km: number | null): string {

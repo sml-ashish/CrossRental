@@ -45,8 +45,12 @@ import type { Actor } from "./rfq.service";
  * so a synthetic figure is never mistaken for a real one later.
  */
 
-/** A recommendation is a shortlist, not the whole fleet: the ten best cranes. */
-export const MAX_RECOMMENDED_CRANES = 10;
+/**
+ * A recommendation is a shortlist, not the whole fleet: the fifty best cranes.
+ * The screen shows ten at a time and lets the person reveal more, so the
+ * ranking is computed once and a longer list costs nothing extra to browse.
+ */
+export const MAX_RECOMMENDED_CRANES = 50;
 
 /** A candidate crane with its cost and warning detail added (P2). */
 export interface RecommendedCrane extends CandidateCrane {
@@ -306,7 +310,7 @@ export async function participationByVendor(
 }
 
 /**
- * Keep only the top ten cranes, in the order the candidate picker produced.
+ * Keep only the top `MAX_RECOMMENDED_CRANES` cranes, in the order the candidate picker produced.
  *
  * The list is already ranked (smallest adequate capacity then nearest, or
  * nearest first), so slicing the flattened order is the ranking. Groups are
@@ -646,4 +650,3 @@ export async function getRecommendation(
     ...built,
   };
 }
-

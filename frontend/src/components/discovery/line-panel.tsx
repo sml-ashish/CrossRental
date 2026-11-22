@@ -245,16 +245,14 @@ export function LinePanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 px-5 pt-5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate text-[14px] text-neutral-500">
-              {greeting}, <span className="text-neutral-300">{displayName}</span>
-            </p>
-            <h1 className="mt-0.5 truncate text-[22px] leading-none font-semibold tracking-tight text-white">
-              Find cranes
-            </h1>
-          </div>
+      <div className="shrink-0 border-b border-ink-800 px-4 pt-3 pb-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <h1
+            className="min-w-0 truncate text-[18px] leading-tight font-semibold tracking-tight text-white"
+            title={`${greeting}, ${displayName}`}
+          >
+            Find cranes
+          </h1>
           <div className="flex shrink-0 items-center gap-0.5">
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
             <button
@@ -269,7 +267,7 @@ export function LinePanel({
           </div>
         </div>
 
-        <div className="relative mt-4">
+        <div className="relative mt-2">
           <Search
             className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-neutral-500"
             aria-hidden
@@ -281,11 +279,16 @@ export function LinePanel({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search enquiry no., site or crane type"
             aria-label="Search enquiry lines by number, site or crane type"
-            className="w-full rounded-lg border border-transparent bg-ink-850 py-2.5 pr-3 pl-9 text-[15px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
+            className="h-9 w-full rounded-lg border border-transparent bg-ink-850 pr-3 pl-9 text-[14px] text-neutral-100 placeholder:text-neutral-500 focus:border-ink-700 focus:outline-none"
           />
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {/* One row, never wraps: a segmented filter instead of three loose chips. */}
+        <div
+          role="group"
+          aria-label="Filter enquiry lines"
+          className="mt-2 flex rounded-lg bg-ink-850 p-0.5"
+        >
           {LINE_FILTERS.map((option) => (
             <button
               key={option.value}
@@ -293,20 +296,26 @@ export function LinePanel({
               onClick={() => setFilter(option.value)}
               aria-pressed={filter === option.value}
               className={cn(
-                "rounded-full px-3 py-1 text-[14px] font-medium transition-colors",
+                "min-w-0 flex-1 truncate rounded-md px-2 py-1 text-[13px] font-medium transition-colors",
                 filter === option.value
-                  ? "bg-white text-ink-950"
-                  : "border border-ink-700 text-neutral-400 hover:text-white",
+                  ? "bg-ink-900 text-white shadow-sm ring-1 ring-ink-800"
+                  : "text-neutral-400 hover:text-white",
               )}
             >
               {option.label}
             </button>
           ))}
+        </div>
+
+        <div className="mt-1.5 flex items-center justify-between gap-2 text-[12px] text-neutral-500">
+          <span className="tabular-nums">
+            {isPending ? "Loading…" : `${matches.length} open line${matches.length === 1 ? "" : "s"}`}
+          </span>
           {lineId ? (
             <button
               type="button"
               onClick={onClear}
-              className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-[13px] font-medium text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+              className="flex items-center gap-1 rounded px-1 font-medium text-neutral-400 transition-colors hover:text-white"
             >
               <X className="size-3" aria-hidden />
               Browse all
@@ -315,7 +324,7 @@ export function LinePanel({
         </div>
       </div>
 
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-3 pb-5">
+      <div className="mt-2 min-h-0 flex-1 overflow-y-auto px-3 pb-5">
         {error ? (
           <div className="p-2">
             <Alert tone="error" title="Could not load enquiry lines">

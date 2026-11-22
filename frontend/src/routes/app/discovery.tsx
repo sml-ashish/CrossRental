@@ -16,7 +16,6 @@ import {
   cranesLocatedIn,
   getLineRoute,
   orderedRecommendationCranes,
-  TOP_RECOMMENDED_CRANES,
   filterRecommended,
   searchDiscovery,
   toDisplayCrane,
@@ -378,7 +377,6 @@ export function DiscoveryPage() {
         availableOnly,
         searchText,
       )
-        .slice(0, TOP_RECOMMENDED_CRANES)
         .map(toDisplayCrane),
     [recommendations, filters.location, mode, distanceSort, availableOnly, searchText, requiredT],
   );

@@ -18,7 +18,7 @@ import {
   type RecommendationMode,
   type DistanceSort,
   DISTANCE_SORT_OPTIONS,
-  TOP_RECOMMENDED_CRANES,
+  RECOMMENDED_PAGE_SIZE,
   filterRecommended,
 } from "@/lib/discovery";
 import type { RaisableLine } from "@/lib/enquiries";
@@ -149,62 +149,59 @@ export function RecommendationPanel({
   const noticeId = useId();
   const [sendOpen, setSendOpen] = useState(false);
   const [sendAll, setSendAll] = useState(false);
+  /** How many of the ranked cranes are revealed; the list opens on the best ten. */
+  const [shown, setShown] = useState(RECOMMENDED_PAGE_SIZE);
   const allCranes = orderedRecommendationCranes(
     recommendations,
     mode,
     line?.capacityT,
     distanceSort,
   );
-  const cranes = filterRecommended(
+  const matching = filterRecommended(
     cranesLocatedIn(allCranes, fromText),
     availableOnly,
     searchText,
-  ).slice(0, TOP_RECOMMENDED_CRANES);
+  );
+  const cranes = matching.slice(0, shown);
   const total = cranes.length;
-  const filteredOut = allCranes.length > 0 && total === 0 && (Boolean(fromText.trim()) || availableOnly || Boolean(searchText.trim()));
+  const matchCount = matching.length;
+  const hiddenCount = matchCount - total;
+  const filteredOut = allCranes.length > 0 && matchCount === 0 && (Boolean(fromText.trim()) || availableOnly || Boolean(searchText.trim()));
   // Only ticks that are still on the visible list count: a crane filtered out by
   // "From" must not silently receive an RFQ.
-  const checkedCranes = cranes.filter((crane) => checkedIds.has(crane.craneId));
+  const checkedCranes = matching.filter((crane) => checkedIds.has(crane.craneId));
   const checkedVendors = new Set(checkedCranes.map((crane) => crane.vendorId)).size;
   const allChecked = total > 0 && checkedCranes.length === total;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 border-b border-ink-800 px-5 pt-5 pb-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-              Recommendations
-            </p>
-            <p className="mt-1 truncate text-[16px] font-semibold text-white">
-              {line ? lineReference(line) : "Selected line"}
-            </p>
-            {line ? (
-              <p className="mt-0.5 truncate text-[13px] text-neutral-400">
-                {line.craneTypeName ?? line.craneTypeCode ?? "Crane type not set"} ·{" "}
-                {capacityText(line)}
-                {line.siteLocation ? ` · ${line.siteLocation}` : ""}
-              </p>
-            ) : null}
-          </div>
+      <div className="shrink-0 border-b border-ink-800 px-4 pt-3 pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="min-w-0 truncate text-[16px] leading-tight font-semibold text-white">
+            <span className="sr-only">Recommendations for </span>
+            {line ? lineReference(line) : "Selected line"}
+          </h2>
           <button
             type="button"
             onClick={onClear}
-            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[14px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
+            className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[13px] text-neutral-400 transition-colors hover:bg-ink-850 hover:text-white"
           >
             <X className="size-3" aria-hidden />
             Clear
           </button>
         </div>
+        {line ? (
+          <p className="mt-0.5 truncate text-[13px] text-neutral-400">
+            {line.craneTypeName ?? line.craneTypeCode ?? "Crane type not set"} · {capacityText(line)}
+            {line.siteLocation ? ` · ${line.siteLocation}` : ""}
+          </p>
+        ) : null}
 
         <div
           role="group"
           aria-label="Sort recommended cranes"
-          className="mt-3 flex flex-wrap items-center gap-1.5"
+          className="mt-2.5 flex rounded-lg bg-ink-850 p-0.5"
         >
-          <span className="mr-1 text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-            Sort
-          </span>
           {DISTANCE_SORT_OPTIONS.map((option) => (
             <button
               key={option.value}
@@ -212,10 +209,10 @@ export function RecommendationPanel({
               aria-pressed={distanceSort === option.value}
               onClick={() => onDistanceSortChange(option.value)}
               className={cn(
-                "rounded-full px-3 py-1 text-[14px] font-medium transition-colors",
+                "min-w-0 flex-1 truncate rounded-md px-2 py-1 text-[13px] font-medium transition-colors",
                 distanceSort === option.value
-                  ? "bg-white text-ink-950"
-                  : "border border-ink-700 text-neutral-400 hover:text-white",
+                  ? "bg-ink-900 text-white shadow-sm ring-1 ring-ink-800"
+                  : "text-neutral-400 hover:text-white",
               )}
             >
               {option.label}
@@ -275,7 +272,7 @@ export function RecommendationPanel({
             <div className="mb-3 flex items-start justify-between gap-3 px-0.5">
               <div className="min-w-0">
                 <p className="text-[15px] font-medium text-neutral-200">
-                  {total} crane{total === 1 ? "" : "s"}
+                  {hiddenCount > 0 ? `${total} of ${matchCount}` : total} crane{matchCount === 1 ? "" : "s"}
                   {fromText.trim() ? ` in ${fromText.trim()}` : ""}
                   <span className="font-normal text-neutral-500">
                     {" · "}
@@ -333,7 +330,7 @@ export function RecommendationPanel({
                   }
                   className="size-3.5 accent-accent-500"
                 />
-                Select all {total} to send an RFQ
+                Select all {total}{hiddenCount > 0 ? " shown" : ""} to send an RFQ
               </label>
               <ul className="space-y-2.5">
                 {cranes.map((crane) => (
@@ -349,6 +346,26 @@ export function RecommendationPanel({
                   />
                 ))}
               </ul>
+              {hiddenCount > 0 ? (
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShown((count) => count + RECOMMENDED_PAGE_SIZE)}
+                    className="rounded-lg border border-ink-700 bg-ink-850 px-3 py-2 text-[14px] font-medium text-neutral-200 transition-colors hover:bg-ink-800 hover:text-white"
+                  >
+                    Show {Math.min(RECOMMENDED_PAGE_SIZE, hiddenCount)} more
+                  </button>
+                  {hiddenCount > RECOMMENDED_PAGE_SIZE ? (
+                    <button
+                      type="button"
+                      onClick={() => setShown(matchCount)}
+                      className="rounded-lg px-3 py-2 text-[14px] font-medium text-accent-400 transition-colors hover:text-white"
+                    >
+                      Show all {matchCount}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
               </>
             )}
           </>

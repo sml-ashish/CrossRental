@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/alert";
 import { RfqFieldsScreen } from "@/components/rfq-fields-screen";
 import type { RfqLineFieldKey } from "@/lib/rfqLineFields";
-import { Field, TextInput } from "@/components/ui/form";
 import { ApiError } from "@/lib/api";
 import { createRfqFromLine } from "@/lib/enquiries";
 import { listApprovedVendors, sendRfq, type SendResult } from "@/lib/rfqs";
 import { addDays, todayDay } from "@/lib/enquiryDetail";
 import type { RecommendationCrane } from "@/lib/discovery";
-import { cn } from "@/lib/cn";
 
 /**
  * Send an RFQ to the vendors that own the cranes ticked in the recommendation
@@ -73,8 +70,6 @@ export function SendRfqDialog({
   /** Set once the RFQ exists, so a failed send is retried without a duplicate. */
   const [rfq, setRfq] = useState<{ id: string; rfqNumber: string } | null>(null);
   const [result, setResult] = useState<SendResult | null>(null);
-  /** The field-selection screen, shown first whenever an RFQ is still to be raised. */
-  const [fieldsOpen, setFieldsOpen] = useState(false);
 
   // A fresh dialog is a fresh RFQ.
   useEffect(() => {
@@ -85,7 +80,6 @@ export function SendRfqDialog({
     setResult(null);
     setAllApproved(startWithAll);
     setTagCranes(true);
-    setFieldsOpen(false);
   }, [open, lineId, startWithAll]);
 
   async function submit(fieldKeys?: RfqLineFieldKey[], remark?: string) {
@@ -120,61 +114,103 @@ export function SendRfqDialog({
 
   const done = result !== null;
 
+  const sectionTitle = "text-[12px] font-semibold text-slate-600";
+  const optionBox =
+    "flex cursor-pointer items-start gap-2.5 rounded-md border border-ink-800 bg-ink-900 px-3 py-2.5 text-[13px] text-slate-800";
+
+  // The one window: choose recipients, deadline and fields together, then raise
+  // and email in a single confirmation. The result replaces the body in place.
   return (
-    <Dialog
+    <RfqFieldsScreen
       open={open}
-      onOpenChange={onOpenChange}
-      title="Send RFQ to vendors"
-      description={
+      lineId={lineId}
+      title="Raise RFQ"
+      lineLabel={
         allApproved
           ? `${lineLabel} · every approved vendor, by email`
           : `${lineLabel} · ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}, ${cranes.length} crane${cranes.length === 1 ? "" : "s"} selected`
       }
-      className="sm:max-w-[520px]"
-      footer={
-        <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="rounded-lg border border-ink-700 px-3 py-2 text-[15px] font-medium text-slate-600 transition-colors hover:bg-ink-850"
-          >
-            {done ? "Close" : "Cancel"}
-          </button>
-          {done && rfq ? (
-            <Link
-              to="/app/rfqs/$rfqId"
-              params={{ rfqId: rfq.id }}
-              className="rounded-lg bg-accent-500 px-3 py-2 text-[15px] font-semibold text-[#fff] transition-colors hover:bg-accent-600"
-            >
-              Open {rfq.rfqNumber}
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={() => (rfq ? void submit() : setFieldsOpen(true))}
-              disabled={busy || (!allApproved && vendors.length === 0) || !deadline}
-              className="rounded-lg bg-accent-500 px-3 py-2 text-[15px] font-semibold text-[#fff] transition-colors hover:bg-accent-600 disabled:opacity-50"
-            >
-              {busy
-                ? "Sending…"
-                : rfq
-                  ? "Retry sending"
-                  : allApproved
-                    ? "Email all vendors"
-                    : `Email ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`}
-            </button>
-          )}
-        </div>
+      deadline={deadline}
+      onDeadline={setDeadline}
+      confirmLabel={
+        busy
+          ? "Sending…"
+          : rfq
+            ? "Retry sending"
+            : allApproved
+              ? "Raise and email all vendors"
+              : `Raise and email ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`
       }
-    >
-      <div className="space-y-4">
-        {error ? (
-          <Alert tone="error" title={rfq ? `${rfq.rfqNumber} was created but not sent` : "Could not send"}>
-            {error}
-          </Alert>
-        ) : null}
+      pending={busy}
+      locked={Boolean(rfq)}
+      confirmDisabled={!allApproved && vendors.length === 0}
+      error={error}
+      errorTitle={rfq ? `${rfq.rfqNumber} was created but not sent` : "Could not send"}
+      onConfirm={(keys, remark) => void submit(keys, remark)}
+      onClose={() => onOpenChange(false)}
+      extra={
+        <section aria-label="Recipients" className="space-y-2">
+          <h3 className={sectionTitle}>Send to</h3>
+          <label className={optionBox}>
+            <input
+              type="checkbox"
+              checked={allApproved}
+              disabled={Boolean(rfq) || busy}
+              onChange={(event) => setAllApproved(event.target.checked)}
+              className="mt-0.5 size-4 shrink-0 accent-accent-500"
+            />
+            <span>
+              <span className="font-semibold">Send to all approved vendors</span>
+              <span className="mt-0.5 block text-[12px] text-slate-600">
+                Emails every approved vendor, not just the ones with ticked cranes.
+              </span>
+            </span>
+          </label>
 
-        {done ? (
+          {!allApproved && cranes.length > 0 ? (
+            <label className={optionBox}>
+              <input
+                type="checkbox"
+                checked={tagCranes}
+                disabled={Boolean(rfq) || busy}
+                onChange={(event) => setTagCranes(event.target.checked)}
+                className="mt-0.5 size-4 shrink-0 accent-accent-500"
+              />
+              <span>
+                <span className="font-semibold">
+                  Tag the {cranes.length} selected crane{cranes.length === 1 ? "" : "s"}
+                </span>
+                <span className="mt-0.5 block text-[12px] text-slate-600">
+                  Each vendor sees its tagged cranes first. Untick to send without tagging.
+                </span>
+              </span>
+            </label>
+          ) : null}
+
+          {vendors.length > 0 ? (
+            <div className={allApproved ? "opacity-60" : undefined}>
+              <p className="mt-1 text-[12px] font-semibold text-slate-600">
+                Selected vendor{vendors.length === 1 ? "" : "s"} ({vendors.length})
+                {allApproved ? " · included in all approved" : ""}
+              </p>
+              <ul className="mt-1.5 divide-y divide-ink-800 rounded-md border border-ink-800 bg-ink-900">
+                {vendors.map((vendor) => (
+                  <li key={vendor.vendorId} className="px-3 py-2">
+                    <p className="text-[13px] font-semibold text-slate-900">{vendor.vendorName}</p>
+                    <p className="mt-0.5 text-[12px] text-slate-600">
+                      {vendor.cranes
+                        .map((crane) => `${crane.make} ${crane.model} (${Math.round(crane.capacityT)} t)`)
+                        .join(" · ")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      }
+      outcome={
+        done ? (
           <Alert
             tone={result.failed > 0 ? "error" : "success"}
             title={`${rfq?.rfqNumber ?? "RFQ"}: sent to ${result.sent} vendor${result.sent === 1 ? "" : "s"}${
@@ -191,115 +227,28 @@ export function SendRfqDialog({
                   .join(" · ")
               : "The vendors have been emailed and can quote from their portal."}
           </Alert>
-        ) : (
-          <>
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-ink-800 px-3.5 py-3 text-[15px] text-slate-800">
-              <input
-                type="checkbox"
-                checked={allApproved}
-                onChange={(event) => setAllApproved(event.target.checked)}
-                className="mt-1 accent-accent-500"
-              />
-              <span>
-                <span className="font-semibold">Send to all approved vendors</span>
-                <span className="mt-0.5 block text-slate-500">
-                  Emails every approved vendor, not just the ones with ticked cranes.
-                </span>
-              </span>
-            </label>
-            {!allApproved && cranes.length > 0 ? (
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-ink-800 px-3.5 py-3 text-[15px] text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={tagCranes}
-                  onChange={(event) => setTagCranes(event.target.checked)}
-                  className="mt-1 accent-accent-500"
-                />
-                <span>
-                  <span className="font-semibold">
-                    Tag the {cranes.length} selected crane{cranes.length === 1 ? "" : "s"} on this RFQ
-                  </span>
-                  <span className="mt-0.5 block text-slate-500">
-                    Each vendor sees its tagged cranes first and can quote every one of them, or any
-                    other crane from its fleet. Untick to send without tagging.
-                  </span>
-                </span>
-              </label>
-            ) : null}
-            <ul className={cn("divide-y divide-ink-800 rounded-xl border border-ink-800", allApproved && "opacity-50")}>
-              {vendors.map((vendor) => (
-                <li key={vendor.vendorId} className="px-3.5 py-2.5">
-                  <p className="text-[15px] font-semibold text-slate-900">{vendor.vendorName}</p>
-                  <p className="mt-0.5 text-[14px] text-slate-500">
-                    {vendor.cranes
-                      .map((crane) => `${crane.make} ${crane.model} (${Math.round(crane.capacityT)} t)`)
-                      .join(" · ")}
-                  </p>
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex flex-wrap items-end gap-2">
-              <Field label="Submission deadline" htmlFor="send-rfq-deadline">
-                <TextInput
-                  id="send-rfq-deadline"
-                  type="date"
-                  value={deadline}
-                  onChange={setDeadline}
-                  disabled={Boolean(rfq)}
-                />
-              </Field>
-              <div className="flex gap-1.5">
-                {[3, 7, 14].map((days) => (
-                  <button
-                    key={days}
-                    type="button"
-                    disabled={Boolean(rfq)}
-                    onClick={() => setDeadline(addDays(todayDay(), days))}
-                    className={cn(
-                      "rounded-lg border px-2.5 py-2 text-[14px] font-medium transition-colors disabled:opacity-50",
-                      deadline === addDays(todayDay(), days)
-                        ? "border-accent-500 bg-accent-500/10 text-accent-400"
-                        : "border-ink-800 bg-ink-850 text-slate-500 hover:border-ink-700 hover:text-slate-800",
-                    )}
-                  >
-                    +{days} days
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-[14px] text-slate-500">
-              One RFQ is raised from this enquiry line and emailed {allApproved ? "to every approved vendor, with no crane tagged" : "only to the vendors above"}.
-              Only the fields you tick are copied; customer name, address and the internal budget
-              are never sent.
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* Raising an RFQ always starts here: choose the line fields first. */}
-      <RfqFieldsScreen
-        open={fieldsOpen && !rfq}
-        lineId={lineId}
-        title="Raise RFQ"
-        lineLabel={lineLabel}
-        deadline={deadline}
-        onDeadline={setDeadline}
-        confirmLabel={
-          allApproved
-            ? "Raise and email all vendors"
-            : `Raise and email ${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`
-        }
-        pending={busy}
-        error={error}
-        onConfirm={(keys, remark) => {
-          setFieldsOpen(false);
-          void submit(keys, remark);
-        }}
-        onClose={() => setFieldsOpen(false)}
-      />
-    </Dialog>
+        ) : undefined
+      }
+      outcomeFooter={
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="btn-secondary !py-1.5 !text-[13px]"
+          >
+            Close
+          </button>
+          {rfq ? (
+            <Link
+              to="/app/rfqs/$rfqId"
+              params={{ rfqId: rfq.id }}
+              className="btn-primary !py-1.5 !text-[13px]"
+            >
+              Open {rfq.rfqNumber}
+            </Link>
+          ) : null}
+        </div>
+      }
+    />
   );
 }
-

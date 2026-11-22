@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
 import { CalendarClock, Check, EyeOff } from "lucide-react";
 import {
   RFQ_LINE_FIELD_KEYS,
@@ -50,6 +50,20 @@ export interface RfqFieldsScreenProps {
   confirmLabel?: string;
   pending?: boolean;
   error?: string | null;
+  /** Heading for `error`; defaults to "The RFQ was not created". */
+  errorTitle?: string;
+  /** Extra settings above the deadline, in the left pane (e.g. who it goes to). */
+  extra?: ReactNode;
+  /** Freezes every input once the RFQ exists, so a retry cannot change it. */
+  locked?: boolean;
+  /** Blocks the confirm button for a reason the caller owns. */
+  confirmDisabled?: boolean;
+  /**
+   * Replaces the whole body once the RFQ has been sent, with `outcomeFooter`
+   * as its footer, so the result appears in this same window.
+   */
+  outcome?: ReactNode;
+  outcomeFooter?: ReactNode;
 }
 
 const DEADLINE_PRESETS = [3, 7, 14] as const;
@@ -128,6 +142,12 @@ export function RfqFieldsScreen({
   confirmLabel = "Create RFQ",
   pending = false,
   error = null,
+  errorTitle = "The RFQ was not created",
+  extra,
+  locked = false,
+  confirmDisabled = false,
+  outcome,
+  outcomeFooter,
 }: RfqFieldsScreenProps) {
   // Each time the screen opens it starts again from "every field ticked". The
   // session number is bumped during render (not in an effect) so the first
@@ -158,7 +178,8 @@ export function RfqFieldsScreen({
   const status = hasDeadline ? deadlineStatus(deadline, today) : null;
 
   const ready = selection.ready && !selection.loading && !selection.error;
-  const canConfirm = ready && !pending && !(status?.bad ?? false);
+  const frozen = pending || locked;
+  const canConfirm = ready && !pending && !confirmDisabled && !(status?.bad ?? false);
 
   // Cleared with the rest of the selection each time the screen opens.
   const [remarkState, setRemarkState] = useState({ session: -1, text: "" });
@@ -180,6 +201,16 @@ export function RfqFieldsScreen({
     onConfirm(RFQ_LINE_FIELD_KEYS.filter((key) => picked.has(key)), note || undefined);
   }
 
+  /** Tick or untick a whole group at once (the group header checkbox). */
+  function toggleGroup(fields: Array<{ key: RfqLineFieldKey }>) {
+    const allOn = fields.every((field) => selectedSet.has(field.key));
+    for (const field of fields) {
+      if (allOn || !selectedSet.has(field.key)) toggle(field.key);
+    }
+  }
+
+  const sectionTitle = "text-[12px] font-semibold text-slate-600";
+
   return (
     <Dialog
       open={open}
@@ -188,9 +219,14 @@ export function RfqFieldsScreen({
       }}
       title={title}
       description={lineLabel}
+      className="sm:h-[min(780px,90vh)] sm:max-w-[980px] sm:rounded-lg"
+      bodyClassName="overflow-hidden p-0 sm:p-0"
       footer={
+        outcome ? (
+          outcomeFooter
+        ) : (
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] text-slate-500" aria-live="polite">
+          <p className="text-[13px] text-slate-600" aria-live="polite">
             {ready
               ? total === 0
                 ? "Only the core requirement will be sent."
@@ -204,7 +240,7 @@ export function RfqFieldsScreen({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="flex-1 rounded-lg border border-ink-700 bg-ink-850 px-3.5 py-2 text-[15px] font-medium text-slate-500 transition-colors hover:bg-ink-800 hover:text-slate-900 disabled:opacity-50 sm:flex-none"
+              className="btn-secondary flex-1 !py-1.5 !text-[13px] sm:flex-none"
             >
               Cancel
             </button>
@@ -212,264 +248,263 @@ export function RfqFieldsScreen({
               type="button"
               onClick={confirm}
               disabled={!canConfirm}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-500 px-3.5 py-2 text-[15px] font-semibold text-white transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+              className="btn-primary flex-1 !py-1.5 !text-[13px] sm:flex-none"
             >
               {pending ? <Spinner /> : null}
               {pending ? "Creating…" : confirmLabel}
             </button>
           </div>
         </div>
+        )
       }
     >
-      <div className="space-y-4">
-        {error ? (
-          <Alert title="The RFQ was not created">{error}</Alert>
-        ) : null}
+      {/* Two panes on a desktop: the RFQ's own settings on the left, the field
+          table on the right, each scrolling on its own. One column on a phone. */}
+      {outcome ? (
+        <div className="h-full overflow-y-auto px-4 py-4 sm:px-6">{outcome}</div>
+      ) : (
+      <div className="h-full overflow-y-auto lg:overflow-hidden">
+        <div className="grid lg:h-full lg:grid-cols-[320px_minmax(0,1fr)]">
+          {/* ------------------------------------------------ settings pane */}
+          <div className="space-y-5 border-b border-ink-800 bg-ink-950 px-4 py-4 sm:px-6 lg:overflow-y-auto lg:border-r lg:border-b-0">
+            {error ? <Alert title={errorTitle}>{error}</Alert> : null}
 
-        {/* What is and is not sent, stated before the choices. */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <section
-            aria-label="Always sent"
-            className="rounded-xl border border-ink-800 bg-ink-850/60 p-3"
-          >
-            <p className="text-[12px] font-medium tracking-[0.12em] text-slate-500 uppercase">
-              Always sent
-            </p>
-            <ul className="mt-2 space-y-1">
-              {alwaysSent(line).map((item) => (
-                <li key={item.label} className="flex items-start gap-2 text-[13px]">
-                  <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-500" aria-hidden />
-                  <span className="min-w-0 break-words text-slate-900">
-                    {item.label}
-                    {item.value ? (
-                      <span className="text-slate-500"> · {item.value}</span>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
+            {extra}
 
-          <section
-            aria-label="Never sent"
-            className="rounded-xl border border-ink-800 bg-ink-850/60 p-3"
-          >
-            <p className="text-[12px] font-medium tracking-[0.12em] text-slate-500 uppercase">
-              Never sent
-            </p>
-            <ul className="mt-2 space-y-1">
-              {["Customer name", "Customer address", "Rental budget"].map((label) => (
-                <li key={label} className="flex items-start gap-2 text-[13px]">
-                  <EyeOff className="mt-0.5 size-3.5 shrink-0 text-slate-500" aria-hidden />
-                  <span className="text-slate-900">{label}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-[12px] leading-relaxed text-slate-500">
-              These stay on the enquiry on every path, whatever you tick below.
-            </p>
-          </section>
-        </div>
-
-        {hasDeadline && status ? (
-          <section
-            aria-label="Submission deadline"
-            className="rounded-xl border border-ink-800 bg-ink-850/60 p-3"
-          >
-            <label
-              htmlFor={deadlineId}
-              className="flex items-center gap-1.5 text-[12px] font-medium tracking-[0.12em] text-slate-500 uppercase"
-            >
-              <CalendarClock className="size-3.5" aria-hidden />
-              Submission deadline
-            </label>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <input
-                id={deadlineId}
-                type="date"
-                value={deadline}
-                min={today}
-                disabled={pending}
-                aria-invalid={status.bad}
-                aria-describedby={deadlineHintId}
-                onChange={(event) => onDeadline(event.target.value)}
-                className="field-input h-9 w-auto py-0 text-[15px]"
-              />
-              <div className="flex flex-wrap gap-1.5">
-                {DEADLINE_PRESETS.map((days) => {
-                  const value = addDays(today, days);
-                  const active = deadline === value;
-                  return (
-                    <button
-                      key={days}
-                      type="button"
-                      aria-pressed={active}
-                      disabled={pending}
-                      onClick={() => onDeadline(value)}
-                      className={cn(
-                        "rounded-full border px-2.5 py-1 text-[13px] font-medium transition-colors disabled:opacity-50",
-                        active
-                          ? "border-accent-500 bg-accent-500/10 text-accent-400"
-                          : "border-ink-800 bg-ink-850 text-slate-500 hover:border-ink-700 hover:text-slate-800",
-                      )}
-                    >
-                      +{days} days
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <p
-              id={deadlineHintId}
-              className={cn("mt-1.5 text-[13px]", status.bad ? "text-red-500" : "text-slate-500")}
-            >
-              {status.text}
-            </p>
-          </section>
-        ) : null}
-
-        <section aria-label="Fields to send in the RFQ" className="min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-[12px] font-medium tracking-[0.12em] text-slate-500 uppercase">
-                Fields to send
-              </h3>
-              {ready && total > 0 ? (
-                <span
-                  className="rounded-full border border-ink-700 px-2 py-0.5 text-[12px] text-slate-500 tabular-nums"
-                  aria-live="polite"
+            {hasDeadline && status ? (
+              <section aria-label="Submission deadline">
+                <label htmlFor={deadlineId} className={cn(sectionTitle, "flex items-center gap-1.5")}>
+                  <CalendarClock className="size-3.5" aria-hidden />
+                  Submission deadline
+                </label>
+                <input
+                  id={deadlineId}
+                  type="date"
+                  value={deadline}
+                  min={today}
+                  disabled={frozen}
+                  aria-invalid={status.bad}
+                  aria-describedby={deadlineHintId}
+                  onChange={(event) => onDeadline(event.target.value)}
+                  className="field-input mt-1.5 h-9 py-0 text-[13px]"
+                />
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {DEADLINE_PRESETS.map((days) => {
+                    const value = addDays(today, days);
+                    const active = deadline === value;
+                    return (
+                      <button
+                        key={days}
+                        type="button"
+                        aria-pressed={active}
+                        disabled={frozen}
+                        onClick={() => onDeadline(value)}
+                        className={cn(
+                          "rounded-md border px-2.5 py-1 text-[12px] font-medium transition-colors disabled:opacity-50",
+                          active
+                            ? "border-accent-500 bg-accent-500/10 text-accent-400"
+                            : "border-ink-800 bg-ink-900 text-slate-600 hover:border-ink-700 hover:text-white",
+                        )}
+                      >
+                        +{days} days
+                      </button>
+                    );
+                  })}
+                </div>
+                <p
+                  id={deadlineHintId}
+                  className={cn("mt-1.5 text-[12px]", status.bad ? "text-red-500" : "text-slate-600")}
                 >
-                  {selectedCount} of {total} selected
+                  {status.text}
+                </p>
+              </section>
+            ) : null}
+
+            <section aria-label="Remark" className="min-w-0">
+              <div className="flex items-baseline justify-between gap-2">
+                <label htmlFor={remarkId} className={sectionTitle}>
+                  Remark <span className="font-normal">(optional)</span>
+                </label>
+                <span className="text-[12px] text-slate-500 tabular-nums">
+                  {remark.length}/{REMARK_MAX}
                 </span>
+              </div>
+              <textarea
+                id={remarkId}
+                value={remark}
+                rows={3}
+                maxLength={REMARK_MAX}
+                disabled={frozen}
+                placeholder="Anything else the vendors should know"
+                onChange={(event) => setRemarkState({ session, text: event.target.value })}
+                className="field-input mt-1.5 resize-y text-[13px]"
+              />
+              <p className="mt-1 text-[12px] text-slate-500">
+                Shown to vendors. Don&rsquo;t include the customer&rsquo;s name, address or budget.
+              </p>
+            </section>
+
+            <section aria-label="Always sent">
+              <h3 className={sectionTitle}>Always sent</h3>
+              <ul className="mt-1.5 space-y-1">
+                {alwaysSent(line).map((item) => (
+                  <li key={item.label} className="flex items-start gap-2 text-[13px]">
+                    <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-500" aria-hidden />
+                    <span className="min-w-0 break-words text-slate-800">
+                      {item.label}
+                      {item.value ? <span className="text-slate-500"> · {item.value}</span> : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section aria-label="Never sent">
+              <h3 className={sectionTitle}>Never sent</h3>
+              <ul className="mt-1.5 space-y-1">
+                {["Customer name", "Customer address", "Rental budget"].map((label) => (
+                  <li key={label} className="flex items-start gap-2 text-[13px]">
+                    <EyeOff className="mt-0.5 size-3.5 shrink-0 text-slate-500" aria-hidden />
+                    <span className="text-slate-800">{label}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">
+                These stay on the enquiry whatever you tick.
+              </p>
+            </section>
+          </div>
+
+          {/* ------------------------------------------------ field table */}
+          <section
+            aria-label="Fields to send in the RFQ"
+            className="min-w-0 bg-ink-900 lg:overflow-y-auto"
+          >
+            <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-ink-800 bg-ink-900 px-4 py-2.5 sm:px-6">
+              <div className="flex items-center gap-2">
+                <h3 className="text-[14px] font-semibold text-white">Fields to send</h3>
+                {ready && total > 0 ? (
+                  <span
+                    className="rounded-full bg-ink-800 px-2 py-px text-[12px] font-medium text-slate-600 tabular-nums"
+                    aria-live="polite"
+                  >
+                    {selectedCount} of {total}
+                  </span>
+                ) : null}
+              </div>
+              {ready && total > 0 ? (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={reset}
+                    disabled={frozen || selectedCount === total}
+                    className="rounded-md px-2 py-1 text-[13px] font-medium text-accent-400 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Select all
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    disabled={frozen || selectedCount === 0}
+                    className="rounded-md px-2 py-1 text-[13px] font-medium text-accent-400 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Clear
+                  </button>
+                </div>
               ) : null}
             </div>
-            {ready && total > 0 ? (
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={reset}
-                  disabled={pending || selectedCount === total}
-                  className="rounded-md px-2 py-1 text-[13px] font-medium text-accent-400 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Select all
-                </button>
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  disabled={pending || selectedCount === 0}
-                  className="rounded-md px-2 py-1 text-[13px] font-medium text-accent-400 transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Clear
-                </button>
+
+            {selection.error ? (
+              <div className="p-4 sm:px-6">
+                <Alert title="Could not load this line">
+                  Check your connection and try again.
+                  <button
+                    type="button"
+                    onClick={selection.retry}
+                    className="mt-1 block font-medium underline underline-offset-2"
+                  >
+                    Retry
+                  </button>
+                </Alert>
               </div>
-            ) : null}
-          </div>
-          <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
-            Only the fields you tick are copied into the RFQ and shown to vendors.
-          </p>
-
-          {selection.error ? (
-            <div className="mt-3">
-              <Alert title="Could not load this line">
-                Check your connection and try again.
-                <button
-                  type="button"
-                  onClick={selection.retry}
-                  className="mt-1 block font-medium underline underline-offset-2"
-                >
-                  Retry
-                </button>
-              </Alert>
-            </div>
-          ) : selection.loading ? (
-            <p className="mt-3 flex items-center gap-2 text-[13px] text-slate-500" role="status">
-              <Spinner /> Loading the line&rsquo;s fields…
-            </p>
-          ) : !line ? (
-            <p className="mt-3 text-[13px] text-slate-500">Choose a line to see its fields.</p>
-          ) : total === 0 ? (
-            <p className="mt-3 rounded-lg border border-ink-800 px-3 py-2.5 text-[13px] text-slate-500">
-              This line has no optional fields filled in, so only the core requirement will be
-              sent.
-            </p>
-          ) : (
-            <div className="mt-3 space-y-4">
-              {groups.map((group) => {
-                const groupSelected = group.fields.filter((f) => selectedSet.has(f.key)).length;
-                return (
-                  <div key={group.group} role="group" aria-label={group.group}>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <p className="text-[12px] font-medium text-slate-500">{group.group}</p>
-                      <p className="text-[12px] text-slate-500 tabular-nums">
-                        {groupSelected}/{group.fields.length}
-                      </p>
-                    </div>
-                    <div className="mt-1.5 space-y-1">
-                      {group.fields.map((field) => {
-                        const checked = selectedSet.has(field.key);
-                        return (
-                          <label
-                            key={field.key}
-                            className={cn(
-                              "flex cursor-pointer items-start gap-2.5 rounded-lg border px-2.5 py-2 text-[13px] transition-colors",
-                              checked
-                                ? "border-accent-500/40 bg-accent-500/10 text-slate-900"
-                                : "border-ink-800 text-slate-500 hover:border-ink-700",
-                              pending && "cursor-not-allowed opacity-60",
-                            )}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              disabled={pending}
-                              onChange={() => toggle(field.key)}
-                              className="mt-0.5 size-3.5 shrink-0 accent-accent-500"
-                            />
-                            <span className="min-w-0 flex-1">
-                              <span className="block font-medium">{field.label}</span>
-                              <span className="block break-words whitespace-pre-line text-slate-500">
-                                {field.value}
-                              </span>
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        <section aria-label="Remark" className="min-w-0">
-          <div className="flex items-baseline justify-between gap-2">
-            <label
-              htmlFor={remarkId}
-              className="text-[12px] font-medium tracking-[0.12em] text-slate-500 uppercase"
-            >
-              Remark <span className="tracking-normal normal-case">(optional)</span>
-            </label>
-            <span className="text-[12px] text-slate-500 tabular-nums">
-              {remark.length}/{REMARK_MAX}
-            </span>
-          </div>
-          <textarea
-            id={remarkId}
-            value={remark}
-            rows={3}
-            maxLength={REMARK_MAX}
-            disabled={pending}
-            placeholder="Anything else the vendors should know about this requirement"
-            onChange={(event) => setRemarkState({ session, text: event.target.value })}
-            className="field-input mt-1.5 resize-y text-[15px]"
-          />
-          <p className="mt-1 text-[13px] text-slate-500">
-            Shown to vendors with the RFQ. Don&rsquo;t include the customer&rsquo;s name, address or
-            budget.
-          </p>
-        </section>
+            ) : selection.loading ? (
+              <p className="flex items-center gap-2 px-6 py-6 text-[13px] text-slate-600" role="status">
+                <Spinner /> Loading the line&rsquo;s fields…
+              </p>
+            ) : !line ? (
+              <p className="px-6 py-6 text-[13px] text-slate-600">Choose a line to see its fields.</p>
+            ) : total === 0 ? (
+              <p className="px-6 py-6 text-[13px] text-slate-600">
+                This line has no optional fields filled in, so only the core requirement will be
+                sent.
+              </p>
+            ) : (
+              <>
+                <p className="px-4 pt-3 text-[12px] text-slate-500 sm:px-6">
+                  Only the fields you tick are copied into the RFQ and shown to vendors.
+                </p>
+                <div className="pb-2">
+                  {groups.map((group) => {
+                    const groupSelected = group.fields.filter((f) => selectedSet.has(f.key)).length;
+                    const allOn = groupSelected === group.fields.length;
+                    return (
+                      <div key={group.group} role="group" aria-label={group.group}>
+                        <label className="mt-2 flex cursor-pointer items-center gap-3 border-y border-ink-800 bg-ink-950 px-4 py-1.5 sm:px-6">
+                          <input
+                            type="checkbox"
+                            checked={allOn}
+                            ref={(el) => {
+                              if (el) el.indeterminate = groupSelected > 0 && !allOn;
+                            }}
+                            disabled={frozen}
+                            onChange={() => toggleGroup(group.fields)}
+                            aria-label={`Select every field in ${group.group}`}
+                            className="size-4 shrink-0 accent-accent-500"
+                          />
+                          <span className="flex-1 text-[12px] font-semibold text-slate-700">
+                            {group.group}
+                          </span>
+                          <span className="text-[12px] text-slate-500 tabular-nums">
+                            {groupSelected}/{group.fields.length}
+                          </span>
+                        </label>
+                        <div className="divide-y divide-ink-800">
+                          {group.fields.map((field) => {
+                            const checked = selectedSet.has(field.key);
+                            return (
+                              <label
+                                key={field.key}
+                                className={cn(
+                                  "grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-0.5 px-4 py-2 text-[13px] transition-colors hover:bg-ink-850 sm:grid-cols-[auto_200px_minmax(0,1fr)] sm:px-6",
+                                  checked && "bg-accent-500/[0.05]",
+                                  frozen && "cursor-not-allowed opacity-60",
+                                )}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  disabled={frozen}
+                                  onChange={() => toggle(field.key)}
+                                  className="mt-0.5 size-4 shrink-0 accent-accent-500"
+                                />
+                                <span className="font-medium text-slate-800">{field.label}</span>
+                                <span className="col-start-2 break-words whitespace-pre-line text-slate-600 sm:col-start-3">
+                                  {field.value}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </section>
+        </div>
       </div>
+      )}
     </Dialog>
   );
 }
