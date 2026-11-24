@@ -1,6 +1,7 @@
 import { ImapFlow } from "imapflow";
 import { simpleParser, type ParsedMail } from "mailparser";
 import { env } from "../config/env";
+import { getImapAccessToken, oauthConfigured } from "../lib/imapAuth";
 import { storage } from "../lib/storage";
 import { MessageChannel } from "../generated/prisma/client";
 import { ingestInboundMessage, type InboundAttachmentRef } from "./inbound.service";
@@ -15,6 +16,12 @@ import { ingestInboundMessage, type InboundAttachmentRef } from "./inbound.servi
  */
 const ALLOWED_MIME = new Set(["application/pdf", "image/jpeg", "image/png"]);
 const MAX_PER_POLL = 50;
+
+/** Subjects are untrusted text: keep them on one log line and bounded. */
+function logSubject(subject: string | null | undefined): string {
+  const clean = (subject ?? "—").replace(/\s+/g, " ").trim();
+  return `"${clean.slice(0, 120)}"`;
+}
 
 function htmlToText(html: string): string {
   return html
@@ -61,18 +68,31 @@ export function isImapConfigured(): boolean {
     env.imap.enabled &&
       env.imap.host &&
       env.imap.user &&
-      env.imap.pass,
+      (oauthConfigured(env.imap) || env.imap.pass),
   );
 }
 
 export async function pollInboundMailbox(): Promise<{ processed: number; failed: number }> {
   if (!isImapConfigured()) return { processed: 0, failed: 0 };
 
+  let auth: { user: string; pass?: string; accessToken?: string };
+  if (oauthConfigured(env.imap)) {
+    const accessToken = await getImapAccessToken(env.imap);
+    if (!accessToken) {
+      throw new Error(
+        "IMAP OAuth2 is configured but no access or refresh token is available. Run `npm run imap:token`.",
+      );
+    }
+    auth = { user: env.imap.user!, accessToken };
+  } else {
+    auth = { user: env.imap.user!, pass: env.imap.pass! };
+  }
+
   const client = new ImapFlow({
     host: env.imap.host!,
     port: env.imap.port,
     secure: env.imap.secure,
-    auth: { user: env.imap.user!, pass: env.imap.pass! },
+    auth,
     logger: false,
   });
 
@@ -86,17 +106,31 @@ export async function pollInboundMailbox(): Promise<{ processed: number; failed:
     // A bounded window keeps a first run on a large mailbox from ingesting years
     // of unrelated mail. Older replies can still be handled manually.
     const since = new Date(Date.now() - 14 * 86_400_000);
-    const messages = client.fetch({ seen: false, since }, { source: true, uid: true }, { uid: true });
+    // Drain the fetch iterator before running any other IMAP command. ImapFlow
+    // serialises commands per connection, so calling messageFlagsAdd while a
+    // fetch is still streaming stalls forever — the message is then never
+    // marked Seen and is retried on every poll.
+    const messages: Array<{ uid: number; source?: Buffer }> = [];
+    for await (const message of client.fetch({ seen: false, since }, { source: true, uid: true }, { uid: true })) {
+      if (messages.length >= MAX_PER_POLL) break;
+      messages.push({ uid: message.uid, source: message.source });
+    }
 
-    for await (const message of messages) {
-      if (processed + failed >= MAX_PER_POLL) break;
-      if (!message.source) continue;
+    for (const message of messages) {
+      if (!message.source) {
+        console.warn(`[imap] uid=${message.uid} → skipped (no source)`);
+        continue;
+      }
 
+      let from: string | undefined;
+      let subject = logSubject(null);
       try {
         const parsed = await simpleParser(message.source);
-        const from = parsed.from?.value?.[0]?.address?.trim().toLowerCase();
+        from = parsed.from?.value?.[0]?.address?.trim().toLowerCase();
+        subject = logSubject(parsed.subject);
         if (!from) {
           failed += 1;
+          console.warn(`[imap] uid=${message.uid} subject=${subject} → skipped (no sender)`);
           continue;
         }
 
@@ -120,11 +154,15 @@ export async function pollInboundMailbox(): Promise<{ processed: number; failed:
 
         await client.messageFlagsAdd(message.uid, ["\\Seen"], { uid: true });
         processed += 1;
+        console.log(`[imap] uid=${message.uid} from=${from} subject=${subject} → ingested`);
       } catch (error) {
         // Leave the message unseen so the next poll retries it. A permanently
         // bad message repeats in the log but never silently disappears.
         failed += 1;
-        console.error("[imap] message could not be ingested", error);
+        console.error(
+          `[imap] uid=${message.uid} from=${from} subject=${subject} → failed`,
+          error,
+        );
       }
     }
   } catch (error) {

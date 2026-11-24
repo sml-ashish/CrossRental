@@ -1,4 +1,4 @@
-import { TRAIL_LABELS } from "@/lib/enquiries";
+import { LINE_STATUS_ORDER, lineStatusDot, lineStatusFromValue } from "@/lib/enquiries";
 import { titleCase } from "@/lib/format";
 import { REPORT_VIEW_LABELS, type Report, type ReportView } from "@/lib/reports";
 
@@ -583,7 +583,7 @@ function regionSentence(report: Report): string | null {
 function stageSentence(report: Report): string | null {
   const counts = new Map<string, number>();
   for (const row of report.rows) {
-    const status = asText(row.trailStatus);
+    const status = lineStatusFromValue(asText(row.trailStatus));
     if (!status) continue;
     counts.set(status, (counts.get(status) ?? 0) + 1);
   }
@@ -755,40 +755,12 @@ export function asNumber(value: string | number | null | undefined): number | nu
 }
 
 export function stageLabel(status: string): string {
-  return (TRAIL_LABELS as Record<string, string>)[status] ?? titleCase(status.replaceAll("_", " ").toLowerCase());
+  return lineStatusFromValue(status) ?? titleCase(status.replaceAll("_", " ").toLowerCase());
 }
 
-const STAGE_ORDER: readonly string[] = [
-  "NEW",
-  "AVAILABILITY_CHECK",
-  "VENDOR_SHORTLISTED",
-  "RFQ_SENT",
-  "AWAITING_QUOTES",
-  "QUOTES_RECEIVED",
-  "UNDER_EVALUATION",
-  "VENDOR_FINALISED",
-  "BOOKED",
-  "CLOSED",
-  "FULFILLED_INTERNALLY",
-  "CANCELLED",
-];
-
 export function stageDot(status: string): string {
-  switch (status) {
-    case "BOOKED":
-    case "CLOSED":
-    case "FULFILLED_INTERNALLY":
-      return "bg-emerald-500";
-    case "CANCELLED":
-      return "bg-red-500";
-    case "AWAITING_QUOTES":
-      return "bg-amber-500";
-    case "NEW":
-    case "AVAILABILITY_CHECK":
-      return "bg-slate-400";
-    default:
-      return "bg-accent-500";
-  }
+  const value = lineStatusFromValue(status);
+  return value ? lineStatusDot(value) : "bg-slate-400";
 }
 
 export function formatCell(key: string, value: string | number | null): string {
@@ -864,8 +836,9 @@ export interface SortState {
 }
 
 function stageRank(status: string): number {
-  const index = STAGE_ORDER.indexOf(status);
-  return index === -1 ? STAGE_ORDER.length : index;
+  const value = lineStatusFromValue(status);
+  const index = value ? LINE_STATUS_ORDER.indexOf(value) : -1;
+  return index === -1 ? LINE_STATUS_ORDER.length : index;
 }
 
 function compareValues(
@@ -1034,18 +1007,13 @@ export function enquiryVolumeSeries(
 export function lineStageSeries(rows: Report["rows"]): ChartPoint[] {
   const counts = new Map<string, number>();
   for (const row of rows) {
-    const status = asText(row.trailStatus);
-    if (status === "") continue;
+    const status = lineStatusFromValue(asText(row.trailStatus));
+    if (!status) continue;
     counts.set(status, (counts.get(status) ?? 0) + 1);
   }
-  if (counts.size === 0) return [];
-  const known = STAGE_ORDER.filter((status) => counts.has(status));
-  const extra = [...counts.keys()]
-    .filter((status) => !STAGE_ORDER.includes(status))
-    .sort((a, b) => stageLabel(a).localeCompare(stageLabel(b)));
-  return [...known, ...extra].map((status) => ({
+  return LINE_STATUS_ORDER.filter((status) => counts.has(status)).map((status) => ({
     key: status,
-    label: stageLabel(status),
+    label: status,
     value: counts.get(status) ?? 0,
   }));
 }

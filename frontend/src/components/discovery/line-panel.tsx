@@ -49,9 +49,9 @@ export function lineReference(line: RaisableLine): string {
   return `ENQ-${number} / line ${line.lineNo}`;
 }
 
-export function capacityText(line: Pick<RaisableLine, "capacityT" | "capacityRule">): string {
+export function capacityText(line: Pick<RaisableLine, "capacityT">): string {
   if (line.capacityT === null) return "Capacity not set";
-  return `${line.capacityRule === "EXACT" ? "=" : "≥"} ${line.capacityT} t`;
+  return `≥ ${line.capacityT} t`;
 }
 
 function durationText(line: Pick<RaisableLine, "durationValue" | "durationUnit">): string {
@@ -75,10 +75,6 @@ function shortDay(iso: string | null): string | null {
 function startText(line: Pick<RaisableLine, "startDateTbc" | "requiredStartDate">): string {
   if (line.startDateTbc) return "Start TBC";
   return shortDay(line.requiredStartDate) ?? "No start date";
-}
-
-function hasPin(line: Pick<RaisableLine, "siteLatitude" | "siteLongitude">): boolean {
-  return typeof line.siteLatitude === "number" && typeof line.siteLongitude === "number";
 }
 
 /** Sun/moon switch for the workspace theme. Shows the mode you would switch TO. */
@@ -113,7 +109,7 @@ export function ThemeToggle({
 /**
  * "To" filter: keep the lines whose job site is in the place typed — `Vadodara`,
  * `Vadodara, Gujarat`, a state. Every comma-separated part has to appear in the
- * line's site or state, case-insensitively; a pincode matches too.
+ * line's ship-to city or state, case-insensitively.
  */
 export function linesToSite(lines: RaisableLine[], to: string): RaisableLine[] {
   const parts = to
@@ -122,10 +118,7 @@ export function linesToSite(lines: RaisableLine[], to: string): RaisableLine[] {
     .filter(Boolean);
   if (parts.length === 0) return lines;
   return lines.filter((line) => {
-    const place = [line.siteLocation, line.siteStateName, line.sitePincode]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+    const place = [line.shipToCity, line.siteStateName].filter(Boolean).join(" ").toLowerCase();
     return parts.every((part) => place.includes(part));
   });
 }
@@ -137,9 +130,8 @@ function lineMatches(line: RaisableLine, query: string): boolean {
     line.enquiryNo,
     line.craneTypeName,
     line.craneTypeCode,
-    line.siteLocation,
+    line.shipToCity,
     line.siteStateName,
-    line.sitePincode,
   ]
     .filter(Boolean)
     .join(" ")
@@ -388,7 +380,7 @@ function LineRow({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const place = `${line.siteLocation}${line.siteStateName ? `, ${line.siteStateName}` : ""}`;
+  const place = `${line.shipToCity}${line.siteStateName ? `, ${line.siteStateName}` : ""}`;
   const rfqText =
     line.rfqCount > 0 ? `${line.rfqCount} RFQ${line.rfqCount === 1 ? "" : "s"}` : "No RFQ";
 
@@ -450,15 +442,8 @@ function LineRow({
               <MapPin className="mt-0.5 size-3.5 shrink-0 text-neutral-500" aria-hidden />
               <dd className="min-w-0">
                 <span className="block truncate text-neutral-300">{place}</span>
-                <span
-                  className={cn(
-                    "mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0 text-[13px] font-medium",
-                    hasPin(line)
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border-amber-200 bg-amber-50 text-amber-700",
-                  )}
-                >
-                  {hasPin(line) ? "Pinned" : "Location unverified"}
+                <span className="mt-1 block text-[13px] text-neutral-500">
+                  Placed from city and state
                 </span>
               </dd>
             </div>

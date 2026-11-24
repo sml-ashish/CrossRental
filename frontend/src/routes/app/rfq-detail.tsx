@@ -77,13 +77,20 @@ export function RfqDetailPage() {
 }
 
 /** The sections of the RFQ screen, in the order work moves through them. */
-type DetailTab = "overview" | "vendors" | "replies" | "quotations" | "audit";
+type DetailTab =
+  | "overview"
+  | "vendors"
+  | "replies"
+  | "quotations"
+  | "negotiations"
+  | "audit";
 
 const DETAIL_TABS: Array<{ value: DetailTab; label: string }> = [
   { value: "overview", label: "Overview" },
   { value: "vendors", label: "Vendors" },
   { value: "replies", label: "Replies" },
   { value: "quotations", label: "Quotations" },
+  { value: "negotiations", label: "Negotiations" },
   { value: "audit", label: "Audit trail" },
 ];
 
@@ -192,9 +199,6 @@ function InternalRfqDetailPage() {
     enabled: Boolean(rfq) && isSent,
   });
   const negotiationThreads: NegotiationThread[] = negotiations.data?.negotiations ?? [];
-  const openNegotiations = negotiationThreads.filter((thread) =>
-    ["AWAITING_VENDOR", "AWAITING_SML", "AGREED"].includes(thread.status),
-  );
   const negotiatingQuotationIds = new Set(
     negotiationThreads
       .filter((thread) => ["AWAITING_VENDOR", "AWAITING_SML"].includes(thread.status))
@@ -237,10 +241,16 @@ function InternalRfqDetailPage() {
       return rfq.recipients.length > 0 ? String(rfq.recipients.length) : null;
     }
     if (entry === "quotations") {
-      const count = rfq.quotations.length > 0 ? String(rfq.quotations.length) : null;
-      return openNegotiations.length > 0
-        ? `${count ?? "0"} · ${openNegotiations.length} negotiating`
-        : count;
+      return rfq.quotations.length > 0 ? String(rfq.quotations.length) : null;
+    }
+    if (entry === "negotiations") {
+      if (negotiationThreads.length === 0) return null;
+      const awaiting = negotiationThreads.filter(
+        (thread) => thread.status === "AWAITING_SML",
+      ).length;
+      return awaiting > 0
+        ? `${negotiationThreads.length} · ${awaiting} need a reply`
+        : String(negotiationThreads.length);
     }
     return null;
   };
@@ -286,7 +296,7 @@ function InternalRfqDetailPage() {
     >
       <div className="mx-auto w-full max-w-[1360px] space-y-4 pb-6">
         <PageHeader
-          back={{ to: "/app/rfqs", label: "All RFQs" }}
+          back={{ to: "/app/rfqs", label: "Back" }}
           title={rfq?.rfqNumber ?? "RFQ"}
           mono
           titleClassName="text-2xl"
@@ -558,7 +568,7 @@ function InternalRfqDetailPage() {
                 <InboundRepliesSection rfqId={rfqId} />
               </div>
 
-              <div className={cn("space-y-5", tab !== "quotations" && "hidden")}>
+              <div className={cn("space-y-5", tab !== "negotiations" && "hidden")}>
                 <NegotiationsSection
                   rfqId={rfqId}
                   negotiations={negotiationThreads}
@@ -568,12 +578,26 @@ function InternalRfqDetailPage() {
                   deadlinePassed={deadlinePassed}
                   submissionDeadline={rfq.submissionDeadline}
                   onDone={invalidate}
-                  onStartCounter={() =>
-                    document
-                      .getElementById("rfq-quotations-list")
-                      ?.scrollIntoView({ block: "start", behavior: "smooth" })
-                  }
+                  onStartCounter={() => {
+                    setTab("quotations");
+                    // The quotations panel is hidden until React applies the new
+                    // tab, so let it mount before scrolling to the list.
+                    window.setTimeout(() => {
+                      const reduced = window.matchMedia(
+                        "(prefers-reduced-motion: reduce)",
+                      ).matches;
+                      document
+                        .getElementById("rfq-quotations-list")
+                        ?.scrollIntoView({
+                          block: "start",
+                          behavior: reduced ? "auto" : "smooth",
+                        });
+                    }, 50);
+                  }}
                 />
+              </div>
+
+              <div className={cn("space-y-5", tab !== "quotations" && "hidden")}>
                 <div id="rfq-quotations-list">
                   <QuotationsSection
                     rfqId={rfqId}
@@ -607,7 +631,8 @@ function requirementExtras(rfq: RfqView): Array<[string, string]> {
     ["Capacity note", rfq.capacityNote],
     ["Application", rfq.applicationDescription],
     ["Load details", rfq.loadDescription],
-    ["Lift load", rfq.liftLoadT !== null ? `${rfq.liftLoadT} t` : null],
+    ["Weight to be lifted", rfq.liftLoadT !== null ? `${rfq.liftLoadT} t` : null],
+    ["Height to be lifted", rfq.liftHeightM !== null ? `${rfq.liftHeightM} m` : null],
     ["Working radius", rfq.workingRadiusM !== null ? `${rfq.workingRadiusM} m` : null],
     ["Main boom", rfq.mainBoomM !== null ? `${rfq.mainBoomM} m` : null],
     ["Fixed jib", rfq.fixedJibM !== null ? `${rfq.fixedJibM} m` : null],
@@ -1691,6 +1716,10 @@ function QuotationsSection({
             <details className="group">
               <summary className="cursor-pointer text-[14px] font-medium text-slate-500 hover:text-slate-900">
                 Superseded versions ({superseded.length})
+                <span className="ml-2 text-[13px] font-normal text-slate-500">
+                  Older quotes kept for the record — only the latest version can be countered or
+                  awarded.
+                </span>
               </summary>
               <div className="mt-2">
                 <QuoteComparisonTable

@@ -114,33 +114,14 @@ const AUTH_FAILED =
 const ROUTE_BLUE = "#1a73e8";
 const ROUTE_ALT = "#8ea7c9";
 
-/** Heat tiers by share of the busiest cell, cool to hot. */
-const HEAT_TIERS = [
-  { upTo: 0.25, colour: "#3b82f6", label: "Few" },
-  { upTo: 0.5, colour: "#22c55e", label: "Some" },
-  { upTo: 0.75, colour: "#f59e0b", label: "Many" },
-  { upTo: 1, colour: "#ef4444", label: "Most" },
-];
-
 /** One colour per crane on a multi-crane send, distinct on dark and light maps. */
 const MULTI_COLOURS = [
   "#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7",
   "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#14b8a6",
 ];
 
-/** Grid cell size in degrees: regions when zoomed out, neighbourhoods when in. */
-function heatCellDegrees(zoom: number): number {
-  if (zoom <= 5) return 1.2;
-  if (zoom === 6) return 0.6;
-  if (zoom === 7) return 0.3;
-  if (zoom === 8) return 0.15;
-  if (zoom === 9) return 0.08;
-  return 0.04;
-}
-
 interface HeatOverlays {
-  circles: google.maps.Circle[];
-  labels: google.maps.marker.AdvancedMarkerElement[];
+  overlay: google.maps.OverlayView | null;
 }
 
 export function GoogleCraneMap({
@@ -162,7 +143,7 @@ export function GoogleCraneMap({
     lines: google.maps.Polyline[];
     markers: google.maps.marker.AdvancedMarkerElement[];
   }>({ lines: [], markers: [] });
-  const heatRef = useRef<HeatOverlays>({ circles: [], labels: [] });
+  const heatRef = useRef<HeatOverlays>({ overlay: null });
   const multiRef = useRef<{
     lines: google.maps.Polyline[];
     markers: google.maps.marker.AdvancedMarkerElement[];
@@ -293,7 +274,7 @@ export function GoogleCraneMap({
       clustererRef.current = null;
       clearOverlays(overlaysRef.current);
       clearHeat(heatRef.current);
-      heatRef.current = { circles: [], labels: [] };
+      heatRef.current = { overlay: null };
       google.maps.event.clearInstanceListeners(map);
       mapRef.current = null;
       container.innerHTML = "";
@@ -358,7 +339,8 @@ export function GoogleCraneMap({
       markersRef.current.set(point.crane.craneId, marker);
       markers.push(marker);
     }
-    clusterer.addMarkers(markers);
+    // Under the heat map the pins step aside; they are rebuilt when it closes.
+    clusterer.addMarkers(showHeat ? [] : markers);
 
     // Frame the results once per result set, unless a route owns the viewport.
     if (!route && !fittedRef.current && points.length > 0) {
@@ -370,7 +352,7 @@ export function GoogleCraneMap({
     }
     // `route` is intentionally read, but a route change must not rebuild pins.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [api, ready, points, selectedCraneId, sitePoint, siteLabel, route?.to.craneId, Boolean(route), multiRoutes]);
+  }, [api, ready, points, selectedCraneId, sitePoint, siteLabel, route?.to.craneId, Boolean(route), multiRoutes, showHeat]);
 
   // Bring the selected crane into view. A crane hidden inside a cluster has no
   // map of its own, so selecting it zooms until the cluster splits.
@@ -515,66 +497,30 @@ export function GoogleCraneMap({
   }, [api, ready, route]);
 
   // ------------------------------------------------------------------- heat
-  // Clusters, not states: the map is divided into a grid whose cell shrinks as
-  // the person zooms in, so the picture goes from regions to neighbourhoods.
-  // Colour is the share of the busiest cell: blue → green → amber → red.
+  // A smooth density surface (blue → green → yellow → red), not a grid: each
+  // crane stamps a soft radial blob, overlapping blobs add up, and the summed
+  // intensity is mapped through a colour ramp. Drawn on a canvas in the map's
+  // own overlay pane so it pans and zooms with the map and sits under labels.
   useEffect(() => {
     const map = mapRef.current;
     if (!api || !ready || !map) return;
 
     clearHeat(heatRef.current);
-    heatRef.current = { circles: [], labels: [] };
+    heatRef.current = { overlay: null };
     if (!showHeat) return;
 
-    const draw = () => {
-      clearHeat(heatRef.current);
-      const cell = heatCellDegrees(map.getZoom() ?? INDIA_ZOOM);
-      const groups = heatGroups(
-        points.map((point) => ({ lat: point.lat, lng: point.lng })),
-        cell,
-      );
-      const max = groups.reduce((value, group) => Math.max(value, group.count), 1);
-      const cellKm = cell * 111;
-      const circles: google.maps.Circle[] = [];
-      const labels: google.maps.marker.AdvancedMarkerElement[] = [];
-      for (const group of groups) {
-        const share = group.count / max;
-        const tier = HEAT_TIERS.find((item) => share <= item.upTo) ?? HEAT_TIERS[HEAT_TIERS.length - 1]!;
-        const circle = new api.maps.Circle({
-          center: { lat: group.lat, lng: group.lng },
-          radius: cellKm * 1000 * (0.22 + 0.2 * Math.sqrt(share)),
-          fillColor: tier.colour,
-          fillOpacity: 0.42,
-          strokeColor: tier.colour,
-          strokeOpacity: 0.95,
-          strokeWeight: 2,
-          clickable: false,
-          zIndex: 5,
-        });
-        circle.setMap(map);
-        circles.push(circle);
+    const overlay = createHeatOverlay(
+      map,
+      points.map((point) => ({ lat: point.lat, lng: point.lng })),
+    );
+    overlay.setMap(map);
+    heatRef.current = { overlay };
+    const listener = map.addListener("idle", () => overlay.redraw());
 
-        const label = document.createElement("div");
-        label.textContent = String(group.count);
-        label.style.cssText =
-          "font:700 15px system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.85);pointer-events:none;transform:translateY(50%);";
-        const marker = new api.marker.AdvancedMarkerElement({
-          position: { lat: group.lat, lng: group.lng },
-          content: label,
-          zIndex: 6,
-        });
-        marker.map = map;
-        labels.push(marker);
-      }
-      heatRef.current = { circles, labels };
-    };
-
-    draw();
-    const listener = map.addListener("zoom_changed", draw);
     return () => {
       listener.remove();
       clearHeat(heatRef.current);
-      heatRef.current = { circles: [], labels: [] };
+      heatRef.current = { overlay: null };
     };
   }, [api, ready, showHeat, points]);
 
@@ -730,14 +676,14 @@ export function GoogleCraneMap({
           </label>
         </div>
         {showHeat ? (
-          <ul className="flex items-center gap-3 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[14px] text-neutral-300 shadow-lg backdrop-blur">
-            {HEAT_TIERS.map((tier) => (
-              <li key={tier.label} className="flex items-center gap-1.5">
-                <span className="inline-block size-3 rounded-full" style={{ backgroundColor: tier.colour }} />
-                {tier.label}
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-center gap-2 rounded-lg border border-ink-800 bg-ink-900/95 px-2.5 py-1.5 text-[14px] text-neutral-300 shadow-lg backdrop-blur">
+            Fewer
+            <span
+              className="inline-block h-2.5 w-24 rounded-full"
+              style={{ background: "linear-gradient(90deg,#3b82f6,#22c55e,#facc15,#ef4444)" }}
+            />
+            More
+          </div>
         ) : null}
         <button
           type="button"
@@ -748,12 +694,13 @@ export function GoogleCraneMap({
         </button>
       </div>
 
-      <div className="pointer-events-none absolute top-3 left-3 z-[800] flex flex-col items-start gap-2">
+      <div className="pointer-events-none absolute top-3 left-3 z-[800] flex max-w-[calc(100%-15rem)] flex-col items-start gap-2">
         <div className="rounded-full border border-ink-800 bg-ink-900/95 px-3 py-1.5 text-[14px] font-medium text-neutral-300 shadow-lg backdrop-blur">
           India · {statesLive} state{statesLive === 1 ? "" : "s"} live
         </div>
         <div className="rounded-lg border border-ink-800 bg-ink-900/95 px-3 py-2 text-[14px] text-neutral-400 shadow-lg backdrop-blur">
-          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {/* Pins are hidden under the heat map, so their key would mislead. */}
+          <ul className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", showHeat && "hidden")}>
             <LegendItem status="AVAILABLE" label="Available" />
             <LegendItem status="ENGAGED" label="Engaged" />
             <LegendItem status="UNDER_MAINTENANCE" label="Maintenance" />
@@ -763,7 +710,7 @@ export function GoogleCraneMap({
             </li>
           </ul>
           {points.length < cranes.length ? (
-            <p className="mt-1 text-neutral-500">
+            <p className={cn("text-neutral-500", !showHeat && "mt-1")}>
               {points.length} of {cranes.length} cranes placed
             </p>
           ) : null}
@@ -798,8 +745,123 @@ function clearOverlays(overlays: {
 }
 
 function clearHeat(heat: HeatOverlays) {
-  for (const circle of heat.circles) circle.setMap(null);
-  for (const label of heat.labels) label.map = null;
+  heat.overlay?.setMap(null);
+}
+
+/** Colour ramp for the density surface, cool to hot. */
+function heatRamp(): Uint8ClampedArray {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d")!;
+  const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+  gradient.addColorStop(0.0, "rgba(59,130,246,0)");
+  gradient.addColorStop(0.15, "rgba(59,130,246,0.85)");
+  gradient.addColorStop(0.4, "rgba(34,197,94,0.9)");
+  gradient.addColorStop(0.65, "rgba(250,204,21,0.95)");
+  gradient.addColorStop(1.0, "rgba(239,68,68,1)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 1, 256);
+  return ctx.getImageData(0, 0, 1, 256).data;
+}
+
+/**
+ * A canvas overlay that paints crane density. It covers the viewport plus half
+ * a screen on every side so a pan does not expose an unpainted edge before the
+ * map settles and `redraw` runs.
+ */
+function createHeatOverlay(
+  map: google.maps.Map,
+  coords: Array<{ lat: number; lng: number }>,
+): google.maps.OverlayView & { redraw: () => void } {
+  const ramp = heatRamp();
+  class HeatOverlay extends google.maps.OverlayView {
+    private canvas: HTMLCanvasElement | null = null;
+
+    onAdd() {
+      const canvas = document.createElement("canvas");
+      canvas.style.cssText = "position:absolute;pointer-events:none;";
+      this.canvas = canvas;
+      this.getPanes()?.overlayLayer.appendChild(canvas);
+    }
+
+    onRemove() {
+      this.canvas?.remove();
+      this.canvas = null;
+    }
+
+    redraw() {
+      this.draw();
+    }
+
+    draw() {
+      const canvas = this.canvas;
+      const projection = this.getProjection();
+      const div = map.getDiv();
+      if (!canvas || !projection) return;
+
+      const viewW = div.clientWidth;
+      const viewH = div.clientHeight;
+      const padX = Math.round(viewW / 2);
+      const padY = Math.round(viewH / 2);
+      const width = viewW + padX * 2;
+      const height = viewH + padY * 2;
+
+      // Where the viewport's top-left corner is in overlay-pane pixels.
+      const bounds = map.getBounds();
+      if (!bounds) return;
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      const topLeft = projection.fromLatLngToDivPixel(new google.maps.LatLng(ne.lat(), sw.lng()));
+      if (!topLeft) return;
+      const originX = topLeft.x - padX;
+      const originY = topLeft.y - padY;
+
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.left = `${originX}px`;
+      canvas.style.top = `${originY}px`;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+
+      // Blob radius grows with zoom so clusters stay readable at every level.
+      const zoom = map.getZoom() ?? 5;
+      const radius = Math.max(26, Math.min(90, 22 + (zoom - 4) * 9));
+
+      // 1. Stamp soft blobs; overlapping alpha accumulates into intensity.
+      for (const coord of coords) {
+        const pixel = projection.fromLatLngToDivPixel(new google.maps.LatLng(coord.lat, coord.lng));
+        if (!pixel) continue;
+        const x = pixel.x - originX;
+        const y = pixel.y - originY;
+        if (x < -radius || y < -radius || x > width + radius || y > height + radius) continue;
+        const blob = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        blob.addColorStop(0, "rgba(0,0,0,0.30)");
+        blob.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = blob;
+        ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      }
+
+      // 2. Colourise by accumulated alpha.
+      const image = ctx.getImageData(0, 0, width, height);
+      const data = image.data;
+      for (let i = 3; i < data.length; i += 4) {
+        const alpha = data[i]!;
+        if (alpha === 0) continue;
+        const r = alpha * 4;
+        data[i - 3] = ramp[r]!;
+        data[i - 2] = ramp[r + 1]!;
+        data[i - 1] = ramp[r + 2]!;
+        data[i] = Math.min(ramp[r + 3]!, 215);
+      }
+      ctx.putImageData(image, 0, 0);
+    }
+  }
+  return new HeatOverlay() as google.maps.OverlayView & { redraw: () => void };
 }
 
 /**
@@ -1031,32 +1093,3 @@ function fitBounds(
   if (typeof zoom === "number" && zoom > 14) map.setZoom(14);
   void api;
 }
-
-interface HeatGroup {
-  lat: number;
-  lng: number;
-  count: number;
-}
-
-/** Points bucketed into a square grid; each cell sits at its points' centre. */
-function heatGroups(points: Array<{ lat: number; lng: number }>, cell: number): HeatGroup[] {
-  const buckets = new Map<string, { lat: number; lng: number; count: number }>();
-  for (const point of points) {
-    const key = `${Math.floor(point.lat / cell)}:${Math.floor(point.lng / cell)}`;
-    const bucket = buckets.get(key);
-    if (bucket) {
-      bucket.lat += point.lat;
-      bucket.lng += point.lng;
-      bucket.count += 1;
-    } else {
-      buckets.set(key, { lat: point.lat, lng: point.lng, count: 1 });
-    }
-  }
-  return [...buckets.values()].map((bucket) => ({
-    lat: bucket.lat / bucket.count,
-    lng: bucket.lng / bucket.count,
-    count: bucket.count,
-  }));
-}
-
-

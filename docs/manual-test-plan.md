@@ -427,14 +427,6 @@ before suspecting the map.
 - [ ] `/app/vendors/$vendorId/sap-sheet` prints/exports and reflects the approved
       data.
 
-### 5.4 Admin dashboard and user management (BPD 6.2, 5.13)
-
-- [ ] `/app/admin`: confirm the Attention counters (registrations awaiting
-      approval, RFQs with email delivery failures, cranes stale, cranes with no
-      map location, engaged cranes past release date).
-- [ ] Under "SML users", create an internal user, change a role, and deactivate
-      one. Confirm you cannot deactivate your own account.
-
 ### 5.5 Configuration (BPD 6.22)
 
 - [ ] `/app/settings`: quotation day basis; SAP office-use master lists; quote
@@ -474,8 +466,8 @@ Run as each role; a hidden control is not a check — the server must refuse too
       redirect / forbidden notice.
 - [ ] **Bank visibility**: sales sees no bank block; admin sees it; vendor sees
       only its own, masked.
-- [ ] **Route guards**: as sales, open `/app/settings`, `/app/admin` and an SAP
-      sheet URL; expect them to be blocked.
+- [ ] **Route guards**: as sales, open `/app/settings` and an SAP sheet URL;
+      expect them to be blocked.
 - [ ] **Server enforcement**: with a vendor bearer token, `GET
       /api/discovery/cranes` and `GET /api/enquiries/:id/history` return 403.
 - [ ] **No secret leakage**: confirm the backend log never prints PAN or bank

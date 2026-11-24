@@ -41,7 +41,7 @@ export const INVITE_SHEET_COLUMNS: InviteSheetColumn[] = [
     label: "Email",
     aliases: ["email", "emailaddress", "vendoremail", "contactemail"],
     required: true,
-    help: "The address the invitation link is sent to. Must not already have an account or a live invitation.",
+    help: "The address the invitation link is sent to. Must not already have an account.",
   },
   {
     key: "contactNumber",

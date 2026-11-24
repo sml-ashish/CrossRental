@@ -70,8 +70,7 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
         id: true,
         enquiryNo: true,
         enquiryDate: true,
-        customerName: true,
-        region: true,
+        shipToCity: true,
         siteState: { select: { name: true, region: true } },
         lines: {
           select: {
@@ -80,7 +79,6 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
             trailStatus: true,
             craneTypeCode: true,
             capacityT: true,
-            quantity: true,
           },
         },
       },
@@ -127,17 +125,17 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
       columns = [
         { key: "enquiryNo", label: "Enquiry" },
         { key: "enquiryDate", label: "Date" },
-        { key: "customerName", label: "Customer" },
-        { key: "region", label: "Region" },
         { key: "siteState", label: "State" },
+        { key: "shipToCity", label: "City" },
+        { key: "region", label: "Region" },
         { key: "lines", label: "Lines" },
       ];
       rows = enquiries.map((enquiry) => ({
         enquiryNo: enquiry.enquiryNo,
         enquiryDate: enquiry.enquiryDate.toISOString().slice(0, 10),
-        customerName: enquiry.customerName,
-        region: enquiry.region ?? enquiry.siteState.region ?? "",
         siteState: enquiry.siteState.name,
+        shipToCity: enquiry.shipToCity,
+        region: enquiry.siteState.region ?? "",
         lines: enquiry.lines.length,
       }));
       break;
@@ -148,7 +146,6 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
         { key: "lineNo", label: "Line" },
         { key: "craneCategory", label: "Crane category" },
         { key: "capacityT", label: "Capacity (T)" },
-        { key: "quantity", label: "Quantity" },
         { key: "trailStatus", label: "Stage" },
       ];
       rows = lines.map(({ enquiry, line }) => ({
@@ -156,7 +153,6 @@ export async function buildReport(scope: ReportScope): Promise<ReportResult> {
         lineNo: line.lineNo,
         craneCategory: labelCrane(line.craneTypeCode, craneNames),
         capacityT: line.capacityT === null ? "" : Number(line.capacityT),
-        quantity: line.quantity,
         trailStatus: String(line.trailStatus),
       }));
       break;

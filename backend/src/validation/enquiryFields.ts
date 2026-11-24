@@ -1,20 +1,11 @@
 import { z } from "zod";
-import {
-  CapacityRule,
-  DurationUnit,
-  EnquiryOverallStatus,
-} from "../generated/prisma/client";
+import { DurationUnit, EnquiryOverallStatus } from "../generated/prisma/client";
 import { submissionDeadlineField } from "./rfqFields";
 
 /**
- * Enquiry intake fields (P1 section 2), derived from the 31-row Cross Rental
- * Enquiry Template in docs/CR Enquiry from SP.xlsx. The template wins where the
- * two disagree, which is why the five scope terms the first field-list draft
- * missed (additional manpower, intra-site movement, pre-release, PPE, ROW) are
- * first-class columns here.
- *
- * Customer name/address and the budget are internal only: the validators keep
- * them, and the RFQ prefill deliberately drops them.
+ * Enquiry intake fields. The enquiry captures the crane requirement, the site
+ * city/state and the terms SML may choose to carry into an RFQ. Vendor terms,
+ * customer details and the site pin are not stored here; they live on the RFQ.
  */
 
 const trimmed = (max: number) => z.string().trim().max(max);
@@ -49,29 +40,17 @@ const optionalInt = (label: string, min: number, max: number) =>
 
 const baseLineFields = {
   craneTypeCode: trimmed(50).min(1, "Choose the crane type"),
+  craneModel: optionalText(100),
+  yom: optionalInt("Year of manufacture", 1950, 2100),
   capacityT: z.coerce
     .number({ message: "Enter the required capacity in tonnes" })
     .positive("Required capacity must be greater than 0"),
-  capacityRule: z
-    .enum([CapacityRule.AT_LEAST, CapacityRule.EXACT])
-    .default(CapacityRule.AT_LEAST),
-  capacityNote: optionalText(2000),
-  quantity: z.coerce
-    .number({ message: "Enter the quantity required" })
-    .int("Quantity must be a whole number")
-    .min(1, "Quantity must be at least 1")
-    .default(1),
 
   applicationDescription: optionalText(5000),
-  loadDescription: optionalText(5000),
-  liftLoadT: optionalNumber("Lift load"),
-  workingRadiusM: optionalNumber("Working radius"),
+  liftLoadT: optionalNumber("Weight to be lifted"),
+  liftHeightM: optionalNumber("Height to be lifted"),
 
-  requiredMainBoomM: optionalNumber("Main boom length"),
-  requiredFixedJibM: optionalNumber("Fixed jib length"),
-  requiredLuffingJibM: optionalNumber("Luffing jib length"),
-  requiredWindJibM: optionalNumber("Wind jib length"),
-  configurationNotes: optionalText(2000),
+  craneConfiguration: optionalText(200),
 
   // No start date means "to be confirmed"; there is no separate flag.
   requiredStartDate: dateField.optional().nullable(),
@@ -82,42 +61,26 @@ const baseLineFields = {
     .nullable(),
   workingDaysPerMonth: optionalInt("Working days per month", 1, 31),
 
-  mobilisationTerms: optionalText(2000),
-  demobilisationTerms: optionalText(2000),
-
   otCharges: optionalText(200),
   breakdownTerms: optionalText(200),
   dieselScope: optionalText(200),
+  workingHoursPerDay: optionalText(120),
+  shift: optionalText(60),
   workingHoursShift: optionalText(120),
-  accommodationConveyance: optionalText(200),
-  paymentTerms: optionalText(500),
   supportCraneScope: optionalText(500),
   steelMatsGroundPrepScope: optionalText(1000),
   ehsHrCompliance: optionalText(1000),
   insuranceTerms: optionalText(1000),
-  extensionClause: optionalText(1000),
   craneAgeCriteriaYears: optionalInt("Crane age criterion", 0, 80),
-  otherTerms: optionalText(4000),
 
-  // The five template rows the first field-list draft missed.
   additionalManpowerScope: optionalText(500),
-  intraSiteMovementScope: optionalText(500),
-  prereleaseTerms: optionalText(500),
-  ppeScope: optionalText(200),
   rowScope: optionalText(500),
-
-  // Internal only — never copied into an RFQ.
-  rentalBudget: optionalText(300),
 };
 
 const headerFields = {
   enquiryDate: dateField.optional(),
-  customerName: trimmed(300).min(1, "Enter the customer name"),
-  customerAddress: trimmed(2000).min(2, "Enter the customer address"),
-  siteLocation: trimmed(300).min(3, "Enter the job site location"),
+  shipToCity: trimmed(100).min(2, "Enter the delivery city"),
   siteStateCode: trimmed(10).min(1, "Choose the state"),
-  sitePincode: optionalText(10),
-  region: optionalText(120),
 };
 
 /**
@@ -170,51 +133,32 @@ export type InternalCheckInput = z.infer<typeof internalCheckSchema>;
 /**
  * The line-item fields a sales user may choose to copy into an RFQ.
  *
- * Core facts (crane type, capacity, quantity, site, dates and duration) are not
- * in this list: an RFQ cannot be sourced without them, so they are always sent.
- * Internal-only fields (customer name/address, rental budget) are absent by
- * construction — there is no key a caller could supply to leak them.
- *
- * The client sends the keys it wants; the service uses this list as the only
- * allow-list, so an unknown key is a validation error rather than a silent way
- * to populate an RFQ column.
+ * Core facts (crane type, capacity and site) are not in this list: an RFQ
+ * cannot be sourced without them, so they are always sent. The client sends the
+ * keys it wants; the service uses this list as the only allow-list, so an
+ * unknown key is a validation error rather than a silent way to populate an RFQ
+ * column.
  */
 export const RFQ_LINE_FIELD_KEYS = [
   // Job and load
   "applicationDescription",
-  "loadDescription",
   "liftLoadT",
-  "workingRadiusM",
-  "capacityNote",
+  "liftHeightM",
   // Configuration
-  "requiredMainBoomM",
-  "requiredFixedJibM",
-  "requiredLuffingJibM",
-  "requiredWindJibM",
-  "configurationNotes",
+  "craneConfiguration",
   "workingDaysPerMonth",
-  // Mobilisation
-  "mobilisationTerms",
-  "demobilisationTerms",
   // Commercial terms
   "otCharges",
   "breakdownTerms",
   "dieselScope",
   "workingHoursShift",
-  "accommodationConveyance",
-  "paymentTerms",
   "craneAgeCriteriaYears",
   // Scopes and other terms
   "supportCraneScope",
   "steelMatsGroundPrepScope",
   "ehsHrCompliance",
   "insuranceTerms",
-  "extensionClause",
-  "otherTerms",
   "additionalManpowerScope",
-  "intraSiteMovementScope",
-  "prereleaseTerms",
-  "ppeScope",
   "rowScope",
 ] as const;
 
@@ -222,7 +166,7 @@ export type RfqLineFieldKey = (typeof RFQ_LINE_FIELD_KEYS)[number];
 
 /**
  * Raising an RFQ from a line. Everything else is prefilled from the line and
- * the enquiry header's vendor-safe subset, so only the deadline is required.
+ * the enquiry city/state, so only the deadline is required.
  *
  * `includeFields` is the sales user's field picker. When it is omitted the
  * service copies every vendor-safe line field, which keeps older callers (and
@@ -249,7 +193,6 @@ export const listEnquiriesQuerySchema = z.object({
     ])
     .optional(),
   search: trimmed(120).optional(),
-  region: optionalText(120),
   stateCode: trimmed(10).optional(),
   from: dateField.optional(),
   to: dateField.optional(),
@@ -288,4 +231,3 @@ export const lineRouteQuerySchema = z.object({
 });
 
 export type LineRouteQuery = z.infer<typeof lineRouteQuerySchema>;
-

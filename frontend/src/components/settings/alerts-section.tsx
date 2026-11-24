@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
   NumberStepper,
@@ -182,7 +180,7 @@ export function AlertsSection({ query }: { query: SettingsQuery }) {
               <SwitchField
                 id="alert-emails-enabled"
                 label="Alert emails"
-                hint="Send the daily alert digest to SML staff. The digest lists the same items the dashboard shows."
+                hint="Send the daily alert digest to SML staff with the items that need attention."
                 checked={draft.emails}
                 onChange={(checked) => setDraft((prev) => ({ ...prev, emails: checked }))}
                 disabled={save.isPending}
@@ -192,15 +190,8 @@ export function AlertsSection({ query }: { query: SettingsQuery }) {
             <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-ink-800 pt-4 text-[15px] text-slate-500">
               <span>
                 Alert emails are {loaded.alertEmailsEnabled ? "on" : "off"} today. Alerts are
-                computed when the dashboard is opened, not stored.
+                computed on demand, not stored.
               </span>
-              <Link
-                to="/app/admin"
-                className="inline-flex items-center gap-1 font-medium text-accent-400 underline-offset-4 hover:underline"
-              >
-                See current alerts
-                <ArrowRight className="size-3.5" aria-hidden />
-              </Link>
             </div>
 
             {save.error ? (

@@ -15,11 +15,9 @@ import type * as Prisma from "../internal/prismaNamespace"
 /**
  * Model EnquiryLineItem
  * *
- *  * One requirement line on an enquiry, derived from the Cross Rental Enquiry
- *  * Template (P1 section 2). All 31 template rows are represented, including the
- *  * five scope terms the first draft of the field list missed.
- *  * `rentalBudget`, `internalNotes` and `poSapReference` are internal only, as is
- *  * the customer block on the header: none of them is ever copied into an RFQ.
+ *  * One requirement line on an enquiry. Only the facts needed to source and quote
+ *  * a crane are captured here; the terms a vendor is asked to price live on the
+ *  * RFQ, where they can be chosen per invitation.
  */
 export type EnquiryLineItemModel = runtime.Types.Result.DefaultSelection<Prisma.$EnquiryLineItemPayload>
 
@@ -33,14 +31,10 @@ export type AggregateEnquiryLineItem = {
 
 export type EnquiryLineItemAvgAggregateOutputType = {
   lineNo: number | null
+  yom: number | null
   capacityT: runtime.Decimal | null
-  quantity: number | null
   liftLoadT: runtime.Decimal | null
-  workingRadiusM: runtime.Decimal | null
-  requiredMainBoomM: runtime.Decimal | null
-  requiredFixedJibM: runtime.Decimal | null
-  requiredLuffingJibM: runtime.Decimal | null
-  requiredWindJibM: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   durationValue: runtime.Decimal | null
   workingDaysPerMonth: number | null
   craneAgeCriteriaYears: number | null
@@ -48,14 +42,10 @@ export type EnquiryLineItemAvgAggregateOutputType = {
 
 export type EnquiryLineItemSumAggregateOutputType = {
   lineNo: number | null
+  yom: number | null
   capacityT: runtime.Decimal | null
-  quantity: number | null
   liftLoadT: runtime.Decimal | null
-  workingRadiusM: runtime.Decimal | null
-  requiredMainBoomM: runtime.Decimal | null
-  requiredFixedJibM: runtime.Decimal | null
-  requiredLuffingJibM: runtime.Decimal | null
-  requiredWindJibM: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   durationValue: runtime.Decimal | null
   workingDaysPerMonth: number | null
   craneAgeCriteriaYears: number | null
@@ -66,44 +56,30 @@ export type EnquiryLineItemMinAggregateOutputType = {
   enquiryId: string | null
   lineNo: number | null
   craneTypeCode: string | null
+  craneModel: string | null
+  yom: number | null
   capacityT: runtime.Decimal | null
-  capacityRule: $Enums.CapacityRule | null
-  capacityNote: string | null
-  quantity: number | null
   applicationDescription: string | null
-  loadDescription: string | null
   liftLoadT: runtime.Decimal | null
-  workingRadiusM: runtime.Decimal | null
-  requiredMainBoomM: runtime.Decimal | null
-  requiredFixedJibM: runtime.Decimal | null
-  requiredLuffingJibM: runtime.Decimal | null
-  requiredWindJibM: runtime.Decimal | null
-  configurationNotes: string | null
+  liftHeightM: runtime.Decimal | null
+  craneConfiguration: string | null
   requiredStartDate: Date | null
   durationValue: runtime.Decimal | null
   durationUnit: $Enums.DurationUnit | null
   workingDaysPerMonth: number | null
-  mobilisationTerms: string | null
-  demobilisationTerms: string | null
   otCharges: string | null
   breakdownTerms: string | null
   dieselScope: string | null
+  workingHoursPerDay: string | null
+  shift: string | null
   workingHoursShift: string | null
-  accommodationConveyance: string | null
-  paymentTerms: string | null
   supportCraneScope: string | null
   steelMatsGroundPrepScope: string | null
   ehsHrCompliance: string | null
   insuranceTerms: string | null
-  extensionClause: string | null
   craneAgeCriteriaYears: number | null
-  otherTerms: string | null
   additionalManpowerScope: string | null
-  intraSiteMovementScope: string | null
-  prereleaseTerms: string | null
-  ppeScope: string | null
   rowScope: string | null
-  rentalBudget: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus | null
   closureStatus: string | null
   cancelledAt: Date | null
@@ -117,44 +93,30 @@ export type EnquiryLineItemMaxAggregateOutputType = {
   enquiryId: string | null
   lineNo: number | null
   craneTypeCode: string | null
+  craneModel: string | null
+  yom: number | null
   capacityT: runtime.Decimal | null
-  capacityRule: $Enums.CapacityRule | null
-  capacityNote: string | null
-  quantity: number | null
   applicationDescription: string | null
-  loadDescription: string | null
   liftLoadT: runtime.Decimal | null
-  workingRadiusM: runtime.Decimal | null
-  requiredMainBoomM: runtime.Decimal | null
-  requiredFixedJibM: runtime.Decimal | null
-  requiredLuffingJibM: runtime.Decimal | null
-  requiredWindJibM: runtime.Decimal | null
-  configurationNotes: string | null
+  liftHeightM: runtime.Decimal | null
+  craneConfiguration: string | null
   requiredStartDate: Date | null
   durationValue: runtime.Decimal | null
   durationUnit: $Enums.DurationUnit | null
   workingDaysPerMonth: number | null
-  mobilisationTerms: string | null
-  demobilisationTerms: string | null
   otCharges: string | null
   breakdownTerms: string | null
   dieselScope: string | null
+  workingHoursPerDay: string | null
+  shift: string | null
   workingHoursShift: string | null
-  accommodationConveyance: string | null
-  paymentTerms: string | null
   supportCraneScope: string | null
   steelMatsGroundPrepScope: string | null
   ehsHrCompliance: string | null
   insuranceTerms: string | null
-  extensionClause: string | null
   craneAgeCriteriaYears: number | null
-  otherTerms: string | null
   additionalManpowerScope: string | null
-  intraSiteMovementScope: string | null
-  prereleaseTerms: string | null
-  ppeScope: string | null
   rowScope: string | null
-  rentalBudget: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus | null
   closureStatus: string | null
   cancelledAt: Date | null
@@ -168,44 +130,30 @@ export type EnquiryLineItemCountAggregateOutputType = {
   enquiryId: number
   lineNo: number
   craneTypeCode: number
+  craneModel: number
+  yom: number
   capacityT: number
-  capacityRule: number
-  capacityNote: number
-  quantity: number
   applicationDescription: number
-  loadDescription: number
   liftLoadT: number
-  workingRadiusM: number
-  requiredMainBoomM: number
-  requiredFixedJibM: number
-  requiredLuffingJibM: number
-  requiredWindJibM: number
-  configurationNotes: number
+  liftHeightM: number
+  craneConfiguration: number
   requiredStartDate: number
   durationValue: number
   durationUnit: number
   workingDaysPerMonth: number
-  mobilisationTerms: number
-  demobilisationTerms: number
   otCharges: number
   breakdownTerms: number
   dieselScope: number
+  workingHoursPerDay: number
+  shift: number
   workingHoursShift: number
-  accommodationConveyance: number
-  paymentTerms: number
   supportCraneScope: number
   steelMatsGroundPrepScope: number
   ehsHrCompliance: number
   insuranceTerms: number
-  extensionClause: number
   craneAgeCriteriaYears: number
-  otherTerms: number
   additionalManpowerScope: number
-  intraSiteMovementScope: number
-  prereleaseTerms: number
-  ppeScope: number
   rowScope: number
-  rentalBudget: number
   trailStatus: number
   closureStatus: number
   cancelledAt: number
@@ -218,14 +166,10 @@ export type EnquiryLineItemCountAggregateOutputType = {
 
 export type EnquiryLineItemAvgAggregateInputType = {
   lineNo?: true
+  yom?: true
   capacityT?: true
-  quantity?: true
   liftLoadT?: true
-  workingRadiusM?: true
-  requiredMainBoomM?: true
-  requiredFixedJibM?: true
-  requiredLuffingJibM?: true
-  requiredWindJibM?: true
+  liftHeightM?: true
   durationValue?: true
   workingDaysPerMonth?: true
   craneAgeCriteriaYears?: true
@@ -233,14 +177,10 @@ export type EnquiryLineItemAvgAggregateInputType = {
 
 export type EnquiryLineItemSumAggregateInputType = {
   lineNo?: true
+  yom?: true
   capacityT?: true
-  quantity?: true
   liftLoadT?: true
-  workingRadiusM?: true
-  requiredMainBoomM?: true
-  requiredFixedJibM?: true
-  requiredLuffingJibM?: true
-  requiredWindJibM?: true
+  liftHeightM?: true
   durationValue?: true
   workingDaysPerMonth?: true
   craneAgeCriteriaYears?: true
@@ -251,44 +191,30 @@ export type EnquiryLineItemMinAggregateInputType = {
   enquiryId?: true
   lineNo?: true
   craneTypeCode?: true
+  craneModel?: true
+  yom?: true
   capacityT?: true
-  capacityRule?: true
-  capacityNote?: true
-  quantity?: true
   applicationDescription?: true
-  loadDescription?: true
   liftLoadT?: true
-  workingRadiusM?: true
-  requiredMainBoomM?: true
-  requiredFixedJibM?: true
-  requiredLuffingJibM?: true
-  requiredWindJibM?: true
-  configurationNotes?: true
+  liftHeightM?: true
+  craneConfiguration?: true
   requiredStartDate?: true
   durationValue?: true
   durationUnit?: true
   workingDaysPerMonth?: true
-  mobilisationTerms?: true
-  demobilisationTerms?: true
   otCharges?: true
   breakdownTerms?: true
   dieselScope?: true
+  workingHoursPerDay?: true
+  shift?: true
   workingHoursShift?: true
-  accommodationConveyance?: true
-  paymentTerms?: true
   supportCraneScope?: true
   steelMatsGroundPrepScope?: true
   ehsHrCompliance?: true
   insuranceTerms?: true
-  extensionClause?: true
   craneAgeCriteriaYears?: true
-  otherTerms?: true
   additionalManpowerScope?: true
-  intraSiteMovementScope?: true
-  prereleaseTerms?: true
-  ppeScope?: true
   rowScope?: true
-  rentalBudget?: true
   trailStatus?: true
   closureStatus?: true
   cancelledAt?: true
@@ -302,44 +228,30 @@ export type EnquiryLineItemMaxAggregateInputType = {
   enquiryId?: true
   lineNo?: true
   craneTypeCode?: true
+  craneModel?: true
+  yom?: true
   capacityT?: true
-  capacityRule?: true
-  capacityNote?: true
-  quantity?: true
   applicationDescription?: true
-  loadDescription?: true
   liftLoadT?: true
-  workingRadiusM?: true
-  requiredMainBoomM?: true
-  requiredFixedJibM?: true
-  requiredLuffingJibM?: true
-  requiredWindJibM?: true
-  configurationNotes?: true
+  liftHeightM?: true
+  craneConfiguration?: true
   requiredStartDate?: true
   durationValue?: true
   durationUnit?: true
   workingDaysPerMonth?: true
-  mobilisationTerms?: true
-  demobilisationTerms?: true
   otCharges?: true
   breakdownTerms?: true
   dieselScope?: true
+  workingHoursPerDay?: true
+  shift?: true
   workingHoursShift?: true
-  accommodationConveyance?: true
-  paymentTerms?: true
   supportCraneScope?: true
   steelMatsGroundPrepScope?: true
   ehsHrCompliance?: true
   insuranceTerms?: true
-  extensionClause?: true
   craneAgeCriteriaYears?: true
-  otherTerms?: true
   additionalManpowerScope?: true
-  intraSiteMovementScope?: true
-  prereleaseTerms?: true
-  ppeScope?: true
   rowScope?: true
-  rentalBudget?: true
   trailStatus?: true
   closureStatus?: true
   cancelledAt?: true
@@ -353,44 +265,30 @@ export type EnquiryLineItemCountAggregateInputType = {
   enquiryId?: true
   lineNo?: true
   craneTypeCode?: true
+  craneModel?: true
+  yom?: true
   capacityT?: true
-  capacityRule?: true
-  capacityNote?: true
-  quantity?: true
   applicationDescription?: true
-  loadDescription?: true
   liftLoadT?: true
-  workingRadiusM?: true
-  requiredMainBoomM?: true
-  requiredFixedJibM?: true
-  requiredLuffingJibM?: true
-  requiredWindJibM?: true
-  configurationNotes?: true
+  liftHeightM?: true
+  craneConfiguration?: true
   requiredStartDate?: true
   durationValue?: true
   durationUnit?: true
   workingDaysPerMonth?: true
-  mobilisationTerms?: true
-  demobilisationTerms?: true
   otCharges?: true
   breakdownTerms?: true
   dieselScope?: true
+  workingHoursPerDay?: true
+  shift?: true
   workingHoursShift?: true
-  accommodationConveyance?: true
-  paymentTerms?: true
   supportCraneScope?: true
   steelMatsGroundPrepScope?: true
   ehsHrCompliance?: true
   insuranceTerms?: true
-  extensionClause?: true
   craneAgeCriteriaYears?: true
-  otherTerms?: true
   additionalManpowerScope?: true
-  intraSiteMovementScope?: true
-  prereleaseTerms?: true
-  ppeScope?: true
   rowScope?: true
-  rentalBudget?: true
   trailStatus?: true
   closureStatus?: true
   cancelledAt?: true
@@ -491,44 +389,30 @@ export type EnquiryLineItemGroupByOutputType = {
   enquiryId: string
   lineNo: number
   craneTypeCode: string | null
+  craneModel: string | null
+  yom: number | null
   capacityT: runtime.Decimal | null
-  capacityRule: $Enums.CapacityRule
-  capacityNote: string | null
-  quantity: number
   applicationDescription: string | null
-  loadDescription: string | null
   liftLoadT: runtime.Decimal | null
-  workingRadiusM: runtime.Decimal | null
-  requiredMainBoomM: runtime.Decimal | null
-  requiredFixedJibM: runtime.Decimal | null
-  requiredLuffingJibM: runtime.Decimal | null
-  requiredWindJibM: runtime.Decimal | null
-  configurationNotes: string | null
+  liftHeightM: runtime.Decimal | null
+  craneConfiguration: string | null
   requiredStartDate: Date | null
   durationValue: runtime.Decimal | null
   durationUnit: $Enums.DurationUnit | null
   workingDaysPerMonth: number | null
-  mobilisationTerms: string | null
-  demobilisationTerms: string | null
   otCharges: string | null
   breakdownTerms: string | null
   dieselScope: string | null
+  workingHoursPerDay: string | null
+  shift: string | null
   workingHoursShift: string | null
-  accommodationConveyance: string | null
-  paymentTerms: string | null
   supportCraneScope: string | null
   steelMatsGroundPrepScope: string | null
   ehsHrCompliance: string | null
   insuranceTerms: string | null
-  extensionClause: string | null
   craneAgeCriteriaYears: number | null
-  otherTerms: string | null
   additionalManpowerScope: string | null
-  intraSiteMovementScope: string | null
-  prereleaseTerms: string | null
-  ppeScope: string | null
   rowScope: string | null
-  rentalBudget: string | null
   trailStatus: $Enums.EnquiryLineTrailStatus
   closureStatus: string | null
   cancelledAt: Date | null
@@ -565,44 +449,30 @@ export type EnquiryLineItemWhereInput = {
   enquiryId?: Prisma.StringFilter<"EnquiryLineItem"> | string
   lineNo?: Prisma.IntFilter<"EnquiryLineItem"> | number
   craneTypeCode?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  craneModel?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  yom?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
   capacityT?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFilter<"EnquiryLineItem"> | $Enums.CapacityRule
-  capacityNote?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  quantity?: Prisma.IntFilter<"EnquiryLineItem"> | number
   applicationDescription?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  loadDescription?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   liftLoadT?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  liftHeightM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
   durationValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
-  mobilisationTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  demobilisationTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   otCharges?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   breakdownTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   dieselScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  workingHoursPerDay?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  shift?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   workingHoursShift?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  accommodationConveyance?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  paymentTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   supportCraneScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   steelMatsGroundPrepScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   ehsHrCompliance?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   insuranceTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  extensionClause?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   craneAgeCriteriaYears?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
-  otherTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   additionalManpowerScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  intraSiteMovementScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  prereleaseTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  ppeScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
@@ -622,44 +492,30 @@ export type EnquiryLineItemOrderByWithRelationInput = {
   enquiryId?: Prisma.SortOrder
   lineNo?: Prisma.SortOrder
   craneTypeCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  craneModel?: Prisma.SortOrderInput | Prisma.SortOrder
+  yom?: Prisma.SortOrderInput | Prisma.SortOrder
   capacityT?: Prisma.SortOrderInput | Prisma.SortOrder
-  capacityRule?: Prisma.SortOrder
-  capacityNote?: Prisma.SortOrderInput | Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   applicationDescription?: Prisma.SortOrderInput | Prisma.SortOrder
-  loadDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   liftLoadT?: Prisma.SortOrderInput | Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrderInput | Prisma.SortOrder
-  configurationNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrderInput | Prisma.SortOrder
+  craneConfiguration?: Prisma.SortOrderInput | Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   durationValue?: Prisma.SortOrderInput | Prisma.SortOrder
   durationUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
-  mobilisationTerms?: Prisma.SortOrderInput | Prisma.SortOrder
-  demobilisationTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   otCharges?: Prisma.SortOrderInput | Prisma.SortOrder
   breakdownTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   dieselScope?: Prisma.SortOrderInput | Prisma.SortOrder
+  workingHoursPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  shift?: Prisma.SortOrderInput | Prisma.SortOrder
   workingHoursShift?: Prisma.SortOrderInput | Prisma.SortOrder
-  accommodationConveyance?: Prisma.SortOrderInput | Prisma.SortOrder
-  paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   supportCraneScope?: Prisma.SortOrderInput | Prisma.SortOrder
   steelMatsGroundPrepScope?: Prisma.SortOrderInput | Prisma.SortOrder
   ehsHrCompliance?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceTerms?: Prisma.SortOrderInput | Prisma.SortOrder
-  extensionClause?: Prisma.SortOrderInput | Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrderInput | Prisma.SortOrder
-  otherTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   additionalManpowerScope?: Prisma.SortOrderInput | Prisma.SortOrder
-  intraSiteMovementScope?: Prisma.SortOrderInput | Prisma.SortOrder
-  prereleaseTerms?: Prisma.SortOrderInput | Prisma.SortOrder
-  ppeScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rowScope?: Prisma.SortOrderInput | Prisma.SortOrder
-  rentalBudget?: Prisma.SortOrderInput | Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -683,44 +539,30 @@ export type EnquiryLineItemWhereUniqueInput = Prisma.AtLeast<{
   enquiryId?: Prisma.StringFilter<"EnquiryLineItem"> | string
   lineNo?: Prisma.IntFilter<"EnquiryLineItem"> | number
   craneTypeCode?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  craneModel?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  yom?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
   capacityT?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFilter<"EnquiryLineItem"> | $Enums.CapacityRule
-  capacityNote?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  quantity?: Prisma.IntFilter<"EnquiryLineItem"> | number
   applicationDescription?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  loadDescription?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   liftLoadT?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  liftHeightM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
   durationValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
-  mobilisationTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  demobilisationTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   otCharges?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   breakdownTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   dieselScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  workingHoursPerDay?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  shift?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   workingHoursShift?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  accommodationConveyance?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  paymentTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   supportCraneScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   steelMatsGroundPrepScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   ehsHrCompliance?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   insuranceTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  extensionClause?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   craneAgeCriteriaYears?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
-  otherTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   additionalManpowerScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  intraSiteMovementScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  prereleaseTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  ppeScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
@@ -740,44 +582,30 @@ export type EnquiryLineItemOrderByWithAggregationInput = {
   enquiryId?: Prisma.SortOrder
   lineNo?: Prisma.SortOrder
   craneTypeCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  craneModel?: Prisma.SortOrderInput | Prisma.SortOrder
+  yom?: Prisma.SortOrderInput | Prisma.SortOrder
   capacityT?: Prisma.SortOrderInput | Prisma.SortOrder
-  capacityRule?: Prisma.SortOrder
-  capacityNote?: Prisma.SortOrderInput | Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   applicationDescription?: Prisma.SortOrderInput | Prisma.SortOrder
-  loadDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   liftLoadT?: Prisma.SortOrderInput | Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrderInput | Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrderInput | Prisma.SortOrder
-  configurationNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrderInput | Prisma.SortOrder
+  craneConfiguration?: Prisma.SortOrderInput | Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   durationValue?: Prisma.SortOrderInput | Prisma.SortOrder
   durationUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrderInput | Prisma.SortOrder
-  mobilisationTerms?: Prisma.SortOrderInput | Prisma.SortOrder
-  demobilisationTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   otCharges?: Prisma.SortOrderInput | Prisma.SortOrder
   breakdownTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   dieselScope?: Prisma.SortOrderInput | Prisma.SortOrder
+  workingHoursPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  shift?: Prisma.SortOrderInput | Prisma.SortOrder
   workingHoursShift?: Prisma.SortOrderInput | Prisma.SortOrder
-  accommodationConveyance?: Prisma.SortOrderInput | Prisma.SortOrder
-  paymentTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   supportCraneScope?: Prisma.SortOrderInput | Prisma.SortOrder
   steelMatsGroundPrepScope?: Prisma.SortOrderInput | Prisma.SortOrder
   ehsHrCompliance?: Prisma.SortOrderInput | Prisma.SortOrder
   insuranceTerms?: Prisma.SortOrderInput | Prisma.SortOrder
-  extensionClause?: Prisma.SortOrderInput | Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrderInput | Prisma.SortOrder
-  otherTerms?: Prisma.SortOrderInput | Prisma.SortOrder
   additionalManpowerScope?: Prisma.SortOrderInput | Prisma.SortOrder
-  intraSiteMovementScope?: Prisma.SortOrderInput | Prisma.SortOrder
-  prereleaseTerms?: Prisma.SortOrderInput | Prisma.SortOrder
-  ppeScope?: Prisma.SortOrderInput | Prisma.SortOrder
   rowScope?: Prisma.SortOrderInput | Prisma.SortOrder
-  rentalBudget?: Prisma.SortOrderInput | Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -799,44 +627,30 @@ export type EnquiryLineItemScalarWhereWithAggregatesInput = {
   enquiryId?: Prisma.StringWithAggregatesFilter<"EnquiryLineItem"> | string
   lineNo?: Prisma.IntWithAggregatesFilter<"EnquiryLineItem"> | number
   craneTypeCode?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
+  craneModel?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
+  yom?: Prisma.IntNullableWithAggregatesFilter<"EnquiryLineItem"> | number | null
   capacityT?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleWithAggregatesFilter<"EnquiryLineItem"> | $Enums.CapacityRule
-  capacityNote?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  quantity?: Prisma.IntWithAggregatesFilter<"EnquiryLineItem"> | number
   applicationDescription?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  loadDescription?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   liftLoadT?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
+  liftHeightM?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"EnquiryLineItem"> | Date | string | null
   durationValue?: Prisma.DecimalNullableWithAggregatesFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableWithAggregatesFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableWithAggregatesFilter<"EnquiryLineItem"> | number | null
-  mobilisationTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  demobilisationTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   otCharges?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   breakdownTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   dieselScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
+  workingHoursPerDay?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
+  shift?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   workingHoursShift?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  accommodationConveyance?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  paymentTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   supportCraneScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   steelMatsGroundPrepScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   ehsHrCompliance?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   insuranceTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  extensionClause?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   craneAgeCriteriaYears?: Prisma.IntNullableWithAggregatesFilter<"EnquiryLineItem"> | number | null
-  otherTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   additionalManpowerScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  intraSiteMovementScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  prereleaseTerms?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  ppeScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
-  rentalBudget?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusWithAggregatesFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.StringNullableWithAggregatesFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"EnquiryLineItem"> | Date | string | null
@@ -848,44 +662,30 @@ export type EnquiryLineItemScalarWhereWithAggregatesInput = {
 export type EnquiryLineItemCreateInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -905,44 +705,30 @@ export type EnquiryLineItemUncheckedCreateInput = {
   enquiryId: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -958,44 +744,30 @@ export type EnquiryLineItemUncheckedCreateInput = {
 export type EnquiryLineItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1015,44 +787,30 @@ export type EnquiryLineItemUncheckedUpdateInput = {
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1070,44 +828,30 @@ export type EnquiryLineItemCreateManyInput = {
   enquiryId: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -1119,44 +863,30 @@ export type EnquiryLineItemCreateManyInput = {
 export type EnquiryLineItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1170,44 +900,30 @@ export type EnquiryLineItemUncheckedUpdateManyInput = {
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1241,44 +957,30 @@ export type EnquiryLineItemCountOrderByAggregateInput = {
   enquiryId?: Prisma.SortOrder
   lineNo?: Prisma.SortOrder
   craneTypeCode?: Prisma.SortOrder
+  craneModel?: Prisma.SortOrder
+  yom?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
-  capacityRule?: Prisma.SortOrder
-  capacityNote?: Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   applicationDescription?: Prisma.SortOrder
-  loadDescription?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrder
-  configurationNotes?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
+  craneConfiguration?: Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   durationUnit?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
-  mobilisationTerms?: Prisma.SortOrder
-  demobilisationTerms?: Prisma.SortOrder
   otCharges?: Prisma.SortOrder
   breakdownTerms?: Prisma.SortOrder
   dieselScope?: Prisma.SortOrder
+  workingHoursPerDay?: Prisma.SortOrder
+  shift?: Prisma.SortOrder
   workingHoursShift?: Prisma.SortOrder
-  accommodationConveyance?: Prisma.SortOrder
-  paymentTerms?: Prisma.SortOrder
   supportCraneScope?: Prisma.SortOrder
   steelMatsGroundPrepScope?: Prisma.SortOrder
   ehsHrCompliance?: Prisma.SortOrder
   insuranceTerms?: Prisma.SortOrder
-  extensionClause?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
-  otherTerms?: Prisma.SortOrder
   additionalManpowerScope?: Prisma.SortOrder
-  intraSiteMovementScope?: Prisma.SortOrder
-  prereleaseTerms?: Prisma.SortOrder
-  ppeScope?: Prisma.SortOrder
   rowScope?: Prisma.SortOrder
-  rentalBudget?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
@@ -1289,14 +991,10 @@ export type EnquiryLineItemCountOrderByAggregateInput = {
 
 export type EnquiryLineItemAvgOrderByAggregateInput = {
   lineNo?: Prisma.SortOrder
+  yom?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
@@ -1307,44 +1005,30 @@ export type EnquiryLineItemMaxOrderByAggregateInput = {
   enquiryId?: Prisma.SortOrder
   lineNo?: Prisma.SortOrder
   craneTypeCode?: Prisma.SortOrder
+  craneModel?: Prisma.SortOrder
+  yom?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
-  capacityRule?: Prisma.SortOrder
-  capacityNote?: Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   applicationDescription?: Prisma.SortOrder
-  loadDescription?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrder
-  configurationNotes?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
+  craneConfiguration?: Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   durationUnit?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
-  mobilisationTerms?: Prisma.SortOrder
-  demobilisationTerms?: Prisma.SortOrder
   otCharges?: Prisma.SortOrder
   breakdownTerms?: Prisma.SortOrder
   dieselScope?: Prisma.SortOrder
+  workingHoursPerDay?: Prisma.SortOrder
+  shift?: Prisma.SortOrder
   workingHoursShift?: Prisma.SortOrder
-  accommodationConveyance?: Prisma.SortOrder
-  paymentTerms?: Prisma.SortOrder
   supportCraneScope?: Prisma.SortOrder
   steelMatsGroundPrepScope?: Prisma.SortOrder
   ehsHrCompliance?: Prisma.SortOrder
   insuranceTerms?: Prisma.SortOrder
-  extensionClause?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
-  otherTerms?: Prisma.SortOrder
   additionalManpowerScope?: Prisma.SortOrder
-  intraSiteMovementScope?: Prisma.SortOrder
-  prereleaseTerms?: Prisma.SortOrder
-  ppeScope?: Prisma.SortOrder
   rowScope?: Prisma.SortOrder
-  rentalBudget?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
@@ -1358,44 +1042,30 @@ export type EnquiryLineItemMinOrderByAggregateInput = {
   enquiryId?: Prisma.SortOrder
   lineNo?: Prisma.SortOrder
   craneTypeCode?: Prisma.SortOrder
+  craneModel?: Prisma.SortOrder
+  yom?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
-  capacityRule?: Prisma.SortOrder
-  capacityNote?: Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   applicationDescription?: Prisma.SortOrder
-  loadDescription?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrder
-  configurationNotes?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
+  craneConfiguration?: Prisma.SortOrder
   requiredStartDate?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   durationUnit?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
-  mobilisationTerms?: Prisma.SortOrder
-  demobilisationTerms?: Prisma.SortOrder
   otCharges?: Prisma.SortOrder
   breakdownTerms?: Prisma.SortOrder
   dieselScope?: Prisma.SortOrder
+  workingHoursPerDay?: Prisma.SortOrder
+  shift?: Prisma.SortOrder
   workingHoursShift?: Prisma.SortOrder
-  accommodationConveyance?: Prisma.SortOrder
-  paymentTerms?: Prisma.SortOrder
   supportCraneScope?: Prisma.SortOrder
   steelMatsGroundPrepScope?: Prisma.SortOrder
   ehsHrCompliance?: Prisma.SortOrder
   insuranceTerms?: Prisma.SortOrder
-  extensionClause?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
-  otherTerms?: Prisma.SortOrder
   additionalManpowerScope?: Prisma.SortOrder
-  intraSiteMovementScope?: Prisma.SortOrder
-  prereleaseTerms?: Prisma.SortOrder
-  ppeScope?: Prisma.SortOrder
   rowScope?: Prisma.SortOrder
-  rentalBudget?: Prisma.SortOrder
   trailStatus?: Prisma.SortOrder
   closureStatus?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
@@ -1406,14 +1076,10 @@ export type EnquiryLineItemMinOrderByAggregateInput = {
 
 export type EnquiryLineItemSumOrderByAggregateInput = {
   lineNo?: Prisma.SortOrder
+  yom?: Prisma.SortOrder
   capacityT?: Prisma.SortOrder
-  quantity?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
-  workingRadiusM?: Prisma.SortOrder
-  requiredMainBoomM?: Prisma.SortOrder
-  requiredFixedJibM?: Prisma.SortOrder
-  requiredLuffingJibM?: Prisma.SortOrder
-  requiredWindJibM?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   durationValue?: Prisma.SortOrder
   workingDaysPerMonth?: Prisma.SortOrder
   craneAgeCriteriaYears?: Prisma.SortOrder
@@ -1581,44 +1247,30 @@ export type EnquiryLineItemUpdateOneRequiredWithoutRecommendationsNestedInput = 
 export type EnquiryLineItemCreateWithoutCraneTypeInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -1636,44 +1288,30 @@ export type EnquiryLineItemUncheckedCreateWithoutCraneTypeInput = {
   id?: string
   enquiryId: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -1720,44 +1358,30 @@ export type EnquiryLineItemScalarWhereInput = {
   enquiryId?: Prisma.StringFilter<"EnquiryLineItem"> | string
   lineNo?: Prisma.IntFilter<"EnquiryLineItem"> | number
   craneTypeCode?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  craneModel?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  yom?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
   capacityT?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFilter<"EnquiryLineItem"> | $Enums.CapacityRule
-  capacityNote?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  quantity?: Prisma.IntFilter<"EnquiryLineItem"> | number
   applicationDescription?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  loadDescription?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   liftLoadT?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  liftHeightM?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   requiredStartDate?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
   durationValue?: Prisma.DecimalNullableFilter<"EnquiryLineItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.EnumDurationUnitNullableFilter<"EnquiryLineItem"> | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
-  mobilisationTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  demobilisationTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   otCharges?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   breakdownTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   dieselScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  workingHoursPerDay?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
+  shift?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   workingHoursShift?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  accommodationConveyance?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  paymentTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   supportCraneScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   steelMatsGroundPrepScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   ehsHrCompliance?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   insuranceTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  extensionClause?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   craneAgeCriteriaYears?: Prisma.IntNullableFilter<"EnquiryLineItem"> | number | null
-  otherTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   additionalManpowerScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  intraSiteMovementScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  prereleaseTerms?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  ppeScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   rowScope?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
-  rentalBudget?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFilter<"EnquiryLineItem"> | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.StringNullableFilter<"EnquiryLineItem"> | string | null
   cancelledAt?: Prisma.DateTimeNullableFilter<"EnquiryLineItem"> | Date | string | null
@@ -1769,44 +1393,30 @@ export type EnquiryLineItemScalarWhereInput = {
 export type EnquiryLineItemCreateWithoutRfqsInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -1825,44 +1435,30 @@ export type EnquiryLineItemUncheckedCreateWithoutRfqsInput = {
   enquiryId: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -1893,44 +1489,30 @@ export type EnquiryLineItemUpdateToOneWithWhereWithoutRfqsInput = {
 export type EnquiryLineItemUpdateWithoutRfqsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1949,44 +1531,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2001,44 +1569,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutRfqsInput = {
 export type EnquiryLineItemCreateWithoutReservationsInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2057,44 +1611,30 @@ export type EnquiryLineItemUncheckedCreateWithoutReservationsInput = {
   enquiryId: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2125,44 +1665,30 @@ export type EnquiryLineItemUpdateToOneWithWhereWithoutReservationsInput = {
 export type EnquiryLineItemUpdateWithoutReservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2181,44 +1707,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2233,44 +1745,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutReservationsInput = {
 export type EnquiryLineItemCreateWithoutEnquiryInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2288,44 +1786,30 @@ export type EnquiryLineItemUncheckedCreateWithoutEnquiryInput = {
   id?: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2367,44 +1851,30 @@ export type EnquiryLineItemUpdateManyWithWhereWithoutEnquiryInput = {
 export type EnquiryLineItemCreateWithoutInboundRepliesInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2423,44 +1893,30 @@ export type EnquiryLineItemUncheckedCreateWithoutInboundRepliesInput = {
   enquiryId: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2491,44 +1947,30 @@ export type EnquiryLineItemUpdateToOneWithWhereWithoutInboundRepliesInput = {
 export type EnquiryLineItemUpdateWithoutInboundRepliesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2547,44 +1989,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput = {
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2599,44 +2027,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutInboundRepliesInput = {
 export type EnquiryLineItemCreateWithoutRecommendationsInput = {
   id?: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2655,44 +2069,30 @@ export type EnquiryLineItemUncheckedCreateWithoutRecommendationsInput = {
   enquiryId: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2723,44 +2123,30 @@ export type EnquiryLineItemUpdateToOneWithWhereWithoutRecommendationsInput = {
 export type EnquiryLineItemUpdateWithoutRecommendationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2779,44 +2165,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutRecommendationsInput = {
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2832,44 +2204,30 @@ export type EnquiryLineItemCreateManyCraneTypeInput = {
   id?: string
   enquiryId: string
   lineNo: number
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -2881,44 +2239,30 @@ export type EnquiryLineItemCreateManyCraneTypeInput = {
 export type EnquiryLineItemUpdateWithoutCraneTypeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2936,44 +2280,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutCraneTypeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2990,44 +2320,30 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutCraneTypeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryId?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3040,44 +2356,30 @@ export type EnquiryLineItemCreateManyEnquiryInput = {
   id?: string
   lineNo: number
   craneTypeCode?: string | null
+  craneModel?: string | null
+  yom?: number | null
   capacityT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: $Enums.CapacityRule
-  capacityNote?: string | null
-  quantity?: number
   applicationDescription?: string | null
-  loadDescription?: string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: string | null
   requiredStartDate?: Date | string | null
   durationValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: $Enums.DurationUnit | null
   workingDaysPerMonth?: number | null
-  mobilisationTerms?: string | null
-  demobilisationTerms?: string | null
   otCharges?: string | null
   breakdownTerms?: string | null
   dieselScope?: string | null
+  workingHoursPerDay?: string | null
+  shift?: string | null
   workingHoursShift?: string | null
-  accommodationConveyance?: string | null
-  paymentTerms?: string | null
   supportCraneScope?: string | null
   steelMatsGroundPrepScope?: string | null
   ehsHrCompliance?: string | null
   insuranceTerms?: string | null
-  extensionClause?: string | null
   craneAgeCriteriaYears?: number | null
-  otherTerms?: string | null
   additionalManpowerScope?: string | null
-  intraSiteMovementScope?: string | null
-  prereleaseTerms?: string | null
-  ppeScope?: string | null
   rowScope?: string | null
-  rentalBudget?: string | null
   trailStatus?: $Enums.EnquiryLineTrailStatus
   closureStatus?: string | null
   cancelledAt?: Date | string | null
@@ -3089,44 +2391,30 @@ export type EnquiryLineItemCreateManyEnquiryInput = {
 export type EnquiryLineItemUpdateWithoutEnquiryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3144,44 +2432,30 @@ export type EnquiryLineItemUncheckedUpdateWithoutEnquiryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3198,44 +2472,30 @@ export type EnquiryLineItemUncheckedUpdateManyWithoutEnquiryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lineNo?: Prisma.IntFieldUpdateOperationsInput | number
   craneTypeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  craneModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   capacityT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  capacityRule?: Prisma.EnumCapacityRuleFieldUpdateOperationsInput | $Enums.CapacityRule
-  capacityNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  quantity?: Prisma.IntFieldUpdateOperationsInput | number
   applicationDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loadDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredMainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredFixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredLuffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  requiredWindJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  configurationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  craneConfiguration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   durationValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   durationUnit?: Prisma.NullableEnumDurationUnitFieldUpdateOperationsInput | $Enums.DurationUnit | null
   workingDaysPerMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  demobilisationTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   otCharges?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   breakdownTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dieselScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workingHoursPerDay?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workingHoursShift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accommodationConveyance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paymentTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportCraneScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steelMatsGroundPrepScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ehsHrCompliance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   insuranceTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extensionClause?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   craneAgeCriteriaYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   additionalManpowerScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  intraSiteMovementScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  prereleaseTerms?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ppeScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rowScope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  rentalBudget?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trailStatus?: Prisma.EnumEnquiryLineTrailStatusFieldUpdateOperationsInput | $Enums.EnquiryLineTrailStatus
   closureStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3307,44 +2567,30 @@ export type EnquiryLineItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   enquiryId?: boolean
   lineNo?: boolean
   craneTypeCode?: boolean
+  craneModel?: boolean
+  yom?: boolean
   capacityT?: boolean
-  capacityRule?: boolean
-  capacityNote?: boolean
-  quantity?: boolean
   applicationDescription?: boolean
-  loadDescription?: boolean
   liftLoadT?: boolean
-  workingRadiusM?: boolean
-  requiredMainBoomM?: boolean
-  requiredFixedJibM?: boolean
-  requiredLuffingJibM?: boolean
-  requiredWindJibM?: boolean
-  configurationNotes?: boolean
+  liftHeightM?: boolean
+  craneConfiguration?: boolean
   requiredStartDate?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
-  mobilisationTerms?: boolean
-  demobilisationTerms?: boolean
   otCharges?: boolean
   breakdownTerms?: boolean
   dieselScope?: boolean
+  workingHoursPerDay?: boolean
+  shift?: boolean
   workingHoursShift?: boolean
-  accommodationConveyance?: boolean
-  paymentTerms?: boolean
   supportCraneScope?: boolean
   steelMatsGroundPrepScope?: boolean
   ehsHrCompliance?: boolean
   insuranceTerms?: boolean
-  extensionClause?: boolean
   craneAgeCriteriaYears?: boolean
-  otherTerms?: boolean
   additionalManpowerScope?: boolean
-  intraSiteMovementScope?: boolean
-  prereleaseTerms?: boolean
-  ppeScope?: boolean
   rowScope?: boolean
-  rentalBudget?: boolean
   trailStatus?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
@@ -3365,44 +2611,30 @@ export type EnquiryLineItemSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   enquiryId?: boolean
   lineNo?: boolean
   craneTypeCode?: boolean
+  craneModel?: boolean
+  yom?: boolean
   capacityT?: boolean
-  capacityRule?: boolean
-  capacityNote?: boolean
-  quantity?: boolean
   applicationDescription?: boolean
-  loadDescription?: boolean
   liftLoadT?: boolean
-  workingRadiusM?: boolean
-  requiredMainBoomM?: boolean
-  requiredFixedJibM?: boolean
-  requiredLuffingJibM?: boolean
-  requiredWindJibM?: boolean
-  configurationNotes?: boolean
+  liftHeightM?: boolean
+  craneConfiguration?: boolean
   requiredStartDate?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
-  mobilisationTerms?: boolean
-  demobilisationTerms?: boolean
   otCharges?: boolean
   breakdownTerms?: boolean
   dieselScope?: boolean
+  workingHoursPerDay?: boolean
+  shift?: boolean
   workingHoursShift?: boolean
-  accommodationConveyance?: boolean
-  paymentTerms?: boolean
   supportCraneScope?: boolean
   steelMatsGroundPrepScope?: boolean
   ehsHrCompliance?: boolean
   insuranceTerms?: boolean
-  extensionClause?: boolean
   craneAgeCriteriaYears?: boolean
-  otherTerms?: boolean
   additionalManpowerScope?: boolean
-  intraSiteMovementScope?: boolean
-  prereleaseTerms?: boolean
-  ppeScope?: boolean
   rowScope?: boolean
-  rentalBudget?: boolean
   trailStatus?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
@@ -3418,44 +2650,30 @@ export type EnquiryLineItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   enquiryId?: boolean
   lineNo?: boolean
   craneTypeCode?: boolean
+  craneModel?: boolean
+  yom?: boolean
   capacityT?: boolean
-  capacityRule?: boolean
-  capacityNote?: boolean
-  quantity?: boolean
   applicationDescription?: boolean
-  loadDescription?: boolean
   liftLoadT?: boolean
-  workingRadiusM?: boolean
-  requiredMainBoomM?: boolean
-  requiredFixedJibM?: boolean
-  requiredLuffingJibM?: boolean
-  requiredWindJibM?: boolean
-  configurationNotes?: boolean
+  liftHeightM?: boolean
+  craneConfiguration?: boolean
   requiredStartDate?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
-  mobilisationTerms?: boolean
-  demobilisationTerms?: boolean
   otCharges?: boolean
   breakdownTerms?: boolean
   dieselScope?: boolean
+  workingHoursPerDay?: boolean
+  shift?: boolean
   workingHoursShift?: boolean
-  accommodationConveyance?: boolean
-  paymentTerms?: boolean
   supportCraneScope?: boolean
   steelMatsGroundPrepScope?: boolean
   ehsHrCompliance?: boolean
   insuranceTerms?: boolean
-  extensionClause?: boolean
   craneAgeCriteriaYears?: boolean
-  otherTerms?: boolean
   additionalManpowerScope?: boolean
-  intraSiteMovementScope?: boolean
-  prereleaseTerms?: boolean
-  ppeScope?: boolean
   rowScope?: boolean
-  rentalBudget?: boolean
   trailStatus?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
@@ -3471,44 +2689,30 @@ export type EnquiryLineItemSelectScalar = {
   enquiryId?: boolean
   lineNo?: boolean
   craneTypeCode?: boolean
+  craneModel?: boolean
+  yom?: boolean
   capacityT?: boolean
-  capacityRule?: boolean
-  capacityNote?: boolean
-  quantity?: boolean
   applicationDescription?: boolean
-  loadDescription?: boolean
   liftLoadT?: boolean
-  workingRadiusM?: boolean
-  requiredMainBoomM?: boolean
-  requiredFixedJibM?: boolean
-  requiredLuffingJibM?: boolean
-  requiredWindJibM?: boolean
-  configurationNotes?: boolean
+  liftHeightM?: boolean
+  craneConfiguration?: boolean
   requiredStartDate?: boolean
   durationValue?: boolean
   durationUnit?: boolean
   workingDaysPerMonth?: boolean
-  mobilisationTerms?: boolean
-  demobilisationTerms?: boolean
   otCharges?: boolean
   breakdownTerms?: boolean
   dieselScope?: boolean
+  workingHoursPerDay?: boolean
+  shift?: boolean
   workingHoursShift?: boolean
-  accommodationConveyance?: boolean
-  paymentTerms?: boolean
   supportCraneScope?: boolean
   steelMatsGroundPrepScope?: boolean
   ehsHrCompliance?: boolean
   insuranceTerms?: boolean
-  extensionClause?: boolean
   craneAgeCriteriaYears?: boolean
-  otherTerms?: boolean
   additionalManpowerScope?: boolean
-  intraSiteMovementScope?: boolean
-  prereleaseTerms?: boolean
-  ppeScope?: boolean
   rowScope?: boolean
-  rentalBudget?: boolean
   trailStatus?: boolean
   closureStatus?: boolean
   cancelledAt?: boolean
@@ -3517,7 +2721,7 @@ export type EnquiryLineItemSelectScalar = {
   updatedAt?: boolean
 }
 
-export type EnquiryLineItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryId" | "lineNo" | "craneTypeCode" | "capacityT" | "capacityRule" | "capacityNote" | "quantity" | "applicationDescription" | "loadDescription" | "liftLoadT" | "workingRadiusM" | "requiredMainBoomM" | "requiredFixedJibM" | "requiredLuffingJibM" | "requiredWindJibM" | "configurationNotes" | "requiredStartDate" | "durationValue" | "durationUnit" | "workingDaysPerMonth" | "mobilisationTerms" | "demobilisationTerms" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "accommodationConveyance" | "paymentTerms" | "supportCraneScope" | "steelMatsGroundPrepScope" | "ehsHrCompliance" | "insuranceTerms" | "extensionClause" | "craneAgeCriteriaYears" | "otherTerms" | "additionalManpowerScope" | "intraSiteMovementScope" | "prereleaseTerms" | "ppeScope" | "rowScope" | "rentalBudget" | "trailStatus" | "closureStatus" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiryLineItem"]>
+export type EnquiryLineItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryId" | "lineNo" | "craneTypeCode" | "craneModel" | "yom" | "capacityT" | "applicationDescription" | "liftLoadT" | "liftHeightM" | "craneConfiguration" | "requiredStartDate" | "durationValue" | "durationUnit" | "workingDaysPerMonth" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursPerDay" | "shift" | "workingHoursShift" | "supportCraneScope" | "steelMatsGroundPrepScope" | "ehsHrCompliance" | "insuranceTerms" | "craneAgeCriteriaYears" | "additionalManpowerScope" | "rowScope" | "trailStatus" | "closureStatus" | "cancelledAt" | "cancelReason" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiryLineItem"]>
 export type EnquiryLineItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enquiry?: boolean | Prisma.EnquiryDefaultArgs<ExtArgs>
   craneType?: boolean | Prisma.EnquiryLineItem$craneTypeArgs<ExtArgs>
@@ -3554,44 +2758,40 @@ export type $EnquiryLineItemPayload<ExtArgs extends runtime.Types.Extensions.Int
      */
     lineNo: number
     craneTypeCode: string | null
+    /**
+     * Customer's preferred crane model and year, when specified at intake.
+     */
+    craneModel: string | null
+    yom: number | null
     capacityT: runtime.Decimal | null
-    capacityRule: $Enums.CapacityRule
-    capacityNote: string | null
-    quantity: number
     applicationDescription: string | null
-    loadDescription: string | null
     liftLoadT: runtime.Decimal | null
-    workingRadiusM: runtime.Decimal | null
-    requiredMainBoomM: runtime.Decimal | null
-    requiredFixedJibM: runtime.Decimal | null
-    requiredLuffingJibM: runtime.Decimal | null
-    requiredWindJibM: runtime.Decimal | null
-    configurationNotes: string | null
+    liftHeightM: runtime.Decimal | null
+    /**
+     * The requested configuration as written by the customer, e.g. "MB 60 + FJ 12".
+     */
+    craneConfiguration: string | null
     requiredStartDate: Date | null
     durationValue: runtime.Decimal | null
     durationUnit: $Enums.DurationUnit | null
     workingDaysPerMonth: number | null
-    mobilisationTerms: string | null
-    demobilisationTerms: string | null
     otCharges: string | null
     breakdownTerms: string | null
     dieselScope: string | null
+    /**
+     * Working hours and shift are captured separately; workingHoursShift is the
+     * combined value carried into an RFQ for the vendor.
+     */
+    workingHoursPerDay: string | null
+    shift: string | null
     workingHoursShift: string | null
-    accommodationConveyance: string | null
-    paymentTerms: string | null
     supportCraneScope: string | null
     steelMatsGroundPrepScope: string | null
     ehsHrCompliance: string | null
     insuranceTerms: string | null
-    extensionClause: string | null
     craneAgeCriteriaYears: number | null
-    otherTerms: string | null
     additionalManpowerScope: string | null
-    intraSiteMovementScope: string | null
-    prereleaseTerms: string | null
-    ppeScope: string | null
     rowScope: string | null
-    rentalBudget: string | null
     trailStatus: $Enums.EnquiryLineTrailStatus
     closureStatus: string | null
     cancelledAt: Date | null
@@ -4031,44 +3231,30 @@ export interface EnquiryLineItemFieldRefs {
   readonly enquiryId: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly lineNo: Prisma.FieldRef<"EnquiryLineItem", 'Int'>
   readonly craneTypeCode: Prisma.FieldRef<"EnquiryLineItem", 'String'>
+  readonly craneModel: Prisma.FieldRef<"EnquiryLineItem", 'String'>
+  readonly yom: Prisma.FieldRef<"EnquiryLineItem", 'Int'>
   readonly capacityT: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly capacityRule: Prisma.FieldRef<"EnquiryLineItem", 'CapacityRule'>
-  readonly capacityNote: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly quantity: Prisma.FieldRef<"EnquiryLineItem", 'Int'>
   readonly applicationDescription: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly loadDescription: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly liftLoadT: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly workingRadiusM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly requiredMainBoomM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly requiredFixedJibM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly requiredLuffingJibM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly requiredWindJibM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
-  readonly configurationNotes: Prisma.FieldRef<"EnquiryLineItem", 'String'>
+  readonly liftHeightM: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
+  readonly craneConfiguration: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly requiredStartDate: Prisma.FieldRef<"EnquiryLineItem", 'DateTime'>
   readonly durationValue: Prisma.FieldRef<"EnquiryLineItem", 'Decimal'>
   readonly durationUnit: Prisma.FieldRef<"EnquiryLineItem", 'DurationUnit'>
   readonly workingDaysPerMonth: Prisma.FieldRef<"EnquiryLineItem", 'Int'>
-  readonly mobilisationTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly demobilisationTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly otCharges: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly breakdownTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly dieselScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
+  readonly workingHoursPerDay: Prisma.FieldRef<"EnquiryLineItem", 'String'>
+  readonly shift: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly workingHoursShift: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly accommodationConveyance: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly paymentTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly supportCraneScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly steelMatsGroundPrepScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly ehsHrCompliance: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly insuranceTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly extensionClause: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly craneAgeCriteriaYears: Prisma.FieldRef<"EnquiryLineItem", 'Int'>
-  readonly otherTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly additionalManpowerScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly intraSiteMovementScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly prereleaseTerms: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly ppeScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly rowScope: Prisma.FieldRef<"EnquiryLineItem", 'String'>
-  readonly rentalBudget: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly trailStatus: Prisma.FieldRef<"EnquiryLineItem", 'EnquiryLineTrailStatus'>
   readonly closureStatus: Prisma.FieldRef<"EnquiryLineItem", 'String'>
   readonly cancelledAt: Prisma.FieldRef<"EnquiryLineItem", 'DateTime'>

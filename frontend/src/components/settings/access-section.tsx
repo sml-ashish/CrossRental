@@ -1,14 +1,12 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { SettingsSection } from "@/components/settings/parts";
 
 /**
  * Who can be here.
  *
  * There is no access setting to edit: the route guard, the nav filter and the
- * API all restrict this page to `admin_user`, and staff accounts and roles are
- * managed on the admin console. So the honest section is a statement of the
- * rule plus the way to the screen that does change it — not a disabled form.
+ * API all restrict this page to `admin_user`. So the honest section is a
+ * statement of the rule — not a disabled form.
  */
 export function AccessSection() {
   return (
@@ -25,17 +23,10 @@ export function AccessSection() {
             <p className="mt-1 max-w-[62ch] text-[15px] leading-relaxed text-slate-500">
               This page is limited to admin users. Sales, operations and vendors never see it, and
               the API refuses a settings change from anyone else even if the request is made by
-              hand. Staff accounts, roles and deactivation live in the admin console.
+              hand. Staff accounts and roles are managed by SML administrators.
             </p>
           </div>
         </div>
-        <Link
-          to="/app/admin"
-          className="btn-secondary shrink-0 px-3 py-1.5 text-[15px]"
-        >
-          Open the admin console
-          <ArrowRight className="size-3.5" aria-hidden />
-        </Link>
       </div>
     </SettingsSection>
   );

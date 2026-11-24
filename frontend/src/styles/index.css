@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* Vercel's Geist family, self-hosted: Sans for UI/body, Mono for reference
+   values, Serif for display copy, Pixel for small decorative labels. */
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "@01orbital/font-geist-serif";
+@import "@fontsource-variable/geist-pixel";
 
 /*
  * crossrentel — design tokens.
@@ -106,7 +112,12 @@
   --color-purple-200: #3a2a5a;
   --color-purple-700: #d8b4fe;
 
+  /* The whole Geist family. `font-sans` is the portal default; the others are
+     opt-in utilities (font-mono / font-serif / font-pixel). */
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: "Geist Serif", Georgia, serif;
+  --font-pixel: "Geist Pixel Variable", ui-monospace, monospace;
 
   --radius-card: 0.75rem;
 }
@@ -598,8 +609,7 @@
  * reads tokens, nothing in the page needs a `dark:` variant.
  */
 .enq {
-  --enq-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Charter, Georgia,
-    serif;
+  --enq-serif: "Geist Serif", Georgia, serif;
   --enq-card-shadow: none;
   --enq-card-shadow-hover: none;
   --enq-card-border: var(--color-ink-800);

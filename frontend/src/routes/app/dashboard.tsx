@@ -22,6 +22,7 @@ import {
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   buildComingUp,
   craneRowName,
@@ -219,36 +220,41 @@ function DashboardHeader({
 }) {
   const greeting = greetingFor();
   return (
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
-        <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-slate-900">
-          {greeting}, {name ?? "there"}
-        </h1>
-        {status ? (
-          <p className="mt-1.5 flex items-center gap-2 text-sm text-slate-600">
-            <span
-              className={cn(
-                "size-1.5 shrink-0 rounded-full",
-                status.tone === "green" ? "bg-emerald-500" : "bg-amber-500",
-              )}
-              aria-hidden
-            />
-            <span>{status.text}</span>
-          </p>
-        ) : null}
+    <div>
+      <div className="mb-2">
+        <PageBackButton />
       </div>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-slate-900">
+            {greeting}, {name ?? "there"}
+          </h1>
+          {status ? (
+            <p className="mt-1.5 flex items-center gap-2 text-sm text-slate-600">
+              <span
+                className={cn(
+                  "size-1.5 shrink-0 rounded-full",
+                  status.tone === "green" ? "bg-emerald-500" : "bg-amber-500",
+                )}
+                aria-hidden
+              />
+              <span>{status.text}</span>
+            </p>
+          ) : null}
+        </div>
 
-      {showAddCrane ? (
-        <Link
-          to="/app/fleet/new"
-          search={{ duplicate: undefined, vendorId: undefined }}
-          className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg px-1 py-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
-        >
-          <Plus className="size-3.5" aria-hidden />
-          Add a crane
-        </Link>
-      ) : null}
-    </header>
+        {showAddCrane ? (
+          <Link
+            to="/app/fleet/new"
+            search={{ duplicate: undefined, vendorId: undefined }}
+            className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg px-1 py-1 text-[15px] font-medium text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
+          >
+            <Plus className="size-3.5" aria-hidden />
+            Add a crane
+          </Link>
+        ) : null}
+      </header>
+    </div>
   );
 }
 

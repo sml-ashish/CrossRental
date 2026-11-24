@@ -19,9 +19,9 @@ import { recordAudit } from "./audit.service";
  *
  * - **A bad row does not stop the import.** Valid rows are invited and the
  *   report names the Excel row and the column that failed.
- * - **Duplicates are skipped, never re-sent.** An email with an account, an
- *   outstanding invitation, or an earlier row in the same file is reported and
- *   left alone.
+ * - **Duplicates are skipped, never re-sent.** An email with an account, or an
+ *   earlier row in the same file, is reported and left alone. Re-sending to an
+ *   address with a live invitation is allowed for now.
  * - **`dryRun` writes nothing.** It returns the same report so the screen can
  *   preview exactly what an import would do.
  * - **One mail failure is not fatal.** A row whose invitation was created but
@@ -139,8 +139,8 @@ export async function importInvitations(input: {
     }
     seen.add(normalisedEmail);
 
-    // Same duplicate guards as the single invite: an existing account, or a
-    // live invitation, must not get a second link.
+    // Same duplicate guard as the single invite: an existing account must not
+    // get another link. A live invitation no longer blocks a re-send.
     try {
       await assertInvitable(normalisedEmail);
     } catch (error) {

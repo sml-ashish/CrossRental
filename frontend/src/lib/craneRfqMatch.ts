@@ -136,7 +136,8 @@ export function requirementFromLine(line: RaisableLine): MatchRequirement {
     craneTypeCode: line.craneTypeCode,
     craneTypeName: line.craneTypeName,
     capacityT: line.capacityT,
-    capacityRule: line.capacityRule,
+    // Enquiries no longer choose a matching rule; RFQs default to at least.
+    capacityRule: "AT_LEAST",
     mainBoomM: null,
     startDateTbc: line.startDateTbc,
     requiredStartDate: line.requiredStartDate,
@@ -144,7 +145,7 @@ export function requirementFromLine(line: RaisableLine): MatchRequirement {
     durationUnit: null,
     siteStateCode: null,
     siteStateName: line.siteStateName,
-    siteLocation: line.siteLocation,
+    siteLocation: line.shipToCity,
     siteLatitude: null,
     siteLongitude: null,
   };

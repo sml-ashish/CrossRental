@@ -88,7 +88,7 @@ export async function buildInviteTemplate(): Promise<Buffer> {
     ],
     [
       "Duplicates",
-      "A row is skipped when its email already has an account, already has a live invitation, or appears twice in the file. The report names the row.",
+      "A row is skipped when its email already has an account or appears twice in the file. The report names the row.",
     ],
     [
       "Bad rows",

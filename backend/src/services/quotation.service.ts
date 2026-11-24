@@ -8,7 +8,7 @@ import { distanceBetween } from "./distance.service";
 import { onQuotesReceived, onUnderEvaluation } from "./enquiryTrail.service";
 import { getSettings } from "../utils/settings";
 import { getMasterLists } from "../utils/masterLists";
-import { sendTemplate } from "./email.service";
+import { Raw, sendTemplate } from "./email.service";
 import {
   quotationMarkSchema,
   type QuotationMarkInput,
@@ -1673,25 +1673,16 @@ async function notifyCreatorOfQuotation(
   );
 }
 
-/** Warnings as a pre-escaped list, so a note cannot inject markup into the mail. */
+/** Warnings as a pre-rendered text block. */
 function warningsBlock(
   warnings: Array<{ code: string; message: string }>,
-): string {
+): Raw {
   if (warnings.length === 0) {
-    return `<p style="margin:0;font-size:13px;color:#64748b">No advisories on this quotation.</p>`;
+    return new Raw("No advisories on this quotation.");
   }
-  const items = warnings
-    .map((w) => `<li style="margin:0 0 4px">${escapeHtml(w.message)}</li>`)
-    .join("");
-  return `<p style="margin:0 0 6px;font-size:13px;color:#b45309"><strong>Advisories for your review:</strong></p><ul style="margin:0 0 12px;padding-left:20px;font-size:13px;color:#b45309">${items}</ul>`;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return new Raw(
+    `Advisories for your review:\n${warnings.map((w) => `- ${w.message}`).join("\n")}`,
+  );
 }
 
 async function vendorNameOf(vendorId: string): Promise<string> {

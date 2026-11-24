@@ -2,3 +2,4 @@ VendorPortalImplementation.md
 design.md
 ./backend/node_modules
 ./frontend/node_modules
+.env

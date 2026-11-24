@@ -66,6 +66,7 @@ export function NegotiationsSection({
     ["AWAITING_VENDOR", "AWAITING_SML", "AGREED"].includes(thread.status),
   );
   const awaiting = negotiations.filter((thread) => thread.status === "AWAITING_SML").length;
+  const agreed = negotiations.filter((thread) => thread.status === "AGREED").length;
 
   const nearDeadline = !closed && !deadlinePassed &&
     new Date(submissionDeadline).getTime() - Date.now() < 24 * 60 * 60 * 1000;
@@ -86,15 +87,22 @@ export function NegotiationsSection({
         </Alert>
       ) : null}
 
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[17px] font-semibold text-slate-900">
-          Negotiations
-          <span className="ml-2 text-[14px] font-normal text-slate-500">
-            {awaiting > 0
-              ? `${awaiting} awaiting your response`
-              : "Counter-offers and agreed terms"}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-[20px] font-semibold tracking-tight text-slate-900">Negotiations</h2>
+          <p className="mt-0.5 text-[14px] text-slate-500">
+            Counter-offers, vendor replies and the terms both sides have agreed.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-ink-800 bg-ink-900 px-2.5 py-1 text-[12px] text-slate-500">
+            {negotiations.length} thread{negotiations.length === 1 ? "" : "s"}
           </span>
-        </h2>
+          {awaiting > 0 ? (
+            <Badge tone="blue">{awaiting} awaiting your reply</Badge>
+          ) : null}
+          {agreed > 0 ? <Badge tone="emerald">{agreed} agreed</Badge> : null}
+        </div>
       </div>
 
       {loading ? (
@@ -156,60 +164,99 @@ function ThreadCard({
   const blocked = closed || deadlinePassed || thread.deadlinePassed;
   const canRespond = canCounter && !blocked;
   const awaitingSml = thread.status === "AWAITING_SML";
+  const warnings = latest?.warnings ?? [];
+  const saving =
+    thread.baseQuotation.totalQuotedValue - (latest?.totalQuotedValue ?? thread.baseQuotation.totalQuotedValue);
 
   const responseDue = latest?.respondBy;
 
   return (
     <li className="card p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[17px] font-semibold text-slate-900">
-              {thread.vendorName ?? "Vendor"}
-            </h3>
-            <Badge tone={negotiationTone(thread.status)}>
-              {NEGOTIATION_STATUS_LABELS[thread.status]}
-            </Badge>
-            {latest?.isFinal ? <Badge tone="purple">Final round</Badge> : null}
+      <div>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-[18px] font-semibold text-slate-900">
+                {thread.vendorName ?? "Vendor"}
+              </h3>
+              <Badge tone={negotiationTone(thread.status)}>
+                {NEGOTIATION_STATUS_LABELS[thread.status]}
+              </Badge>
+              {latest?.isFinal ? <Badge tone="purple">Final round</Badge> : null}
+            </div>
+            <p className="mt-1 text-[14px] text-slate-500">
+              {thread.craneLabel} · Round {thread.currentRound} of {thread.maxRounds} · v{thread.version}
+            </p>
           </div>
-          <p className="mt-1 text-[14px] text-slate-500">
-            {thread.craneLabel} · Round {thread.currentRound} of {thread.maxRounds} · v{thread.version}
-          </p>
+          <div className="rounded-xl border border-ink-800 bg-ink-900/60 px-4 py-2.5 text-right">
+            <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
+              {awaitingSml
+                ? "Their offer to you"
+                : thread.status === "AGREED"
+                  ? "Agreed total"
+                  : "Last offer"}
+            </p>
+            <p className="text-[28px] leading-8 font-semibold text-slate-900 tabular-nums">
+              ₹{inr(latest?.totalQuotedValue ?? thread.baseQuotation.totalQuotedValue)}
+            </p>
+            <p className="text-[13px] text-slate-500">
+              vs ₹{inr(thread.baseQuotation.totalQuotedValue)} original ·{" "}
+              <span className={saving < 0 ? "text-amber-600" : "text-emerald-600"}>
+                {saving === 0 ? "no change" : `${saving < 0 ? "↑" : "↓"} ₹${inr(Math.abs(saving))}`}
+              </span>
+            </p>
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-[12px] font-medium tracking-[0.08em] text-slate-500 uppercase">
-            {awaitingSml ? "Their latest offer" : thread.status === "AGREED" ? "Agreed total" : "Last offer"}
+
+        {thread.status === "AGREED" && thread.agreedQuotation ? (
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[15px] font-semibold text-emerald-700">
+                Terms agreed at ₹{inr(thread.agreedQuotation.totalQuotedValue)}
+              </p>
+              <Badge tone="emerald">Agreed · v{thread.agreedQuotation.version}</Badge>
+            </div>
+            <p className="mt-1 text-[13px] text-slate-500">
+              Award quotation v{thread.agreedQuotation.version} from the Quotations tab to confirm.
+              Awarding closes this thread and cancels any other open offers for this RFQ.
+            </p>
+          </div>
+        ) : null}
+
+        {warnings.length > 0 && thread.status !== "AGREED" ? (
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3" role="alert">
+            <p className="text-[14px] font-semibold text-amber-700">
+              Check these terms before accepting
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {warnings.map((warning) => (
+                <li key={warning.code} className="flex gap-2 text-[13px] text-amber-600">
+                  <span aria-hidden>•</span>
+                  <span>{warning.message}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {["DECLINED", "EXPIRED", "CANCELLED"].includes(thread.status) ? (
+          <p className="mt-3 text-[14px] text-slate-500">
+            {thread.closedReason ?? "This negotiation is closed."}
           </p>
-          <p className="text-[24px] leading-7 font-semibold text-slate-900 tabular-nums">
-            ₹{inr(latest?.totalQuotedValue ?? thread.baseQuotation.totalQuotedValue)}
-          </p>
-          <p className="text-[13px] text-slate-500">
-            vs ₹{inr(thread.baseQuotation.totalQuotedValue)} base
-          </p>
+        ) : null}
+
+        <div className="mt-5 border-t border-ink-800 pt-4">
+          <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+            <h4 className="text-[15px] font-semibold text-slate-900">Offer comparison</h4>
+            <p className="text-[13px] text-slate-500">
+              Original quote against every counter · changes highlighted
+            </p>
+          </div>
+          <OfferComparison thread={thread} />
         </div>
       </div>
 
-      {thread.status === "AGREED" && thread.agreedQuotation ? (
-        <div className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 px-4 py-3">
-          <p className="text-[15px] font-medium text-emerald-400">
-            Terms agreed at ₹{inr(thread.agreedQuotation.totalQuotedValue)}.
-          </p>
-          <p className="mt-0.5 text-[13px] text-slate-400">
-            Award quotation v{thread.agreedQuotation.version} from the Quotations tab to confirm.
-            Awarding closes this thread and cancels any other open offers for this RFQ.
-          </p>
-        </div>
-      ) : null}
-
-      {["DECLINED", "EXPIRED", "CANCELLED"].includes(thread.status) ? (
-        <p className="mt-3 text-[14px] text-slate-500">
-          {thread.closedReason ?? "This negotiation is closed."}
-        </p>
-      ) : null}
-
-      <OfferComparison thread={thread} />
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 pt-4">
+      <div className="-mx-5 -mb-5 mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-ink-800 px-5 py-4">
         <p className="text-[13px] text-slate-500">
           {awaitingSml
             ? responseDue
@@ -328,11 +375,100 @@ interface OfferColumn {
   warnings: NegotiationRound["warnings"];
 }
 
+const TONE_EDGE: Record<OfferColumn["tone"], string> = {
+  base: "border-t-slate-500",
+  vendor: "border-t-amber-600",
+  sml: "border-t-blue-600",
+};
+
+const TONE_TEXT: Record<OfferColumn["tone"], string> = {
+  base: "text-slate-500",
+  vendor: "text-amber-600",
+  sml: "text-blue-600",
+};
+
+const money = (value: number) => `₹${inr(value)}`;
+
+function offerBasis(basis: string): string {
+  return basis.replaceAll("_", " ").toLowerCase();
+}
+
+function taxLabel(basis: string): string {
+  return basis === "INCLUSIVE_OF_GST" ? "Inclusive" : "Exclusive";
+}
+
+function SpotlightTerm({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-slate-500">{label}</dt>
+      <dd className="font-medium text-slate-700 tabular-nums">{children}</dd>
+    </div>
+  );
+}
+
+/**
+ * One at-a-glance card for a side of the negotiation. The colour of the top
+ * edge matches that side's column in the table below, so a user can follow an
+ * offer from the headline straight through to the detailed comparison.
+ */
+function OfferSpotlight({
+  column,
+  eyebrow,
+  emptyText,
+}: {
+  column: OfferColumn | null;
+  eyebrow: string;
+  emptyText: string;
+}) {
+  const tone: OfferColumn["tone"] = column?.tone ?? "sml";
+  return (
+    <div
+      className={cn(
+        "min-w-0 rounded-xl border border-ink-800 border-t-2 bg-ink-900/60 p-4",
+        TONE_EDGE[tone],
+        column?.open && "ring-1 ring-accent-500/30",
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[12px] font-semibold tracking-[0.1em] text-slate-500 uppercase">
+          {eyebrow}
+        </p>
+        {column ? (
+          <Badge tone={tone === "sml" ? "blue" : tone === "vendor" ? "amber" : "neutral"}>
+            {column.open ? "Current" : column.title}
+          </Badge>
+        ) : null}
+      </div>
+      {column ? (
+        <>
+          <p className="mt-2 text-[28px] leading-8 font-semibold text-slate-900 tabular-nums">
+            {money(column.total)}
+          </p>
+          <p className={cn("text-[13px] font-medium", TONE_TEXT[tone])}>{column.subtitle}</p>
+          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-ink-800 pt-3 text-[13px]">
+            <SpotlightTerm label="Rate">
+              {money(column.rentalRate)}{" "}
+              <span className="font-normal text-slate-500">/ {offerBasis(column.rateBasis)}</span>
+            </SpotlightTerm>
+            <SpotlightTerm label="GST">{taxLabel(column.taxBasis)}</SpotlightTerm>
+            <SpotlightTerm label="Mobilisation">{money(column.mobilisationCharges)}</SpotlightTerm>
+            <SpotlightTerm label="Demobilisation">
+              {money(column.demobilisationCharges)}
+            </SpotlightTerm>
+            <SpotlightTerm label="Valid until">{formatDate(column.validityDate)}</SpotlightTerm>
+          </dl>
+        </>
+      ) : (
+        <p className="mt-3 text-[14px] leading-5 text-slate-500">{emptyText}</p>
+      )}
+    </div>
+  );
+}
+
 /**
  * The vendor's original quotation and every counter-offer side by side, oldest
- * on the left. Each column is one offer; any figure that moved since the column
- * before it is tinted and shows the change, so the negotiation reads straight
- * across instead of down a list.
+ * on the left. The headline cards answer "what did they offer / what did we
+ * counter"; the table below answers "what exactly changed, and when".
  */
 export function OfferComparison({
   thread,
@@ -342,69 +478,90 @@ export function OfferComparison({
   viewer?: "sml" | "vendor";
 }) {
   const base = thread.baseQuotation;
-  const columns: OfferColumn[] = [
-    {
-      key: "base",
-      title: "Original quote",
-      subtitle: viewer === "vendor" ? `Your quote · v${base.version}` : `Vendor · v${base.version}`,
-      tone: "base",
-      isFinal: false,
-      open: false,
-      total: base.totalQuotedValue,
-      rentalRate: base.rentalRate,
-      rateBasis: base.rateBasis,
-      mobilisationCharges: base.mobilisationCharges,
-      demobilisationCharges: base.demobilisationCharges,
-      taxBasis: base.taxBasis,
-      validityDate: base.validityDate,
-      availableFrom: base.availableFrom,
-      note: base.deviationText,
-      warnings: [],
-    },
-    ...thread.rounds.map(
-      (round): OfferColumn => ({
-        key: round.roundId,
-        title: `Round ${round.roundNumber}`,
-        subtitle:
-          round.offeredBy === "VENDOR"
-            ? viewer === "vendor"
-              ? "Your counter"
-              : round.onBehalfOfVendor
-                ? "Vendor (logged)"
-                : "Vendor counter"
-            : viewer === "vendor"
-              ? "Buyer counter"
-              : "SML counter",
-        tone: round.offeredBy === "VENDOR" ? "vendor" : "sml",
-        isFinal: round.isFinal,
-        open: round.outcome === "OPEN",
-        total: round.totalQuotedValue,
-        rentalRate: round.rentalRate,
-        rateBasis: round.rateBasis,
-        mobilisationCharges: round.mobilisationCharges,
-        demobilisationCharges: round.demobilisationCharges,
-        taxBasis: round.taxBasis,
-        validityDate: round.validityDate,
-        availableFrom: round.availableFrom,
-        note: round.message ?? round.deviationText,
-        warnings: round.warnings,
-      }),
-    ),
-  ];
+  const baseColumn: OfferColumn = {
+    key: "base",
+    title: "Original quote",
+    subtitle: `Vendor · v${base.version}`,
+    tone: "base",
+    isFinal: false,
+    open: false,
+    total: base.totalQuotedValue,
+    rentalRate: base.rentalRate,
+    rateBasis: base.rateBasis,
+    mobilisationCharges: base.mobilisationCharges,
+    demobilisationCharges: base.demobilisationCharges,
+    taxBasis: base.taxBasis,
+    validityDate: base.validityDate,
+    availableFrom: base.availableFrom,
+    note: base.deviationText,
+    warnings: [],
+  };
 
-  const money = (value: number) => `₹${inr(value)}`;
-  const delta = (current: number, previous: number | undefined) => {
+  const roundColumns: OfferColumn[] = thread.rounds.map((round): OfferColumn => ({
+    key: round.roundId,
+    title: `Round ${round.roundNumber}`,
+    subtitle:
+      round.offeredBy === "VENDOR"
+        ? viewer === "vendor"
+          ? "Your counter"
+          : round.onBehalfOfVendor
+            ? "Vendor (logged)"
+            : "Vendor counter"
+        : viewer === "vendor"
+          ? "SML counter"
+          : "Our counter",
+    tone: round.offeredBy === "VENDOR" ? "vendor" : "sml",
+    isFinal: round.isFinal,
+    open: round.outcome === "OPEN",
+    total: round.totalQuotedValue,
+    rentalRate: round.rentalRate,
+    rateBasis: round.rateBasis,
+    mobilisationCharges: round.mobilisationCharges,
+    demobilisationCharges: round.demobilisationCharges,
+    taxBasis: round.taxBasis,
+    validityDate: round.validityDate,
+    availableFrom: round.availableFrom,
+    note: round.message ?? round.deviationText,
+    warnings: round.warnings,
+  }));
+
+  const columns = [baseColumn, ...roundColumns];
+  const vendorColumn = roundColumns.filter((column) => column.tone === "vendor").at(-1) ?? baseColumn;
+  const smlColumn = roundColumns.filter((column) => column.tone === "sml").at(-1) ?? null;
+  const gap = smlColumn ? Math.abs(vendorColumn.total - smlColumn.total) : 0;
+
+  /** A directional change against the previous offer: ↓ is cheaper, ↑ dearer. */
+  const change = (current: number, previous: number | undefined) => {
     if (previous === undefined || current === previous) return null;
     const diff = current - previous;
     return (
       <span
         className={cn(
-          "block text-[12px] font-normal",
-          diff > 0 ? "text-amber-600" : "text-emerald-600",
+          "block text-[12px] font-medium tabular-nums",
+          diff < 0 ? "text-emerald-600" : "text-amber-600",
         )}
       >
-        {diff > 0 ? "+" : "−"}
-        {money(Math.abs(diff))}
+        {diff < 0 ? "↓" : "↑"} {money(Math.abs(diff))}
+      </span>
+    );
+  };
+
+  const vsOriginal = (current: number) => {
+    const diff = current - baseColumn.total;
+    return (
+      <span
+        className={cn(
+          "block text-[12px] tabular-nums",
+          diff === 0
+            ? "text-slate-500"
+            : diff < 0
+              ? "text-emerald-600"
+              : "text-amber-600",
+        )}
+      >
+        {diff === 0
+          ? "same as original"
+          : `${diff < 0 ? "↓" : "↑"} ${money(Math.abs(diff))} vs original`}
       </span>
     );
   };
@@ -415,16 +572,16 @@ export function OfferComparison({
     changed: (column: OfferColumn, previous: OfferColumn) => boolean;
   }
 
-  const rows: Row[] = [
+  const commercialRows: Row[] = [
     {
       label: "Rate",
       value: (c, p) => (
         <>
           {money(c.rentalRate)}
           <span className="block text-[12px] font-normal text-slate-500">
-            {c.rateBasis.replaceAll("_", " ").toLowerCase()}
+            {offerBasis(c.rateBasis)}
           </span>
-          {delta(c.rentalRate, p?.rentalRate)}
+          {change(c.rentalRate, p?.rentalRate)}
         </>
       ),
       changed: (c, p) => c.rentalRate !== p.rentalRate || c.rateBasis !== p.rateBasis,
@@ -434,7 +591,7 @@ export function OfferComparison({
       value: (c, p) => (
         <>
           {money(c.mobilisationCharges)}
-          {delta(c.mobilisationCharges, p?.mobilisationCharges)}
+          {change(c.mobilisationCharges, p?.mobilisationCharges)}
         </>
       ),
       changed: (c, p) => c.mobilisationCharges !== p.mobilisationCharges,
@@ -444,16 +601,19 @@ export function OfferComparison({
       value: (c, p) => (
         <>
           {money(c.demobilisationCharges)}
-          {delta(c.demobilisationCharges, p?.demobilisationCharges)}
+          {change(c.demobilisationCharges, p?.demobilisationCharges)}
         </>
       ),
       changed: (c, p) => c.demobilisationCharges !== p.demobilisationCharges,
     },
     {
       label: "GST",
-      value: (c) => (c.taxBasis === "INCLUSIVE_OF_GST" ? "Inclusive" : "Exclusive"),
+      value: (c) => taxLabel(c.taxBasis),
       changed: (c, p) => c.taxBasis !== p.taxBasis,
     },
+  ];
+
+  const validityRows: Row[] = [
     {
       label: "Valid until",
       value: (c) => formatDate(c.validityDate),
@@ -470,119 +630,169 @@ export function OfferComparison({
 
   const labelCell =
     "sticky left-0 z-10 w-[130px] min-w-[130px] bg-ink-850 px-4 py-3 text-left align-top text-[12px] font-medium tracking-[0.08em] whitespace-nowrap text-slate-500 uppercase";
-  const valueCell = "min-w-[190px] px-4 py-3 align-top text-[15px] text-slate-700 tabular-nums";
+  const valueCell = "min-w-[200px] px-4 py-3 align-top text-[15px] text-slate-700 tabular-nums";
   const changedCell = "bg-amber-500/10 font-semibold text-slate-900";
+  const sectionCell =
+    "bg-ink-850 px-4 py-2 text-left text-[11px] font-semibold tracking-[0.12em] text-slate-500 uppercase";
+
+  const renderRow = (row: Row) => (
+    <tr key={row.label}>
+      <th scope="row" className={labelCell}>
+        {row.label}
+      </th>
+      {columns.map((column, index) => {
+        const previous = columns[index - 1];
+        return (
+          <td
+            key={column.key}
+            className={cn(valueCell, previous && row.changed(column, previous) && changedCell)}
+          >
+            {row.value(column, previous)}
+          </td>
+        );
+      })}
+    </tr>
+  );
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-xl border border-ink-800">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-ink-800">
-            <th scope="col" className={cn(labelCell, "py-3")}>
-              Offer
-            </th>
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                scope="col"
+    <div className="mt-3 space-y-3">
+      <div
+        className={cn(
+          "grid gap-3",
+          smlColumn ? "lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]" : "lg:grid-cols-2",
+        )}
+      >
+        <OfferSpotlight
+          column={vendorColumn}
+          eyebrow={viewer === "vendor" ? "Your latest offer" : "Their latest offer"}
+          emptyText="No offer has been logged in this thread yet."
+        />
+        {smlColumn ? (
+          <div className="flex items-center justify-center px-2">
+            <div className="text-center">
+              <p className="text-[11px] font-semibold tracking-[0.1em] text-slate-500 uppercase">
+                Gap
+              </p>
+              <p
                 className={cn(
-                  "min-w-[190px] px-4 py-3 text-left align-top font-normal",
-                  column.open && "bg-accent-500/5",
+                  "text-[19px] font-semibold tabular-nums",
+                  gap === 0 ? "text-emerald-600" : "text-amber-600",
                 )}
               >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[15px] font-semibold text-slate-900">{column.title}</span>
-                  {column.isFinal ? <Badge tone="purple">Final</Badge> : null}
-                  {column.open ? <Badge tone="blue">Current</Badge> : null}
-                </div>
-                <p
-                  className={cn(
-                    "text-[13px] font-medium",
-                    column.tone === "sml"
-                      ? "text-blue-600"
-                      : column.tone === "vendor"
-                        ? "text-amber-600"
-                        : "text-slate-500",
-                  )}
-                >
-                  {column.subtitle}
-                </p>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-ink-800">
-          <tr className="bg-ink-900/60">
-            <th scope="row" className={cn(labelCell, "bg-ink-900")}>
-              Total
-            </th>
-            {columns.map((column, index) => {
-              const previous = columns[index - 1];
-              return (
-                <td key={column.key} className={valueCell}>
-                  <span className="block text-[22px] leading-7 font-semibold text-slate-900">
-                    {money(column.total)}
-                  </span>
-                  {delta(column.total, previous?.total)}
-                  {index === 0 ? null : (
-                    <span className="block text-[12px] text-slate-500">
-                      {column.total === columns[0].total
-                        ? "same as original"
-                        : `${column.total < columns[0].total ? "−" : "+"}${money(Math.abs(column.total - columns[0].total))} vs original`}
-                    </span>
-                  )}
-                </td>
-              );
-            })}
-          </tr>
+                {gap === 0 ? "None" : money(gap)}
+              </p>
+              <p className="text-[12px] text-slate-500">{gap === 0 ? "terms match" : "apart"}</p>
+            </div>
+          </div>
+        ) : null}
+        <OfferSpotlight
+          column={smlColumn}
+          eyebrow={viewer === "vendor" ? "SML's last counter" : "Our last counter"}
+          emptyText="No counter sent yet — start one from the quotations list."
+        />
+      </div>
 
-          {rows.map((row) => (
-            <tr key={row.label}>
-              <th scope="row" className={labelCell}>
-                {row.label}
-              </th>
-              {columns.map((column, index) => {
-                const previous = columns[index - 1];
-                return (
-                  <td
-                    key={column.key}
-                    className={cn(valueCell, previous && row.changed(column, previous) && changedCell)}
-                  >
-                    {row.value(column, previous)}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-
-          {hasNotes ? (
-            <tr>
-              <th scope="row" className={labelCell}>
-                Notes
+      <div className="overflow-x-auto rounded-xl border border-ink-800">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-ink-800">
+              <th scope="col" className={cn(labelCell, "py-3")}>
+                Offer
               </th>
               {columns.map((column) => (
-                <td key={column.key} className={valueCell}>
-                  {column.note?.trim() || column.warnings.length > 0 ? (
-                    <div className="space-y-1.5 text-[14px] whitespace-pre-wrap">
-                      {column.note?.trim() ? <p className="text-slate-700">{column.note}</p> : null}
-                      {column.warnings.map((warning) => (
-                        <p
-                          key={warning.code}
-                          className="rounded-md bg-amber-500/10 px-2 py-1 text-[12px] text-amber-600"
-                        >
-                          {warning.message}
-                        </p>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-slate-400">—</span>
+                <th
+                  key={column.key}
+                  scope="col"
+                  className={cn(
+                    "min-w-[200px] border-t-2 px-4 py-3 text-left align-top font-normal",
+                    TONE_EDGE[column.tone],
+                    column.open && "bg-accent-500/5",
                   )}
+                >
+                  <p className="text-[12px] font-medium tracking-[0.06em] text-slate-500 uppercase">
+                    {column.title}
+                  </p>
+                  <p className={cn("mt-1 text-[15px] font-semibold", TONE_TEXT[column.tone])}>
+                    {column.subtitle}
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {column.isFinal ? <Badge tone="purple">Final</Badge> : null}
+                    {column.open ? <Badge tone="blue">Current</Badge> : null}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-ink-800">
+            <tr className="bg-ink-900/60">
+              <th scope="row" className={cn(labelCell, "bg-ink-900")}>
+                Total
+              </th>
+              {columns.map((column, index) => (
+                <td key={column.key} className={cn(valueCell, column.open && "bg-accent-500/5")}>
+                  <span className="block text-[24px] leading-7 font-semibold text-slate-900">
+                    {money(column.total)}
+                  </span>
+                  {change(column.total, columns[index - 1]?.total)}
+                  {index === 0 ? null : vsOriginal(column.total)}
                 </td>
               ))}
             </tr>
-          ) : null}
-        </tbody>
-      </table>
+
+            <tr>
+              <th colSpan={columns.length + 1} scope="colgroup" className={sectionCell}>
+                Commercial terms
+              </th>
+            </tr>
+            {commercialRows.map(renderRow)}
+
+            <tr>
+              <th colSpan={columns.length + 1} scope="colgroup" className={sectionCell}>
+                Validity &amp; availability
+              </th>
+            </tr>
+            {validityRows.map(renderRow)}
+
+            {hasNotes ? (
+              <tr>
+                <th scope="row" className={labelCell}>
+                  Notes
+                </th>
+                {columns.map((column) => (
+                  <td key={column.key} className={valueCell}>
+                    {column.note?.trim() || column.warnings.length > 0 ? (
+                      <div className="space-y-1.5 text-[14px] whitespace-pre-wrap">
+                        {column.note?.trim() ? <p className="text-slate-700">{column.note}</p> : null}
+                        {column.warnings.map((warning) => (
+                          <p
+                            key={warning.code}
+                            className="rounded-md bg-amber-500/10 px-2 py-1 text-[12px] text-amber-600"
+                          >
+                            {warning.message}
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-ink-800 bg-ink-900/40 px-4 py-2.5 text-[12px] text-slate-500">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-blue-600" aria-hidden />
+            {viewer === "vendor" ? "SML counters" : "Our counters"}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-amber-600" aria-hidden />
+            {viewer === "vendor" ? "Your offers" : "Vendor offers"}
+          </span>
+          <span>↓ lower cost · ↑ higher cost</span>
+        </div>
+      </div>
     </div>
   );
 }

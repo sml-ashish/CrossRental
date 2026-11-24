@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowDownRight, Send } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { StatusBadge } from "@/components/ui/badge";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { Panel } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api";
@@ -104,6 +105,10 @@ export function VendorRfqDetailPage() {
       className="space-y-4 pb-28 lg:pb-0"
       style={{ "--rfq-bar-h": `${barHeight + 48}px` } as CSSProperties}
     >
+      <div className="mb-2">
+        <PageBackButton />
+      </div>
+
       <h1 className="sr-only">
         RFQ {rfq.rfqNumber} — {rfq.enquiryNo}
         {rfq.lineNo ? `, line ${rfq.lineNo}` : ""}

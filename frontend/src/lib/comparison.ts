@@ -67,24 +67,20 @@ export interface ComparisonResult {
   lineId: string;
   enquiryId: string;
   enquiryNo: string;
-  siteLocation: string;
+  shipToCity: string;
   siteStateName: string | null;
   lineNo: number;
   requirement: {
     craneTypeCode: string | null;
     craneTypeName: string | null;
     capacityT: number | null;
-    capacityRule: string;
-    quantity: number;
     requiredStartDate: string | null;
     startDateTbc: boolean;
     durationValue: number | null;
     durationUnit: string | null;
     craneAgeCriteriaYears: number | null;
   };
-  rentalBudget: string | null;
   rankRule: "TOTAL_ESTIMATED_COST";
-  quantity: number;
   awardedCount: number;
   fullyAwarded: boolean;
   quotations: ComparisonQuotation[];

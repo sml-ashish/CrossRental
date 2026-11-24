@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Clock, MapPin, Plus, Search, Truck } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth";
@@ -76,17 +77,20 @@ export function RfqTrackingPage({ canCreate }: { canCreate: boolean }) {
 
   return (
     <div className="mx-auto w-full max-w-[1100px] space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-900">RFQs</h1>
-        {canCreate ? (
-          <Link
-            to="/app/rfqs/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-[15px] font-semibold text-white hover:bg-brand-600"
-          >
-            <Plus className="size-4" aria-hidden />
-            New RFQ
-          </Link>
-        ) : null}
+      <div className="space-y-2">
+        <PageBackButton />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold text-slate-900">RFQs</h1>
+          {canCreate ? (
+            <Link
+              to="/app/rfqs/new"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-[15px] font-semibold text-white hover:bg-brand-600"
+            >
+              <Plus className="size-4" aria-hidden />
+              New RFQ
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

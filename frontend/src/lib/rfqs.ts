@@ -81,6 +81,7 @@ export interface Rfq {
   jibLengthM: number | null;
   /** Line-item measures included only when the sales user picked them. */
   liftLoadT: number | null;
+  liftHeightM: number | null;
   workingRadiusM: number | null;
   fixedJibM: number | null;
   luffingJibM: number | null;
@@ -277,7 +278,7 @@ export interface CandidateList {
   /** Which ranking produced this list. */
   mode: CandidateMode;
   site: {
-    siteLocation: string;
+    shipToCity: string;
     stateCode: string;
     stateName: string;
     latitude: number | null;

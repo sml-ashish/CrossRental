@@ -4,11 +4,11 @@ import type { RfqRollupStatus } from "@/lib/rfqs";
 /**
  * Client for the native enquiry endpoints (P1).
  *
- * The customer block — customer name/address and the rental budget — is shown
- * on the internal screens but never leaves the server when an RFQ is raised:
- * `createRfqFromLine` takes a deadline plus the optional line fields the user
- * ticked, and the backend copies only that vendor-safe subset. There is
- * deliberately no way to send those customer fields from here.
+ * An enquiry holds the ship-to city, the state and the crane requirement.
+ * Customer details, the site pin and the terms a vendor is asked to price live
+ * on the RFQ, where they can be chosen per invitation. `createRfqFromLine` takes
+ * a deadline plus the optional line fields the user ticked, and the backend
+ * copies only that subset.
  */
 
 export type EnquiryOverallStatus =
@@ -32,6 +32,7 @@ export type EnquiryLineTrailStatus =
   | "FULFILLED_INTERNALLY"
   | "CANCELLED";
 
+/** Kept for the RFQ match helpers; the enquiry no longer stores a rule. */
 export type CapacityRule = "AT_LEAST" | "EXACT";
 export type DurationUnit = "DAYS" | "MONTHS";
 
@@ -43,32 +44,101 @@ export const ENQUIRY_STATUS_LABELS: Record<EnquiryOverallStatus, string> = {
   CLOSED: "Closed",
 };
 
-export const TRAIL_LABELS: Record<EnquiryLineTrailStatus, string> = {
-  NEW: "New",
-  AVAILABILITY_CHECK: "Availability Check",
-  VENDOR_SHORTLISTED: "Vendor Shortlisted",
-  RFQ_SENT: "RFQ Sent",
-  AWAITING_QUOTES: "Awaiting Quotes",
-  QUOTES_RECEIVED: "Quotes Received",
-  UNDER_EVALUATION: "Under Evaluation",
-  VENDOR_FINALISED: "Vendor Finalised",
-  BOOKED: "Booked",
-  CLOSED: "Closed",
-  FULFILLED_INTERNALLY: "Fulfilled Internally",
-  CANCELLED: "Cancelled",
+/**
+ * The only line statuses a user ever sees.
+ *
+ * The database keeps the finer trail for audit, but no screen prints it. Every
+ * trail value folds into one of these five words; `Booked` is the last step in
+ * the progression and `Cancelled` is a terminal outcome off that progression.
+ */
+export type EnquiryLineStatus =
+  | "Sourcing pending"
+  | "RFQ sent"
+  | "Quotes received"
+  | "Booked"
+  | "Cancelled";
+
+/** The four progress steps, in order. Cancelled is not a step on this track. */
+export const LINE_STEPS: readonly EnquiryLineStatus[] = [
+  "Sourcing pending",
+  "RFQ sent",
+  "Quotes received",
+  "Booked",
+];
+
+/** All visible statuses, in display order (reports, filters, charts). */
+export const LINE_STATUS_ORDER: readonly EnquiryLineStatus[] = [...LINE_STEPS, "Cancelled"];
+
+export type LineStatusTone = "neutral" | "blue" | "amber" | "emerald" | "muted";
+
+export const LINE_STATUS_TONES: Record<EnquiryLineStatus, LineStatusTone> = {
+  "Sourcing pending": "neutral",
+  "RFQ sent": "blue",
+  "Quotes received": "amber",
+  Booked: "emerald",
+  Cancelled: "muted",
 };
 
-/** The trail rendered as a fixed sequence, so a reader sees the whole journey. */
-export const TRAIL_SEQUENCE: EnquiryLineTrailStatus[] = [
-  "NEW",
-  "AVAILABILITY_CHECK",
-  "VENDOR_SHORTLISTED",
-  "RFQ_SENT",
-  "QUOTES_RECEIVED",
-  "UNDER_EVALUATION",
-  "VENDOR_FINALISED",
-  "BOOKED",
-];
+const LINE_STATUS_DOT_CLASSES: Record<EnquiryLineStatus, string> = {
+  "Sourcing pending": "bg-slate-400",
+  "RFQ sent": "bg-blue-500",
+  "Quotes received": "bg-amber-500",
+  Booked: "bg-emerald-500",
+  Cancelled: "bg-slate-500",
+};
+
+export function lineStatusDot(status: EnquiryLineStatus): string {
+  return LINE_STATUS_DOT_CLASSES[status];
+}
+
+/** Enough of a line to decide its status; RFQ picker rows have no quote count. */
+export interface LineStatusInput {
+  trailStatus: EnquiryLineTrailStatus;
+  quoteCount?: number | null;
+}
+
+/**
+ * Fold one internal trail value into the public vocabulary.
+ *
+ * `CLOSED` and `FULFILLED_INTERNALLY` are completed work, so they read Booked.
+ * A quote can arrive before the trail catches up, so any quoted line that is
+ * still in sourcing reads Quotes received — the label and the action agree.
+ */
+export function lineStatusFromTrail(
+  status: EnquiryLineTrailStatus,
+  quoteCount = 0,
+): EnquiryLineStatus {
+  switch (status) {
+    case "CANCELLED":
+      return "Cancelled";
+    case "CLOSED":
+    case "FULFILLED_INTERNALLY":
+    case "VENDOR_FINALISED":
+    case "BOOKED":
+      return "Booked";
+    case "QUOTES_RECEIVED":
+    case "UNDER_EVALUATION":
+      return "Quotes received";
+    case "RFQ_SENT":
+    case "AWAITING_QUOTES":
+      return "RFQ sent";
+    default:
+      return quoteCount > 0 ? "Quotes received" : "Sourcing pending";
+  }
+}
+
+/** The same fold for report rows, whose status arrives as a plain string. */
+export function lineStatusFromValue(value: string, quoteCount = 0): EnquiryLineStatus | null {
+  if (!value) return null;
+  if ((LINE_STATUS_ORDER as readonly string[]).includes(value)) {
+    return value as EnquiryLineStatus;
+  }
+  return lineStatusFromTrail(value as EnquiryLineTrailStatus, quoteCount);
+}
+
+export function lineStatusOf(line: LineStatusInput): EnquiryLineStatus {
+  return lineStatusFromTrail(line.trailStatus, line.quoteCount ?? 0);
+}
 
 export const CAPACITY_RULE_LABELS: Record<CapacityRule, string> = {
   AT_LEAST: "At least",
@@ -81,44 +151,30 @@ export interface EnquiryLine {
   lineNo: number;
   craneTypeCode: string | null;
   craneTypeName: string | null;
+  craneModel: string | null;
+  yom: number | null;
   capacityT: number | null;
-  capacityRule: CapacityRule;
-  capacityNote: string | null;
-  quantity: number;
   applicationDescription: string | null;
-  loadDescription: string | null;
   liftLoadT: number | null;
-  workingRadiusM: number | null;
-  requiredMainBoomM: number | null;
-  requiredFixedJibM: number | null;
-  requiredLuffingJibM: number | null;
-  requiredWindJibM: number | null;
-  configurationNotes: string | null;
+  liftHeightM: number | null;
+  craneConfiguration: string | null;
   requiredStartDate: string | null;
   durationValue: number | null;
   durationUnit: DurationUnit | null;
   workingDaysPerMonth: number | null;
-  mobilisationTerms: string | null;
-  demobilisationTerms: string | null;
   otCharges: string | null;
   breakdownTerms: string | null;
   dieselScope: string | null;
+  workingHoursPerDay: string | null;
+  shift: string | null;
   workingHoursShift: string | null;
-  accommodationConveyance: string | null;
-  paymentTerms: string | null;
   supportCraneScope: string | null;
   steelMatsGroundPrepScope: string | null;
   ehsHrCompliance: string | null;
   insuranceTerms: string | null;
-  extensionClause: string | null;
   craneAgeCriteriaYears: number | null;
-  otherTerms: string | null;
   additionalManpowerScope: string | null;
-  intraSiteMovementScope: string | null;
-  prereleaseTerms: string | null;
-  ppeScope: string | null;
   rowScope: string | null;
-  rentalBudget: string | null;
   trailStatus: EnquiryLineTrailStatus;
   closureStatus: string | null;
   cancelledAt: string | null;
@@ -144,16 +200,9 @@ export interface Enquiry {
   id: string;
   enquiryNo: string;
   enquiryDate: string;
-  customerName: string;
-  customerAddress: string;
-  siteLocation: string;
+  shipToCity: string;
   siteStateCode: string;
   siteStateName: string | null;
-  sitePincode: string | null;
-  region: string | null;
-  /** The site pin, resolved once by the server's geocoder. */
-  siteLatitude: number | null;
-  siteLongitude: number | null;
   overallStatus: EnquiryOverallStatus;
   createdAt: string;
   updatedAt: string;
@@ -172,7 +221,7 @@ export type EnquiryBucket = "pending" | "awaiting" | "quotes" | "finalised" | "c
 
 export interface EnquiryListRow extends Enquiry {
   lineCount: number;
-  /** Cranes required, counted by quantity rather than by line. */
+  /** One line is one crane to source. */
   craneCount: number;
   sourcedCranes: number;
   sourcedLineCount: number;
@@ -220,114 +269,74 @@ export type { RfqRollupStatus };
 
 // --- form shapes -----------------------------------------------------------
 
-/**
- * Header strings while editing. The customer block is here because this is the
- * internal form; it is dropped by the backend when an RFQ is raised, not by the
- * client.
- */
+/** Header strings while editing. */
 export interface EnquiryForm {
   enquiryDate: string;
-  customerName: string;
-  customerAddress: string;
-  siteLocation: string;
+  shipToCity: string;
   siteStateCode: string;
-  sitePincode: string;
-  region: string;
 }
 
 export interface EnquiryLineForm {
   craneTypeCode: string;
+  craneModel: string;
+  yom: string;
   capacityT: string;
-  capacityRule: CapacityRule;
-  capacityNote: string;
-  quantity: string;
   applicationDescription: string;
-  loadDescription: string;
   liftLoadT: string;
-  workingRadiusM: string;
-  requiredMainBoomM: string;
-  requiredFixedJibM: string;
-  requiredLuffingJibM: string;
-  requiredWindJibM: string;
-  configurationNotes: string;
+  liftHeightM: string;
+  craneConfiguration: string;
   requiredStartDate: string;
   durationValue: string;
   durationUnit: DurationUnit;
   workingDaysPerMonth: string;
-  mobilisationTerms: string;
-  demobilisationTerms: string;
   otCharges: string;
   breakdownTerms: string;
   dieselScope: string;
+  workingHoursPerDay: string;
+  shift: string;
   workingHoursShift: string;
-  accommodationConveyance: string;
-  paymentTerms: string;
   supportCraneScope: string;
   steelMatsGroundPrepScope: string;
   ehsHrCompliance: string;
   insuranceTerms: string;
-  extensionClause: string;
   craneAgeCriteriaYears: string;
-  otherTerms: string;
   additionalManpowerScope: string;
-  intraSiteMovementScope: string;
-  prereleaseTerms: string;
-  ppeScope: string;
   rowScope: string;
-  rentalBudget: string;
 }
 
 export const EMPTY_ENQUIRY_FORM: EnquiryForm = {
   enquiryDate: "",
-  customerName: "",
-  customerAddress: "",
-  siteLocation: "",
+  shipToCity: "",
   siteStateCode: "",
-  sitePincode: "",
-  region: "",
 };
 
 export function emptyLine(): EnquiryLineForm {
   return {
     craneTypeCode: "",
+    craneModel: "",
+    yom: "",
     capacityT: "",
-    capacityRule: "AT_LEAST",
-    capacityNote: "",
-    quantity: "1",
     applicationDescription: "",
-    loadDescription: "",
     liftLoadT: "",
-    workingRadiusM: "",
-    requiredMainBoomM: "",
-    requiredFixedJibM: "",
-    requiredLuffingJibM: "",
-    requiredWindJibM: "",
-    configurationNotes: "",
+    liftHeightM: "",
+    craneConfiguration: "",
     requiredStartDate: "",
     durationValue: "",
     durationUnit: "DAYS",
     workingDaysPerMonth: "",
-    mobilisationTerms: "",
-    demobilisationTerms: "",
     otCharges: "",
     breakdownTerms: "",
     dieselScope: "",
+    workingHoursPerDay: "",
+    shift: "",
     workingHoursShift: "",
-    accommodationConveyance: "",
-    paymentTerms: "",
     supportCraneScope: "",
     steelMatsGroundPrepScope: "",
     ehsHrCompliance: "",
     insuranceTerms: "",
-    extensionClause: "",
     craneAgeCriteriaYears: "",
-    otherTerms: "",
     additionalManpowerScope: "",
-    intraSiteMovementScope: "",
-    prereleaseTerms: "",
-    ppeScope: "",
     rowScope: "",
-    rentalBudget: "",
   };
 }
 
@@ -336,44 +345,30 @@ export function lineToForm(line: EnquiryLine): EnquiryLineForm {
   const numberish = (v: number | null) => (v === null ? "" : String(v));
   return {
     craneTypeCode: text(line.craneTypeCode),
+    craneModel: text(line.craneModel),
+    yom: numberish(line.yom),
     capacityT: numberish(line.capacityT),
-    capacityRule: line.capacityRule,
-    capacityNote: text(line.capacityNote),
-    quantity: String(line.quantity),
     applicationDescription: text(line.applicationDescription),
-    loadDescription: text(line.loadDescription),
     liftLoadT: numberish(line.liftLoadT),
-    workingRadiusM: numberish(line.workingRadiusM),
-    requiredMainBoomM: numberish(line.requiredMainBoomM),
-    requiredFixedJibM: numberish(line.requiredFixedJibM),
-    requiredLuffingJibM: numberish(line.requiredLuffingJibM),
-    requiredWindJibM: numberish(line.requiredWindJibM),
-    configurationNotes: text(line.configurationNotes),
+    liftHeightM: numberish(line.liftHeightM),
+    craneConfiguration: text(line.craneConfiguration),
     requiredStartDate: line.requiredStartDate ? line.requiredStartDate.slice(0, 10) : "",
     durationValue: numberish(line.durationValue),
     durationUnit: line.durationUnit ?? "DAYS",
     workingDaysPerMonth: numberish(line.workingDaysPerMonth),
-    mobilisationTerms: text(line.mobilisationTerms),
-    demobilisationTerms: text(line.demobilisationTerms),
     otCharges: text(line.otCharges),
     breakdownTerms: text(line.breakdownTerms),
     dieselScope: text(line.dieselScope),
+    workingHoursPerDay: text(line.workingHoursPerDay),
+    shift: text(line.shift),
     workingHoursShift: text(line.workingHoursShift),
-    accommodationConveyance: text(line.accommodationConveyance),
-    paymentTerms: text(line.paymentTerms),
     supportCraneScope: text(line.supportCraneScope),
     steelMatsGroundPrepScope: text(line.steelMatsGroundPrepScope),
     ehsHrCompliance: text(line.ehsHrCompliance),
     insuranceTerms: text(line.insuranceTerms),
-    extensionClause: text(line.extensionClause),
     craneAgeCriteriaYears: numberish(line.craneAgeCriteriaYears),
-    otherTerms: text(line.otherTerms),
     additionalManpowerScope: text(line.additionalManpowerScope),
-    intraSiteMovementScope: text(line.intraSiteMovementScope),
-    prereleaseTerms: text(line.prereleaseTerms),
-    ppeScope: text(line.ppeScope),
     rowScope: text(line.rowScope),
-    rentalBudget: text(line.rentalBudget),
   };
 }
 
@@ -391,68 +386,46 @@ function calendarDate(value: string): string | null {
 function toLinePayload(form: EnquiryLineForm) {
   return {
     craneTypeCode: form.craneTypeCode,
+    craneModel: blankToNull(form.craneModel),
+    yom: numberOrNull(form.yom),
     capacityT: Number(form.capacityT),
-    capacityRule: form.capacityRule,
-    capacityNote: blankToNull(form.capacityNote),
-    quantity: Number(form.quantity),
     applicationDescription: blankToNull(form.applicationDescription),
-    loadDescription: blankToNull(form.loadDescription),
     liftLoadT: numberOrNull(form.liftLoadT),
-    workingRadiusM: numberOrNull(form.workingRadiusM),
-    requiredMainBoomM: numberOrNull(form.requiredMainBoomM),
-    requiredFixedJibM: numberOrNull(form.requiredFixedJibM),
-    requiredLuffingJibM: numberOrNull(form.requiredLuffingJibM),
-    requiredWindJibM: numberOrNull(form.requiredWindJibM),
-    configurationNotes: blankToNull(form.configurationNotes),
+    liftHeightM: numberOrNull(form.liftHeightM),
+    craneConfiguration: blankToNull(form.craneConfiguration),
     requiredStartDate: calendarDate(form.requiredStartDate),
     durationValue: numberOrNull(form.durationValue),
     durationUnit: form.durationValue.trim() === "" ? null : form.durationUnit,
     workingDaysPerMonth: numberOrNull(form.workingDaysPerMonth),
-    mobilisationTerms: blankToNull(form.mobilisationTerms),
-    demobilisationTerms: blankToNull(form.demobilisationTerms),
     otCharges: blankToNull(form.otCharges),
     breakdownTerms: blankToNull(form.breakdownTerms),
     dieselScope: blankToNull(form.dieselScope),
+    workingHoursPerDay: blankToNull(form.workingHoursPerDay),
+    shift: blankToNull(form.shift),
     workingHoursShift: blankToNull(form.workingHoursShift),
-    accommodationConveyance: blankToNull(form.accommodationConveyance),
-    paymentTerms: blankToNull(form.paymentTerms),
     supportCraneScope: blankToNull(form.supportCraneScope),
     steelMatsGroundPrepScope: blankToNull(form.steelMatsGroundPrepScope),
     ehsHrCompliance: blankToNull(form.ehsHrCompliance),
     insuranceTerms: blankToNull(form.insuranceTerms),
-    extensionClause: blankToNull(form.extensionClause),
     craneAgeCriteriaYears: numberOrNull(form.craneAgeCriteriaYears),
-    otherTerms: blankToNull(form.otherTerms),
     additionalManpowerScope: blankToNull(form.additionalManpowerScope),
-    intraSiteMovementScope: blankToNull(form.intraSiteMovementScope),
-    prereleaseTerms: blankToNull(form.prereleaseTerms),
-    ppeScope: blankToNull(form.ppeScope),
     rowScope: blankToNull(form.rowScope),
-    rentalBudget: blankToNull(form.rentalBudget),
   };
 }
 
 function toHeaderPayload(form: EnquiryForm) {
   return {
     enquiryDate: form.enquiryDate ? calendarDate(form.enquiryDate) : undefined,
-    customerName: form.customerName.trim(),
-    customerAddress: form.customerAddress.trim(),
-    siteLocation: form.siteLocation.trim(),
+    shipToCity: form.shipToCity.trim(),
     siteStateCode: form.siteStateCode,
-    sitePincode: blankToNull(form.sitePincode),
-    region: blankToNull(form.region),
   };
 }
 
 export function enquiryToForm(enquiry: Enquiry): EnquiryForm {
   return {
     enquiryDate: enquiry.enquiryDate ? enquiry.enquiryDate.slice(0, 10) : "",
-    customerName: enquiry.customerName,
-    customerAddress: enquiry.customerAddress,
-    siteLocation: enquiry.siteLocation,
+    shipToCity: enquiry.shipToCity,
     siteStateCode: enquiry.siteStateCode,
-    sitePincode: enquiry.sitePincode ?? "",
-    region: enquiry.region ?? "",
   };
 }
 
@@ -462,6 +435,9 @@ export interface ListEnquiriesFilters {
   status?: EnquiryOverallStatus;
   search?: string;
   stateCode?: string;
+  /** Inclusive logged-date range, sent as YYYY-MM-DD. */
+  from?: string;
+  to?: string;
   sort?: EnquirySort;
 }
 
@@ -475,6 +451,8 @@ export function listEnquiries(
   if (filters.status) params.set("status", filters.status);
   if (filters.search) params.set("search", filters.search);
   if (filters.stateCode) params.set("stateCode", filters.stateCode);
+  if (filters.from) params.set("from", filters.from);
+  if (filters.to) params.set("to", filters.to);
   if (filters.sort && filters.sort !== "newest") params.set("sort", filters.sort);
   const query = params.toString();
   return api(`/enquiries${query ? `?${query}` : ""}`);
@@ -496,19 +474,13 @@ export interface RaisableLine {
   craneTypeCode: string | null;
   craneTypeName: string | null;
   capacityT: number | null;
-  capacityRule: CapacityRule;
-  quantity: number;
   requiredStartDate: string | null;
   startDateTbc: boolean;
   /** Hire length, for the requirement summary. */
   durationValue: number | null;
   durationUnit: DurationUnit | null;
-  siteLocation: string;
+  shipToCity: string;
   siteStateName: string | null;
-  sitePincode: string | null;
-  /** The job site's pin, when it has one. Drives the "Pinned" indicator. */
-  siteLatitude: number | null;
-  siteLongitude: number | null;
   trailStatus: EnquiryLineTrailStatus;
   /** How many RFQs this line already carries, so a re-tender is visible. */
   rfqCount: number;
@@ -613,7 +585,7 @@ export interface BulkEnquiryRowResult {
   /** Excel row number, so the report can point at the line to fix. */
   row: number;
   ref: string | null;
-  customerName: string | null;
+  shipToCity: string | null;
   /** `valid` is what `imported` would become — the dry-run wording. */
   status: "imported" | "valid" | "failed";
   message: string | null;
@@ -723,4 +695,3 @@ export function importBulkLines(
     method: "POST",
   });
 }
-

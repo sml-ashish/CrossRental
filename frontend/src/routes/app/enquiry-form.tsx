@@ -34,8 +34,8 @@ import {
  *
  * Two screens share the line editor: create (header plus any number of new
  * lines) and the single-line editor used to add a line to an existing enquiry or
- * correct one. The line fields are the 31 the template carries, including the
- * five scope terms and the internal-only block.
+ * correct one. An enquiry captures the crane requirement and the terms SML may
+ * carry into an RFQ; vendor-specific terms are chosen when the RFQ is raised.
  */
 
 export function EnquiryFormPage() {
@@ -115,30 +115,16 @@ export function EnquiryFormPage() {
     <form onSubmit={onSubmit} className="space-y-5">
       <PageHeader
         title={editing ? "Edit enquiry" : "New enquiry"}
-        description="Customer and commercial details stay internal and are never sent to vendors."
+        description="Capture the state, city and crane requirement. Vendor terms are chosen when the RFQ is raised."
       />
 
       {error ? <Alert tone="error">{error}</Alert> : null}
 
-      <Section title="Enquiry" description="Who the job is for, and where it is.">
+      <Section title="Enquiry" description="Where the crane is needed.">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Enquiry date" htmlFor="enquiryDate">
             <TextInput id="enquiryDate" type="date" {...u("enquiryDate")} />
           </Field>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Customer name" htmlFor="customerName" required>
-            <TextInput id="customerName" {...u("customerName")} />
-          </Field>
-          <Field label="Site location" htmlFor="siteLocation" required>
-            <TextInput id="siteLocation" {...u("siteLocation")} />
-          </Field>
-        </div>
-        <Field label="Customer address" htmlFor="customerAddress" required>
-          <TextArea id="customerAddress" rows={2} {...u("customerAddress")} />
-        </Field>
-        <div className="grid gap-4 sm:grid-cols-3">
           <Field label="State" htmlFor="siteStateCode" required>
             <Select
               id="siteStateCode"
@@ -150,11 +136,8 @@ export function EnquiryFormPage() {
               }))}
             />
           </Field>
-          <Field label="Pincode" htmlFor="sitePincode">
-            <TextInput id="sitePincode" {...u("sitePincode")} />
-          </Field>
-          <Field label="Region" htmlFor="region">
-            <TextInput id="region" {...u("region")} />
+          <Field label="City" htmlFor="shipToCity" required>
+            <TextInput id="shipToCity" {...u("shipToCity")} />
           </Field>
         </div>
       </Section>
@@ -352,61 +335,35 @@ function LineFields({
             options={craneOptions}
           />
         </Field>
+        <Field label="Crane model" htmlFor={`${idPrefix}-model`}>
+          <TextInput id={`${idPrefix}-model`} {...t("craneModel")} />
+        </Field>
+        <Field label="YOM" htmlFor={`${idPrefix}-yom`}>
+          <TextInput id={`${idPrefix}-yom`} inputMode="numeric" {...t("yom")} />
+        </Field>
         <Field label="Capacity (t)" htmlFor={`${idPrefix}-capacity`} required>
           <TextInput id={`${idPrefix}-capacity`} inputMode="decimal" {...t("capacityT")} />
         </Field>
-        <Field label="Capacity rule" htmlFor={`${idPrefix}-rule`}>
-          <Select
-            id={`${idPrefix}-rule`}
-            value={value.capacityRule}
-            onChange={(v) => set("capacityRule", v as EnquiryLineForm["capacityRule"])}
-            options={[
-              { value: "AT_LEAST", label: "At least" },
-              { value: "EXACT", label: "Exactly" },
-            ]}
-            placeholder="At least"
-          />
-        </Field>
-        <Field label="Quantity" htmlFor={`${idPrefix}-qty`}>
-          <TextInput id={`${idPrefix}-qty`} inputMode="numeric" {...t("quantity")} />
-        </Field>
-        <Field label="Lift load (t)" htmlFor={`${idPrefix}-lift`}>
+        <Field label="Weight to be lifted (t)" htmlFor={`${idPrefix}-lift`}>
           <TextInput id={`${idPrefix}-lift`} inputMode="decimal" {...t("liftLoadT")} />
         </Field>
-        <Field label="Working radius (m)" htmlFor={`${idPrefix}-radius`}>
-          <TextInput id={`${idPrefix}-radius`} inputMode="decimal" {...t("workingRadiusM")} />
+        <Field label="Height to be lifted (m)" htmlFor={`${idPrefix}-lift-height`}>
+          <TextInput id={`${idPrefix}-lift-height`} inputMode="decimal" {...t("liftHeightM")} />
         </Field>
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Field label="Application description" htmlFor={`${idPrefix}-app`}>
-          <TextArea id={`${idPrefix}-app`} rows={2} {...t("applicationDescription")} />
-        </Field>
-        <Field label="Load description" htmlFor={`${idPrefix}-load`}>
-          <TextArea id={`${idPrefix}-load`} rows={2} {...t("loadDescription")} />
-        </Field>
-      </div>
-      <Field label="Capacity note" htmlFor={`${idPrefix}-capNote`}>
-        <TextInput id={`${idPrefix}-capNote`} {...t("capacityNote")} />
+      <Field label="Application description" htmlFor={`${idPrefix}-app`}>
+        <TextArea id={`${idPrefix}-app`} rows={2} {...t("applicationDescription")} />
       </Field>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-4">
-        <Field label="Main boom (m)" htmlFor={`${idPrefix}-mb`}>
-          <TextInput id={`${idPrefix}-mb`} inputMode="decimal" {...t("requiredMainBoomM")} />
-        </Field>
-        <Field label="Fixed jib (m)" htmlFor={`${idPrefix}-fj`}>
-          <TextInput id={`${idPrefix}-fj`} inputMode="decimal" {...t("requiredFixedJibM")} />
-        </Field>
-        <Field label="Luffing jib (m)" htmlFor={`${idPrefix}-lj`}>
-          <TextInput id={`${idPrefix}-lj`} inputMode="decimal" {...t("requiredLuffingJibM")} />
-        </Field>
-        <Field label="Wind jib (m)" htmlFor={`${idPrefix}-wj`}>
-          <TextInput id={`${idPrefix}-wj`} inputMode="decimal" {...t("requiredWindJibM")} />
+      <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Crane configuration
+        </p>
+        <Field label="Crane configuration (e.g. MB 60 + FJ 12)" htmlFor={`${idPrefix}-config-name`} className="mt-3">
+          <TextInput id={`${idPrefix}-config-name`} {...t("craneConfiguration")} />
         </Field>
       </div>
-      <Field label="Configuration notes" htmlFor={`${idPrefix}-config`}>
-        <TextInput id={`${idPrefix}-config`} {...t("configurationNotes")} />
-      </Field>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-4">
         <Field label="Required start" htmlFor={`${idPrefix}-start`}>
@@ -435,26 +392,17 @@ function LineFields({
         <Field label="OT charges" htmlFor={`${idPrefix}-ot`}>
           <TextInput id={`${idPrefix}-ot`} {...t("otCharges")} />
         </Field>
-        <Field label="Breakdown terms" htmlFor={`${idPrefix}-bd`}>
+        <Field label="Breakdown Charges" htmlFor={`${idPrefix}-bd`}>
           <TextInput id={`${idPrefix}-bd`} {...t("breakdownTerms")} />
         </Field>
         <Field label="Diesel scope" htmlFor={`${idPrefix}-diesel`}>
           <TextInput id={`${idPrefix}-diesel`} {...t("dieselScope")} />
         </Field>
-        <Field label="Working hours / shift" htmlFor={`${idPrefix}-shift`}>
-          <TextInput id={`${idPrefix}-shift`} {...t("workingHoursShift")} />
+        <Field label="Working hours (per day)" htmlFor={`${idPrefix}-hours`}>
+          <TextInput id={`${idPrefix}-hours`} {...t("workingHoursPerDay")} />
         </Field>
-        <Field label="Accommodation / conveyance" htmlFor={`${idPrefix}-accom`}>
-          <TextInput id={`${idPrefix}-accom`} {...t("accommodationConveyance")} />
-        </Field>
-        <Field label="Payment terms" htmlFor={`${idPrefix}-pay`}>
-          <TextInput id={`${idPrefix}-pay`} {...t("paymentTerms")} />
-        </Field>
-        <Field label="Mobilisation terms" htmlFor={`${idPrefix}-mob`}>
-          <TextInput id={`${idPrefix}-mob`} {...t("mobilisationTerms")} />
-        </Field>
-        <Field label="Demobilisation terms" htmlFor={`${idPrefix}-demob`}>
-          <TextInput id={`${idPrefix}-demob`} {...t("demobilisationTerms")} />
+        <Field label="Shift" htmlFor={`${idPrefix}-shift`}>
+          <TextInput id={`${idPrefix}-shift`} {...t("shift")} />
         </Field>
         <Field label="Crane age criterion (years)" htmlFor={`${idPrefix}-age`}>
           <TextInput id={`${idPrefix}-age`} inputMode="numeric" {...t("craneAgeCriteriaYears")} />
@@ -468,11 +416,8 @@ function LineFields({
         <Field label="EHS / HR requirements" htmlFor={`${idPrefix}-ehs`}>
           <TextInput id={`${idPrefix}-ehs`} {...t("ehsHrCompliance")} />
         </Field>
-        <Field label="Insurance terms" htmlFor={`${idPrefix}-ins`}>
+        <Field label="Insurance Coverage" htmlFor={`${idPrefix}-ins`}>
           <TextInput id={`${idPrefix}-ins`} {...t("insuranceTerms")} />
-        </Field>
-        <Field label="Extension clause" htmlFor={`${idPrefix}-ext`}>
-          <TextInput id={`${idPrefix}-ext`} {...t("extensionClause")} />
         </Field>
       </div>
 
@@ -484,31 +429,8 @@ function LineFields({
           <Field label="Additional manpower" htmlFor={`${idPrefix}-manpower`}>
             <TextInput id={`${idPrefix}-manpower`} {...t("additionalManpowerScope")} />
           </Field>
-          <Field label="Intra-site movement" htmlFor={`${idPrefix}-intra`}>
-            <TextInput id={`${idPrefix}-intra`} {...t("intraSiteMovementScope")} />
-          </Field>
-          <Field label="Pre-release terms" htmlFor={`${idPrefix}-prerelease`}>
-            <TextInput id={`${idPrefix}-prerelease`} {...t("prereleaseTerms")} />
-          </Field>
-          <Field label="PPE" htmlFor={`${idPrefix}-ppe`}>
-            <TextInput id={`${idPrefix}-ppe`} {...t("ppeScope")} />
-          </Field>
-          <Field label="Right of way (ROW)" htmlFor={`${idPrefix}-row`} className="sm:col-span-2">
+          <Field label="Right of way (ROW)" htmlFor={`${idPrefix}-row`}>
             <TextInput id={`${idPrefix}-row`} {...t("rowScope")} />
-          </Field>
-        </div>
-        <Field label="Other terms" htmlFor={`${idPrefix}-other`} className="mt-4">
-          <TextArea id={`${idPrefix}-other`} rows={2} {...t("otherTerms")} />
-        </Field>
-      </div>
-
-      <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
-          Internal only
-        </p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Field label="Rental per month" htmlFor={`${idPrefix}-budget`}>
-            <TextInput id={`${idPrefix}-budget`} {...t("rentalBudget")} />
           </Field>
         </div>
       </div>

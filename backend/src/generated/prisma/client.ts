@@ -165,18 +165,18 @@ export type NegotiationRound = Prisma.NegotiationRoundModel
  *  * The enquiry header (BPD 6.3/6.4, P1 section 2).
  *  * The CR team types these in today; a future SAP feed would call the same
  *  * `createEnquiry(payload, source)` service, which is why `source` is a column
- *  * even though `manual` is the only value that exists. The customer's name and
- *  * address are internal-only and are never copied into an RFQ.
+ *  * even though `manual` is the only value that exists.
+ *  *
+ *  * The site is just a city plus state. Coordinates are derived when an RFQ or a
+ *  * recommendation needs them and are stored on those records, never here.
  */
 export type Enquiry = Prisma.EnquiryModel
 /**
  * Model EnquiryLineItem
  * *
- *  * One requirement line on an enquiry, derived from the Cross Rental Enquiry
- *  * Template (P1 section 2). All 31 template rows are represented, including the
- *  * five scope terms the first draft of the field list missed.
- *  * `rentalBudget`, `internalNotes` and `poSapReference` are internal only, as is
- *  * the customer block on the header: none of them is ever copied into an RFQ.
+ *  * One requirement line on an enquiry. Only the facts needed to source and quote
+ *  * a crane are captured here; the terms a vendor is asked to price live on the
+ *  * RFQ, where they can be chosen per invitation.
  */
 export type EnquiryLineItem = Prisma.EnquiryLineItemModel
 /**

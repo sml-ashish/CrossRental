@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ROLE_HOME, roleLabel, useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
+import { clearHistory, markBrowserHistoryPop, recordVisit } from "@/lib/navigationHistory";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
@@ -45,14 +46,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: LayoutDashboard,
     roles: ["vendor_user"],
   },
-  { to: "/app/sales", label: "Dashboard", icon: LayoutDashboard, roles: ["sales_user"] },
   {
     to: "/app/management",
     label: "Dashboard",
     icon: LayoutDashboard,
     roles: ["management_viewer"],
   },
-  { to: "/app/admin", label: "Dashboard", icon: LayoutDashboard, roles: ["admin_user"], exact: true },
   { to: "/app/enquiries", label: "Enquiries", icon: Inbox, roles: ["sales_user", "admin_user"] },
   { to: "/app/discovery", label: "Find cranes", icon: Compass, roles: ["sales_user", "admin_user"] },
   {
@@ -90,6 +89,20 @@ export function AppLayout() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const href = useRouterState({ select: (state) => state.location.href });
+
+  // Remember every internal page as it opens. Browser Back/Forward and our own
+  // Back button are both "restores": they trim the memory to the page reached
+  // instead of appending it a second time.
+  useEffect(() => {
+    if (user) recordVisit(href);
+  }, [href, user]);
+
+  useEffect(() => {
+    const onPopState = () => markBrowserHistoryPop();
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   // A drawer that survives a navigation is a drawer covering the thing the
   // person just asked for, so close it whenever the route changes.
@@ -115,6 +128,7 @@ export function AppLayout() {
   const items = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
 
   function onSignOut() {
+    clearHistory();
     logout();
     void navigate({ to: "/auth/login" });
   }

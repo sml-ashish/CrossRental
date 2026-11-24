@@ -1,7 +1,13 @@
-import type { EnquiryDetail, EnquiryLine } from "@/lib/enquiries";
+import {
+  LINE_STEPS,
+  lineStatusFromValue,
+  lineStatusOf,
+  type EnquiryDetail,
+  type EnquiryLine,
+} from "@/lib/enquiries";
 import type { HistoryEntry } from "@/lib/enquiryHistory";
 import type { RfqListRow } from "@/lib/rfqs";
-import { cityOf, siteLabel, titleCase } from "@/lib/format";
+import { cityOf, titleCase } from "@/lib/format";
 
 /**
  * Pure readings of one enquiry line.
@@ -81,38 +87,37 @@ export function durationText(line: EnquiryLine): string | null {
   return `${number(line.durationValue)} ${plural(line.durationValue, unit)}`;
 }
 
-/** "Pune, Maharashtra" — built once, with the state never appended twice. */
+/** "Maharashtra, Pune" — state first, with the state never repeated. */
 export function siteLine(enquiry: Pick<
   EnquiryDetail,
-  "siteLocation" | "siteStateCode" | "siteStateName"
+  "shipToCity" | "siteStateCode" | "siteStateName"
 >): string {
-  return siteLabel({
-    siteLocation: enquiry.siteLocation,
-    siteState: enquiry.siteStateName ? { name: enquiry.siteStateName } : null,
-    siteStateCode: enquiry.siteStateCode,
-  });
+  const city = titleCase(enquiry.shipToCity.trim());
+  const state = enquiry.siteStateName
+    ? titleCase(enquiry.siteStateName)
+    : enquiry.siteStateCode
+      ? titleCase(enquiry.siteStateCode)
+      : "";
+  if (!state || city.toLowerCase().includes(state.toLowerCase())) return city;
+  return `${state}, ${city}`;
 }
 
-export function siteCity(enquiry: Pick<EnquiryDetail, "siteLocation">): string {
-  return cityOf(enquiry);
+export function siteCity(enquiry: Pick<EnquiryDetail, "shipToCity">): string {
+  return cityOf({ siteLocation: enquiry.shipToCity });
 }
 
 // ---------------------------------------------------------------------------
 // The line itself
 // ---------------------------------------------------------------------------
 
-/** "Line 1 · 250 t+ Crawler Crane × 2". */
+/** "Line 1 · 250 t+ Crawler Crane". */
 export function lineTitle(line: EnquiryLine): string {
   const type =
     line.craneTypeName?.trim() ||
     (line.craneTypeCode ? `${titleCase(line.craneTypeCode)} Crane` : "Crane");
-  const capacity =
-    line.capacityT !== null
-      ? `${number(line.capacityT)} t${line.capacityRule === "AT_LEAST" ? "+" : ""}`
-      : null;
+  const capacity = line.capacityT !== null ? `${number(line.capacityT)} t+` : null;
   const subject = capacity ? `${capacity} ${type}` : type;
-  const quantity = line.quantity > 1 ? ` × ${line.quantity}` : "";
-  return `Line ${line.lineNo} · ${subject}${quantity}`;
+  return `Line ${line.lineNo} · ${subject}`;
 }
 
 /** The line as the banner and activity list talk about it. */
@@ -144,15 +149,8 @@ export function lineUrgency(
   hasRfq: boolean,
   now: Date = new Date(),
 ): Urgency | null {
-  if (
-    line.trailStatus === "CANCELLED" ||
-    line.trailStatus === "CLOSED" ||
-    line.trailStatus === "FULFILLED_INTERNALLY" ||
-    line.trailStatus === "VENDOR_FINALISED" ||
-    line.trailStatus === "BOOKED"
-  ) {
-    return null;
-  }
+  const status = lineStatusOf(line);
+  if (status === "Booked" || status === "Cancelled") return null;
   const start = dayOf(line.requiredStartDate);
   if (!start) return null;
   const days = daysUntil(start, now);
@@ -169,12 +167,11 @@ export function lineUrgency(
   return null;
 }
 
-/** "Lift 120 t at 30 m radius · boom 60 m" — only the parts that were entered. */
+/** "Lift 120 t to 30 m height" — only the parts that were entered. */
 export function liftSummary(line: EnquiryLine): string | null {
   const parts: string[] = [];
   if (line.liftLoadT !== null) parts.push(`Lift ${number(line.liftLoadT)} t`);
-  if (line.workingRadiusM !== null) parts.push(`at ${number(line.workingRadiusM)} m radius`);
-  if (line.requiredMainBoomM !== null) parts.push(`boom ${number(line.requiredMainBoomM)} m`);
+  if (line.liftHeightM !== null) parts.push(`to ${number(line.liftHeightM)} m height`);
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
@@ -193,88 +190,35 @@ export function lineWindow(line: EnquiryLine): { from: string; to: string } | nu
 }
 
 // ---------------------------------------------------------------------------
-// The five-step shorthand
+// The four progress steps, plus Cancelled as a terminal outcome
 // ---------------------------------------------------------------------------
 
-export const LINE_STEPS = ["Requirement", "Vendors", "RFQ sent", "Quotes", "Booked"] as const;
-
 export interface LineStage {
-  /** 0 to 4; -1 when the line was cancelled. */
+  /** 0 to 3 for progress steps; -1 when the line was cancelled. */
   index: number;
-  /** True for closed and internally fulfilled lines: every step is done. */
+  /** True for a booked line: every progress step is done. */
   completed: boolean;
-  /** "Closed" or "Fulfilled internally" when all five steps are done. */
-  note: string | null;
+  /** True when the line reads Cancelled. */
   cancelled: boolean;
 }
 
 /**
- * Twelve trail statuses folded into the five a salesperson actually thinks in.
- *
- * A quote can arrive before the trail catches up, so a line that carries a
- * quote reads as "Quotes" even while its status still says RFQ sent. That is
- * the same precedence the action picker uses, so the stepper and the button
- * never point at different stages.
+ * The stepper and the status pill come from the same fold, so they can never
+ * disagree. Booked is the last step; Cancelled sits outside the progression.
  */
 export function lineStage(line: EnquiryLine): LineStage {
-  if (line.trailStatus === "CANCELLED") {
-    return { index: -1, completed: false, note: null, cancelled: true };
+  const status = lineStatusOf(line);
+  if (status === "Cancelled") return { index: -1, completed: false, cancelled: true };
+  if (status === "Booked") {
+    return { index: LINE_STEPS.length - 1, completed: true, cancelled: false };
   }
-  if (line.trailStatus === "CLOSED") {
-    return { index: 4, completed: true, note: "Closed", cancelled: false };
-  }
-  if (line.trailStatus === "FULFILLED_INTERNALLY") {
-    return { index: 4, completed: true, note: "Fulfilled internally", cancelled: false };
-  }
-  if (line.trailStatus === "VENDOR_FINALISED" || line.trailStatus === "BOOKED") {
-    return { index: 4, completed: false, note: null, cancelled: false };
-  }
-  // A quote can land before the trail moves. Reading it as "Quotes" is what
-  // keeps the stepper and the Compare button on the same stage.
-  if ((line.quoteCount ?? 0) > 0) {
-    return { index: 3, completed: false, note: null, cancelled: false };
-  }
-  if (line.trailStatus === "QUOTES_RECEIVED" || line.trailStatus === "UNDER_EVALUATION") {
-    return { index: 3, completed: false, note: null, cancelled: false };
-  }
-  if (line.trailStatus === "RFQ_SENT" || line.trailStatus === "AWAITING_QUOTES") {
-    return { index: 2, completed: false, note: null, cancelled: false };
-  }
-  if (line.trailStatus === "VENDOR_SHORTLISTED") {
-    return { index: 1, completed: false, note: null, cancelled: false };
-  }
-  return { index: 0, completed: false, note: null, cancelled: false };
+  const index = LINE_STEPS.indexOf(status);
+  return { index: index < 0 ? 0 : index, completed: false, cancelled: false };
 }
 
-const TRAIL_TEXT: Record<EnquiryLine["trailStatus"], string> = {
-  NEW: "New requirement",
-  AVAILABILITY_CHECK: "Checking availability",
-  VENDOR_SHORTLISTED: "Vendors shortlisted",
-  RFQ_SENT: "RFQ sent",
-  AWAITING_QUOTES: "Waiting for quotes",
-  QUOTES_RECEIVED: "Quotes received",
-  UNDER_EVALUATION: "Comparing quotes",
-  VENDOR_FINALISED: "Vendor finalised",
-  BOOKED: "Booked",
-  CLOSED: "Closed",
-  FULFILLED_INTERNALLY: "Fulfilled internally",
-  CANCELLED: "Cancelled",
-};
-
-/** The exact trail, in words a reader does not have to decode. */
-export function exactStatusText(line: EnquiryLine): string {
-  return TRAIL_TEXT[line.trailStatus];
-}
-
-/** The status in one plain sentence for the copy summary and the banner. */
+/** The status in one plain word for the copy summary and the stepper caption. */
 export function lineStatusWord(line: EnquiryLine): string {
-  if (line.trailStatus === "CANCELLED") return "Cancelled";
-  if (line.trailStatus === "CLOSED") return "Closed";
-  if (line.trailStatus === "FULFILLED_INTERNALLY") return "Fulfilled internally";
-  if (line.quoteCount && line.quoteCount > 0 && lineStage(line).index === 3) {
-    return "Quotes received";
-  }
-  return exactStatusText(line);
+  return lineStatusOf(line);
 }
 
 // ---------------------------------------------------------------------------
@@ -435,7 +379,7 @@ export function rfqSentence(
 // Actions
 // ---------------------------------------------------------------------------
 
-export type LineActionKind = "raise" | "open" | "compare" | "find" | "availability";
+export type LineActionKind = "raise" | "open" | "find" | "availability";
 
 export interface LineActionDescriptor {
   kind: LineActionKind;
@@ -452,40 +396,17 @@ export interface LineActions {
 /**
  * Exactly one primary button, chosen from the state.
  *
- * A new line can never offer "Compare quotes": comparison is only reachable
- * when a quote exists. A sourced line's next action is the paperwork, even if
- * quotes are still listed, so the decision is not re-opened by the layout.
+ * Once an RFQ exists, the line's only action is to open it. Comparison lives
+ * inside the RFQ, where the terms and counter-offers can be read together, so
+ * the enquiry never offers a competing "Compare quotes" shortcut.
  */
 export function lineActions(line: EnquiryLine, facts: LineFacts): LineActions {
-  if (
-    line.trailStatus === "CANCELLED" ||
-    line.trailStatus === "CLOSED" ||
-    line.trailStatus === "FULFILLED_INTERNALLY"
-  ) {
+  if (lineStatusOf(line) === "Cancelled") {
     return { primary: null, secondary: [] };
   }
 
-  const sourced = line.trailStatus === "VENDOR_FINALISED" || line.trailStatus === "BOOKED";
-  if (sourced) {
-    return facts.rfqId
-      ? { primary: { kind: "open", label: "Open RFQ", rfqId: facts.rfqId }, secondary: [] }
-      : { primary: null, secondary: [] };
-  }
-
-  if (facts.quotes > 0) {
-    return {
-      primary: { kind: "compare", label: `Compare quotes (${facts.quotes})` },
-      secondary: facts.rfqId
-        ? [{ kind: "open", label: "Open RFQ", rfqId: facts.rfqId }]
-        : [],
-    };
-  }
-
-  if (facts.hasRfq && facts.rfqId) {
-    return {
-      primary: { kind: "open", label: "Open RFQ", rfqId: facts.rfqId },
-      secondary: [{ kind: "raise", label: "Raise another RFQ" }],
-    };
+  if (facts.rfqId) {
+    return { primary: { kind: "open", label: "Open RFQ", rfqId: facts.rfqId }, secondary: [] };
   }
 
   return {
@@ -495,145 +416,6 @@ export function lineActions(line: EnquiryLine, facts: LineFacts): LineActions {
       { kind: "availability", label: "Check availability" },
     ],
   };
-}
-
-// ---------------------------------------------------------------------------
-// "What next?"
-// ---------------------------------------------------------------------------
-
-export type NextStepKind = "quotes" | "imminent" | "no-rfq" | "expired" | "all-sourced";
-
-export interface NextStep {
-  kind: NextStepKind;
-  line: EnquiryLine | null;
-  /** Exactly the matching line's primary action. */
-  action: LineActionDescriptor | null;
-  text: string;
-  /** The "all sourced" message is deliberately quiet. */
-  muted: boolean;
-}
-
-function startValue(line: EnquiryLine): number {
-  return line.requiredStartDate ? Date.parse(line.requiredStartDate) : Number.POSITIVE_INFINITY;
-}
-
-function byStartThenLine(a: EnquiryLine, b: EnquiryLine): number {
-  return startValue(a) - startValue(b) || a.lineNo - b.lineNo;
-}
-
-function done(line: EnquiryLine): boolean {
-  return ["CLOSED", "FULFILLED_INTERNALLY"].includes(line.trailStatus);
-}
-
-function sourced(line: EnquiryLine): boolean {
-  return ["VENDOR_FINALISED", "BOOKED"].includes(line.trailStatus);
-}
-
-/**
- * The single most urgent suggestion across the lines.
- *
- * Priority is deliberate: a quote waiting to be compared is money on the table;
- * a start date inside two weeks with no RFQ is a delivery risk; a missing RFQ
- * is the ordinary next step; a closed RFQ with nothing back needs a decision.
- */
-export function pickNextStep(
-  lines: EnquiryLine[],
-  summaries: Record<string, LineRfqSummary | undefined>,
-  now: Date = new Date(),
-): NextStep | null {
-  const live = lines.filter((line) => line.trailStatus !== "CANCELLED" && !done(line));
-  if (live.length === 0) return null;
-
-  const facts = new Map(
-    live.map((line) => [line.id, lineRfqFacts(line, summaries[line.id], now)] as const),
-  );
-
-  const quoteLines = live
-    .filter((line) => {
-      const fact = facts.get(line.id)!;
-      return fact.quotes > 0 && !sourced(line);
-    })
-    .sort(byStartThenLine);
-  if (quoteLines.length > 0) {
-    const line = quoteLines[0]!;
-    const fact = facts.get(line.id)!;
-    const actions = lineActions(line, fact);
-    return {
-      kind: "quotes",
-      line,
-      action: actions.primary,
-      text: `${lineShort(line)} has ${fact.quotes} ${plural(fact.quotes, "quote")} ready to compare.`,
-      muted: false,
-    };
-  }
-
-  const noRfq = live
-    .filter((line) => !facts.get(line.id)!.hasRfq && !sourced(line))
-    .sort(byStartThenLine);
-
-  const imminent = noRfq.filter((line) => {
-    const start = dayOf(line.requiredStartDate);
-    return start !== null && daysUntil(start, now) <= 14;
-  });
-  if (imminent.length > 0) {
-    const line = imminent[0]!;
-    const start = dayOf(line.requiredStartDate)!;
-    const days = daysUntil(start, now);
-    const when =
-      days < -1
-        ? `started ${Math.abs(days)} days ago`
-        : days === -1
-          ? "started yesterday"
-          : days === 0
-            ? "starts today"
-            : `starts in ${days} days`;
-    return {
-      kind: "imminent",
-      line,
-      action: lineActions(line, facts.get(line.id)!).primary,
-      text: `${lineShort(line)} ${when} and has no RFQ yet.`,
-      muted: false,
-    };
-  }
-
-  if (noRfq.length > 0) {
-    const line = noRfq[0]!;
-    return {
-      kind: "no-rfq",
-      line,
-      action: lineActions(line, facts.get(line.id)!).primary,
-      text: `${lineShort(line)} needs vendors. Raise an RFQ.`,
-      muted: false,
-    };
-  }
-
-  const expired = live
-    .filter((line) => facts.get(line.id)!.expired)
-    .sort(byStartThenLine);
-  if (expired.length > 0) {
-    const line = expired[0]!;
-    const fact = facts.get(line.id)!;
-    return {
-      kind: "expired",
-      line,
-      action: lineActions(line, fact).primary,
-      text: `${fact.rfqNumber ?? "The RFQ"} closed with no quotes.`,
-      muted: false,
-    };
-  }
-
-  const allSourced = live.every((line) => sourced(line));
-  if (allSourced) {
-    return {
-      kind: "all-sourced",
-      line: null,
-      action: null,
-      text: "All lines sourced. Nothing to do here.",
-      muted: true,
-    };
-  }
-
-  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -667,23 +449,18 @@ function present(items: Array<RequirementItem | null>): RequirementItem[] {
 /** The rest of the line, grouped and with empty fields left out. */
 export function requirementGroups(line: EnquiryLine): RequirementGroup[] {
   const scope = present([
+    text(line.craneModel) ? { label: "Crane model", value: text(line.craneModel)! } : null,
+    line.yom !== null ? { label: "YOM", value: String(line.yom) } : null,
+    text(line.craneConfiguration)
+      ? { label: "Crane configuration", value: text(line.craneConfiguration)! }
+      : null,
     text(line.applicationDescription)
       ? { label: "Application", value: text(line.applicationDescription)! }
       : null,
-    text(line.loadDescription)
-      ? { label: "Load", value: text(line.loadDescription)! }
-      : null,
     line.liftLoadT !== null
-      ? { label: "Lift load", value: `${number(line.liftLoadT)} t` }
+      ? { label: "Weight to be lifted", value: `${number(line.liftLoadT)} t` }
       : null,
-    metres(line.workingRadiusM, "Working radius"),
-    metres(line.requiredMainBoomM, "Main boom"),
-    metres(line.requiredFixedJibM, "Fixed jib"),
-    metres(line.requiredLuffingJibM, "Luffing jib"),
-    metres(line.requiredWindJibM, "Wind jib"),
-    text(line.configurationNotes)
-      ? { label: "Configuration", value: text(line.configurationNotes)! }
-      : null,
+    metres(line.liftHeightM, "Height to be lifted"),
     durationText(line) ? { label: "Duration", value: durationText(line)! } : null,
     line.workingDaysPerMonth !== null
       ? { label: "Working days", value: `${line.workingDaysPerMonth} days/month` }
@@ -691,32 +468,24 @@ export function requirementGroups(line: EnquiryLine): RequirementGroup[] {
   ]);
 
   const commercial = present([
-    text(line.mobilisationTerms)
-      ? { label: "Mobilisation", value: text(line.mobilisationTerms)! }
-      : null,
-    text(line.demobilisationTerms)
-      ? { label: "Demobilisation", value: text(line.demobilisationTerms)! }
-      : null,
     text(line.otCharges) ? { label: "OT charges", value: text(line.otCharges)! } : null,
     text(line.breakdownTerms)
-      ? { label: "Breakdown", value: text(line.breakdownTerms)! }
+      ? { label: "Breakdown Charges", value: text(line.breakdownTerms)! }
       : null,
     text(line.dieselScope) ? { label: "Diesel", value: text(line.dieselScope)! } : null,
-    text(line.workingHoursShift)
+    text(line.workingHoursPerDay)
+      ? { label: "Working hours (per day)", value: text(line.workingHoursPerDay)! }
+      : null,
+    text(line.shift) ? { label: "Shift", value: text(line.shift)! } : null,
+    !text(line.workingHoursPerDay) && !text(line.shift) && text(line.workingHoursShift)
       ? { label: "Working hours / shift", value: text(line.workingHoursShift)! }
       : null,
-    text(line.accommodationConveyance)
-      ? { label: "Accommodation & conveyance", value: text(line.accommodationConveyance)! }
+    text(line.insuranceTerms)
+      ? { label: "Insurance Coverage", value: text(line.insuranceTerms)! }
       : null,
-    text(line.paymentTerms) ? { label: "Payment terms", value: text(line.paymentTerms)! } : null,
-    text(line.extensionClause)
-      ? { label: "Extension clause", value: text(line.extensionClause)! }
-      : null,
-    text(line.insuranceTerms) ? { label: "Insurance", value: text(line.insuranceTerms)! } : null,
     line.craneAgeCriteriaYears !== null
       ? { label: "Crane age", value: `${line.craneAgeCriteriaYears} years or newer` }
       : null,
-    text(line.otherTerms) ? { label: "Other terms", value: text(line.otherTerms)! } : null,
   ]);
 
   const siteAndCompliance = present([
@@ -726,25 +495,12 @@ export function requirementGroups(line: EnquiryLine): RequirementGroup[] {
     text(line.ehsHrCompliance)
       ? { label: "EHS & HR", value: text(line.ehsHrCompliance)! }
       : null,
-    text(line.ppeScope) ? { label: "PPE", value: text(line.ppeScope)! } : null,
     text(line.rowScope) ? { label: "Right of way", value: text(line.rowScope)! } : null,
-    text(line.intraSiteMovementScope)
-      ? { label: "Intra-site movement", value: text(line.intraSiteMovementScope)! }
-      : null,
     text(line.supportCraneScope)
       ? { label: "Support crane", value: text(line.supportCraneScope)! }
       : null,
     text(line.additionalManpowerScope)
       ? { label: "Additional manpower", value: text(line.additionalManpowerScope)! }
-      : null,
-    text(line.prereleaseTerms)
-      ? { label: "Pre-release", value: text(line.prereleaseTerms)! }
-      : null,
-  ]);
-
-  const internal = present([
-    text(line.rentalBudget)
-      ? { label: "Rental budget", value: text(line.rentalBudget)!, internal: true }
       : null,
   ]);
 
@@ -752,7 +508,6 @@ export function requirementGroups(line: EnquiryLine): RequirementGroup[] {
     { title: "Scope", items: scope },
     { title: "Commercial terms", items: commercial },
     { title: "Site and compliance", items: siteAndCompliance },
-    { title: "Internal", items: internal },
   ].filter((group) => group.items.length > 0);
 }
 
@@ -761,11 +516,11 @@ export function requirementGroups(line: EnquiryLine): RequirementGroup[] {
 // ---------------------------------------------------------------------------
 
 /**
- * The short summary the menu copies. Internal fields — the rental budget — are
- * deliberately absent: this text gets pasted into chats and emails.
+ * The short summary the menu copies. This text gets pasted into chats and
+ * emails, so it carries only the enquiry number and the site.
  */
 export function enquirySummaryText(enquiry: EnquiryDetail): string {
-  const header = `${enquiry.enquiryNo} — ${enquiry.customerName}`;
+  const header = `${enquiry.enquiryNo} — ${enquiry.shipToCity}`;
   const context = `${siteLine(enquiry)} · Raised ${formatLongDate(enquiry.enquiryDate)}`;
   const lines = enquiry.lines.map((line) => {
     const start = line.requiredStartDate
@@ -865,8 +620,8 @@ export function mapActivity(
       const line = lineNo.get(entry.entityId);
       if (entry.action === "trail") {
         const to = changeTo(entry, "trailStatus") ?? value.trailStatus;
-        const label = typeof to === "string" ? TRAIL_TEXT[to as EnquiryLine["trailStatus"]] : null;
-        if (label && to !== "NEW") {
+        const label = typeof to === "string" ? lineStatusFromValue(to) : null;
+        if (label && label !== "Sourcing pending") {
           text = `Line ${line ?? "?"} moved to ${label.toLowerCase()}`;
         }
       } else if (entry.action === "update") {

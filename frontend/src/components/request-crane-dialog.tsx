@@ -444,7 +444,7 @@ function LineCard({
         </div>
       }
     >
-      <dl className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
+      <dl className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3">
         <Fact
           label="Crane"
           value={`${craneTypeLabel(line.craneTypeName)} · ${line.capacityT === null ? "—" : `${line.capacityT} t`}`}
@@ -452,7 +452,7 @@ function LineCard({
         <Fact
           label="Site"
           value={siteLabel({
-            siteLocation: line.siteLocation,
+            siteLocation: line.shipToCity,
             siteState: line.siteStateName ? { name: line.siteStateName } : null,
           })}
         />
@@ -460,7 +460,6 @@ function LineCard({
           label="Required start"
           value={line.startDateTbc ? "TBC" : formatStartShort(line.requiredStartDate)}
         />
-        <Fact label="Quantity" value={String(line.quantity)} />
       </dl>
 
       <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">

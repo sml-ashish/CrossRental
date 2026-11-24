@@ -6,6 +6,11 @@
  * Placeholders use {{name}} and are substituted at send time. Unknown
  * placeholders are left as-is rather than blanked, so a typo in a customised
  * template is visible instead of silently swallowing content.
+ *
+ * Bodies are plain text. No cards, buttons, coloured headers or footers —
+ * the recipient gets the message and the link, nothing else. The stored column
+ * is still called `bodyHtml` for compatibility with the existing table; it now
+ * holds text only.
  */
 
 export interface EmailTemplateSeed {
@@ -14,379 +19,358 @@ export interface EmailTemplateSeed {
   bodyHtml: string;
 }
 
-const layout = (title: string, body: string, cta?: { label: string; url: string }) => `
-<div style="font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f8fafc;padding:24px">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden">
-    <div style="background:linear-gradient(to bottom,#FA5A54,#F1221C,#D91B16);padding:20px 28px">
-      <div style="color:#ffffff;font-size:15px;font-weight:700;letter-spacing:-0.02em">Sanghvi Movers Limited</div>
-      <div style="color:#ffe1e0;font-size:12px;margin-top:2px">crossrentel &middot; Crane sourcing &amp; vendor network</div>
-    </div>
-    <div style="padding:28px">
-      <h1 style="margin:0 0 16px;font-size:18px;color:#0f172a;letter-spacing:-0.02em">${title}</h1>
-      ${body}
-      ${
-        cta
-          ? `<div style="margin:24px 0">
-               <a href="${cta.url}" style="display:inline-block;background:linear-gradient(to bottom,#FA5A54,#F1221C,#D91B16);color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;padding:11px 20px;border-radius:8px">${cta.label}</a>
-             </div>
-             <p style="margin:0;font-size:11px;color:#64748b;word-break:break-all">If the button does not work, copy this link into your browser:<br/>${cta.url}</p>`
-          : ""
-      }
-    </div>
-    <div style="border-top:1px solid #e2e8f0;padding:16px 28px;background:#f8fafc">
-      <p style="margin:0;font-size:11px;color:#64748b">
-        This message was sent by the SML Crane Portal. Please do not reply to this email —
-        responses are not read; use the portal links above.
-      </p>
-    </div>
-  </div>
-</div>`.trim();
+const plain = (...lines: string[]): string => lines.join("\n").trim();
+
+const link = (label: string, url: string): string[] => ["", `${label}:`, url];
 
 export const DEFAULT_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     key: "vendor_invitation",
     subject: "SML Crane Portal — vendor registration",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Vendor registration",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear Sir,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">Greetings from Sanghvi Movers Ltd.</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         We are registering vendors for our crane sourcing platform. Please complete the
-         online registration form and upload the documents listed below. This replaces the
-         scanned paper form.
-       </p>
-       <ul style="margin:0 0 16px;padding-left:20px;font-size:13px;color:#334155;line-height:1.9">
-         <li>Cancelled cheque copy</li>
-         <li>GST certificate</li>
-         <li>PAN card copy</li>
-       </ul>
-       <p style="margin:0;font-size:14px;color:#334155">Your response will be appreciated to proceed further.</p>`,
-      { label: "Start registration", url: "{{onboardingUrl}}" },
+      "",
+      "Dear Sir,",
+      "",
+      "Greetings from Sanghvi Movers Ltd.",
+      "",
+      "We are registering vendors for our crane sourcing platform. Please complete the",
+      "online registration form and upload the documents listed below. This replaces the",
+      "scanned paper form.",
+      "",
+      "Documents required:",
+      "- Cancelled cheque copy",
+      "- GST certificate",
+      "- PAN card copy",
+      "",
+      "Your response will be appreciated to proceed further.",
+      ...link("Start registration", "{{onboardingUrl}}"),
     ),
   },
   {
     key: "onboarding_submitted",
     subject: "New vendor registration submitted — {{vendorName}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "New vendor registration",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">{{vendorName}} has submitted a vendor registration.</p>
-       <p style="margin:0 0 6px;font-size:13px;color:#475569">Email: {{vendorEmail}}</p>
-       <p style="margin:0 0 6px;font-size:13px;color:#475569">PAN: {{pan}}</p>
-       <p style="margin:0 0 6px;font-size:13px;color:#475569">GSTIN: {{gstn}}</p>
-       <p style="margin:0;font-size:13px;color:#475569">Registered address: {{registeredAddress}}</p>`,
-      { label: "Review registration", url: "{{reviewUrl}}" },
+      "",
+      "{{vendorName}} has submitted a vendor registration.",
+      "",
+      "Email: {{vendorEmail}}",
+      "PAN: {{pan}}",
+      "GSTIN: {{gstn}}",
+      "Registered address: {{registeredAddress}}",
+      ...link("Review registration", "{{reviewUrl}}"),
     ),
   },
   {
     key: "onboarding_approved",
     subject: "Your SML vendor registration is approved",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Registration approved",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Your vendor registration has been approved. Please set a password to activate your
-         portal account. The link below can be used once and expires in
-         {{activationTtlHours}} hours.
-       </p>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         Vendor code: {{sapVendorCode}}
-       </p>`,
-      { label: "Activate your account", url: "{{activationUrl}}" },
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "Your vendor registration has been approved. Please set a password to activate your",
+      "portal account. The link below can be used once and expires in",
+      "{{activationTtlHours}} hours.",
+      "",
+      "Vendor code: {{sapVendorCode}}",
+      ...link("Activate your account", "{{activationUrl}}"),
     ),
   },
   {
     key: "onboarding_rejected",
     subject: "SML vendor registration — not approved",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Registration not approved",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         We are unable to approve your registration at this time. The remarks are below.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#991b1b;white-space:pre-wrap">{{adminRemarks}}</div>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Please correct the details and submit again using the registration link in the
-         original invitation email. That link is still active — no new email is needed.
-       </p>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         If you no longer have that email, reply to the SML user who invited you and they
-         can send a fresh invitation.
-       </p>`,
-      // Deliberately no call-to-action button. The vendor has no account yet, so a
-      // link to the sign-in page would dead-end them. The raw invitation token is
-      // only stored as a hash and cannot be rebuilt here, which is why the copy
-      // points them at the original email instead of a deep link.
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "We are unable to approve your registration at this time. The remarks are below.",
+      "",
+      "{{adminRemarks}}",
+      "",
+      "Please correct the details and submit again using the registration link in the",
+      "original invitation email. That link is still active — no new email is needed.",
+      "",
+      "If you no longer have that email, reply to the SML user who invited you and they",
+      "can send a fresh invitation.",
+      // Deliberately no call-to-action. The vendor has no account yet, so a link
+      // to the sign-in page would dead-end them. The raw invitation token is
+      // only stored as a hash and cannot be rebuilt here.
     ),
   },
   {
     key: "password_reset",
     subject: "Reset your SML Crane Portal password",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Reset your password",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Use the link below to choose a new password. It can be used once and expires in
-         {{resetTtlHours}} hour.
-       </p>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         If you did not request this, you can ignore this email — your password is unchanged.
-       </p>`,
-      { label: "Set a new password", url: "{{resetUrl}}" },
+      "",
+      "Hello,",
+      "",
+      "Use the link below to choose a new password. It can be used once and expires in",
+      "{{resetTtlHours}} hour.",
+      "",
+      "If you did not request this, you can ignore this email — your password is unchanged.",
+      ...link("Set a new password", "{{resetUrl}}"),
     ),
   },
   {
     key: "login_otp",
     subject: "Your SML Crane Portal sign-in code",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Your sign-in code",
-      `<p style="margin:0 0 16px;font-size:14px;color:#334155">Hello{{fullName}},</p>
-       <div style="margin:0 0 20px;font-size:32px;font-weight:700;letter-spacing:0.18em;color:#0f172a;font-family:'Consolas',monospace">${"{{otpCode}}"}</div>
-       <p style="margin:0 0 6px;font-size:13px;color:#475569">This code expires in {{otpTtlMinutes}} minutes and can be used once.</p>
-       <p style="margin:0;font-size:13px;color:#64748b">If you did not try to sign in, tell your administrator.</p>`,
+      "",
+      "Hello{{fullName}},",
+      "",
+      "{{otpCode}}",
+      "",
+      "This code expires in {{otpTtlMinutes}} minutes and can be used once.",
+      "",
+      "If you did not try to sign in, tell your administrator.",
     ),
   },
   {
     key: "fleet_update_reminder",
     subject: "Please confirm your crane details are up to date",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Confirm your fleet data",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         We have not received a status or location update for the crane below since
-         {{lastUpdatedAt}}. SML ranks cranes by location and availability, so stale data
-         affects which enquiries reach you.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#334155">
-         {{craneLabel}}<br/>
-         <span style="color:#64748b">Last confirmed: {{lastUpdatedAt}}</span>
-       </div>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         If nothing has changed, use <strong>Confirm current status</strong> — it takes one tap.
-       </p>`,
-      { label: "Update crane", url: "{{craneUrl}}" },
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "We have not received a status or location update for the crane below since",
+      "{{lastUpdatedAt}}. SML ranks cranes by location and availability, so stale data",
+      "affects which enquiries reach you.",
+      "",
+      "{{craneLabel}}",
+      "Last confirmed: {{lastUpdatedAt}}",
+      "",
+      "If nothing has changed, use Confirm current status — it takes one tap.",
+      ...link("Update crane", "{{craneUrl}}"),
+    ),
+  },
+  {
+    key: "fleet_updated_on_behalf",
+    subject: "Your crane details were updated on your behalf",
+    bodyHtml: plain(
+      "Fleet updated on your behalf",
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "An SML user updated your crane details for you. The change is recorded against",
+      "your crane and is shown in the portal.",
+      "",
+      `{{craneLabel}}\nUpdated by {{actorName}}`,
+      "",
+      'If anything looks wrong, open the crane in the portal and edit it — that clears the "updated on your behalf" mark.',
+      ...link("View crane", "{{craneUrl}}"),
     ),
   },
   {
     key: "rfq_invitation",
     subject: "[{{rfqNumber}}] Crane enquiry — please quote",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Crane enquiry",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear Sir,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Greetings from Sanghvi Movers Ltd. We are interested in hiring a crane from your
-         fleet. Please find the enquiry details below and share your best commercial quote
-         through the portal.
-       </p>
-       <table style="width:100%;border-collapse:collapse;font-size:13px;color:#334155;margin:0 0 16px">
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b;width:45%">RFQ number</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:600">{{rfqNumber}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Site location</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{siteLocation}}, {{siteState}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane requirement</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneType}}, {{capacityRule}}, quantity {{quantity}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Capacity note</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{capacityNote}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Application</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{applicationDescription}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Load details</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{loadDescription}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Main boom required</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{mainBoomText}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Jib length required</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{jibText}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Configuration</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{configuration}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Tentative deployment</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{requiredStartDate}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Hiring duration</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{durationText}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">OT charges</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{otCharges}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Breakdown charges</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{breakdownTerms}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Diesel scope</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{dieselScope}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Working hours / shift</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{workingHoursShift}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane age criteria</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneAgeCriteria}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Accommodation &amp; conveyance</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{accommodationConveyance}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Payment terms</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{paymentTerms}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Mobilisation &amp; demobilisation</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{mobilisationTerms}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Support crane</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{supportCrane}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Steel mats &amp; ground prep</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{steelMatsGroundPrep}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">EHS / HR</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{ehsHrRequirements}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Insurance</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{insuranceTerms}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Extension clause</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{extensionClause}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Quote due by</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:600;color:#b8130f">{{submissionDeadline}}</td></tr>
-       </table>
-       <p style="margin:0 0 12px;font-size:13px;color:#334155">
-         Please submit your quotation through the portal along with the
-         <strong>load chart</strong> for the crane, as we need to verify its suitability.
-       </p>
-       <p style="margin:0 0 4px;font-size:13px;color:#334155">
-         In case of any queries, kindly connect with:<br/>
-         {{smlContactName}} — {{smlContactMobile}}<br/>
-         {{smlContactEmail}}
-       </p>
-       <p style="margin:16px 0 0;font-size:13px;color:#334155">
-         If this crane is not available with you, you can still respond by declining and
-         mention:
-       </p>
-       <ol style="margin:6px 0 0;padding-left:20px;font-size:13px;color:#334155;line-height:1.8">
-         <li>Your available fleet details with make, model, capacity, YOM, type and current location.</li>
-         <li>Contacts of other agencies or persons who have this equipment in their fleet.</li>
-       </ol>`,
-      { label: "View enquiry and quote", url: "{{rfqUrl}}" },
+      "",
+      "Dear Sir,",
+      "",
+      "Greetings from Sanghvi Movers Ltd. We are interested in hiring a crane from your",
+      "fleet. Please find the enquiry details below and share your best commercial quote",
+      "through the portal.",
+      "",
+      `RFQ number: {{rfqNumber}}
+Site: {{siteLocation}}, {{siteState}}
+Crane requirement: {{craneType}}, {{capacityRule}}, quantity {{quantity}}
+Application: {{applicationDescription}}
+Main boom required: {{mainBoomText}}
+Jib length required: {{jibText}}
+Configuration: {{configuration}}
+Tentative deployment: {{requiredStartDate}}
+Hiring duration: {{durationText}}
+OT charges: {{otCharges}}
+Breakdown charges: {{breakdownTerms}}
+Diesel scope: {{dieselScope}}
+Working hours / shift: {{workingHoursShift}}
+Crane age criteria: {{craneAgeCriteria}}
+Support crane: {{supportCrane}}
+Steel mats & ground prep: {{steelMatsGroundPrep}}
+EHS / HR: {{ehsHrRequirements}}
+Insurance: {{insuranceTerms}}
+Quote due by: {{submissionDeadline}}`,
+      "",
+      "Please submit your quotation through the portal along with the load chart for the",
+      "crane, as we need to verify its suitability.",
+      "",
+      "In case of any queries, kindly connect with:",
+      "{{smlContactName}} — {{smlContactMobile}}",
+      "{{smlContactEmail}}",
+      "",
+      "If this crane is not available with you, you can still respond by declining and",
+      "mention:",
+      "",
+      "1. Your available fleet details with make, model, capacity, YOM, type and current location.",
+      "2. Contacts of other agencies or persons who have this equipment in their fleet.",
+      ...link("View enquiry and quote", "{{rfqUrl}}"),
     ),
   },
   {
     key: "rfq_reminder",
     subject: "[{{rfqNumber}}] Reminder — quote due by {{submissionDeadline}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Reminder: quotation due",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear Sir,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         This is a reminder that our quotation for <strong>{{rfqNumber}}</strong> is still
-         pending. The deadline is <strong>{{submissionDeadline}}</strong>.
-       </p>
-       <p style="margin:0;font-size:13px;color:#64748b">Site: {{siteLocation}}, {{siteState}}</p>`,
-      { label: "Submit quotation", url: "{{rfqUrl}}" },
+      "",
+      "Dear Sir,",
+      "",
+      "This is a reminder that our quotation for {{rfqNumber}} is still pending. The",
+      "deadline is {{submissionDeadline}}.",
+      "",
+      "Site: {{siteLocation}}, {{siteState}}",
+      ...link("Submit quotation", "{{rfqUrl}}"),
     ),
   },
   {
     key: "quotation_receipt",
     subject: "[{{rfqNumber}}] Quotation received — {{action}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Quotation {{action}}",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Your quotation for <strong>{{rfqNumber}}</strong> has been {{action}} and received by
-         SML. This is your receipt.
-       </p>
-       <table style="width:100%;border-collapse:collapse;font-size:13px;color:#334155;margin:0 0 16px">
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneLabel}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Version</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{version}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Rate</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">INR {{rentalRate}} per {{rateBasis}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Mobilisation</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">INR {{mobilisationCharges}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Demobilisation</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">INR {{demobilisationCharges}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Tax basis</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{taxBasis}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Total quoted value</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:700">INR {{totalQuotedValue}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Validity</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{validityDate}}</td></tr>
-       </table>
-       <p style="margin:0;font-size:13px;color:#64748b">{{calculationNote}}</p>
-       <p style="margin:12px 0 0;font-size:12px;color:#64748b">
-         You may revise or withdraw this quotation until the deadline. All versions are kept.
-       </p>`,
-      { label: "View quotation", url: "{{rfqUrl}}" },
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "Your quotation for {{rfqNumber}} has been {{action}} and received by SML. This is",
+      "your receipt.",
+      "",
+      `Crane: {{craneLabel}}
+Version: {{version}}
+Rate: INR {{rentalRate}} per {{rateBasis}}
+Mobilisation: INR {{mobilisationCharges}}
+Demobilisation: INR {{demobilisationCharges}}
+Tax basis: {{taxBasis}}
+Total quoted value: INR {{totalQuotedValue}}
+Validity: {{validityDate}}`,
+      "",
+      "{{calculationNote}}",
+      "",
+      "You may revise or withdraw this quotation until the deadline. All versions are kept.",
+      ...link("View quotation", "{{rfqUrl}}"),
     ),
   },
   {
     key: "quotation_received",
     subject: "[{{rfqNumber}}] Quotation received from {{vendorName}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Quotation received",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">{{vendorName}} has submitted a quotation for <strong>{{rfqNumber}}</strong>.</p>
-       <table style="width:100%;border-collapse:collapse;font-size:13px;color:#334155;margin:0 0 16px">
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{craneLabel}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Total quoted value</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:700">INR {{totalQuotedValue}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Distance to site</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{distanceText}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Version</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{version}}</td></tr>
-       </table>
-       {{warningsBlock}}`,
-      { label: "View RFQ", url: "{{rfqUrl}}" },
+      "",
+      "{{vendorName}} has submitted a quotation for {{rfqNumber}}.",
+      "",
+      `Crane: {{craneLabel}}
+Total quoted value: INR {{totalQuotedValue}}
+Distance to site: {{distanceText}}
+Version: {{version}}`,
+      "",
+      "{{warningsBlock}}",
+      ...link("View RFQ", "{{rfqUrl}}"),
     ),
   },
   {
     key: "quotation_awarded",
     subject: "[{{rfqNumber}}] Your quotation has been awarded",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Quotation awarded",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Your quotation for <strong>{{rfqNumber}}</strong> has been selected. The crane below
-         is now marked as booked in the portal.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534">
-         {{craneLabel}}<br/>
-         <span style="color:#475569">Reserved for: {{periodText}}</span><br/>
-         <span style="color:#475569">Total quoted value: INR {{totalQuotedValue}}</span>
-       </div>
-       {{reasonBlock}}
-       <p style="margin:0;font-size:13px;color:#64748b">
-         Our team will contact you regarding mobilisation. Commercial terms remain as quoted.
-       </p>`,
-      { label: "View quotation", url: "{{rfqUrl}}" },
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "Your quotation for {{rfqNumber}} has been selected. The crane below is now marked",
+      "as booked in the portal.",
+      "",
+      `{{craneLabel}}
+Reserved for: {{periodText}}
+Total quoted value: INR {{totalQuotedValue}}`,
+      "",
+      "{{reasonBlock}}",
+      "",
+      "Our team will contact you regarding mobilisation. Commercial terms remain as quoted.",
+      ...link("View quotation", "{{rfqUrl}}"),
     ),
   },
   {
     key: "quotation_not_awarded",
     subject: "[{{rfqNumber}}] Update on your quotation",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Quotation not awarded",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         Thank you for quoting for <strong>{{rfqNumber}}</strong>. We have not been able to
-         proceed with this quotation on the present occasion.
-       </p>
-       {{reasonBlock}}
-       <p style="margin:0;font-size:13px;color:#64748b">
-         We value your continued association and will include your fleet in future enquiries.
-       </p>`,
-      { label: "View quotation", url: "{{rfqUrl}}" },
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "Thank you for quoting for {{rfqNumber}}. We have not been able to proceed with this",
+      "quotation on the present occasion.",
+      "",
+      "{{reasonBlock}}",
+      "",
+      "We value your continued association and will include your fleet in future enquiries.",
+      ...link("View quotation", "{{rfqUrl}}"),
     ),
   },
   {
     key: "rfq_deadline_changed",
     subject: "[{{rfqNumber}}] Deadline {{changeKind}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Deadline {{changeKind}}",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear Sir,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         The submission deadline for <strong>{{rfqNumber}}</strong> has been
-         {{changeKind}}.
-       </p>
-       <p style="margin:0 0 6px;font-size:14px;color:#334155">
-         <strong>New deadline:</strong> {{submissionDeadline}}
-       </p>
-       {{reasonBlock}}`,
-      { label: "View enquiry", url: "{{rfqUrl}}" },
+      "",
+      "Dear Sir,",
+      "",
+      "The submission deadline for {{rfqNumber}} has been {{changeKind}}.",
+      "",
+      "New deadline: {{submissionDeadline}}",
+      "",
+      "{{reasonBlock}}",
+      ...link("View enquiry", "{{rfqUrl}}"),
     ),
   },
   {
     key: "reservation_released",
     subject: "Your crane {{craneLabel}} has been released",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Reservation released",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         The reservation on the crane below has been released, so it is available again.
-       </p>
-       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px">
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Crane</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-weight:600">{{craneLabel}}</td></tr>
-         <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;color:#64748b">Period</td><td style="padding:7px 0;border-bottom:1px solid #e2e8f0">{{periodText}}</td></tr>
-         <tr><td style="padding:7px 0;color:#64748b">Released by</td><td style="padding:7px 0">{{releasedBy}}</td></tr>
-       </table>
-       {{reasonBlock}}
-        <p style="margin:0;font-size:13px;color:#64748b">
-          You can update this crane's status in the portal from your fleet list.
-        </p>`,
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "The reservation on the crane below has been released, so it is available again.",
+      "",
+      `Crane: {{craneLabel}}
+Period: {{periodText}}
+Released by: {{releasedBy}}`,
+      "",
+      "{{reasonBlock}}",
+      "",
+      "You can update this crane's status in the portal from your fleet list.",
     ),
   },
   {
     key: "internal_user_created",
     subject: "Your SML Crane Portal account",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Your portal account is ready",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello{{fullName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         An SML Crane Portal account has been created for you with the role
-         <strong>{{roleLabel}}</strong>.
-       </p>
-       <p style="margin:0;font-size:14px;color:#334155">
-         Sign in with this email address and the one-time code we send you — there is no
-         password to remember.
-       </p>`,
-      { label: "Sign in", url: "{{loginUrl}}" },
+      "",
+      "Hello{{fullName}},",
+      "",
+      "An SML Crane Portal account has been created for you with the role {{roleLabel}}.",
+      "",
+      "Sign in with this email address and the one-time code we send you — there is no",
+      "password to remember.",
+      ...link("Sign in", "{{loginUrl}}"),
     ),
   },
   {
     key: "internal_alert_digest",
     subject: "SML Crane Portal — {{alertCount}} item{{alertCount}} need attention",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Alerts needing attention",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         {{alertCount}} item{{alertCount}} on the portal need attention today.
-       </p>
-       <ul style="margin:0 0 16px;padding-left:20px;font-size:13px;color:#334155;line-height:1.8">
-         {{alertItems}}
-       </ul>`,
-      { label: "Open the portal", url: "{{portalUrl}}" },
+      "",
+      "Hello,",
+      "",
+      "{{alertCount}} item{{alertCount}} on the portal need attention today.",
+      "",
+      "{{alertItems}}",
+      ...link("Open the portal", "{{portalUrl}}"),
     ),
   },
 ];
@@ -396,96 +380,88 @@ const NEGOTIATION_EMAIL_TEMPLATES: EmailTemplateSeed[] = [
   {
     key: "negotiation_counter_received",
     subject: "[{{rfqNumber}}] Counter-offer received — round {{roundNumber}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "SML sent a counter-offer",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Dear {{vendorName}},</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         SML has sent a counter-offer for <strong>{{rfqNumber}}</strong>
-         ({{craneLabel}}), round <strong>{{roundNumber}} of {{maxRounds}}</strong>.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534">
-         Total quoted value: INR {{totalQuotedValue}}<br/>
-         <span style="color:#475569">Reply by: {{respondBy}}</span>
-       </div>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         Sign in to the portal to accept, counter or decline. Please reply before the time above.
-       </p>`,
-      { label: "View offer", url: "{{rfqUrl}}" },
+      "",
+      "Dear {{vendorName}},",
+      "",
+      "SML has sent a counter-offer for {{rfqNumber}} ({{craneLabel}}), round",
+      "{{roundNumber}} of {{maxRounds}}.",
+      "",
+      `Total quoted value: INR {{totalQuotedValue}}
+Reply by: {{respondBy}}`,
+      "",
+      "Sign in to the portal to accept, counter or decline. Please reply before the time above.",
+      ...link("View offer", "{{rfqUrl}}"),
     ),
   },
   {
     key: "negotiation_vendor_countered",
     subject: "[{{rfqNumber}}] {{vendorName}} countered — round {{roundNumber}}",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Vendor countered your offer",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         <strong>{{vendorName}}</strong> has sent a counter for
-         <strong>{{rfqNumber}}</strong> ({{craneLabel}}),
-         round <strong>{{roundNumber}} of {{maxRounds}}</strong>.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534">
-         Total quoted value: INR {{totalQuotedValue}}<br/>
-         <span style="color:#475569">Reply by: {{respondBy}}</span>
-       </div>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         Open the RFQ to accept, counter or reject before the reply time.
-       </p>`,
-      { label: "View offer", url: "{{rfqUrl}}" },
+      "",
+      "Hello,",
+      "",
+      "{{vendorName}} has sent a counter for {{rfqNumber}} ({{craneLabel}}), round",
+      "{{roundNumber}} of {{maxRounds}}.",
+      "",
+      `Total quoted value: INR {{totalQuotedValue}}
+Reply by: {{respondBy}}`,
+      "",
+      "Open the RFQ to accept, counter or reject before the reply time.",
+      ...link("View offer", "{{rfqUrl}}"),
     ),
   },
   {
     key: "negotiation_accepted",
     subject: "[{{rfqNumber}}] Offer agreed — awaiting award",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Offer agreed",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         An offer for <strong>{{rfqNumber}}</strong> has been agreed with
-         <strong>{{vendorName}}</strong> at INR {{totalQuotedValue}}.
-       </p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">{{nextStep}}</p>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         Open the RFQ to review and confirm the award.
-       </p>`,
-      { label: "View offer", url: "{{rfqUrl}}" },
+      "",
+      "Hello,",
+      "",
+      "An offer for {{rfqNumber}} has been agreed with {{vendorName}} at INR",
+      "{{totalQuotedValue}}.",
+      "",
+      "{{nextStep}}",
+      "",
+      "Open the RFQ to review and confirm the award.",
+      ...link("View offer", "{{rfqUrl}}"),
     ),
   },
   {
     key: "negotiation_declined",
     subject: "[{{rfqNumber}}] Negotiation closed",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Negotiation closed",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         The negotiation for <strong>{{rfqNumber}}</strong> with
-         <strong>{{vendorName}}</strong> has been closed.
-         <strong>{{actor}}</strong> ended the thread.
-       </p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">Reason: {{reason}}</p>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         The vendor's standing quotation is still available and can be awarded.
-       </p>`,
-      { label: "View enquiry", url: "{{rfqUrl}}" },
+      "",
+      "Hello,",
+      "",
+      "The negotiation for {{rfqNumber}} with {{vendorName}} has been closed.",
+      "{{actor}} ended the thread.",
+      "",
+      "Reason: {{reason}}",
+      "",
+      "The vendor's standing quotation is still available and can be awarded.",
+      ...link("View enquiry", "{{rfqUrl}}"),
     ),
   },
   {
     key: "negotiation_reminder",
     subject: "[{{rfqNumber}}] Offer awaiting your reply",
-    bodyHtml: layout(
+    bodyHtml: plain(
       "Counter-offer awaiting your reply",
-      `<p style="margin:0 0 12px;font-size:14px;color:#334155">Hello,</p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155">
-         A counter-offer for <strong>{{rfqNumber}}</strong> is still awaiting your reply.
-       </p>
-       <div style="margin:0 0 16px;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412">
-         Total quoted value: INR {{totalQuotedValue}}<br/>
-         <span style="color:#475569">Reply by: {{respondBy}}</span>
-       </div>
-       <p style="margin:0;font-size:13px;color:#64748b">
-         If it is not answered before the time above, the offer expires.
-       </p>`,
-      { label: "View offer", url: "{{rfqUrl}}" },
+      "",
+      "Hello,",
+      "",
+      "A counter-offer for {{rfqNumber}} is still awaiting your reply.",
+      "",
+      `Total quoted value: INR {{totalQuotedValue}}
+Reply by: {{respondBy}}`,
+      "",
+      "If it is not answered before the time above, the offer expires.",
+      ...link("View offer", "{{rfqUrl}}"),
     ),
   },
 ];

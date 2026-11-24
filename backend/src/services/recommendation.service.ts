@@ -12,12 +12,7 @@ import {
   pickRate,
   type RateRow,
 } from "./mobilisationCost.service";
-import {
-  CapacityRule,
-  CoordinateSource,
-  DurationUnit,
-  OwnershipType,
-} from "../generated/prisma/client";
+import { CapacityRule, DurationUnit, OwnershipType } from "../generated/prisma/client";
 import type { Actor } from "./rfq.service";
 
 /**
@@ -56,7 +51,7 @@ export const MAX_RECOMMENDED_CRANES = 50;
 export interface RecommendedCrane extends CandidateCrane {
   estimatedMobilisationCost: number | null;
   ratePerKm: number | null;
-  /** Brief 6.9: boom or jib shorter than the line requires. */
+  /** Kept for compatibility; enquiries no longer capture boom or jib lengths. */
   boomWarnings: string[];
 }
 
@@ -82,7 +77,7 @@ export interface RecommendedGroup {
 }
 
 export interface RecommendationSite {
-  siteLocation: string;
+  shipToCity: string;
   stateCode: string;
   stateName: string;
   latitude: number | null;
@@ -132,25 +127,16 @@ interface LineForRecommendation {
   id: string;
   craneTypeCode: string | null;
   capacityT: unknown;
-  capacityRule: CapacityRule;
   requiredStartDate: Date | null;
   startDateTbc: boolean;
   durationValue: unknown;
   durationUnit: DurationUnit | null;
   workingDaysPerMonth: number | null;
-  requiredMainBoomM: unknown;
-  requiredFixedJibM: unknown;
-  requiredLuffingJibM: unknown;
-  requiredWindJibM: unknown;
   trailStatus: string;
   closureStatus: string | null;
   enquiry: {
-    id: string;
-    siteLocation: string;
+    shipToCity: string;
     siteStateCode: string;
-    sitePincode: string | null;
-    siteLatitude: unknown;
-    siteLongitude: unknown;
     siteState: { name: string } | null;
   };
 }
@@ -159,25 +145,16 @@ const LINE_FOR_RECOMMENDATION = {
   id: true,
   craneTypeCode: true,
   capacityT: true,
-  capacityRule: true,
   requiredStartDate: true,
   durationValue: true,
   durationUnit: true,
   workingDaysPerMonth: true,
-  requiredMainBoomM: true,
-  requiredFixedJibM: true,
-  requiredLuffingJibM: true,
-  requiredWindJibM: true,
   trailStatus: true,
   closureStatus: true,
   enquiry: {
     select: {
-      id: true,
-      siteLocation: true,
+      shipToCity: true,
       siteStateCode: true,
-      sitePincode: true,
-      siteLatitude: true,
-      siteLongitude: true,
       siteState: { select: { name: true } },
     },
   },
@@ -196,68 +173,29 @@ function assertInternal(actor: Actor): void {
 }
 
 /**
- * Pin the job site, storing the result on the enquiry.
+ * Place the job site from the enquiry's ship-to city and state.
  *
- * The pin is geocoded once and reused. A provider failure is not fatal — the
- * brief has cranes saved with an unverified location — so a failed lookup
- * leaves the coordinates null and the distances simply unavailable. The stub
- * always succeeds, and its point is deterministic for a given place.
+ * The enquiry holds no pin: coordinates belong to the RFQ or the snapshot. A
+ * provider failure is not fatal — the brief has cranes saved with an unverified
+ * location — so a failed lookup leaves the coordinates null and the distances
+ * simply unavailable. The stub always succeeds, and its point is deterministic
+ * for a given place.
  */
 async function ensureSitePin(line: LineForRecommendation): Promise<{
   latitude: number | null;
   longitude: number | null;
   locationUnverified: boolean;
 }> {
-  const existingLat = num(line.enquiry.siteLatitude);
-  const existingLng = num(line.enquiry.siteLongitude);
-  if (existingLat !== null && existingLng !== null) {
-    return { latitude: existingLat, longitude: existingLng, locationUnverified: false };
-  }
-
   const result = await tryGeocode({
-    location: line.enquiry.siteLocation,
-    state: line.enquiry.siteStateCode,
-    pincode: line.enquiry.sitePincode,
+    location: line.enquiry.shipToCity,
+    state: line.enquiry.siteState?.name ?? line.enquiry.siteStateCode,
   });
 
   if (!result.ok) {
     return { latitude: null, longitude: null, locationUnverified: true };
   }
 
-  await prisma.enquiry.update({
-    where: { id: line.enquiry.id },
-    data: {
-      siteLatitude: result.point.lat,
-      siteLongitude: result.point.lng,
-      siteCoordinateSource:
-        getGeoProvider().isAuthoritative ? CoordinateSource.auto : CoordinateSource.manual,
-    },
-  });
-
   return { latitude: result.point.lat, longitude: result.point.lng, locationUnverified: false };
-}
-
-/** Brief 6.9: name every length on the line the crane cannot reach. */
-function boomWarnings(line: LineForRecommendation, crane: CandidateCrane): string[] {
-  const checks: Array<{ required: unknown; offered: unknown; label: string }> = [
-    { required: line.requiredMainBoomM, offered: crane.mainBoomM, label: "Main boom" },
-    { required: line.requiredFixedJibM, offered: crane.fixedJibM, label: "Fixed jib" },
-    { required: line.requiredLuffingJibM, offered: crane.luffingJibM, label: "Luffing jib" },
-    { required: line.requiredWindJibM, offered: crane.windJibM, label: "Wind jib" },
-  ];
-  const warnings: string[] = [];
-  for (const check of checks) {
-    const required = num(check.required);
-    const offered = num(check.offered);
-    if (required === null || required <= 0) continue;
-    if (offered === null) continue;
-    if (offered < required) {
-      warnings.push(
-        `${check.label} ${offered} m is shorter than the ${required} m required`,
-      );
-    }
-  }
-  return warnings;
 }
 
 /**
@@ -355,6 +293,8 @@ async function buildRecommendation(
     internalCheck: smlInternalCheck,
   };
 
+  const pin = await ensureSitePin(line);
+
   // Without a type and capacity there is nothing to match. Return an empty
   // vendor set rather than a 400: the workspace shows "needs a type and
   // capacity" from this result, not an error.
@@ -363,12 +303,12 @@ async function buildRecommendation(
       trigger: "initial",
       provider: getGeoProvider().name,
       site: {
-        siteLocation: line.enquiry.siteLocation,
+        shipToCity: line.enquiry.shipToCity,
         stateCode: line.enquiry.siteStateCode,
         stateName: line.enquiry.siteState?.name ?? "",
-        latitude: num(line.enquiry.siteLatitude),
-        longitude: num(line.enquiry.siteLongitude),
-        locationUnverified: num(line.enquiry.siteLatitude) === null,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        locationUnverified: pin.locationUnverified,
       },
       distancesAvailable: false,
       startDateTbc: line.requiredStartDate === null,
@@ -379,19 +319,18 @@ async function buildRecommendation(
     };
   }
 
-  const pin = await ensureSitePin(line);
-
   const candidates = await candidatesForRfq({
     id: line.id,
     craneType: line.craneTypeCode,
     capacityT: line.capacityT,
-    capacityRule: line.capacityRule,
+    // The enquiry no longer carries a matching rule; RFQs default to at least.
+    capacityRule: CapacityRule.AT_LEAST,
     requiredStartDate: line.requiredStartDate ?? new Date(),
     durationValue: line.durationValue ?? 1,
     durationUnit: line.durationUnit ?? DurationUnit.DAYS,
     startDateTbc: line.requiredStartDate === null,
     workingDaysPerMonth: line.workingDaysPerMonth,
-    siteLocation: line.enquiry.siteLocation,
+    siteLocation: line.enquiry.shipToCity,
     siteStateCode: line.enquiry.siteStateCode,
     siteLatitude: pin.latitude,
     siteLongitude: pin.longitude,
@@ -416,7 +355,7 @@ async function buildRecommendation(
         crane.distanceKm !== null && ratePerKm !== null
           ? estimateMobilisationCost(crane.distanceKm, ratePerKm)
           : null,
-      boomWarnings: boomWarnings(line, crane),
+      boomWarnings: [],
     };
   };
 
@@ -439,7 +378,7 @@ async function buildRecommendation(
     trigger: "initial",
     provider: getGeoProvider().name,
     site: {
-      siteLocation: candidates.site.siteLocation,
+      shipToCity: candidates.site.siteLocation,
       stateCode: candidates.site.stateCode,
       stateName: candidates.site.stateName,
       latitude: candidates.site.latitude,

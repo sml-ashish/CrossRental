@@ -166,9 +166,16 @@ export const env = Object.freeze({
     host: process.env["IMAP_HOST"] ?? null,
     port: num("IMAP_PORT", 993),
     secure: bool("IMAP_SECURE", true),
-    user: process.env["IMAP_USER"] ?? null,
-    pass: process.env["IMAP_PASS"] ?? null,
+    // OAuth2 is preferred; the password remains a fallback for tenants where
+    // basic IMAP login is still allowed.
+    user: process.env["IMAP_USER"] || process.env["SMTP_USER"] || null,
+    pass: process.env["IMAP_PASS"] || process.env["SMTP_PASS"] || null,
     mailbox: str("IMAP_MAILBOX", "INBOX"),
+    clientId: process.env["IMAP_CLIENT_ID"] ?? null,
+    tenantId: process.env["IMAP_TENANT_ID"] ?? null,
+    refreshToken: process.env["IMAP_REFRESH_TOKEN"] ?? null,
+    accessToken: process.env["IMAP_ACCESS_TOKEN"] ?? null,
+    tokenFile: process.env["IMAP_TOKEN_FILE"] ?? null,
   }),
 
   onboarding: Object.freeze({

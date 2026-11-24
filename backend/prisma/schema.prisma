@@ -825,6 +825,7 @@ model Rfq {
   // Line-item fields the sales user chose to send. Unselected fields stay null,
   // so the vendor screen never shows a requirement SML did not intend to share.
   liftLoadT      Decimal? @db.Decimal(10, 2)
+  liftHeightM    Decimal? @db.Decimal(6, 2)
   workingRadiusM Decimal? @db.Decimal(6, 2)
   fixedJibM      Decimal? @db.Decimal(6, 2)
   luffingJibM    Decimal? @db.Decimal(6, 2)
@@ -1198,31 +1199,20 @@ model NegotiationRound {
  * The enquiry header (BPD 6.3/6.4, P1 section 2).
  * The CR team types these in today; a future SAP feed would call the same
  * `createEnquiry(payload, source)` service, which is why `source` is a column
- * even though `manual` is the only value that exists. The customer's name and
- * address are internal-only and are never copied into an RFQ.
+ * even though `manual` is the only value that exists.
+ *
+ * The site is just a city plus state. Coordinates are derived when an RFQ or a
+ * recommendation needs them and are stored on those records, never here.
  */
 model Enquiry {
   id          String   @id @default(uuid())
   enquiryNo   String   @unique
   enquiryDate DateTime
 
-  // Internal only, never copied into an RFQ.
-  customerName    String
-  customerAddress String
-
-  siteLocation  String
+  /// The delivery city, used as the site on every RFQ raised from this enquiry.
+  shipToCity    String
   siteStateCode String
   siteState     State   @relation("EnquirySiteState", fields: [siteStateCode], references: [code])
-  sitePincode   String?
-  region        String?
-
-  // The job site's pin (P2). Geocoded once through the provider interface and
-  // stored, so a recommendation run reuses it rather than looking up again. The
-  // value is whatever the provider gave — with the stub that is a synthetic
-  // point, hence `siteCoordinateSource`.
-  siteLatitude         Decimal?          @db.Decimal(10, 7)
-  siteLongitude        Decimal?          @db.Decimal(10, 7)
-  siteCoordinateSource CoordinateSource?
 
   overallStatus EnquiryOverallStatus @default(RECEIVED_PENDING_SOURCING)
 
@@ -1240,11 +1230,9 @@ model Enquiry {
 }
 
 /**
- * One requirement line on an enquiry, derived from the Cross Rental Enquiry
- * Template (P1 section 2). All 31 template rows are represented, including the
- * five scope terms the first draft of the field list missed.
- * `rentalBudget`, `internalNotes` and `poSapReference` are internal only, as is
- * the customer block on the header: none of them is ever copied into an RFQ.
+ * One requirement line on an enquiry. Only the facts needed to source and quote
+ * a crane are captured here; the terms a vendor is asked to price live on the
+ * RFQ, where they can be chosen per invitation.
  */
 model EnquiryLineItem {
   id        String  @id @default(uuid())
@@ -1257,23 +1245,19 @@ model EnquiryLineItem {
   // --- Requirement ---
   craneTypeCode String?
   craneType     CraneType?   @relation("EnquiryLineCraneType", fields: [craneTypeCode], references: [code])
+  /// Customer's preferred crane model and year, when specified at intake.
+  craneModel    String?
+  yom           Int?
   capacityT     Decimal?     @db.Decimal(10, 2)
-  capacityRule  CapacityRule @default(AT_LEAST)
-  capacityNote  String?
-  quantity      Int          @default(1)
 
   // --- Application and load ---
   applicationDescription String?
-  loadDescription        String?
   liftLoadT              Decimal? @db.Decimal(10, 2)
-  workingRadiusM         Decimal? @db.Decimal(6, 2)
+  liftHeightM            Decimal? @db.Decimal(6, 2)
 
   // --- Configuration ---
-  requiredMainBoomM   Decimal? @db.Decimal(6, 2)
-  requiredFixedJibM   Decimal? @db.Decimal(6, 2)
-  requiredLuffingJibM Decimal? @db.Decimal(6, 2)
-  requiredWindJibM    Decimal? @db.Decimal(6, 2)
-  configurationNotes  String?
+  /// The requested configuration as written by the customer, e.g. "MB 60 + FJ 12".
+  craneConfiguration String?
 
   // --- Dates ---
   requiredStartDate   DateTime?
@@ -1281,34 +1265,22 @@ model EnquiryLineItem {
   durationUnit        DurationUnit?
   workingDaysPerMonth Int?
 
-  // --- Mobilisation ---
-  mobilisationTerms   String?
-  demobilisationTerms String?
-
-  // --- Terms and scopes (rows 12-25 of the template) ---
+  // --- Terms and scopes carried into an RFQ when selected ---
   otCharges                String?
   breakdownTerms           String?
   dieselScope              String?
+  /// Working hours and shift are captured separately; workingHoursShift is the
+  /// combined value carried into an RFQ for the vendor.
+  workingHoursPerDay       String?
+  shift                    String?
   workingHoursShift        String?
-  accommodationConveyance  String?
-  paymentTerms             String?
   supportCraneScope        String?
   steelMatsGroundPrepScope String?
   ehsHrCompliance          String?
   insuranceTerms           String?
-  extensionClause          String?
   craneAgeCriteriaYears    Int?
-  otherTerms               String?
-
-  // --- Template rows the first P1 draft missed (rows 26-30) ---
-  additionalManpowerScope String?
-  intraSiteMovementScope  String?
-  prereleaseTerms         String?
-  ppeScope                String?
-  rowScope                String?
-
-  // --- Internal only ---
-  rentalBudget String?
+  additionalManpowerScope  String?
+  rowScope                 String?
 
   // --- Status (event driven; see services/enquiryTrail.service.ts) ---
   trailStatus   EnquiryLineTrailStatus @default(NEW)

@@ -9,8 +9,8 @@ import { adminAlerts, salesAlerts, type AlertItem } from "./alert.service";
  *
  * The sales dashboard is operational: counters that link straight into the
  * filtered list. The management dashboard is the read-only aggregate view with
- * filters; it never returns a customer name, address or budget. Both are
- * computed on demand from the same rows the rest of the portal writes.
+ * filters; it only reports enquiries by their state's configured region. Both
+ * are computed on demand from the same rows the rest of the portal writes.
  */
 
 export interface SalesDashboard {
@@ -164,7 +164,7 @@ export async function managementDashboard(
           },
         }
       : {}),
-    ...(filters.region ? { region: filters.region } : {}),
+    ...(filters.region ? { siteState: { is: { region: filters.region } } } : {}),
     ...(filters.ownerId ? { createdById: filters.ownerId } : {}),
   };
 
@@ -191,8 +191,8 @@ export async function managementDashboard(
     rfqs,
     selectedQuotations,
     quotationStatuses,
-    byRegion,
-    regions,
+    byStateCode,
+    states,
     craneCategories,
   ] = await Promise.all([
     prisma.enquiry.count({ where }),
@@ -252,18 +252,14 @@ export async function managementDashboard(
       },
       _count: { _all: true },
     }),
+    // The enquiry no longer stores a region. The state's configured region is
+    // the single source of truth, so group by state and fold into regions here.
     prisma.enquiry.groupBy({
-      by: ["region"],
+      by: ["siteStateCode"],
       where,
       _count: { _all: true },
-      orderBy: { _count: { region: "desc" } },
     }),
-    prisma.enquiry.findMany({
-      where: { region: { not: null } },
-      select: { region: true },
-      distinct: ["region"],
-      orderBy: { region: "asc" },
-    }),
+    prisma.state.findMany({ select: { code: true, region: true } }),
     prisma.craneType.findMany({
       select: { code: true, name: true },
       orderBy: { sortOrder: "asc" },
@@ -308,6 +304,18 @@ export async function managementDashboard(
 
   const rfqsWithQuotes = rfqs.filter((rfq) => rfq.quotations.length > 0).length;
 
+  const regionByState = new Map(states.map((state) => [state.code, state.region ?? null]));
+  const regionCounts = new Map<string | null, number>();
+  for (const row of byStateCode) {
+    const region = regionByState.get(row.siteStateCode) ?? null;
+    regionCounts.set(region, (regionCounts.get(region) ?? 0) + row._count._all);
+  }
+  const byRegion = [...regionCounts.entries()]
+    .map(([region, count]) => ({ region, count }))
+    .sort((a, b) => b.count - a.count);
+  const regions = [...new Set(states.map((state) => state.region).filter((r): r is string => Boolean(r)))]
+    .sort((a, b) => a.localeCompare(b));
+
   return {
     filters: {
       from: filters.from ? filters.from.toISOString() : null,
@@ -327,16 +335,8 @@ export async function managementDashboard(
       averageMobilisationDistanceKm: mean(distances),
       averageTransportCost: mean(transportCosts),
     },
-    byRegion: byRegion.map((row) => ({
-      region: row.region,
-      count: row._count._all,
-    })),
-    options: {
-      regions: regions
-        .map((row) => row.region)
-        .filter((value): value is string => Boolean(value)),
-      craneCategories,
-    },
+    byRegion,
+    options: { regions, craneCategories },
   };
 }
 

@@ -5,17 +5,16 @@ import { cellText } from "./craneSheet";
 /**
  * Reading the bulk-enquiry upload workbook.
  *
- * The sheet is wide on purpose: it carries all 31 particulars of the Cross
- * Rental Enquiry Template (`docs/CR Enquiry from SP.xlsx`) plus the header and
- * the mandatory line fields, so an enquiry uploaded from a spreadsheet needs no
- * second pass to be sourceable.
+ * The sheet carries the ship-to city, state and the crane requirements, so an
+ * enquiry uploaded from a spreadsheet needs no second pass to be sourceable.
+ * Vendor terms are chosen when the RFQ is raised, so they are not columns here.
  *
  * Two things are specific to this sheet:
  *
  * - **`Enquiry ref` groups lines.** Rows that share a ref become one enquiry
  *   with several lines; a blank ref makes each row its own enquiry. The grouping
- *   is explicit, never inferred from matching customer/site text — a sales user
- *   who wants two enquiries for one customer leaves the ref blank.
+ *   is explicit, never inferred from matching site text — a sales user who wants
+ *   two enquiries for the same city leaves the ref blank.
  * - **Dates are read day-first.** The CR team writes `01/10/2026` for 1 October.
  *   `new Date("01/10/2026")` would read 10 January, so a `dd/mm/yyyy` cell is
  *   parsed explicitly rather than handed to the default parser.
@@ -35,8 +34,6 @@ export interface EnquirySheetColumn {
   aliases: string[];
   required: boolean;
   help: string;
-  /** Internal-only columns never copied into an RFQ — the template says so. */
-  internal?: boolean;
 }
 
 export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
@@ -57,27 +54,6 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     help: "When the enquiry arrived. Defaults to today. Real Excel dates, 2026-10-01 and 01/10/2026 (day first) are all accepted.",
   },
   {
-    key: "customerName",
-    label: "Customer name",
-    aliases: ["customername", "customer", "clientname", "client"],
-    required: true,
-    help: "Internal only — never shown to a vendor or copied into an RFQ.",
-  },
-  {
-    key: "customerAddress",
-    label: "Customer address",
-    aliases: ["customeraddress", "clientaddress", "address"],
-    required: true,
-    help: "Internal only — never shown to a vendor or copied into an RFQ.",
-  },
-  {
-    key: "siteLocation",
-    label: "Site location",
-    aliases: ["sitelocation", "sitelocationaddress", "jobsite"],
-    required: true,
-    help: "Where the crane will work. Vendors see this.",
-  },
-  {
     key: "siteStateCode",
     label: "State",
     aliases: ["state", "sitestate", "sitestatecode", "statename"],
@@ -85,18 +61,11 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     help: "Pick an Indian state from the Lists sheet. Drives the distance ranking.",
   },
   {
-    key: "sitePincode",
-    label: "Pincode",
-    aliases: ["pincode", "pin", "postalcode", "sitepincode"],
-    required: false,
-    help: "Six digits. Helps pin the job site when the address is ambiguous.",
-  },
-  {
-    key: "region",
-    label: "Region",
-    aliases: ["region", "salesregion", "zone"],
-    required: false,
-    help: "Sales region for reports. Optional; the state mapping is used when blank.",
+    key: "shipToCity",
+    label: "City",
+    aliases: ["shiptocity", "city", "deliverycity", "sitelocation", "jobsite"],
+    required: true,
+    help: "Where the crane will work. Used with the state to place the site on a map.",
   },
   // --- line: requirement ---------------------------------------------------
   {
@@ -107,32 +76,25 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     help: "Pick a crane type from the Lists sheet.",
   },
   {
+    key: "craneModel",
+    label: "Crane model",
+    aliases: ["cranemodel", "model", "preferredmodel"],
+    required: false,
+    help: "Customer's preferred crane model, when stated.",
+  },
+  {
+    key: "yom",
+    label: "YOM",
+    aliases: ["yom", "yearofmanufacture", "yearofmfg"],
+    required: false,
+    help: "Preferred year of manufacture, e.g. 2020.",
+  },
+  {
     key: "capacityT",
     label: "Capacity (T)",
     aliases: ["capacityt", "capacity", "tonnage", "capacitytonnes", "cranecapacity"],
     required: true,
     help: "Required capacity in tonnes. A number, e.g. 250.",
-  },
-  {
-    key: "capacityRule",
-    label: "Capacity rule",
-    aliases: ["capacityrule", "matchingrule", "atleastorexact"],
-    required: false,
-    help: "At least (a bigger crane may be offered) or Exact. Defaults to At least.",
-  },
-  {
-    key: "capacityNote",
-    label: "Capacity note",
-    aliases: ["capacitynote", "capacityremarks"],
-    required: false,
-    help: "Free text around the tonnage, e.g. “700 TMC main boom + 36m luffing jib, or higher capacity”.",
-  },
-  {
-    key: "quantity",
-    label: "Quantity",
-    aliases: ["quantity", "qty", "numberofcranes"],
-    required: false,
-    help: "How many cranes this line needs. Defaults to 1.",
   },
   // --- line: application and load -----------------------------------------
   {
@@ -148,65 +110,26 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     help: "What the crane has to do, e.g. “Bridge erection, 565 MT at 78 m boom”.",
   },
   {
-    key: "loadDescription",
-    label: "Load description",
-    aliases: ["loaddescription", "load", "loaddetails"],
-    required: false,
-    help: "What is being lifted and any constraints on it.",
-  },
-  {
     key: "liftLoadT",
-    label: "Lift load (T)",
-    aliases: ["liftloadt", "liftload", "loadt", "loadweight"],
+    label: "Weight to be lifted (T)",
+    aliases: ["liftloadt", "liftload", "loadt", "loadweight", "weighttobelifted", "weighttobeliftedtonnage", "weighttonnage"],
     required: false,
     help: "Weight of the load in tonnes, if stated.",
   },
   {
-    key: "workingRadiusM",
-    label: "Working radius (m)",
-    aliases: ["workingradiusm", "workingradius", "radius"],
+    key: "liftHeightM",
+    label: "Height to be lifted (m)",
+    aliases: ["liftheightm", "liftheight", "heighttobelifted", "heighttobeliftedmeters", "heighttobeliftedm", "heightm"],
     required: false,
-    help: "Maximum working radius in metres, if stated.",
+    help: "Height the load must be lifted to, in metres, if stated.",
   },
   // --- line: configuration -------------------------------------------------
   {
-    key: "requiredMainBoomM",
-    label: "Main boom (m)",
-    aliases: ["requiredmainboomm", "mainboom", "mainboomm", "boomm"],
+    key: "craneConfiguration",
+    label: "Crane configuration",
+    aliases: ["craneconfiguration", "configuration", "mbxxfjxx"],
     required: false,
-    help: "Required main boom length in metres.",
-  },
-  {
-    key: "requiredFixedJibM",
-    label: "Fixed jib (m)",
-    aliases: ["requiredfixedjibm", "fixedjib", "fixedjibm"],
-    required: false,
-    help: "Required fixed jib length in metres.",
-  },
-  {
-    key: "requiredLuffingJibM",
-    label: "Luffing jib (m)",
-    aliases: ["requiredluffingjibm", "luffingjib", "luffingjibm"],
-    required: false,
-    help: "Required luffing jib length in metres.",
-  },
-  {
-    key: "requiredWindJibM",
-    label: "Wind jib (m)",
-    aliases: ["requiredwindjibm", "windjib", "windjibm"],
-    required: false,
-    help: "Required wind jib length in metres.",
-  },
-  {
-    key: "configurationNotes",
-    label: "Configuration notes",
-    aliases: [
-      "configurationnotes",
-      "craneconfigurationwithspecificboomhookblock",
-      "configuration",
-    ],
-    required: false,
-    help: "Anything about hook blocks, counterweight, superlift and so on.",
+    help: "Requested configuration as written by the customer, e.g. “MB 60 + FJ 12”.",
   },
   // --- line: dates ---------------------------------------------------------
   {
@@ -244,33 +167,6 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
   },
   // --- line: commercial terms ---------------------------------------------
   {
-    key: "rentalBudget",
-    label: "Rental per month (internal)",
-    aliases: ["rentalpermonth", "rentalbudget", "budget", "rental"],
-    required: false,
-    help: "Internal only — never shown to a vendor or copied into an RFQ.",
-    internal: true,
-  },
-  {
-    key: "mobilisationTerms",
-    label: "Mobilisation price",
-    aliases: ["mobilisationprice", "mobilizationprice", "mobilisationterms", "mobilizationterms"],
-    required: false,
-    help: "Budget or expectation for mobilisation, e.g. “10 lakhs or lower”.",
-  },
-  {
-    key: "demobilisationTerms",
-    label: "Demobilisation price",
-    aliases: [
-      "demobilisationprice",
-      "demobilizationprice",
-      "demobilisationterms",
-      "demobilizationterms",
-    ],
-    required: false,
-    help: "Budget or expectation for demobilisation.",
-  },
-  {
     key: "dieselScope",
     label: "Diesel scope",
     aliases: ["dieselscope", "diesel"],
@@ -297,18 +193,6 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     aliases: ["shift", "shifts", "singleordouble"],
     required: false,
     help: "Single or Double. Combined with the working hours column.",
-  },
-  {
-    key: "accommodationConveyance",
-    label: "Accommodation & local conveyance",
-    aliases: [
-      "accommodationconveyance",
-      "accomodationlocalconveyanceofcrew",
-      "accommodation",
-      "conveyance",
-    ],
-    required: false,
-    help: "Who provides crew accommodation and local transport, e.g. SML scope.",
   },
   {
     key: "supportCraneScope",
@@ -344,25 +228,11 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     help: "Documents and compliance the vendor must meet.",
   },
   {
-    key: "paymentTerms",
-    label: "Payment terms",
-    aliases: ["paymentterms", "paymenttermsindetailsincludingfhr", "payment"],
-    required: false,
-    help: "Payment terms in detail, including FHR where relevant.",
-  },
-  {
     key: "breakdownTerms",
     label: "Breakdown charges",
     aliases: ["breakdowncharges", "breakdownterms"],
     required: false,
     help: "How breakdown days are charged, e.g. Pro-rata.",
-  },
-  {
-    key: "extensionClause",
-    label: "Extension clause",
-    aliases: ["extensionclause", "extension"],
-    required: false,
-    help: "Extension terms, or NA.",
   },
   {
     key: "insuranceTerms",
@@ -383,43 +253,11 @@ export const ENQUIRY_SHEET_COLUMNS: EnquirySheetColumn[] = [
     help: "Extra supervisors, safety officers or technicians and who provides them.",
   },
   {
-    key: "intraSiteMovementScope",
-    label: "Intra-site movement scope",
-    aliases: [
-      "intrasitemovementscope",
-      "scopeofintrasitemovementofcranes",
-      "intrasitemovement",
-    ],
-    required: false,
-    help: "Who covers moving the crane around the site.",
-  },
-  {
-    key: "prereleaseTerms",
-    label: "Pre-release terms",
-    aliases: ["prereleaseterms", "prereleaseofcranesterms", "prerelease"],
-    required: false,
-    help: "Pre-release conditions, or NA.",
-  },
-  {
-    key: "ppeScope",
-    label: "PPE",
-    aliases: ["ppe", "ppescope", "ppe standardorclientspecific"],
-    required: false,
-    help: "Standard or client-specific PPE requirements.",
-  },
-  {
     key: "rowScope",
     label: "ROW / right of way scope",
     aliases: ["rowscope", "rowrightofwayscope", "rightofway", "row"],
     required: false,
     help: "Who secures the right of way.",
-  },
-  {
-    key: "otherTerms",
-    label: "Additional remarks",
-    aliases: ["additionalremarks", "additionalremarksifany", "otherterms", "remarks"],
-    required: false,
-    help: "Anything else the vendor should know.",
   },
 ];
 

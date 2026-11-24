@@ -113,7 +113,6 @@ function alwaysSent(line: EnquiryLine | null): Array<{ label: string; value?: st
       label: "Capacity",
       value: line && line.capacityT !== null ? `${line.capacityT} t` : undefined,
     },
-    { label: "Quantity", value: line ? String(line.quantity) : undefined },
     { label: "Site" },
     {
       label: "Start date",

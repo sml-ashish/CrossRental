@@ -44,7 +44,6 @@ export interface OutgoingMail {
   to: string;
   cc?: string[];
   subject: string;
-  html: string;
   text: string;
 }
 
@@ -76,7 +75,6 @@ export async function sendMail(mail: OutgoingMail): Promise<SendResult> {
       to: mail.to,
       cc: mail.cc,
       subject: mail.subject,
-      html: mail.html,
       text: mail.text,
     });
     return { sent: true };

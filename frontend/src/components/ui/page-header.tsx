@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { PageBackButton } from "./page-back-button";
 
 /**
  * The one page header.
@@ -43,7 +44,9 @@ export function PageHeader({
           <ChevronLeft className="size-3.5" aria-hidden />
           {back.label}
         </Link>
-      ) : null}
+      ) : (
+        <PageBackButton />
+      )}
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">

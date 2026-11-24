@@ -231,15 +231,16 @@ describe("M2 invitations", () => {
     expect(res.status).toBe(401);
   });
 
-  it("refuses a second live invitation for the same address", async () => {
+  it("allows a second invitation for the same address (outstanding-invitation guard disabled)", async () => {
     const ctx = await seedAndSignIn();
     await invite(ctx.adminToken);
     const res = await call(app, "POST", "/api/vendors/invitations", {
       token: ctx.adminToken,
       body: { name: "Second Try Cranes", email: APPLICANT_EMAIL, contactNumber: "9820011223" },
     });
-    // Two live links would leave the vendor unable to tell which is current.
-    expect(res.status).toBe(409);
+    expect(res.status).toBe(201);
+    expect(res.body.invitationId).toEqual(expect.any(String));
+    expect(await testPrisma.vendorInvitation.count()).toBe(2);
   });
 
   it("does not put the token itself in the invitation list", async () => {
@@ -395,7 +396,7 @@ describe("M2 bulk invitations", () => {
     expect(res.body.rows[0].message).toMatch(/account already exists/i);
   });
 
-  it("skips an email whose invitation is already outstanding", async () => {
+  it("imports an email whose invitation is already outstanding (guard disabled)", async () => {
     const ctx = await seedAndSignIn();
     const email = "already.invited@onboarding.test";
     await call(app, "POST", "/api/vendors/invitations", {
@@ -407,10 +408,9 @@ describe("M2 bulk invitations", () => {
     const res = await uploadInvites(file, { token: ctx.adminToken, dryRun: false });
 
     expect(res.status).toBe(201);
-    expect(res.body.summary).toMatchObject({ total: 1, imported: 0, skipped: 1 });
-    expect(res.body.rows[0].message).toMatch(/already outstanding/i);
-    // The original invitation is untouched; no second link was created.
-    expect(await testPrisma.vendorInvitation.count()).toBe(1);
+    expect(res.body.summary).toMatchObject({ total: 1, imported: 1, skipped: 0 });
+    expect(res.body.rows[0].message).toBe("Invitation sent.");
+    expect(await testPrisma.vendorInvitation.count()).toBe(2);
   });
 
   it("skips a repeated email earlier in the same file", async () => {

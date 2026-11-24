@@ -33,6 +33,7 @@ import {
 } from "@/components/google-crane-map";
 import { craneFill, craneStatusLabel } from "@/components/crane-glyph";
 import { DiscoveryCalendar } from "@/components/discovery-calendar";
+import { PageBackButton } from "@/components/ui/page-back-button";
 import {
   LinePanel,
   ThemeToggle,
@@ -577,7 +578,7 @@ export function DiscoveryPage() {
    */
   const routeSummary = useMemo<RouteSummary | null>(() => {
     if (!lineId || !selectedCrane) return null;
-    const siteLabel = recommendations?.site.siteLocation ?? "Job site";
+    const siteLabel = recommendations?.site.shipToCity ?? "Job site";
     const craneLabel = `${selectedCrane.make} ${selectedCrane.model}`;
 
     if (routeMissing) {
@@ -737,7 +738,7 @@ export function DiscoveryPage() {
       from: {
         lat: siteEnd.lat,
         lng: siteEnd.lng,
-        label: recommendations?.site.siteLocation ?? "Job site",
+        label: recommendations?.site.shipToCity ?? "Job site",
       },
       to: {
         lat: craneEnd.lat,
@@ -1174,6 +1175,9 @@ export function DiscoveryPage() {
 
   return (
     <div className={cn("isolate -mx-4 -my-6 flex h-[calc(100dvh-3rem)] flex-col overflow-hidden bg-ink-950 text-neutral-200 sm:-mx-6", theme === "light" ? "theme-light" : "theme-dark")}>
+      <div className="shrink-0 px-4 pt-1">
+        <PageBackButton className="text-slate-400 hover:text-white" />
+      </div>
       {isDesktop ? (
       <div className="flex min-h-0 flex-1 gap-4 p-4">
         {/* 30 / 30 / 40: the enquiry lines and the cranes get three tenths each,
@@ -1205,7 +1209,7 @@ export function DiscoveryPage() {
             className="h-full w-full"
             cranes={cranes}
             site={sitePoint}
-            siteLabel={lineId ? (recommendations?.site.siteLocation ?? null) : null}
+            siteLabel={lineId ? (recommendations?.site.shipToCity ?? null) : null}
             selectedCraneId={highlightedCraneId}
             route={mapRoute}
             multiRoutes={multiRoutes}
@@ -1258,7 +1262,7 @@ export function DiscoveryPage() {
             className="h-full w-full"
             cranes={cranes}
             site={sitePoint}
-            siteLabel={lineId ? (recommendations?.site.siteLocation ?? null) : null}
+            siteLabel={lineId ? (recommendations?.site.shipToCity ?? null) : null}
             selectedCraneId={highlightedCraneId}
             route={mapRoute}
             multiRoutes={multiRoutes}
@@ -1572,6 +1576,24 @@ function MoreFilters({
 
           <fieldset className="space-y-3">
             <legend className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
+              Location
+            </legend>
+            <Field
+              label="Crane location"
+              htmlFor="more-crane-location"
+              hint="Lists cranes in and near this place, nearest first, e.g. Pune."
+            >
+              <TextInput
+                id="more-crane-location"
+                value={filters.location}
+                onChange={(value) => set("location", value)}
+                placeholder="e.g. Pune"
+              />
+            </Field>
+          </fieldset>
+
+          <fieldset className="space-y-3">
+            <legend className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
               Hire window
             </legend>
             <div className="grid grid-cols-2 gap-2">
@@ -1597,24 +1619,6 @@ function MoreFilters({
                 ? "Set both dates — one date has no period to test a booking against."
                 : "A crane must be free for the whole window, not only on the first day."}
             </p>
-          </fieldset>
-
-          <fieldset className="space-y-3">
-            <legend className="text-[13px] font-semibold tracking-[0.12em] text-neutral-500 uppercase">
-              Location
-            </legend>
-            <Field
-              label="Crane location"
-              htmlFor="more-crane-location"
-              hint="Lists cranes in and near this place, nearest first, e.g. Pune."
-            >
-              <TextInput
-                id="more-crane-location"
-                value={filters.location}
-                onChange={(value) => set("location", value)}
-                placeholder="e.g. Pune"
-              />
-            </Field>
           </fieldset>
 
           <fieldset className="space-y-3">

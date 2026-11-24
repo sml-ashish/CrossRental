@@ -1,7 +1,5 @@
 import { prisma } from "../lib/database";
 import type { Prisma } from "../generated/prisma/client";
-import { CoordinateSource } from "../generated/prisma/client";
-import { tryGeocode, getGeoProvider } from "../lib/geo";
 import { env } from "../config/env";
 import { AppError } from "../middleware/errorHandler";
 import type { AuthedRequest } from "../middleware/auth";
@@ -54,10 +52,10 @@ import {
  * it, so numbering, audit and the status trail cannot drift. Nothing here talks
  * to SAP.
  *
- * **The customer block is internal.** `customerName`, `customerAddress` and
- * `rentalBudget` are never copied into an RFQ. `createRfqFromLine` builds the
- * RFQ payload from the vendor-safe subset by construction (it never references
- * those fields), and a test asserts the created RFQ carries none of them.
+ * **The enquiry is deliberately small.** It holds the site city/state and the
+ * crane requirement only. Customer details, vendor terms and the site pin are
+ * owned by the RFQ, where they can be chosen per invitation; coordinates are
+ * resolved there (and for recommendations) from the city and state.
  *
  * **Status is event driven.** The trail lives in `enquiryTrail.service.ts`;
  * this file calls it at the trigger points and never lets a caller set a status
@@ -89,18 +87,9 @@ const ENQUIRY_SELECT = {
   id: true,
   enquiryNo: true,
   enquiryDate: true,
-  customerName: true,
-  customerAddress: true,
-  siteLocation: true,
+  shipToCity: true,
   siteStateCode: true,
-  sitePincode: true,
-  region: true,
   overallStatus: true,
-  // The job site's pin, resolved once through the geocoding seam. The list
-  // screen draws it as a small map, so it has to survive the view mapping.
-  siteLatitude: true,
-  siteLongitude: true,
-  siteCoordinateSource: true,
   createdAt: true,
   updatedAt: true,
   siteState: { select: { name: true } },
@@ -111,44 +100,30 @@ const LINE_SELECT = {
   enquiryId: true,
   lineNo: true,
   craneTypeCode: true,
+  craneModel: true,
+  yom: true,
   capacityT: true,
-  capacityRule: true,
-  capacityNote: true,
-  quantity: true,
   applicationDescription: true,
-  loadDescription: true,
   liftLoadT: true,
-  workingRadiusM: true,
-  requiredMainBoomM: true,
-  requiredFixedJibM: true,
-  requiredLuffingJibM: true,
-  requiredWindJibM: true,
-  configurationNotes: true,
+  liftHeightM: true,
+  craneConfiguration: true,
   requiredStartDate: true,
   durationValue: true,
   durationUnit: true,
   workingDaysPerMonth: true,
-  mobilisationTerms: true,
-  demobilisationTerms: true,
   otCharges: true,
   breakdownTerms: true,
   dieselScope: true,
+  workingHoursPerDay: true,
+  shift: true,
   workingHoursShift: true,
-  accommodationConveyance: true,
-  paymentTerms: true,
   supportCraneScope: true,
   steelMatsGroundPrepScope: true,
   ehsHrCompliance: true,
   insuranceTerms: true,
-  extensionClause: true,
   craneAgeCriteriaYears: true,
-  otherTerms: true,
   additionalManpowerScope: true,
-  intraSiteMovementScope: true,
-  prereleaseTerms: true,
-  ppeScope: true,
   rowScope: true,
-  rentalBudget: true,
   trailStatus: true,
   closureStatus: true,
   cancelledAt: true,
@@ -202,11 +177,7 @@ export function toLineView(row: LineRow) {
     ...line,
     capacityT: num(row.capacityT),
     liftLoadT: num(row.liftLoadT),
-    workingRadiusM: num(row.workingRadiusM),
-    requiredMainBoomM: num(row.requiredMainBoomM),
-    requiredFixedJibM: num(row.requiredFixedJibM),
-    requiredLuffingJibM: num(row.requiredLuffingJibM),
-    requiredWindJibM: num(row.requiredWindJibM),
+    liftHeightM: num(row.liftHeightM),
     durationValue: num(row.durationValue),
     craneTypeName: (row.craneType as { name: string } | null)?.name ?? null,
     rfqId: latest?.id ?? null,
@@ -219,8 +190,6 @@ export function toEnquiryView(row: EnquiryRow) {
   return {
     ...row,
     siteStateName: (row.siteState as { name: string } | null)?.name ?? null,
-    siteLatitude: num(row.siteLatitude),
-    siteLongitude: num(row.siteLongitude),
   };
 }
 
@@ -245,52 +214,35 @@ async function assertCraneType(code: string | null): Promise<void> {
 /** The header columns, shared by create and update so they cannot drift. */
 function headerData(input: CreateEnquiryInput | UpdateEnquiryInput) {
   return {
-    customerName: input.customerName,
-    customerAddress: input.customerAddress,
-    siteLocation: input.siteLocation,
+    shipToCity: input.shipToCity,
     siteStateCode: input.siteStateCode,
-    sitePincode: input.sitePincode,
-    region: input.region,
   };
 }
 
 /**
- * Pin the job site at intake.
+ * Keep the two new working-hours values and the combined RFQ value in step.
  *
- * The enquiry screen draws the site on a small map before anyone raises an RFQ,
- * so the pin cannot wait for the recommendation run that used to be the only
- * thing that geocoded it. This is the same provider seam the RFQ and crane
- * paths use, and the same rule applies: a failed lookup leaves the coordinates
- * empty rather than blocking the enquiry. The panel then says the pin is
- * missing instead of showing a fabricated one.
+ * `workingHoursShift` is still what an RFQ receives; older records and sheet
+ * imports that only carry the combined value must keep working. When the form
+ * supplies the separate values they win, so the vendor sees the same wording
+ * the enquiry captured.
  */
-async function sitePin(input: {
-  siteLocation: string;
-  siteStateCode: string;
-  sitePincode: string | null;
-}): Promise<{
-  siteLatitude: number | null;
-  siteLongitude: number | null;
-  siteCoordinateSource: CoordinateSource | null;
-}> {
-  const result = await tryGeocode({
-    location: input.siteLocation,
-    state: await stateNameOf(input.siteStateCode),
-    pincode: input.sitePincode,
-  });
-
-  if (!result.ok) {
-    return { siteLatitude: null, siteLongitude: null, siteCoordinateSource: null };
-  }
-
-  // "auto" means a provider produced the point; the stub invents its
-  // coordinates, so those are labelled manual rather than passed off as real.
+function normaliseLine<T extends {
+  workingHoursPerDay?: string | null;
+  shift?: string | null;
+  workingHoursShift?: string | null;
+  craneConfiguration?: string | null;
+}>(line: T): T {
+  const parts = [line.workingHoursPerDay, line.shift]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  const combined = parts.length > 0 ? parts.join(" · ") : null;
   return {
-    siteLatitude: result.point.lat,
-    siteLongitude: result.point.lng,
-    siteCoordinateSource: getGeoProvider().isAuthoritative
-      ? CoordinateSource.auto
-      : CoordinateSource.manual,
+    ...line,
+    workingHoursPerDay: line.workingHoursPerDay?.trim() || null,
+    shift: line.shift?.trim() || null,
+    workingHoursShift: combined ?? (line.workingHoursShift?.trim() || null),
+    craneConfiguration: line.craneConfiguration?.trim() || null,
   };
 }
 
@@ -311,10 +263,9 @@ export async function createEnquiry(raw: unknown, actor: Actor) {
       enquiryDate: input.enquiryDate ?? new Date(),
       createdById: actor.id,
       ...headerData(input),
-      ...(await sitePin(input)),
       lines: {
         create: input.lines.map((line, index) => ({
-          ...line,
+          ...normaliseLine(line),
           lineNo: index + 1,
         })),
       },
@@ -343,38 +294,25 @@ export async function updateEnquiry(enquiryId: string, raw: unknown, actor: Acto
 
   const existing = await prisma.enquiry.findUnique({
     where: { id: enquiryId },
-    select: {
-      id: true,
-      siteStateCode: true,
-      siteLocation: true,
-      sitePincode: true,
-    },
+    select: { id: true, shipToCity: true, siteStateCode: true },
   });
   if (!existing) throw AppError.notFound("That enquiry does not exist");
   await stateNameOf(input.siteStateCode);
 
-  // Moving the site moves the pin. A saved address that no longer matches its
-  // coordinates is worse than no pin: the map would confidently point at the
-  // previous job.
-  const siteChanged =
-    existing.siteLocation !== input.siteLocation ||
-    existing.siteStateCode !== input.siteStateCode ||
-    existing.sitePincode !== input.sitePincode;
-
   await prisma.enquiry.update({
     where: { id: enquiryId },
-    data: {
-      ...headerData(input),
-      ...(siteChanged ? await sitePin(input) : {}),
-    },
+    data: headerData(input),
   });
 
   await recordAudit({
     entity: "enquiry",
     entityId: enquiryId,
     action: "update",
-    oldValue: { siteStateCode: existing.siteStateCode },
-    newValue: { siteStateCode: input.siteStateCode },
+    oldValue: {
+      shipToCity: existing.shipToCity,
+      siteStateCode: existing.siteStateCode,
+    },
+    newValue: { shipToCity: input.shipToCity, siteStateCode: input.siteStateCode },
     actor: auditActor(actor),
   });
 
@@ -389,7 +327,6 @@ export async function updateEnquiry(enquiryId: string, raw: unknown, actor: Acto
  * not drag every template field of every line across the wire.
  */
 const LIST_LINE_SELECT = {
-  quantity: true,
   trailStatus: true,
   requiredStartDate: true,
   cancelledAt: true,
@@ -400,7 +337,6 @@ const LIST_LINE_SELECT = {
 } as const;
 
 interface ListLineRow {
-  quantity: number;
   trailStatus: EnquiryLineTrailStatus;
   requiredStartDate: Date | string | null;
   cancelledAt: Date | null;
@@ -416,16 +352,15 @@ const SOURCED_TRAIL_STATUSES: EnquiryLineTrailStatus[] = [
 ];
 
 /**
- * Progress is measured in cranes, not lines: a line for three cranes is three
- * cranes to find, and a two-line enquiry with one three-crane line awarded is
- * further along than a two-line enquiry with one single-crane line awarded.
+ * Progress is measured in lines: the enquiry no longer carries a quantity, so
+ * one requirement line is one crane to source.
  */
 function metricsOf(lines: ListLineRow[]) {
   const live = lines.filter((line) => !line.cancelledAt);
-  const craneCount = live.reduce((sum, line) => sum + line.quantity, 0);
-  const sourcedCranes = live
-    .filter((line) => SOURCED_TRAIL_STATUSES.includes(line.trailStatus))
-    .reduce((sum, line) => sum + line.quantity, 0);
+  const craneCount = live.length;
+  const sourcedCranes = live.filter((line) =>
+    SOURCED_TRAIL_STATUSES.includes(line.trailStatus),
+  ).length;
   const rfqCount = live.reduce((sum, line) => sum + line.rfqs.length, 0);
   const quoteCount = live.reduce(
     (sum, line) =>
@@ -514,14 +449,39 @@ function toEnquiryDetailView(row: EnquiryRow) {
   };
 }
 
+/** Search words for the five stored overall statuses; both spellings included. */
+const STATUS_SEARCH_WORDS: Record<EnquiryOverallStatus, string> = {
+  RECEIVED_PENDING_SOURCING: "received pending sourcing",
+  PARTIALLY_QUOTED: "partially quoted",
+  PARTIALLY_FINALISED: "partially finalised finalized",
+  FULLY_FINALISED: "fully finalised finalized",
+  CLOSED: "closed",
+};
+
+function normaliseSearch(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[_—–-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function statusesMatchingSearch(search: string): EnquiryOverallStatus[] {
+  const term = normaliseSearch(search);
+  if (!term) return [];
+  return (Object.keys(STATUS_SEARCH_WORDS) as EnquiryOverallStatus[]).filter((status) =>
+    normaliseSearch(`${status} ${STATUS_SEARCH_WORDS[status]}`).includes(term),
+  );
+}
+
 export async function listEnquiries(rawQuery: unknown, actor: Actor) {
   assertInternal(actor);
   const query: ListEnquiriesQuery = listEnquiriesQuerySchema.parse(rawQuery ?? {});
+  const matchedStatuses = query.search ? statusesMatchingSearch(query.search) : [];
 
   const rows = await prisma.enquiry.findMany({
     where: {
       ...(query.status ? { overallStatus: query.status } : {}),
-      ...(query.region ? { region: query.region } : {}),
       ...(query.stateCode ? { siteStateCode: query.stateCode } : {}),
       ...(query.from || query.to
         ? {
@@ -533,22 +493,19 @@ export async function listEnquiries(rawQuery: unknown, actor: Actor) {
         : {}),
       ...(query.search
         ? {
+            // Search follows the visible table fields: number, state, city and
+            // the stored overall status. It deliberately does not reach into
+            // line descriptions or RFQ data.
             OR: [
               { enquiryNo: { contains: query.search, mode: "insensitive" as const } },
-              { customerName: { contains: query.search, mode: "insensitive" as const } },
-              // "Project" is the line's application description; the enquiry
-              // itself has no project column, so a search has to reach the line.
-              { siteLocation: { contains: query.search, mode: "insensitive" as const } },
               {
-                lines: {
-                  some: {
-                    applicationDescription: {
-                      contains: query.search,
-                      mode: "insensitive" as const,
-                    },
-                  },
+                siteState: {
+                  is: { name: { contains: query.search, mode: "insensitive" as const } },
                 },
               },
+              { siteStateCode: { contains: query.search, mode: "insensitive" as const } },
+              { shipToCity: { contains: query.search, mode: "insensitive" as const } },
+              ...(matchedStatuses.length > 0 ? [{ overallStatus: { in: matchedStatuses } }] : []),
             ],
           }
         : {}),
@@ -706,8 +663,6 @@ export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
       lineNo: true,
       craneTypeCode: true,
       capacityT: true,
-      capacityRule: true,
-      quantity: true,
       requiredStartDate: true,
       durationValue: true,
       durationUnit: true,
@@ -716,10 +671,7 @@ export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
       enquiry: {
         select: {
           enquiryNo: true,
-          siteLocation: true,
-          sitePincode: true,
-          siteLatitude: true,
-          siteLongitude: true,
+          shipToCity: true,
           siteState: { select: { name: true } },
         },
       },
@@ -737,19 +689,13 @@ export async function listRaisableLines(rawQuery: unknown, actor: Actor) {
     craneTypeCode: row.craneTypeCode,
     craneTypeName: row.craneType?.name ?? null,
     capacityT: num(row.capacityT),
-    capacityRule: row.capacityRule,
-    quantity: row.quantity,
     requiredStartDate: row.requiredStartDate,
     startDateTbc: row.requiredStartDate === null,
-    // The requirement summary in the line panel needs the hire length and
-    // whether the site can be pinned at all.
+    // The requirement summary in the line panel needs the hire length.
     durationValue: num(row.durationValue),
     durationUnit: row.durationUnit,
-    siteLocation: row.enquiry.siteLocation,
+    shipToCity: row.enquiry.shipToCity,
     siteStateName: row.enquiry.siteState?.name ?? null,
-    sitePincode: row.enquiry.sitePincode,
-    siteLatitude: num(row.enquiry.siteLatitude),
-    siteLongitude: num(row.enquiry.siteLongitude),
     trailStatus: row.trailStatus,
     rfqCount: row._count.rfqs,
   }));
@@ -776,7 +722,6 @@ async function loadLine(lineId: string): Promise<{
   lineNo: number;
   craneTypeCode: string | null;
   capacityT: unknown;
-  capacityRule: CapacityRule;
   trailStatus: EnquiryLineTrailStatus;
 }> {
   const line = await prisma.enquiryLineItem.findUnique({
@@ -787,7 +732,6 @@ async function loadLine(lineId: string): Promise<{
       lineNo: true,
       craneTypeCode: true,
       capacityT: true,
-      capacityRule: true,
       trailStatus: true,
     },
   });
@@ -813,7 +757,7 @@ export async function addLine(enquiryId: string, raw: unknown, actor: Actor) {
   });
 
   const row = await prisma.enquiryLineItem.create({
-    data: { ...input, enquiryId, lineNo: (last?.lineNo ?? 0) + 1 },
+    data: { ...normaliseLine(input), enquiryId, lineNo: (last?.lineNo ?? 0) + 1 },
     select: LINE_SELECT,
   });
 
@@ -836,7 +780,7 @@ export async function updateLine(lineId: string, raw: unknown, actor: Actor) {
 
   const row = await prisma.enquiryLineItem.update({
     where: { id: lineId },
-    data: { ...input },
+    data: normaliseLine(input),
     select: LINE_SELECT,
   });
 
@@ -904,56 +848,17 @@ export async function markUnderEvaluation(lineId: string, actor: Actor) {
 
 // --- RFQ from a line ------------------------------------------------------
 
-/**
- * The largest *selected* jib the line requires.
- *
- * The RFQ keeps a single `jibLengthM` for the fit warnings in the quotation
- * service. It is derived only from jib fields the sales user chose to send, so
- * an unselected jib never reaches the vendor indirectly through this column.
- */
-function selectedJib(
-  line: {
-    requiredLuffingJibM: unknown;
-    requiredFixedJibM: unknown;
-    requiredWindJibM: unknown;
-  },
-  want: (key: RfqLineFieldKey) => boolean,
-): number | null {
-  const candidates: number[] = [];
-  if (want("requiredLuffingJibM")) {
-    const value = num(line.requiredLuffingJibM);
-    if (value !== null) candidates.push(value);
-  }
-  if (want("requiredFixedJibM")) {
-    const value = num(line.requiredFixedJibM);
-    if (value !== null) candidates.push(value);
-  }
-  if (want("requiredWindJibM")) {
-    const value = num(line.requiredWindJibM);
-    if (value !== null) candidates.push(value);
-  }
-  return candidates.length > 0 ? Math.max(...candidates) : null;
-}
-
 /** The vendor-safe terms with no column of their own, filtered to the picker. */
 function selectedExtraTerms(
   line: {
-    demobilisationTerms: unknown;
     additionalManpowerScope: unknown;
-    intraSiteMovementScope: unknown;
-    prereleaseTerms: unknown;
-    ppeScope: unknown;
     rowScope: unknown;
   },
   want: (key: RfqLineFieldKey) => boolean,
 ): Record<string, string | null> {
   const extra: Record<string, string | null> = {};
   const pairs: Array<[RfqLineFieldKey, string, unknown]> = [
-    ["demobilisationTerms", "demobilisationTerms", line.demobilisationTerms],
     ["additionalManpowerScope", "additionalManpowerScope", line.additionalManpowerScope],
-    ["intraSiteMovementScope", "intraSiteMovementScope", line.intraSiteMovementScope],
-    ["prereleaseTerms", "prereleaseTerms", line.prereleaseTerms],
-    ["ppeScope", "ppeScope", line.ppeScope],
     ["rowScope", "rowScope", line.rowScope],
   ];
   for (const [key, target, value] of pairs) {
@@ -965,10 +870,9 @@ function selectedExtraTerms(
 /**
  * Raise an RFQ from an enquiry line (P1 section 2).
  *
- * Prefills from the line and the enquiry header's **vendor-safe subset**: the
- * customer name/address and the rental budget are never read here, so they
- * cannot leak into the RFQ. The RFQ is a snapshot; later edits to the line do
- * not rewrite it.
+ * Prefills from the line and the enquiry's city/state. The RFQ is a snapshot;
+ * later edits to the line do not rewrite it. Coordinates are resolved by
+ * `createRfq` from the city and state, since the enquiry holds no site pin.
  *
  * `includeFields` narrows which optional line fields are copied. Core sourcing
  * facts are always sent; the caller's selection decides the rest, so a vendor
@@ -986,12 +890,8 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
       enquiry: {
         select: {
           enquiryNo: true,
-          siteLocation: true,
+          shipToCity: true,
           siteStateCode: true,
-          sitePincode: true,
-          siteLatitude: true,
-          siteLongitude: true,
-          siteCoordinateSource: true,
         },
       },
     },
@@ -1011,18 +911,8 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
   const pick = (lineKey: RfqLineFieldKey, rfqKey: string, value: unknown) =>
     want(lineKey) ? { [rfqKey]: value } : {};
 
-  // The RFQ's vendor-visible notes hold the ticked "Other terms" and the sales
-  // user's optional remark, in that order.
-  const notes =
-    [want("otherTerms") ? line.otherTerms : null, input.remark]
-      .map((part) => part?.trim())
-      .filter((part): part is string => Boolean(part))
-      .join("\n\n") || null;
-  if (notes && notes.length > 2000) {
-    throw AppError.badRequest(
-      "The other terms and remark together are too long for an RFQ's notes. Shorten the remark or untick Other terms.",
-    );
-  }
+  // The sales user's optional remark is the only free-text note on the RFQ.
+  const notes = input.remark?.trim() || null;
 
   const rfq = await createRfq(
     {
@@ -1030,19 +920,14 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
       enquiryLineId: line.id,
       craneType: line.craneTypeCode,
       capacityT: num(line.capacityT),
-      capacityRule: line.capacityRule,
-      quantity: line.quantity,
+      capacityRule: CapacityRule.AT_LEAST,
+      quantity: 1,
       // A line without a start date means "to be confirmed"; the template's
       // free-text TBC is represented by the absence of a date.
       startDateTbc: line.requiredStartDate === null,
-      siteLocation: line.enquiry.siteLocation,
+      siteLocation: line.enquiry.shipToCity,
       siteStateCode: line.enquiry.siteStateCode,
-      sitePincode: line.enquiry.sitePincode,
-      // Inherit the enquiry's already-geocoded pin. Re-geocoding from the site
-      // text would be a second provider call that can fail (or drift) after the
-      // enquiry was pinned, leaving the RFQ with no distance to show.
-      siteLatitude: num(line.enquiry.siteLatitude) ?? undefined,
-      siteLongitude: num(line.enquiry.siteLongitude) ?? undefined,
+      sitePincode: null,
       requiredStartDate: line.requiredStartDate ?? new Date(),
       durationValue: num(line.durationValue) ?? 1,
       durationUnit: line.durationUnit ?? DurationUnit.DAYS,
@@ -1052,36 +937,24 @@ export async function createRfqFromLine(lineId: string, raw: unknown, actor: Act
       // absent from this payload, so createRfq stores them as null. Where the
       // enquiry and RFQ use different names, the second argument is the RFQ
       // column the picked value lands in.
-      ...pick("capacityNote", "capacityNote", line.capacityNote),
       ...pick("applicationDescription", "applicationDescription", line.applicationDescription),
-      ...pick("loadDescription", "loadDescription", line.loadDescription),
       ...pick("liftLoadT", "liftLoadT", num(line.liftLoadT) ?? undefined),
-      ...pick("workingRadiusM", "workingRadiusM", num(line.workingRadiusM) ?? undefined),
-      ...pick("requiredMainBoomM", "mainBoomM", num(line.requiredMainBoomM) ?? undefined),
-      ...pick("configurationNotes", "configuration", line.configurationNotes),
+      ...pick("liftHeightM", "liftHeightM", num(line.liftHeightM) ?? undefined),
+      ...pick("craneConfiguration", "configuration", line.craneConfiguration),
       ...pick("workingDaysPerMonth", "workingDaysPerMonth", line.workingDaysPerMonth ?? undefined),
-      ...pick("mobilisationTerms", "mobilisationTerms", line.mobilisationTerms),
       ...pick("otCharges", "otCharges", line.otCharges),
       ...pick("breakdownTerms", "breakdownTerms", line.breakdownTerms),
       ...pick("dieselScope", "dieselScope", line.dieselScope),
       ...pick("workingHoursShift", "workingHoursShift", line.workingHoursShift),
       ...pick("craneAgeCriteriaYears", "craneAgeCriteriaYears", line.craneAgeCriteriaYears),
-      ...pick("accommodationConveyance", "accommodationConveyance", line.accommodationConveyance),
-      ...pick("paymentTerms", "paymentTerms", line.paymentTerms),
       ...pick("supportCraneScope", "supportCrane", line.supportCraneScope),
       ...pick("steelMatsGroundPrepScope", "steelMatsGroundPrep", line.steelMatsGroundPrepScope),
       ...pick("ehsHrCompliance", "ehsHrRequirements", line.ehsHrCompliance),
       ...pick("insuranceTerms", "insuranceTerms", line.insuranceTerms),
-      ...pick("extensionClause", "extensionClause", line.extensionClause),
       notes: notes ?? undefined,
-      ...pick("requiredFixedJibM", "fixedJibM", num(line.requiredFixedJibM) ?? undefined),
-      ...pick("requiredLuffingJibM", "luffingJibM", num(line.requiredLuffingJibM) ?? undefined),
-      ...pick("requiredWindJibM", "windJibM", num(line.requiredWindJibM) ?? undefined),
-      jibLengthM: selectedJib(line, want) ?? undefined,
       commercialTermsExtra: selectedExtraTerms(line, want),
     },
     actor,
-    { siteCoordinateSource: line.enquiry.siteCoordinateSource },
   );
 
   // A line with an RFQ is no longer merely shortlisted; the dispatch trigger
@@ -1149,5 +1022,3 @@ export async function getLineRoute(
 export function getLineComparison(lineId: string, actor: Actor) {
   return compareQuotationsForLine(lineId, actor);
 }
-
-

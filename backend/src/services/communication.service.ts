@@ -59,6 +59,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
   password_reset: "Password reset",
   login_otp: "Login code",
   fleet_update_reminder: "Fleet update reminder",
+  fleet_updated_on_behalf: "Fleet updated on your behalf",
   rfq_invitation: "RFQ invitation",
   rfq_reminder: "RFQ reminder",
   quotation_receipt: "Quotation receipt",

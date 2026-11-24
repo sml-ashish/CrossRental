@@ -51,7 +51,7 @@ function ReportTable({ rows }: { rows: BulkEnquiryRowResult[] }) {
           <TR>
             <TH className="w-16">Row</TH>
             <TH className="w-32">Ref</TH>
-            <TH>Customer</TH>
+            <TH>City</TH>
             <TH className="w-24">Status</TH>
             <TH>Detail</TH>
           </TR>
@@ -61,7 +61,7 @@ function ReportTable({ rows }: { rows: BulkEnquiryRowResult[] }) {
             <TR key={row.row}>
               <TD className="text-xs tabular-nums text-slate-500">{row.row}</TD>
               <TD className="text-xs">{row.ref ?? "—"}</TD>
-              <TD className="text-xs">{row.customerName ?? "—"}</TD>
+              <TD className="text-xs">{row.shipToCity ?? "—"}</TD>
               <TD>
                 <Badge tone={statusTone(row.status)}>{statusLabel(row.status)}</Badge>
               </TD>

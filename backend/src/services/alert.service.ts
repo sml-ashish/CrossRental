@@ -1,6 +1,6 @@
 import { prisma } from "../lib/database";
 import { getSettings } from "../utils/settings";
-import { Raw, escapeHtml, sendTemplate } from "./email.service";
+import { Raw, sendTemplate } from "./email.service";
 import { portalUrl } from "../utils/jwt";
 
 /**
@@ -301,8 +301,8 @@ export async function adminAlerts(): Promise<AlertItem[]> {
       kind: "EMAIL_FAILURE",
       tone: "error",
       title: `${emailFailures} email${emailFailures === 1 ? "" : "s"} failed in the last 7 days`,
-      detail: "Check the delivery log for the address that failed.",
-      to: "/app/admin",
+      detail: "Check the alert email settings for the address that failed.",
+      to: "/app/settings",
       count: emailFailures,
     });
   }
@@ -348,11 +348,8 @@ export async function sendAlertDigest(): Promise<{ sent: number; alerts: number 
   const items = new Raw(
     alerts
       .slice(0, 50)
-      .map(
-        (alert) =>
-          `<li><strong>${escapeHtml(alert.title)}</strong><br/>${escapeHtml(alert.detail)}</li>`,
-      )
-      .join(""),
+      .map((alert) => `${alert.title}\n${alert.detail}`)
+      .join("\n\n"),
   );
 
   let sent = 0;

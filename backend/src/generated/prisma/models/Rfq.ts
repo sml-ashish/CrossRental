@@ -32,6 +32,7 @@ export type RfqAvgAggregateOutputType = {
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
   liftLoadT: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   workingRadiusM: runtime.Decimal | null
   fixedJibM: runtime.Decimal | null
   luffingJibM: runtime.Decimal | null
@@ -49,6 +50,7 @@ export type RfqSumAggregateOutputType = {
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
   liftLoadT: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   workingRadiusM: runtime.Decimal | null
   fixedJibM: runtime.Decimal | null
   luffingJibM: runtime.Decimal | null
@@ -75,6 +77,7 @@ export type RfqMinAggregateOutputType = {
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
   liftLoadT: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   workingRadiusM: runtime.Decimal | null
   fixedJibM: runtime.Decimal | null
   luffingJibM: runtime.Decimal | null
@@ -135,6 +138,7 @@ export type RfqMaxAggregateOutputType = {
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
   liftLoadT: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   workingRadiusM: runtime.Decimal | null
   fixedJibM: runtime.Decimal | null
   luffingJibM: runtime.Decimal | null
@@ -195,6 +199,7 @@ export type RfqCountAggregateOutputType = {
   mainBoomM: number
   jibLengthM: number
   liftLoadT: number
+  liftHeightM: number
   workingRadiusM: number
   fixedJibM: number
   luffingJibM: number
@@ -250,6 +255,7 @@ export type RfqAvgAggregateInputType = {
   mainBoomM?: true
   jibLengthM?: true
   liftLoadT?: true
+  liftHeightM?: true
   workingRadiusM?: true
   fixedJibM?: true
   luffingJibM?: true
@@ -267,6 +273,7 @@ export type RfqSumAggregateInputType = {
   mainBoomM?: true
   jibLengthM?: true
   liftLoadT?: true
+  liftHeightM?: true
   workingRadiusM?: true
   fixedJibM?: true
   luffingJibM?: true
@@ -293,6 +300,7 @@ export type RfqMinAggregateInputType = {
   mainBoomM?: true
   jibLengthM?: true
   liftLoadT?: true
+  liftHeightM?: true
   workingRadiusM?: true
   fixedJibM?: true
   luffingJibM?: true
@@ -353,6 +361,7 @@ export type RfqMaxAggregateInputType = {
   mainBoomM?: true
   jibLengthM?: true
   liftLoadT?: true
+  liftHeightM?: true
   workingRadiusM?: true
   fixedJibM?: true
   luffingJibM?: true
@@ -413,6 +422,7 @@ export type RfqCountAggregateInputType = {
   mainBoomM?: true
   jibLengthM?: true
   liftLoadT?: true
+  liftHeightM?: true
   workingRadiusM?: true
   fixedJibM?: true
   luffingJibM?: true
@@ -562,6 +572,7 @@ export type RfqGroupByOutputType = {
   mainBoomM: runtime.Decimal | null
   jibLengthM: runtime.Decimal | null
   liftLoadT: runtime.Decimal | null
+  liftHeightM: runtime.Decimal | null
   workingRadiusM: runtime.Decimal | null
   fixedJibM: runtime.Decimal | null
   luffingJibM: runtime.Decimal | null
@@ -647,6 +658,7 @@ export type RfqWhereInput = {
   mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -719,6 +731,7 @@ export type RfqOrderByWithRelationInput = {
   mainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
   jibLengthM?: Prisma.SortOrderInput | Prisma.SortOrder
   liftLoadT?: Prisma.SortOrderInput | Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrderInput | Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrderInput | Prisma.SortOrder
   fixedJibM?: Prisma.SortOrderInput | Prisma.SortOrder
   luffingJibM?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -794,6 +807,7 @@ export type RfqWhereUniqueInput = Prisma.AtLeast<{
   mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -866,6 +880,7 @@ export type RfqOrderByWithAggregationInput = {
   mainBoomM?: Prisma.SortOrderInput | Prisma.SortOrder
   jibLengthM?: Prisma.SortOrderInput | Prisma.SortOrder
   liftLoadT?: Prisma.SortOrderInput | Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrderInput | Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrderInput | Prisma.SortOrder
   fixedJibM?: Prisma.SortOrderInput | Prisma.SortOrder
   luffingJibM?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -936,6 +951,7 @@ export type RfqScalarWhereWithAggregatesInput = {
   mainBoomM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.DecimalNullableWithAggregatesFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -997,6 +1013,7 @@ export type RfqCreateInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1066,6 +1083,7 @@ export type RfqUncheckedCreateInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1133,6 +1151,7 @@ export type RfqUpdateInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1202,6 +1221,7 @@ export type RfqUncheckedUpdateInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1270,6 +1290,7 @@ export type RfqCreateManyInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1331,6 +1352,7 @@ export type RfqUpdateManyMutationInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1390,6 +1412,7 @@ export type RfqUncheckedUpdateManyInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1470,6 +1493,7 @@ export type RfqCountOrderByAggregateInput = {
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrder
   fixedJibM?: Prisma.SortOrder
   luffingJibM?: Prisma.SortOrder
@@ -1523,6 +1547,7 @@ export type RfqAvgOrderByAggregateInput = {
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrder
   fixedJibM?: Prisma.SortOrder
   luffingJibM?: Prisma.SortOrder
@@ -1549,6 +1574,7 @@ export type RfqMaxOrderByAggregateInput = {
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrder
   fixedJibM?: Prisma.SortOrder
   luffingJibM?: Prisma.SortOrder
@@ -1609,6 +1635,7 @@ export type RfqMinOrderByAggregateInput = {
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrder
   fixedJibM?: Prisma.SortOrder
   luffingJibM?: Prisma.SortOrder
@@ -1660,6 +1687,7 @@ export type RfqSumOrderByAggregateInput = {
   mainBoomM?: Prisma.SortOrder
   jibLengthM?: Prisma.SortOrder
   liftLoadT?: Prisma.SortOrder
+  liftHeightM?: Prisma.SortOrder
   workingRadiusM?: Prisma.SortOrder
   fixedJibM?: Prisma.SortOrder
   luffingJibM?: Prisma.SortOrder
@@ -1976,6 +2004,7 @@ export type RfqCreateWithoutSiteStateInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2044,6 +2073,7 @@ export type RfqUncheckedCreateWithoutSiteStateInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2140,6 +2170,7 @@ export type RfqScalarWhereInput = {
   mainBoomM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.DecimalNullableFilter<"Rfq"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2201,6 +2232,7 @@ export type RfqCreateWithoutCraneTypeRefInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2268,6 +2300,7 @@ export type RfqUncheckedCreateWithoutCraneTypeRefInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2361,6 +2394,7 @@ export type RfqCreateWithoutCreatedByInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2429,6 +2463,7 @@ export type RfqUncheckedCreateWithoutCreatedByInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2521,6 +2556,7 @@ export type RfqCreateWithoutAttachmentsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2589,6 +2625,7 @@ export type RfqUncheckedCreateWithoutAttachmentsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2671,6 +2708,7 @@ export type RfqUpdateWithoutAttachmentsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2739,6 +2777,7 @@ export type RfqUncheckedUpdateWithoutAttachmentsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2805,6 +2844,7 @@ export type RfqCreateWithoutReservationsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2873,6 +2913,7 @@ export type RfqUncheckedCreateWithoutReservationsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2955,6 +2996,7 @@ export type RfqUpdateWithoutReservationsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3023,6 +3065,7 @@ export type RfqUncheckedUpdateWithoutReservationsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3089,6 +3132,7 @@ export type RfqCreateWithoutRecipientsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3157,6 +3201,7 @@ export type RfqUncheckedCreateWithoutRecipientsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3239,6 +3284,7 @@ export type RfqUpdateWithoutRecipientsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3307,6 +3353,7 @@ export type RfqUncheckedUpdateWithoutRecipientsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3373,6 +3420,7 @@ export type RfqCreateWithoutQuotationsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3441,6 +3489,7 @@ export type RfqUncheckedCreateWithoutQuotationsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3523,6 +3572,7 @@ export type RfqUpdateWithoutQuotationsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3591,6 +3641,7 @@ export type RfqUncheckedUpdateWithoutQuotationsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3657,6 +3708,7 @@ export type RfqCreateWithoutNegotiationsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3725,6 +3777,7 @@ export type RfqUncheckedCreateWithoutNegotiationsInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3807,6 +3860,7 @@ export type RfqUpdateWithoutNegotiationsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3875,6 +3929,7 @@ export type RfqUncheckedUpdateWithoutNegotiationsInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3941,6 +3996,7 @@ export type RfqCreateWithoutEnquiryLineInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4009,6 +4065,7 @@ export type RfqUncheckedCreateWithoutEnquiryLineInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4101,6 +4158,7 @@ export type RfqCreateWithoutInboundRepliesInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4169,6 +4227,7 @@ export type RfqUncheckedCreateWithoutInboundRepliesInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4251,6 +4310,7 @@ export type RfqUpdateWithoutInboundRepliesInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4319,6 +4379,7 @@ export type RfqUncheckedUpdateWithoutInboundRepliesInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4386,6 +4447,7 @@ export type RfqCreateManySiteStateInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4446,6 +4508,7 @@ export type RfqUpdateWithoutSiteStateInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4514,6 +4577,7 @@ export type RfqUncheckedUpdateWithoutSiteStateInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4581,6 +4645,7 @@ export type RfqUncheckedUpdateManyWithoutSiteStateInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4641,6 +4706,7 @@ export type RfqCreateManyCraneTypeRefInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4702,6 +4768,7 @@ export type RfqUpdateWithoutCraneTypeRefInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4769,6 +4836,7 @@ export type RfqUncheckedUpdateWithoutCraneTypeRefInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4836,6 +4904,7 @@ export type RfqUncheckedUpdateManyWithoutCraneTypeRefInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4898,6 +4967,7 @@ export type RfqCreateManyCreatedByInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -4958,6 +5028,7 @@ export type RfqUpdateWithoutCreatedByInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5026,6 +5097,7 @@ export type RfqUncheckedUpdateWithoutCreatedByInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5093,6 +5165,7 @@ export type RfqUncheckedUpdateManyWithoutCreatedByInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5154,6 +5227,7 @@ export type RfqCreateManyEnquiryLineInput = {
   mainBoomM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5214,6 +5288,7 @@ export type RfqUpdateWithoutEnquiryLineInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5282,6 +5357,7 @@ export type RfqUncheckedUpdateWithoutEnquiryLineInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5349,6 +5425,7 @@ export type RfqUncheckedUpdateManyWithoutEnquiryLineInput = {
   mainBoomM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   jibLengthM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   liftLoadT?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  liftHeightM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   workingRadiusM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   fixedJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   luffingJibM?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -5486,6 +5563,7 @@ export type RfqSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   mainBoomM?: boolean
   jibLengthM?: boolean
   liftLoadT?: boolean
+  liftHeightM?: boolean
   workingRadiusM?: boolean
   fixedJibM?: boolean
   luffingJibM?: boolean
@@ -5559,6 +5637,7 @@ export type RfqSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   mainBoomM?: boolean
   jibLengthM?: boolean
   liftLoadT?: boolean
+  liftHeightM?: boolean
   workingRadiusM?: boolean
   fixedJibM?: boolean
   luffingJibM?: boolean
@@ -5625,6 +5704,7 @@ export type RfqSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   mainBoomM?: boolean
   jibLengthM?: boolean
   liftLoadT?: boolean
+  liftHeightM?: boolean
   workingRadiusM?: boolean
   fixedJibM?: boolean
   luffingJibM?: boolean
@@ -5691,6 +5771,7 @@ export type RfqSelectScalar = {
   mainBoomM?: boolean
   jibLengthM?: boolean
   liftLoadT?: boolean
+  liftHeightM?: boolean
   workingRadiusM?: boolean
   fixedJibM?: boolean
   luffingJibM?: boolean
@@ -5738,7 +5819,7 @@ export type RfqSelectScalar = {
   channels?: boolean
 }
 
-export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "liftLoadT" | "workingRadiusM" | "fixedJibM" | "luffingJibM" | "windJibM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt" | "channels", ExtArgs["result"]["rfq"]>
+export type RfqOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rfqNumber" | "enquiryNo" | "lineNo" | "craneType" | "capacityT" | "quantity" | "capacityRule" | "capacityNote" | "applicationDescription" | "loadDescription" | "mainBoomM" | "jibLengthM" | "liftLoadT" | "liftHeightM" | "workingRadiusM" | "fixedJibM" | "luffingJibM" | "windJibM" | "startDateTbc" | "workingDaysPerMonth" | "siteLocation" | "siteStateCode" | "sitePincode" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "requiredStartDate" | "durationValue" | "durationUnit" | "configuration" | "otCharges" | "breakdownTerms" | "dieselScope" | "workingHoursShift" | "craneAgeCriteriaYears" | "accommodationConveyance" | "paymentTerms" | "notes" | "mobilisationTerms" | "supportCrane" | "steelMatsGroundPrep" | "ehsHrRequirements" | "insuranceTerms" | "extensionClause" | "commercialTermsExtra" | "smlContactName" | "smlContactMobile" | "smlContactEmail" | "submissionDeadline" | "status" | "rollupStatus" | "cancelledAt" | "cancelReason" | "enquiryLineId" | "createdById" | "createdAt" | "updatedAt" | "sentAt" | "channels", ExtArgs["result"]["rfq"]>
 export type RfqInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   craneTypeRef?: boolean | Prisma.CraneTypeDefaultArgs<ExtArgs>
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
@@ -5794,6 +5875,7 @@ export type $RfqPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     mainBoomM: runtime.Decimal | null
     jibLengthM: runtime.Decimal | null
     liftLoadT: runtime.Decimal | null
+    liftHeightM: runtime.Decimal | null
     workingRadiusM: runtime.Decimal | null
     fixedJibM: runtime.Decimal | null
     luffingJibM: runtime.Decimal | null
@@ -6290,6 +6372,7 @@ export interface RfqFieldRefs {
   readonly mainBoomM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly jibLengthM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly liftLoadT: Prisma.FieldRef<"Rfq", 'Decimal'>
+  readonly liftHeightM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly workingRadiusM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly fixedJibM: Prisma.FieldRef<"Rfq", 'Decimal'>
   readonly luffingJibM: Prisma.FieldRef<"Rfq", 'Decimal'>

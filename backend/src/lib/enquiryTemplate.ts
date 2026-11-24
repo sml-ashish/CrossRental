@@ -28,7 +28,6 @@ export interface EnquiryTemplateInput {
   states: TemplateReference[];
 }
 
-const CAPACITY_RULES = ["At least", "Exact"];
 const DURATION_UNITS = ["Days", "Months"];
 
 const HEADER_FILL: ExcelJS.Fill = {
@@ -59,8 +58,7 @@ export async function buildEnquiryTemplate(
   const lists = workbook.addWorksheet("Lists");
   lists.getColumn(1).values = ["Crane type", ...input.craneTypes.map((t) => t.name)];
   lists.getColumn(2).values = ["State", ...input.states.map((s) => s.name)];
-  lists.getColumn(3).values = ["Capacity rule", ...CAPACITY_RULES];
-  lists.getColumn(4).values = ["Duration unit", ...DURATION_UNITS];
+  lists.getColumn(3).values = ["Duration unit", ...DURATION_UNITS];
   lists.state = "hidden";
 
   // --- Enquiries -----------------------------------------------------------
@@ -81,9 +79,6 @@ export async function buildEnquiryTemplate(
     if (column.required) {
       header.font = { bold: true, color: { argb: "FFFFE4E6" }, size: 11 };
     }
-    if (column.internal) {
-      header.font = { bold: true, italic: true, color: { argb: "FFFDE68A" }, size: 11 };
-    }
   });
 
   const firstType = input.craneTypes[0]?.name ?? "Crawler Crane";
@@ -91,52 +86,32 @@ export async function buildEnquiryTemplate(
   const example = sheet.addRow({
     enquiryRef: "EXAMPLE-1",
     enquiryDate: "2026-10-01",
-    customerName: "Example Customer Ltd (example row — delete it)",
-    customerAddress: "Plot 1, Example Industrial Estate, Example City",
-    siteLocation: "Example Site, Ambattur",
+    shipToCity: "Ambattur",
     siteStateCode: firstState,
-    sitePincode: "600058",
-    region: "South",
     craneTypeCode: firstType,
+    craneModel: "Liebherr LR 1250",
+    yom: 2020,
     capacityT: 250,
-    capacityRule: "At least",
-    capacityNote: "250 T or higher",
-    quantity: 1,
     applicationDescription: "Example application — replace this row",
-    loadDescription: "",
     liftLoadT: 120,
-    workingRadiusM: 60,
-    requiredMainBoomM: 60,
-    requiredFixedJibM: "",
-    requiredLuffingJibM: "",
-    requiredWindJibM: "",
-    configurationNotes: "",
+    liftHeightM: 45,
+    craneConfiguration: "MB 60 + FJ 12",
     requiredStartDate: "2026-11-01",
     durationValue: 1,
     durationUnit: "Months",
     workingDaysPerMonth: 26,
-    rentalBudget: "",
-    mobilisationTerms: "",
-    demobilisationTerms: "",
     dieselScope: "Client scope",
     otCharges: "Pro-rata",
     workingHoursPerDay: "12 hrs including lunch break",
     shift: "Single",
-    accommodationConveyance: "SML scope",
     supportCraneScope: "Client scope",
     steelMatsGroundPrepScope: "Client scope",
     craneAgeCriteriaYears: "",
     ehsHrCompliance: "",
-    paymentTerms: "",
     breakdownTerms: "Pro-rata",
-    extensionClause: "NA",
     insuranceTerms: "",
     additionalManpowerScope: "",
-    intraSiteMovementScope: "Client scope",
-    prereleaseTerms: "NA",
-    ppeScope: "Standard",
     rowScope: "Client scope",
-    otherTerms: "",
   });
   example.font = { italic: true, color: { argb: "FF64748B" } };
 
@@ -167,15 +142,8 @@ export async function buildEnquiryTemplate(
       error: "Pick an Indian state from the list.",
     },
     {
-      key: "capacityRule",
-      range: listRange("C", CAPACITY_RULES.length),
-      allowBlank: true,
-      title: "Capacity rule",
-      error: "At least or Exact. Leave blank for At least.",
-    },
-    {
       key: "durationUnit",
-      range: listRange("D", DURATION_UNITS.length),
+      range: listRange("C", DURATION_UNITS.length),
       allowBlank: true,
       title: "Duration unit",
       error: "Days or Months. Required when a Duration is given.",
@@ -224,23 +192,19 @@ export async function buildEnquiryTemplate(
     ],
     [
       "Same header on every row",
-      "The first row of a group supplies the customer, site and enquiry date. If a later row in the same group disagrees, the first row wins and the report warns about it.",
+      "The first row of a group supplies the site and enquiry date. If a later row in the same group disagrees, the first row wins and the report warns about it.",
     ],
     [
       "Adding lines to an existing enquiry",
-      "Use “Add lines in bulk” on that enquiry's screen. The enquiry is fixed by the screen, so the header columns (customer, site, state, date, ref) are ignored and only the line columns are read.",
+      "Use “Add lines in bulk” on that enquiry's screen. The enquiry is fixed by the screen, so the header columns (site, state, date, ref) are ignored and only the line columns are read.",
     ],
     [
       "Dates",
       "Real Excel dates, 2026-10-01 and 01/10/2026 (day first) all work. A text date is read day-first.",
     ],
     [
-      "Internal columns",
-      "“Customer name”, “Customer address” and “Rental per month (internal)” are never shown to a vendor or copied into an RFQ.",
-    ],
-    [
       "Not in the sheet",
-      "Site coordinates are resolved after the import, and RFQs are raised from the enquiry screen.",
+      "Vendor terms are chosen when the RFQ is raised. Site coordinates are derived from the city and state.",
     ],
   ];
   for (const [label, text] of notes) {

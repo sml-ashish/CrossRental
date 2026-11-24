@@ -45,13 +45,16 @@ async function seedReferenceData() {
 }
 
 async function seedEmailTemplates() {
+  // Set EMAIL_TEMPLATE_RESET=1 once to replace stored HTML templates with the
+  // new plain-text copy. Normal seeding still preserves UI customisations.
+  const reset = process.env["EMAIL_TEMPLATE_RESET"] === "1";
   for (const template of DEFAULT_EMAIL_TEMPLATES) {
     await prisma.emailTemplate.upsert({
       where: { key: template.key },
       create: template,
       // Intentionally does not overwrite: once someone has customised a
       // template in the UI, re-seeding must not revert their wording.
-      update: {},
+      update: reset ? { subject: template.subject, bodyHtml: template.bodyHtml } : {},
     });
   }
   console.log(`  email templates: ${DEFAULT_EMAIL_TEMPLATES.length}`);
@@ -673,61 +676,55 @@ async function seedDemoEnquiries() {
   const demos = [
     {
       enquiryNo: "CR-2026-9001",
-      customerName: "Sanghvi Movers Ltd (demo)",
-      customerAddress: "Plot 12, GIDC Estate, Vadodara, Gujarat 390010",
-      siteLocation: "Vadodara, Gujarat",
+      shipToCity: "Vadodara",
       siteStateCode: "GJ",
-      sitePincode: "390010",
       lines: [
         {
           lineNo: 1,
           craneTypeCode: "CRAWLER",
           capacityT: 250,
-          quantity: 1,
           applicationDescription: "Erecting a 60 m lattice tower at the plant's new furnace line",
-          loadDescription: "Base section, 40 t at 20 m radius",
           requiredStartDate: at(21),
           durationValue: 3,
           durationUnit: "MONTHS" as const,
           workingDaysPerMonth: 26,
-          configurationNotes: "Main boom 60 m, luffing jib 50 m",
+          craneModel: "Liebherr LR 1250",
+          yom: 2019,
+          craneConfiguration: "MB 60 + LJ 50",
           trailStatus: "AVAILABILITY_CHECK" as const,
         },
         {
           lineNo: 2,
           craneTypeCode: "ALL_TERRAIN",
           capacityT: 100,
-          quantity: 2,
           applicationDescription: "Shutdown maintenance lifts across two process units",
-          loadDescription: "Heat exchangers, 18 t at 12 m radius",
           requiredStartDate: at(35),
           durationValue: 45,
           durationUnit: "DAYS" as const,
-          configurationNotes: "Main boom 40 m",
+          craneModel: "Terex AC 100/4L",
+          yom: 2021,
+          craneConfiguration: "MB 40",
           trailStatus: "NEW" as const,
         },
       ],
     },
     {
       enquiryNo: "CR-2026-9002",
-      customerName: "Coastal Refinery Services (demo)",
-      customerAddress: "Survey 44, Moti Khavdi, Jamnagar, Gujarat 361140",
-      siteLocation: "Jamnagar, Gujarat",
+      shipToCity: "Jamnagar",
       siteStateCode: "GJ",
-      sitePincode: "361140",
       lines: [
         {
           lineNo: 1,
           craneTypeCode: "CRAWLER",
           capacityT: 400,
-          quantity: 1,
           applicationDescription: "Reactor replacement at the hydrocracker unit",
-          loadDescription: "Reactor shell, 210 t at 18 m radius",
           requiredStartDate: at(60),
           durationValue: 2,
           durationUnit: "MONTHS" as const,
           workingDaysPerMonth: 26,
-          configurationNotes: "Main boom 84 m, luffing jib 60 m",
+          craneModel: "XCMG XGC400",
+          yom: 2022,
+          craneConfiguration: "MB 84 + LJ 60",
           trailStatus: "VENDOR_SHORTLISTED" as const,
         },
       ],
@@ -746,11 +743,8 @@ async function seedDemoEnquiries() {
       data: {
         enquiryNo: demo.enquiryNo,
         enquiryDate: at(-3),
-        customerName: demo.customerName,
-        customerAddress: demo.customerAddress,
-        siteLocation: demo.siteLocation,
+        shipToCity: demo.shipToCity,
         siteStateCode: demo.siteStateCode,
-        sitePincode: demo.sitePincode,
         createdById: admin.id,
         lines: {
           create: demo.lines.map((line) => ({
@@ -758,12 +752,9 @@ async function seedDemoEnquiries() {
             otCharges: "As per agreement",
             breakdownTerms: "As per agreement",
             dieselScope: "To SML",
-            workingHoursShift: "8 hours per shift",
-            paymentTerms: "30 days from invoice",
-            mobilisationTerms: "Lump sum, per mobilisation rate card",
-            demobilisationTerms: "Lump sum, per mobilisation rate card",
-            // Internal only, and never copied into an RFQ.
-            rentalBudget: "Commercials held by Sales",
+            workingHoursPerDay: "8 hours per shift",
+            shift: "Single",
+            workingHoursShift: "8 hours per shift · Single",
           })),
         },
       },

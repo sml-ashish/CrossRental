@@ -42,7 +42,7 @@ export function ReplyQueuePage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        back={{ to: "/app/admin", label: "Admin" }}
+        back={{ to: "/app/approvals", label: "Back" }}
         title="Reply validation queue"
         description="Email and WhatsApp replies the parser could not turn into a complete quotation."
         meta={<Badge tone="amber">{list.data?.pendingCount ?? 0} pending</Badge>}

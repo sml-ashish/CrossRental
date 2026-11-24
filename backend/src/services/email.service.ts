@@ -1,5 +1,6 @@
 import { prisma } from "../lib/database";
 import { sendMail } from "../lib/mailer";
+import { htmlToPlainText } from "../lib/plainText";
 
 /**
  * Renders a template from the `email_templates` table, sends it through the
@@ -18,6 +19,7 @@ export type TemplateKey =
   | "password_reset"
   | "login_otp"
   | "fleet_update_reminder"
+  | "fleet_updated_on_behalf"
   | "rfq_invitation"
   | "rfq_reminder"
   | "quotation_receipt"
@@ -38,33 +40,24 @@ export type TemplateKey =
 export type TemplateVars = Record<string, string | number | null | undefined | Raw>;
 
 /**
- * Marks a value as trusted markup. Everything else passed to a template is
- * HTML-escaped, so a vendor-supplied name or remark can never inject markup
- * into an outbound email.
+ * Marks a value as pre-rendered plain text. Everything else passed to a
+ * template is HTML-escaped, so a vendor-supplied name or remark cannot inject
+ * markup into an outbound email. The message itself is sent as text, so a Raw
+ * value is text too — never markup.
  */
 export class Raw {
-  constructor(readonly html: string) {}
+  constructor(readonly text: string) {}
 }
 
 /** Renders a reason block, or nothing when there is no content. */
 export function optionalBlock(reason: string | null | undefined, label = "Reason"): Raw {
   if (!reason || reason.trim() === "") return new Raw("");
-  return new Raw(
-    `<div style="margin:0 0 16px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#334155"><strong>${escapeHtml(label)}</strong><br/>${escapeHtml(reason)}</div>`,
-  );
+  return new Raw(`${label}: ${reason}`);
 }
 
 export function warningsBlock(warnings: string[]): Raw {
   if (warnings.length === 0) return new Raw("");
-  const items = warnings
-    .map((w) => `<li style="margin:0 0 4px">${escapeHtml(w)}</li>`)
-    .join("");
-  return new Raw(
-    `<div style="margin:0 0 16px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px">
-      <strong style="display:block;margin-bottom:6px;font-size:13px;color:#92400e">Advisories (not blocking)</strong>
-      <ul style="margin:0;padding-left:18px;font-size:12px;color:#78350f">${items}</ul>
-    </div>`,
-  );
+  return new Raw(`Advisories (not blocking)\n${warnings.map((w) => `- ${w}`).join("\n")}`);
 }
 
 export function escapeHtml(value: string): string {
@@ -81,24 +74,8 @@ export function render(template: string, vars: TemplateVars): string {
     if (!(key in vars)) return match;
     const value = vars[key];
     if (value === null || value === undefined) return "";
-    return value instanceof Raw ? value.html : escapeHtml(String(value));
+    return value instanceof Raw ? value.text : escapeHtml(String(value));
   });
-}
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|tr|li|h1)>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
 }
 
 export interface SendTemplateInput {
@@ -127,8 +104,10 @@ export async function sendTemplate(input: SendTemplateInput): Promise<SendTempla
   }
 
   const subject = render(row.subject, input.vars);
-  const html = render(row.bodyHtml, input.vars);
-  const text = stripHtml(html);
+  // Text only. Older templates in the database may still contain HTML; the
+  // converter strips it so every outgoing message has the same clean format.
+  const storedIsHtml = /<\/?[a-z][^>]*>/i.test(row.bodyHtml);
+  const text = htmlToPlainText(render(row.bodyHtml, input.vars), storedIsHtml);
 
   const log = await prisma.emailLog.create({
     data: {
@@ -142,7 +121,7 @@ export async function sendTemplate(input: SendTemplateInput): Promise<SendTempla
     },
   });
 
-  const result = await sendMail({ to: input.to, cc: input.cc, subject, html, text });
+  const result = await sendMail({ to: input.to, cc: input.cc, subject, text });
 
   await prisma.emailLog.update({
     where: { id: log.id },

@@ -1,5 +1,3 @@
-
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -297,7 +295,7 @@ export function CraneMap({
 
     const draw = () => {
       heatRef.current?.remove();
-      const zoom = map.getZoom();
+      const zoom = Math.round(map.getZoom());
       const cell = zoom <= 5 ? 1.2 : zoom === 6 ? 0.6 : zoom === 7 ? 0.3 : zoom === 8 ? 0.15 : zoom === 9 ? 0.08 : 0.04;
       const buckets = new Map<string, { lat: number; lng: number; count: number }>();
       for (const point of points) {
@@ -421,7 +419,3 @@ function LegendItem({ status, label }: { status: string; label: string }) {
     </li>
   );
 }
-
-
-
-

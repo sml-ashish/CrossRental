@@ -296,12 +296,12 @@ export interface InviteResult {
 }
 
 /**
- * The duplicate guards, shared by the single invite and the bulk upload.
+ * The duplicate guard, shared by the single invite and the bulk upload.
  *
- * Both paths must refuse the same things for the same reasons: an email that
- * already has an account, and an email that already has a live invitation.
- * Keeping the check here means the bulk report and the single form can never
- * disagree about what "already invited" means.
+ * Only an email that already has an account is refused. The check for an
+ * already-outstanding invitation is disabled for now: re-sending to an address
+ * with a live invitation must be possible. Keeping the remaining check here
+ * means the bulk report and the single form cannot disagree.
  */
 export async function assertInvitable(email: string): Promise<void> {
   const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
@@ -309,15 +309,11 @@ export async function assertInvitable(email: string): Promise<void> {
     throw AppError.conflict("An account already exists for that email address.");
   }
 
-  // Do not stack invitations on one address; the vendor would then have two
-  // live links and no way to tell which is current.
-  const live = await prisma.vendorInvitation.findFirst({
-    where: { email, revokedAt: null, submittedAt: null, expiresAt: { gt: new Date() } },
-    select: { id: true },
-  });
-  if (live) {
-    throw AppError.conflict("An invitation for that email address is already outstanding.");
-  }
+  // TEMPORARY: the live-invitation guard was removed so invitations can be
+  // re-sent. Previously this rejected a second unexpired, unsubmitted,
+  // unrevoked invitation for the same address with a 409. To restore it, query
+  // prisma.vendorInvitation with { email, revokedAt: null, submittedAt: null,
+  // expiresAt: { gt: new Date() } } and throw AppError.conflict(...) when found.
 }
 
 /**

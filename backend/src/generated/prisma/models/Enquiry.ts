@@ -18,42 +18,25 @@ import type * as Prisma from "../internal/prismaNamespace"
  *  * The enquiry header (BPD 6.3/6.4, P1 section 2).
  *  * The CR team types these in today; a future SAP feed would call the same
  *  * `createEnquiry(payload, source)` service, which is why `source` is a column
- *  * even though `manual` is the only value that exists. The customer's name and
- *  * address are internal-only and are never copied into an RFQ.
+ *  * even though `manual` is the only value that exists.
+ *  *
+ *  * The site is just a city plus state. Coordinates are derived when an RFQ or a
+ *  * recommendation needs them and are stored on those records, never here.
  */
 export type EnquiryModel = runtime.Types.Result.DefaultSelection<Prisma.$EnquiryPayload>
 
 export type AggregateEnquiry = {
   _count: EnquiryCountAggregateOutputType | null
-  _avg: EnquiryAvgAggregateOutputType | null
-  _sum: EnquirySumAggregateOutputType | null
   _min: EnquiryMinAggregateOutputType | null
   _max: EnquiryMaxAggregateOutputType | null
-}
-
-export type EnquiryAvgAggregateOutputType = {
-  siteLatitude: runtime.Decimal | null
-  siteLongitude: runtime.Decimal | null
-}
-
-export type EnquirySumAggregateOutputType = {
-  siteLatitude: runtime.Decimal | null
-  siteLongitude: runtime.Decimal | null
 }
 
 export type EnquiryMinAggregateOutputType = {
   id: string | null
   enquiryNo: string | null
   enquiryDate: Date | null
-  customerName: string | null
-  customerAddress: string | null
-  siteLocation: string | null
+  shipToCity: string | null
   siteStateCode: string | null
-  sitePincode: string | null
-  region: string | null
-  siteLatitude: runtime.Decimal | null
-  siteLongitude: runtime.Decimal | null
-  siteCoordinateSource: $Enums.CoordinateSource | null
   overallStatus: $Enums.EnquiryOverallStatus | null
   createdById: string | null
   createdAt: Date | null
@@ -64,15 +47,8 @@ export type EnquiryMaxAggregateOutputType = {
   id: string | null
   enquiryNo: string | null
   enquiryDate: Date | null
-  customerName: string | null
-  customerAddress: string | null
-  siteLocation: string | null
+  shipToCity: string | null
   siteStateCode: string | null
-  sitePincode: string | null
-  region: string | null
-  siteLatitude: runtime.Decimal | null
-  siteLongitude: runtime.Decimal | null
-  siteCoordinateSource: $Enums.CoordinateSource | null
   overallStatus: $Enums.EnquiryOverallStatus | null
   createdById: string | null
   createdAt: Date | null
@@ -83,15 +59,8 @@ export type EnquiryCountAggregateOutputType = {
   id: number
   enquiryNo: number
   enquiryDate: number
-  customerName: number
-  customerAddress: number
-  siteLocation: number
+  shipToCity: number
   siteStateCode: number
-  sitePincode: number
-  region: number
-  siteLatitude: number
-  siteLongitude: number
-  siteCoordinateSource: number
   overallStatus: number
   createdById: number
   createdAt: number
@@ -100,29 +69,12 @@ export type EnquiryCountAggregateOutputType = {
 }
 
 
-export type EnquiryAvgAggregateInputType = {
-  siteLatitude?: true
-  siteLongitude?: true
-}
-
-export type EnquirySumAggregateInputType = {
-  siteLatitude?: true
-  siteLongitude?: true
-}
-
 export type EnquiryMinAggregateInputType = {
   id?: true
   enquiryNo?: true
   enquiryDate?: true
-  customerName?: true
-  customerAddress?: true
-  siteLocation?: true
+  shipToCity?: true
   siteStateCode?: true
-  sitePincode?: true
-  region?: true
-  siteLatitude?: true
-  siteLongitude?: true
-  siteCoordinateSource?: true
   overallStatus?: true
   createdById?: true
   createdAt?: true
@@ -133,15 +85,8 @@ export type EnquiryMaxAggregateInputType = {
   id?: true
   enquiryNo?: true
   enquiryDate?: true
-  customerName?: true
-  customerAddress?: true
-  siteLocation?: true
+  shipToCity?: true
   siteStateCode?: true
-  sitePincode?: true
-  region?: true
-  siteLatitude?: true
-  siteLongitude?: true
-  siteCoordinateSource?: true
   overallStatus?: true
   createdById?: true
   createdAt?: true
@@ -152,15 +97,8 @@ export type EnquiryCountAggregateInputType = {
   id?: true
   enquiryNo?: true
   enquiryDate?: true
-  customerName?: true
-  customerAddress?: true
-  siteLocation?: true
+  shipToCity?: true
   siteStateCode?: true
-  sitePincode?: true
-  region?: true
-  siteLatitude?: true
-  siteLongitude?: true
-  siteCoordinateSource?: true
   overallStatus?: true
   createdById?: true
   createdAt?: true
@@ -206,18 +144,6 @@ export type EnquiryAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
-   * Select which fields to average
-  **/
-  _avg?: EnquiryAvgAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
-   * Select which fields to sum
-  **/
-  _sum?: EnquirySumAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
    * Select which fields to find the minimum value
   **/
   _min?: EnquiryMinAggregateInputType
@@ -248,8 +174,6 @@ export type EnquiryGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: EnquiryCountAggregateInputType | true
-  _avg?: EnquiryAvgAggregateInputType
-  _sum?: EnquirySumAggregateInputType
   _min?: EnquiryMinAggregateInputType
   _max?: EnquiryMaxAggregateInputType
 }
@@ -258,22 +182,13 @@ export type EnquiryGroupByOutputType = {
   id: string
   enquiryNo: string
   enquiryDate: Date
-  customerName: string
-  customerAddress: string
-  siteLocation: string
+  shipToCity: string
   siteStateCode: string
-  sitePincode: string | null
-  region: string | null
-  siteLatitude: runtime.Decimal | null
-  siteLongitude: runtime.Decimal | null
-  siteCoordinateSource: $Enums.CoordinateSource | null
   overallStatus: $Enums.EnquiryOverallStatus
   createdById: string | null
   createdAt: Date
   updatedAt: Date
   _count: EnquiryCountAggregateOutputType | null
-  _avg: EnquiryAvgAggregateOutputType | null
-  _sum: EnquirySumAggregateOutputType | null
   _min: EnquiryMinAggregateOutputType | null
   _max: EnquiryMaxAggregateOutputType | null
 }
@@ -300,15 +215,8 @@ export type EnquiryWhereInput = {
   id?: Prisma.StringFilter<"Enquiry"> | string
   enquiryNo?: Prisma.StringFilter<"Enquiry"> | string
   enquiryDate?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
-  customerName?: Prisma.StringFilter<"Enquiry"> | string
-  customerAddress?: Prisma.StringFilter<"Enquiry"> | string
-  siteLocation?: Prisma.StringFilter<"Enquiry"> | string
+  shipToCity?: Prisma.StringFilter<"Enquiry"> | string
   siteStateCode?: Prisma.StringFilter<"Enquiry"> | string
-  sitePincode?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  region?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  siteLatitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableFilter<"Enquiry"> | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
   createdById?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
@@ -322,15 +230,8 @@ export type EnquiryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
-  customerName?: Prisma.SortOrder
-  customerAddress?: Prisma.SortOrder
-  siteLocation?: Prisma.SortOrder
+  shipToCity?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
-  sitePincode?: Prisma.SortOrderInput | Prisma.SortOrder
-  region?: Prisma.SortOrderInput | Prisma.SortOrder
-  siteLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
-  siteCoordinateSource?: Prisma.SortOrderInput | Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -347,15 +248,8 @@ export type EnquiryWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.EnquiryWhereInput[]
   NOT?: Prisma.EnquiryWhereInput | Prisma.EnquiryWhereInput[]
   enquiryDate?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
-  customerName?: Prisma.StringFilter<"Enquiry"> | string
-  customerAddress?: Prisma.StringFilter<"Enquiry"> | string
-  siteLocation?: Prisma.StringFilter<"Enquiry"> | string
+  shipToCity?: Prisma.StringFilter<"Enquiry"> | string
   siteStateCode?: Prisma.StringFilter<"Enquiry"> | string
-  sitePincode?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  region?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  siteLatitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableFilter<"Enquiry"> | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
   createdById?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
@@ -369,24 +263,15 @@ export type EnquiryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
-  customerName?: Prisma.SortOrder
-  customerAddress?: Prisma.SortOrder
-  siteLocation?: Prisma.SortOrder
+  shipToCity?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
-  sitePincode?: Prisma.SortOrderInput | Prisma.SortOrder
-  region?: Prisma.SortOrderInput | Prisma.SortOrder
-  siteLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
-  siteCoordinateSource?: Prisma.SortOrderInput | Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.EnquiryCountOrderByAggregateInput
-  _avg?: Prisma.EnquiryAvgOrderByAggregateInput
   _max?: Prisma.EnquiryMaxOrderByAggregateInput
   _min?: Prisma.EnquiryMinOrderByAggregateInput
-  _sum?: Prisma.EnquirySumOrderByAggregateInput
 }
 
 export type EnquiryScalarWhereWithAggregatesInput = {
@@ -396,15 +281,8 @@ export type EnquiryScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
   enquiryNo?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
   enquiryDate?: Prisma.DateTimeWithAggregatesFilter<"Enquiry"> | Date | string
-  customerName?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
-  customerAddress?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
-  siteLocation?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
+  shipToCity?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
   siteStateCode?: Prisma.StringWithAggregatesFilter<"Enquiry"> | string
-  sitePincode?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
-  region?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
-  siteLatitude?: Prisma.DecimalNullableWithAggregatesFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.DecimalNullableWithAggregatesFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableWithAggregatesFilter<"Enquiry"> | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusWithAggregatesFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
   createdById?: Prisma.StringNullableWithAggregatesFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Enquiry"> | Date | string
@@ -415,14 +293,7 @@ export type EnquiryCreateInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
+  shipToCity: string
   overallStatus?: $Enums.EnquiryOverallStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -435,15 +306,8 @@ export type EnquiryUncheckedCreateInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
+  shipToCity: string
   siteStateCode: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
   overallStatus?: $Enums.EnquiryOverallStatus
   createdById?: string | null
   createdAt?: Date | string
@@ -455,14 +319,7 @@ export type EnquiryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -475,15 +332,8 @@ export type EnquiryUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -495,15 +345,8 @@ export type EnquiryCreateManyInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
+  shipToCity: string
   siteStateCode: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
   overallStatus?: $Enums.EnquiryOverallStatus
   createdById?: string | null
   createdAt?: Date | string
@@ -514,14 +357,7 @@ export type EnquiryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -531,15 +367,8 @@ export type EnquiryUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -560,39 +389,20 @@ export type EnquiryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
-  customerName?: Prisma.SortOrder
-  customerAddress?: Prisma.SortOrder
-  siteLocation?: Prisma.SortOrder
+  shipToCity?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
-  sitePincode?: Prisma.SortOrder
-  region?: Prisma.SortOrder
-  siteLatitude?: Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrder
-  siteCoordinateSource?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type EnquiryAvgOrderByAggregateInput = {
-  siteLatitude?: Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrder
-}
-
 export type EnquiryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
-  customerName?: Prisma.SortOrder
-  customerAddress?: Prisma.SortOrder
-  siteLocation?: Prisma.SortOrder
+  shipToCity?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
-  sitePincode?: Prisma.SortOrder
-  region?: Prisma.SortOrder
-  siteLatitude?: Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrder
-  siteCoordinateSource?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -603,24 +413,12 @@ export type EnquiryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   enquiryNo?: Prisma.SortOrder
   enquiryDate?: Prisma.SortOrder
-  customerName?: Prisma.SortOrder
-  customerAddress?: Prisma.SortOrder
-  siteLocation?: Prisma.SortOrder
+  shipToCity?: Prisma.SortOrder
   siteStateCode?: Prisma.SortOrder
-  sitePincode?: Prisma.SortOrder
-  region?: Prisma.SortOrder
-  siteLatitude?: Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrder
-  siteCoordinateSource?: Prisma.SortOrder
   overallStatus?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type EnquirySumOrderByAggregateInput = {
-  siteLatitude?: Prisma.SortOrder
-  siteLongitude?: Prisma.SortOrder
 }
 
 export type EnquiryScalarRelationFilter = {
@@ -734,14 +532,7 @@ export type EnquiryCreateWithoutSiteStateInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
+  shipToCity: string
   overallStatus?: $Enums.EnquiryOverallStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -753,14 +544,7 @@ export type EnquiryUncheckedCreateWithoutSiteStateInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
+  shipToCity: string
   overallStatus?: $Enums.EnquiryOverallStatus
   createdById?: string | null
   createdAt?: Date | string
@@ -801,15 +585,8 @@ export type EnquiryScalarWhereInput = {
   id?: Prisma.StringFilter<"Enquiry"> | string
   enquiryNo?: Prisma.StringFilter<"Enquiry"> | string
   enquiryDate?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
-  customerName?: Prisma.StringFilter<"Enquiry"> | string
-  customerAddress?: Prisma.StringFilter<"Enquiry"> | string
-  siteLocation?: Prisma.StringFilter<"Enquiry"> | string
+  shipToCity?: Prisma.StringFilter<"Enquiry"> | string
   siteStateCode?: Prisma.StringFilter<"Enquiry"> | string
-  sitePincode?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  region?: Prisma.StringNullableFilter<"Enquiry"> | string | null
-  siteLatitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.DecimalNullableFilter<"Enquiry"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.EnumCoordinateSourceNullableFilter<"Enquiry"> | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFilter<"Enquiry"> | $Enums.EnquiryOverallStatus
   createdById?: Prisma.StringNullableFilter<"Enquiry"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Enquiry"> | Date | string
@@ -820,14 +597,7 @@ export type EnquiryCreateWithoutCreatedByInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
+  shipToCity: string
   overallStatus?: $Enums.EnquiryOverallStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -839,15 +609,8 @@ export type EnquiryUncheckedCreateWithoutCreatedByInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
+  shipToCity: string
   siteStateCode: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
   overallStatus?: $Enums.EnquiryOverallStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -884,14 +647,7 @@ export type EnquiryCreateWithoutLinesInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
+  shipToCity: string
   overallStatus?: $Enums.EnquiryOverallStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -903,15 +659,8 @@ export type EnquiryUncheckedCreateWithoutLinesInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
+  shipToCity: string
   siteStateCode: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
   overallStatus?: $Enums.EnquiryOverallStatus
   createdById?: string | null
   createdAt?: Date | string
@@ -938,14 +687,7 @@ export type EnquiryUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -957,15 +699,8 @@ export type EnquiryUncheckedUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -976,14 +711,7 @@ export type EnquiryCreateManySiteStateInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
+  shipToCity: string
   overallStatus?: $Enums.EnquiryOverallStatus
   createdById?: string | null
   createdAt?: Date | string
@@ -994,14 +722,7 @@ export type EnquiryUpdateWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1013,14 +734,7 @@ export type EnquiryUncheckedUpdateWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1032,14 +746,7 @@ export type EnquiryUncheckedUpdateManyWithoutSiteStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1050,15 +757,8 @@ export type EnquiryCreateManyCreatedByInput = {
   id?: string
   enquiryNo: string
   enquiryDate: Date | string
-  customerName: string
-  customerAddress: string
-  siteLocation: string
+  shipToCity: string
   siteStateCode: string
-  sitePincode?: string | null
-  region?: string | null
-  siteLatitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: $Enums.CoordinateSource | null
   overallStatus?: $Enums.EnquiryOverallStatus
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1068,14 +768,7 @@ export type EnquiryUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1087,15 +780,8 @@ export type EnquiryUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1106,15 +792,8 @@ export type EnquiryUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryNo?: Prisma.StringFieldUpdateOperationsInput | string
   enquiryDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  customerName?: Prisma.StringFieldUpdateOperationsInput | string
-  customerAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  siteLocation?: Prisma.StringFieldUpdateOperationsInput | string
+  shipToCity?: Prisma.StringFieldUpdateOperationsInput | string
   siteStateCode?: Prisma.StringFieldUpdateOperationsInput | string
-  sitePincode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  siteLatitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteLongitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  siteCoordinateSource?: Prisma.NullableEnumCoordinateSourceFieldUpdateOperationsInput | $Enums.CoordinateSource | null
   overallStatus?: Prisma.EnumEnquiryOverallStatusFieldUpdateOperationsInput | $Enums.EnquiryOverallStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1155,15 +834,8 @@ export type EnquirySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id?: boolean
   enquiryNo?: boolean
   enquiryDate?: boolean
-  customerName?: boolean
-  customerAddress?: boolean
-  siteLocation?: boolean
+  shipToCity?: boolean
   siteStateCode?: boolean
-  sitePincode?: boolean
-  region?: boolean
-  siteLatitude?: boolean
-  siteLongitude?: boolean
-  siteCoordinateSource?: boolean
   overallStatus?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -1178,15 +850,8 @@ export type EnquirySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   enquiryNo?: boolean
   enquiryDate?: boolean
-  customerName?: boolean
-  customerAddress?: boolean
-  siteLocation?: boolean
+  shipToCity?: boolean
   siteStateCode?: boolean
-  sitePincode?: boolean
-  region?: boolean
-  siteLatitude?: boolean
-  siteLongitude?: boolean
-  siteCoordinateSource?: boolean
   overallStatus?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -1199,15 +864,8 @@ export type EnquirySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   enquiryNo?: boolean
   enquiryDate?: boolean
-  customerName?: boolean
-  customerAddress?: boolean
-  siteLocation?: boolean
+  shipToCity?: boolean
   siteStateCode?: boolean
-  sitePincode?: boolean
-  region?: boolean
-  siteLatitude?: boolean
-  siteLongitude?: boolean
-  siteCoordinateSource?: boolean
   overallStatus?: boolean
   createdById?: boolean
   createdAt?: boolean
@@ -1220,22 +878,15 @@ export type EnquirySelectScalar = {
   id?: boolean
   enquiryNo?: boolean
   enquiryDate?: boolean
-  customerName?: boolean
-  customerAddress?: boolean
-  siteLocation?: boolean
+  shipToCity?: boolean
   siteStateCode?: boolean
-  sitePincode?: boolean
-  region?: boolean
-  siteLatitude?: boolean
-  siteLongitude?: boolean
-  siteCoordinateSource?: boolean
   overallStatus?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EnquiryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryNo" | "enquiryDate" | "customerName" | "customerAddress" | "siteLocation" | "siteStateCode" | "sitePincode" | "region" | "siteLatitude" | "siteLongitude" | "siteCoordinateSource" | "overallStatus" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiry"]>
+export type EnquiryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "enquiryNo" | "enquiryDate" | "shipToCity" | "siteStateCode" | "overallStatus" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiry"]>
 export type EnquiryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   siteState?: boolean | Prisma.StateDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Enquiry$createdByArgs<ExtArgs>
@@ -1262,15 +913,11 @@ export type $EnquiryPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     enquiryNo: string
     enquiryDate: Date
-    customerName: string
-    customerAddress: string
-    siteLocation: string
+    /**
+     * The delivery city, used as the site on every RFQ raised from this enquiry.
+     */
+    shipToCity: string
     siteStateCode: string
-    sitePincode: string | null
-    region: string | null
-    siteLatitude: runtime.Decimal | null
-    siteLongitude: runtime.Decimal | null
-    siteCoordinateSource: $Enums.CoordinateSource | null
     overallStatus: $Enums.EnquiryOverallStatus
     createdById: string | null
     createdAt: Date
@@ -1704,15 +1351,8 @@ export interface EnquiryFieldRefs {
   readonly id: Prisma.FieldRef<"Enquiry", 'String'>
   readonly enquiryNo: Prisma.FieldRef<"Enquiry", 'String'>
   readonly enquiryDate: Prisma.FieldRef<"Enquiry", 'DateTime'>
-  readonly customerName: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly customerAddress: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly siteLocation: Prisma.FieldRef<"Enquiry", 'String'>
+  readonly shipToCity: Prisma.FieldRef<"Enquiry", 'String'>
   readonly siteStateCode: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly sitePincode: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly region: Prisma.FieldRef<"Enquiry", 'String'>
-  readonly siteLatitude: Prisma.FieldRef<"Enquiry", 'Decimal'>
-  readonly siteLongitude: Prisma.FieldRef<"Enquiry", 'Decimal'>
-  readonly siteCoordinateSource: Prisma.FieldRef<"Enquiry", 'CoordinateSource'>
   readonly overallStatus: Prisma.FieldRef<"Enquiry", 'EnquiryOverallStatus'>
   readonly createdById: Prisma.FieldRef<"Enquiry", 'String'>
   readonly createdAt: Prisma.FieldRef<"Enquiry", 'DateTime'>

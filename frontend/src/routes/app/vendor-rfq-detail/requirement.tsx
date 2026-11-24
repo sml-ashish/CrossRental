@@ -17,7 +17,8 @@ import {
  */
 function machineMeasureRows(rfq: VendorRfqDetail["rfq"]): Array<[string, string]> {
   const rows: Array<[string, string | null]> = [
-    ["Lift load", rfq.liftLoadT !== null ? `${rfq.liftLoadT} t` : null],
+    ["Weight to be lifted", rfq.liftLoadT !== null ? `${rfq.liftLoadT} t` : null],
+    ["Height to be lifted", rfq.liftHeightM !== null ? `${rfq.liftHeightM} m` : null],
     ["Working radius", rfq.workingRadiusM !== null ? `${rfq.workingRadiusM} m` : null],
     ["Main boom required", rfq.mainBoomM !== null ? `${rfq.mainBoomM} m` : null],
     ["Fixed jib required", rfq.fixedJibM !== null ? `${rfq.fixedJibM} m` : null],

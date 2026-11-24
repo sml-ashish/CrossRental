@@ -24,15 +24,13 @@ import { Field, Select, TextArea, TextInput } from "@/components/ui/form";
  * Quote comparison and final selection (P3, BPD 6.15 + 6.16).
  *
  * One line, every live quotation side by side, ranked by total estimated cost
- * (open item 5; the rule is configurable and named on screen). The internal
- * rental budget sits here because this is an internal screen — it is never part
- * of an RFQ or a vendor's view.
+ * (open item 5; the rule is configurable and named on screen). This is an
+ * internal screen — none of it is part of a vendor's view.
  *
  * The internal marks (Under Review / Shortlisted / Rejected) are SML's working
  * notes: the vendor sees the quotation as still Submitted. Final selection runs
  * through the single `award_quotation` path, which reserves the crane, emails
- * the vendor and marks the rest Not Awarded only once the requirement's
- * quantity is met — a partial award leaves the other quotations open.
+ * the vendor and marks the rest Not Awarded. One line sources one crane.
  */
 
 const MARK_LABELS: Record<QuoteMarkStatus, string> = {
@@ -95,39 +93,31 @@ export function LineComparisonPage() {
           <>
             {data.enquiryNo} · line {data.lineNo} ·{" "}
             {data.requirement.craneTypeName ?? data.requirement.craneTypeCode ?? "No type"}{" "}
-            {data.requirement.capacityT !== null ? `${data.requirement.capacityT} t ` : ""}
-            {data.requirement.capacityRule === "EXACT" ? "(exact)" : "(at least)"} ×{" "}
-            {data.requirement.quantity} ·{" "}
+            {data.requirement.capacityT !== null ? `${data.requirement.capacityT} t+ ` : ""}
             {data.requirement.startDateTbc
               ? "start TBC"
               : `required ${formatDate(data.requirement.requiredStartDate)}`}{" "}
             for {durationText(data.requirement.durationValue, data.requirement.durationUnit)}
             <br />
-            {data.siteLocation}
+            {data.shipToCity}
             {data.siteStateName ? `, ${data.siteStateName}` : ""}
           </>
         }
         meta={
           data.fullyAwarded ? (
-            <Badge tone="emerald">Fully awarded</Badge>
+            <Badge tone="emerald">Awarded</Badge>
           ) : (
-            <Badge tone="amber">
-              {data.awardedCount} of {data.quantity} awarded
-            </Badge>
+            <Badge tone="amber">Awaiting award</Badge>
           )
         }
       />
 
       <Panel
         title="Internal reference"
-        description="The rental per month is internal only and never part of an RFQ or a vendor's view."
+        description="Internal only and never part of an RFQ or a vendor's view."
       >
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div>
-            <dt className="text-xs font-medium text-slate-500">Rental per month</dt>
-            <dd className="mt-0.5 text-sm text-slate-900">{data.rentalBudget ?? "—"}</dd>
-          </div>
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-3">
             <dt className="text-xs font-medium text-slate-500">Ranking rule</dt>
             <dd className="mt-0.5 text-sm text-slate-900">{RANK_RULE_LABELS[data.rankRule]}</dd>
           </div>
@@ -453,8 +443,7 @@ function AwardControl({
   return (
     <div className="mt-2 w-64 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
       <p className="text-xs text-slate-600">
-        Reserves this crane, emails the vendor and — once the line's quantity is met — marks the
-        rest Not Awarded.
+        Reserves this crane, emails the vendor and marks the other quotations Not Awarded.
       </p>
       {startDateTbc ? (
         <>

@@ -12,6 +12,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "seed": "ts-node src/lib/seed.ts",
+    "imap:token": "ts-node scripts/get-imap-token.ts",
     "test": "vitest run",
     "test:quick": "vitest run --passWithNoTests",
     "test:watch": "vitest",

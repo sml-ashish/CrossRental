@@ -248,7 +248,7 @@ export interface RecommendationGroup {
 }
 
 export interface RecommendationSite {
-  siteLocation: string;
+  shipToCity: string;
   stateCode: string;
   stateName: string;
   latitude: number | null;

@@ -10,7 +10,7 @@ import { buildEnquiryTemplate } from "../lib/enquiryTemplate";
 import { createEnquirySchema, addLineSchema } from "../validation/enquiryFields";
 import { addLine, createEnquiry } from "./enquiry.service";
 import type { Actor } from "./rfq.service";
-import { CapacityRule, DurationUnit } from "../generated/prisma/client";
+import { DurationUnit } from "../generated/prisma/client";
 
 /**
  * Bulk enquiry upload for the CR team (sales and admin).
@@ -46,7 +46,7 @@ export interface BulkEnquiryRowResult {
   /** Excel row number, so the report points at the line to fix. */
   row: number;
   ref: string | null;
-  customerName: string | null;
+  shipToCity: string | null;
   /** `valid` is the dry-run equivalent of `imported`. */
   status: "imported" | "valid" | "failed";
   message: string | null;
@@ -103,16 +103,6 @@ function resolveReference(
   );
   return match?.code ?? null;
 }
-
-const CAPACITY_RULE_LABELS = new Map<string, CapacityRule>([
-  ["atleast", CapacityRule.AT_LEAST],
-  ["minimum", CapacityRule.AT_LEAST],
-  ["min", CapacityRule.AT_LEAST],
-  ["orhigher", CapacityRule.AT_LEAST],
-  ["higher", CapacityRule.AT_LEAST],
-  ["exact", CapacityRule.EXACT],
-  ["exactly", CapacityRule.EXACT],
-]);
 
 const DURATION_UNIT_LABELS = new Map<string, DurationUnit>([
   ["day", DurationUnit.DAYS],
@@ -185,18 +175,6 @@ function buildLine(
     };
   }
 
-  let capacityRule: CapacityRule | undefined;
-  const ruleText = (values["capacityRule"] ?? "").trim();
-  if (ruleText) {
-    capacityRule = CAPACITY_RULE_LABELS.get(normalise(ruleText));
-    if (!capacityRule) {
-      return {
-        ok: false,
-        message: `Capacity rule: “${ruleText}” is not At least or Exact`,
-      };
-    }
-  }
-
   let durationUnit: DurationUnit | undefined;
   const unitText = (values["durationUnit"] ?? "").trim();
   if (unitText) {
@@ -215,44 +193,30 @@ function buildLine(
 
   const line: Record<string, unknown> = {
     craneTypeCode,
+    craneModel: textOrUndefined(values["craneModel"]),
+    yom: numberOrUndefined(values["yom"]),
     capacityT: numberOrUndefined(values["capacityT"]),
-    capacityRule,
-    capacityNote: textOrUndefined(values["capacityNote"]),
-    quantity: numberOrUndefined(values["quantity"]),
     applicationDescription: textOrUndefined(values["applicationDescription"]),
-    loadDescription: textOrUndefined(values["loadDescription"]),
     liftLoadT: numberOrUndefined(values["liftLoadT"]),
-    workingRadiusM: numberOrUndefined(values["workingRadiusM"]),
-    requiredMainBoomM: numberOrUndefined(values["requiredMainBoomM"]),
-    requiredFixedJibM: numberOrUndefined(values["requiredFixedJibM"]),
-    requiredLuffingJibM: numberOrUndefined(values["requiredLuffingJibM"]),
-    requiredWindJibM: numberOrUndefined(values["requiredWindJibM"]),
-    configurationNotes: textOrUndefined(values["configurationNotes"]),
+    liftHeightM: numberOrUndefined(values["liftHeightM"]),
+    craneConfiguration: textOrUndefined(values["craneConfiguration"]),
     requiredStartDate: dateOrRaw(values["requiredStartDate"]),
     durationValue: numberOrUndefined(values["durationValue"]),
     durationUnit,
     workingDaysPerMonth: numberOrUndefined(values["workingDaysPerMonth"]),
-    mobilisationTerms: textOrUndefined(values["mobilisationTerms"]),
-    demobilisationTerms: textOrUndefined(values["demobilisationTerms"]),
     otCharges: textOrUndefined(values["otCharges"]),
     breakdownTerms: textOrUndefined(values["breakdownTerms"]),
     dieselScope: textOrUndefined(values["dieselScope"]),
+    workingHoursPerDay: hours,
+    shift,
     workingHoursShift: workingHoursShift || undefined,
-    accommodationConveyance: textOrUndefined(values["accommodationConveyance"]),
-    paymentTerms: textOrUndefined(values["paymentTerms"]),
     supportCraneScope: textOrUndefined(values["supportCraneScope"]),
     steelMatsGroundPrepScope: textOrUndefined(values["steelMatsGroundPrepScope"]),
     ehsHrCompliance: textOrUndefined(values["ehsHrCompliance"]),
     insuranceTerms: textOrUndefined(values["insuranceTerms"]),
-    extensionClause: textOrUndefined(values["extensionClause"]),
     craneAgeCriteriaYears: numberOrUndefined(values["craneAgeCriteriaYears"]),
-    otherTerms: textOrUndefined(values["otherTerms"]),
     additionalManpowerScope: textOrUndefined(values["additionalManpowerScope"]),
-    intraSiteMovementScope: textOrUndefined(values["intraSiteMovementScope"]),
-    prereleaseTerms: textOrUndefined(values["prereleaseTerms"]),
-    ppeScope: textOrUndefined(values["ppeScope"]),
     rowScope: textOrUndefined(values["rowScope"]),
-    rentalBudget: textOrUndefined(values["rentalBudget"]),
   };
 
   return { ok: true, craneTypeCode, line };
@@ -261,12 +225,8 @@ function buildLine(
 /** The header columns, read only by the create path. */
 function buildHeader(values: Record<string, string>, stateCode: string): HeaderPayload {
   const header: HeaderPayload = {
-    customerName: values["customerName"] ?? "",
-    customerAddress: values["customerAddress"] ?? "",
-    siteLocation: values["siteLocation"] ?? "",
+    shipToCity: values["shipToCity"] ?? "",
     siteStateCode: stateCode,
-    sitePincode: textOrUndefined(values["sitePincode"]) ?? null,
-    region: textOrUndefined(values["region"]) ?? null,
   };
   // Only set when a date was given: `z.coerce.date(null)` is the epoch, and a
   // blank enquiry date must mean "today", not 1970.
@@ -277,12 +237,8 @@ function buildHeader(values: Record<string, string>, stateCode: string): HeaderP
 
 interface HeaderPayload {
   enquiryDate?: Date | string;
-  customerName: string;
-  customerAddress: string;
-  siteLocation: string;
+  shipToCity: string;
   siteStateCode: string;
-  sitePincode?: string | null;
-  region?: string | null;
 }
 
 type LinePayload = Record<string, unknown>;
@@ -303,12 +259,8 @@ interface Group {
 
 function headerSignature(header: HeaderPayload): string {
   return [
-    header.customerName,
-    header.customerAddress,
-    header.siteLocation,
+    header.shipToCity,
     header.siteStateCode,
-    header.sitePincode ?? "",
-    header.region ?? "",
     header.enquiryDate instanceof Date
       ? header.enquiryDate.toISOString()
       : (header.enquiryDate ?? ""),
@@ -317,7 +269,7 @@ function headerSignature(header: HeaderPayload): string {
     .join("|");
 }
 
-/** The duplicate warning key: customer, site, state, crane type and tonnage. */
+/** The duplicate warning key: city, state, crane type and tonnage. */
 function duplicateKey(parts: Array<string | number | null | undefined>): string {
   return parts
     .map((part) => {
@@ -365,22 +317,20 @@ export async function importEnquiries(input: {
       where: { createdAt: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) } },
       select: {
         enquiryNo: true,
-        customerName: true,
-        siteLocation: true,
+        shipToCity: true,
         siteStateCode: true,
         lines: { select: { craneTypeCode: true, capacityT: true } },
       },
     }),
   ]);
 
-  // Likely duplicates: the same customer, site and crane within the last 90
-  // days. A warning, never a skip — an enquiry has no natural key.
+  // Likely duplicates: the same city, state and crane within the last 90 days.
+  // A warning, never a skip — an enquiry has no natural key.
   const seen = new Map<string, string>();
   for (const enquiry of recentEnquiries) {
     for (const line of enquiry.lines) {
       const key = duplicateKey([
-        enquiry.customerName,
-        enquiry.siteLocation,
+        enquiry.shipToCity,
         enquiry.siteStateCode,
         line.craneTypeCode,
         line.capacityT?.toString(),
@@ -397,18 +347,18 @@ export async function importEnquiries(input: {
   const fail = (
     row: number,
     ref: string | null,
-    customerName: string | null,
+    shipToCity: string | null,
     message: string,
     warnings: string[] = [],
   ): void => {
     failed += 1;
-    results.push({ row, ref, customerName, status: "failed", message, warnings });
+    results.push({ row, ref, shipToCity, status: "failed", message, warnings });
   };
 
   for (const row of rows) {
     const values = row.values;
     const ref = textOrUndefined(values["enquiryRef"]) ?? null;
-    const customerName = textOrUndefined(values["customerName"]) ?? null;
+    const shipToCity = textOrUndefined(values["shipToCity"]) ?? null;
     const warnings: string[] = [];
 
     const stateCode = resolveReference(values["siteStateCode"], states);
@@ -416,7 +366,7 @@ export async function importEnquiries(input: {
       fail(
         row.rowNumber,
         ref,
-        customerName,
+        shipToCity,
         `State: “${values["siteStateCode"] ?? ""}” is not an Indian state on the Lists sheet`,
       );
       continue;
@@ -424,7 +374,7 @@ export async function importEnquiries(input: {
 
     const built = buildLine(values, craneTypes);
     if (!built.ok) {
-      fail(row.rowNumber, ref, customerName, built.message);
+      fail(row.rowNumber, ref, shipToCity, built.message);
       continue;
     }
 
@@ -432,14 +382,14 @@ export async function importEnquiries(input: {
     const line = built.line;
 
     // Validate the row as if it were the whole enquiry. That keeps each row
-    // self-contained: a row missing the customer name fails on its own row
-    // rather than silently borrowing the group's first row.
+    // self-contained: a row missing the city fails on its own row rather than
+    // silently borrowing the group's first row.
     const parsed = createEnquirySchema.safeParse({ ...header, lines: [line] });
     if (!parsed.success) {
       fail(
         row.rowNumber,
         ref,
-        customerName,
+        shipToCity,
         describeIssues(parsed.error.issues),
         warnings,
       );
@@ -448,17 +398,14 @@ export async function importEnquiries(input: {
 
     const likely = seen.get(
       duplicateKey([
-        header.customerName,
-        header.siteLocation,
+        header.shipToCity,
         header.siteStateCode,
         built.craneTypeCode,
         values["capacityT"],
       ]),
     );
     if (likely) {
-      warnings.push(
-        `Looks like ${likely} already covers this customer, site and crane`,
-      );
+      warnings.push(`Looks like ${likely} already covers this site and crane`);
     }
 
     validRows += 1;
@@ -476,8 +423,8 @@ export async function importEnquiries(input: {
       if (headerSignature(header) !== existingGroup.headerKey) {
         warnings.push(
           ref
-            ? `The customer/site in this row differs from the first row of “${ref}”, so the first row's header was used`
-            : "The customer/site in this row was not used",
+            ? `The site in this row differs from the first row of “${ref}”, so the first row's header was used`
+            : "The site in this row was not used",
         );
       }
       existingGroup.lines.push({ row: row.rowNumber, line, warnings });
@@ -496,7 +443,7 @@ export async function importEnquiries(input: {
         results.push({
           row: entry.row,
           ref: group.ref,
-          customerName: group.header.customerName,
+          shipToCity: group.header.shipToCity,
           status: "valid",
           message:
             lineCount === 1
@@ -520,7 +467,7 @@ export async function importEnquiries(input: {
         results.push({
           row: entry.row,
           ref: group.ref,
-          customerName: group.header.customerName,
+          shipToCity: group.header.shipToCity,
           status: "imported",
           message:
             lineCount === 1
@@ -537,7 +484,7 @@ export async function importEnquiries(input: {
         results.push({
           row: entry.row,
           ref: group.ref,
-          customerName: group.header.customerName,
+          shipToCity: group.header.shipToCity,
           status: "failed",
           message,
           warnings: entry.warnings,

@@ -8,13 +8,12 @@ import type { Actor } from "./rfq.service";
  * Quote comparison (BPD 6.15, P3 section 1).
  *
  * Read-only. It gathers every comparable quotation on an enquiry line — the
- * latest, non-withdrawn version of each — beside the line's requirement and its
- * internal rental budget, and ranks them by total estimated cost. Marking and
- * awarding are separate writes (`markQuotation`, `awardQuotation`); nothing here
- * changes state.
+ * latest, non-withdrawn version of each — beside the line's requirement, and
+ * ranks them by total estimated cost. Marking and awarding are separate writes
+ * (`markQuotation`, `awardQuotation`); nothing here changes state.
  *
- * This is an internal screen: the rental budget and the vendor names are SML's
- * own view, never the vendor's. Only internal roles may call it.
+ * This is an internal screen: the vendor names are SML's own view, never the
+ * vendor's. Only internal roles may call it.
  */
 
 function assertInternal(actor: Actor): void {
@@ -75,25 +74,20 @@ export interface ComparisonResult {
   lineId: string;
   enquiryId: string;
   enquiryNo: string;
-  siteLocation: string;
+  shipToCity: string;
   siteStateName: string | null;
   lineNo: number;
   requirement: {
     craneTypeCode: string | null;
     craneTypeName: string | null;
     capacityT: number | null;
-    capacityRule: string;
-    quantity: number;
     requiredStartDate: string | null;
     startDateTbc: boolean;
     durationValue: number | null;
     durationUnit: string | null;
     craneAgeCriteriaYears: number | null;
   };
-  /** Internal only: the free-text budget note. */
-  rentalBudget: string | null;
   rankRule: QuoteRankRule;
-  quantity: number;
   awardedCount: number;
   fullyAwarded: boolean;
   quotations: ComparisonQuotation[];
@@ -136,21 +130,18 @@ export async function compareQuotationsForLine(
     select: {
       id: true,
       lineNo: true,
-      quantity: true,
       craneTypeCode: true,
       craneType: { select: { name: true } },
       capacityT: true,
-      capacityRule: true,
       requiredStartDate: true,
       durationValue: true,
       durationUnit: true,
-      rentalBudget: true,
       craneAgeCriteriaYears: true,
       enquiry: {
         select: {
           id: true,
           enquiryNo: true,
-          siteLocation: true,
+          shipToCity: true,
           siteState: { select: { name: true } },
         },
       },
@@ -273,26 +264,24 @@ export async function compareQuotationsForLine(
     lineId: line.id,
     enquiryId: line.enquiry.id,
     enquiryNo: line.enquiry.enquiryNo,
-    siteLocation: line.enquiry.siteLocation,
+    shipToCity: line.enquiry.shipToCity,
     siteStateName: line.enquiry.siteState?.name ?? null,
     lineNo: line.lineNo,
     requirement: {
       craneTypeCode: line.craneTypeCode,
       craneTypeName: line.craneType?.name ?? null,
       capacityT: num(line.capacityT),
-      capacityRule: line.capacityRule,
-      quantity: line.quantity,
       requiredStartDate: line.requiredStartDate?.toISOString() ?? null,
       startDateTbc: line.requiredStartDate === null,
       durationValue: num(line.durationValue),
       durationUnit: line.durationUnit,
       craneAgeCriteriaYears: line.craneAgeCriteriaYears,
     },
-    rentalBudget: line.rentalBudget,
     rankRule: settings.quoteRankRule,
-    quantity: line.quantity,
     awardedCount,
-    fullyAwarded: awardedCount >= line.quantity,
+    // One line sources one crane. Once one quotation is selected there is
+    // nothing left to award on this line.
+    fullyAwarded: awardedCount >= 1,
     quotations,
   };
 }

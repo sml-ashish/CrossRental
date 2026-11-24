@@ -60,6 +60,11 @@ services:
       IMAP_USER: ${IMAP_USER:-}
       IMAP_PASS: ${IMAP_PASS:-}
       IMAP_MAILBOX: ${IMAP_MAILBOX:-INBOX}
+      IMAP_CLIENT_ID: ${IMAP_CLIENT_ID:-}
+      IMAP_TENANT_ID: ${IMAP_TENANT_ID:-}
+      IMAP_REFRESH_TOKEN: ${IMAP_REFRESH_TOKEN:-}
+      IMAP_ACCESS_TOKEN: ${IMAP_ACCESS_TOKEN:-}
+      IMAP_TOKEN_FILE: ${IMAP_TOKEN_FILE:-/app/data/imap_refresh_token}
       INTERNAL_NOTIFY_EMAIL: ${INTERNAL_NOTIFY_EMAIL:-}
       MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
       STORAGE_DRIVER: local
@@ -81,6 +86,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - uploads:/app/uploads
+      - imap_token:/app/data
     healthcheck:
       test:
         [
@@ -111,3 +117,4 @@ services:
 
 volumes:
   uploads:
+  imap_token:

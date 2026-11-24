@@ -14,6 +14,8 @@ import {
 import {
   createRfqFromLine,
   formatDate,
+  LINE_STATUS_TONES,
+  lineStatusOf,
   listRaisableLines,
   type RaisableLine,
 } from "@/lib/enquiries";
@@ -24,7 +26,7 @@ import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonRow } from "@/components/ui/skeleton";
-import { StatusPill, type StatusPillTone } from "@/components/ui/status-pill";
+import { StatusPill } from "@/components/ui/status-pill";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/cn";
 
@@ -71,41 +73,14 @@ function respondLabel(days: number | null): string {
   return `${days} day${days === 1 ? "" : "s"} to respond`;
 }
 
-/** Same six states the enquiry panel uses, folded from the eleven-step trail. */
-function trailPill(status: RaisableLine["trailStatus"]): { label: string; tone: StatusPillTone } {
-  switch (status) {
-    case "NEW":
-      return { label: "New", tone: "neutral" };
-    case "AVAILABILITY_CHECK":
-    case "VENDOR_SHORTLISTED":
-      return { label: "Availability check", tone: "blue" };
-    case "RFQ_SENT":
-    case "AWAITING_QUOTES":
-      return { label: "RFQ sent", tone: "blue" };
-    case "QUOTES_RECEIVED":
-    case "UNDER_EVALUATION":
-      return { label: "Quotes in", tone: "amber" };
-    case "VENDOR_FINALISED":
-    case "BOOKED":
-    case "FULFILLED_INTERNALLY":
-      return { label: "Awarded", tone: "emerald" };
-    default:
-      return { label: "Closed", tone: "muted" };
-  }
-}
-
 function capacityLabel(line: RaisableLine): string {
   if (line.capacityT === null) return "TBC";
-  return `${line.capacityT} t${line.capacityRule === "AT_LEAST" ? "+" : ""}`;
+  return `${line.capacityT} t+`;
 }
 
-/** `siteLocation` often already ends in the state; do not print it twice. */
+/** The state is already shown separately, so the city is enough here. */
 function placeOf(line: RaisableLine): string {
-  const state = line.siteStateName;
-  if (!state || line.siteLocation.toLowerCase().includes(state.toLowerCase())) {
-    return line.siteLocation;
-  }
-  return `${line.siteLocation}, ${state}`;
+  return line.shipToCity;
 }
 
 /** Non-blocking reasons to pause before creating a draft. */
@@ -287,7 +262,7 @@ export function RfqNewPage() {
       <section className="flex min-w-0 flex-1 flex-col">
         <div className="shrink-0 border-b border-ink-800 px-6 pt-5 pb-4">
           <PageHeader
-            back={{ to: "/app/rfqs", label: "All RFQs" }}
+            back={{ to: "/app/rfqs", label: "Back" }}
             title="Raise an RFQ"
             description="Every RFQ belongs to one enquiry line item. Pick the line, review what the vendor will see, then create the draft."
           />
@@ -467,7 +442,7 @@ export function RfqNewPage() {
         title="Raise an RFQ"
         lineLabel={
           selected
-            ? `${selected.enquiryNo} / line ${selected.lineNo} · ${selected.quantity} × ${
+            ? `${selected.enquiryNo} / line ${selected.lineNo} · ${
                 selected.craneTypeName ?? selected.craneTypeCode ?? "Crane"
               } · ${capacityLabel(selected)}`
             : undefined
@@ -523,7 +498,8 @@ function RaisableLineCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const trail = trailPill(line.trailStatus);
+  const status = lineStatusOf(line);
+  const trail = { label: status, tone: LINE_STATUS_TONES[status] };
   const start = line.startDateTbc
     ? "Start TBC"
     : line.requiredStartDate
@@ -553,7 +529,7 @@ function RaisableLineCard({
       <div className="pointer-events-none relative flex items-start gap-3">
         <div className="flex w-[68px] shrink-0 flex-col items-center rounded-lg border border-ink-800 bg-ink-850 px-2 py-1.5">
           <span className="text-sm font-semibold tabular-nums text-white">{capacityLabel(line)}</span>
-          <span className="mt-0.5 text-[12px] text-slate-500 tabular-nums">qty {line.quantity}</span>
+          <span className="mt-0.5 text-[10px] tracking-wide text-slate-500 uppercase">Capacity</span>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -622,7 +598,8 @@ function DraftPreview({
     );
   }
 
-  const trail = trailPill(line.trailStatus);
+  const status = lineStatusOf(line);
+  const trail = { label: status, tone: LINE_STATUS_TONES[status] };
   const presets = [3, 7, 14] as const;
   const start = line.startDateTbc
     ? "To be confirmed"
@@ -637,8 +614,7 @@ function DraftPreview({
           Draft preview · what the vendor sees
         </p>
         <h2 className="mt-1 text-lg leading-tight font-semibold text-white">
-          {line.quantity} × {line.craneTypeName ?? line.craneTypeCode ?? "Crane"} ·{" "}
-          {capacityLabel(line)}
+          {line.craneTypeName ?? line.craneTypeCode ?? "Crane"} · {capacityLabel(line)}
         </h2>
         <p className="mt-0.5 font-mono text-[13px] text-slate-500">
           {line.enquiryNo} / line {line.lineNo}
@@ -657,19 +633,14 @@ function DraftPreview({
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
           <PreviewFact label="Crane type" value={line.craneTypeName ?? line.craneTypeCode ?? "—"} />
           <PreviewFact label="Capacity" value={capacityLabel(line)} />
-          <PreviewFact label="Quantity" value={String(line.quantity)} />
           <PreviewFact label="Required start" value={start} mono={!line.startDateTbc && Boolean(line.requiredStartDate)} />
           <PreviewFact label="Site" value={placeOf(line)} />
-          <PreviewFact
-            label="State / pincode"
-            value={[line.siteStateName, line.sitePincode].filter(Boolean).join(" · ") || "—"}
-            mono={Boolean(line.sitePincode)}
-          />
+          <PreviewFact label="State" value={line.siteStateName ?? "—"} />
         </dl>
 
         <p className="rounded-lg border border-ink-800 bg-ink-850 px-3 py-2 text-[13px] leading-relaxed text-slate-500">
-          Customer name and address, the rental budget, internal notes and the Sales
-          Partner&rsquo;s name are never copied into an RFQ.
+          One line sources one crane. Vendor terms are chosen on the RFQ itself; the
+          Sales Partner&rsquo;s name and internal notes are never copied into an RFQ.
         </p>
 
         <div className="rounded-xl border border-ink-800 bg-ink-850/60 p-3">

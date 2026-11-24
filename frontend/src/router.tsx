@@ -23,7 +23,6 @@ import { CraneFormPage } from "@/routes/app/crane-form";
 import { VendorDetailPage } from "@/routes/app/vendor-detail";
 import { SapSheetPage } from "@/routes/app/sap-sheet";
 import { SettingsPage } from "@/routes/app/settings";
-import { AdminPage } from "@/routes/app/admin";
 import { ReplyQueuePage } from "@/routes/app/replies";
 import { RfqIndexPage } from "@/routes/app/rfqs";
 import { RfqNewPage } from "@/routes/app/rfq-new";
@@ -43,7 +42,6 @@ import { DiscoveryPage } from "@/routes/app/discovery";
 import { CraneDetailPage } from "@/routes/app/crane-detail";
 import { CommunicationHistoryPage } from "@/routes/app/communications";
 import { EnquiryHistoryPage } from "@/routes/app/enquiry-history";
-import { SalesDashboardPage } from "@/routes/app/sales";
 import { ManagementDashboardPage } from "@/routes/app/management";
 import { ReportsPage } from "@/routes/app/reports";
 
@@ -497,22 +495,6 @@ const vendorBookingsRoute = createRoute({
   ),
 });
 
-/**
- * Sales can work the queue — search, chase, send invitations — so the route is
- * open to both internal roles. Approval controls are further restricted by the
- * backend, and the detail screen hides them from sales.
- */
-/** P5: the CR team's operational dashboard. */
-const salesDashboardRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: "/sales",
-  component: () => (
-    <RequireAuth roles={["admin_user", "sales_user"]}>
-      <SalesDashboardPage />
-    </RequireAuth>
-  ),
-});
-
 /** P5: the read-only Management Viewer dashboard. */
 const managementDashboardRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -584,22 +566,6 @@ const settingsRoute = createRoute({
   ),
 });
 
-/** The admin dashboard and staff management (P0 B), admin only. */
-const adminRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: "/admin",
-  // `?review=stale-cranes` opens the matching drawer, so a link from an email
-  // or a colleague lands on the same rows without a second click.
-  validateSearch: (search: Record<string, unknown>): { review?: string } => ({
-    review: typeof search.review === "string" ? search.review : undefined,
-  }),
-  component: () => (
-    <RequireAuth roles={["admin_user"]}>
-      <AdminPage />
-    </RequireAuth>
-  ),
-});
-
 /** P6: email/WhatsApp replies that need an admin to complete the match. */
 const adminRepliesRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -644,14 +610,12 @@ const routeTree = rootRoute.addChildren([
     bookingsRoute,
     vendorBookingsRoute,
     approvalsRoute,
-    salesDashboardRoute,
     managementDashboardRoute,
     reportsRoute,
     vendorsRoute,
     vendorDetailRoute,
     sapSheetRoute,
     settingsRoute,
-    adminRoute,
     adminRepliesRoute,
   ]),
 ]);

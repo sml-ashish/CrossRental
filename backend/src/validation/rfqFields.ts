@@ -299,6 +299,11 @@ const lineMeasureFields = {
     .positive("Lift load must be greater than 0")
     .max(10_000, "Lift load is too high")
     .optional(),
+  liftHeightM: z.coerce
+    .number({ message: "Enter the height to be lifted in metres" })
+    .positive("Height to be lifted must be greater than 0")
+    .max(1000, "Height to be lifted is too high")
+    .optional(),
   workingRadiusM: z.coerce
     .number({ message: "Enter the working radius in metres" })
     .positive("Working radius must be greater than 0")

@@ -91,7 +91,6 @@ src/
 | `/app/vendors/$vendorId`    | admin, sales   | Registration detail. Admin sees decrypted bank details and the approve/reject controls; both roles get the vendor's fleet section (add/edit on the vendor's behalf) and, for admin, the SAP creation-sheet link |
 | `/app/vendors`              | internal       | Redirects to the queue |
 | `/app/vendors/$vendorId/sap-sheet` | admin   | Print-friendly SAP vendor creation sheet (phase D3) |
-| `/app/admin`                | admin          | Dashboard counters (B1), staff management and vendor suspend/reinstate entry point (P0 B) |
 | `/app/settings`             | admin          | Day basis and the SAP office-use master lists (phase D3) |
 | `/app/enquiries`            | admin, sales   | Enquiry intake list, filtered by the derived roll-up (P1) |
 | `/app/enquiries/new`        | admin, sales   | Capture an enquiry and its line items (P1) |

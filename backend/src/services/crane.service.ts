@@ -882,11 +882,8 @@ async function enquirySiteFor(craneId: string) {
           enquiry: {
             select: {
               enquiryNo: true,
-              siteLocation: true,
+              shipToCity: true,
               siteStateCode: true,
-              sitePincode: true,
-              siteLatitude: true,
-              siteLongitude: true,
             },
           },
         },
@@ -904,11 +901,13 @@ async function enquirySiteFor(craneId: string) {
   if (!enquiry) return null;
   return {
     enquiryNo: enquiry.enquiryNo,
-    location: enquiry.siteLocation,
+    location: enquiry.shipToCity,
     stateCode: enquiry.siteStateCode,
-    pincode: enquiry.sitePincode ?? null,
-    latitude: enquiry.siteLatitude === null ? null : Number(enquiry.siteLatitude),
-    longitude: enquiry.siteLongitude === null ? null : Number(enquiry.siteLongitude),
+    pincode: null,
+    // The enquiry stores no pin; resolveCoordinates geocodes the city when the
+    // crane is deployed so the crane gets its own confirmed place.
+    latitude: null,
+    longitude: null,
   };
 }
 
@@ -939,10 +938,10 @@ export async function updateCrane(
   // Deployed means "on site", so the crane's location becomes the enquiry's job
   // site, whoever makes the change and whatever location they typed. It applies
   // when the status *becomes* Deployed; an ordinary edit of a crane that is
-  // already Deployed leaves its location alone. The enquiry's pin is used as
-  // the crane's pin when it has one; otherwise the old pin is dropped so the
-  // new place is geocoded rather than left pointing at the old one. A crane with
-  // no enquiry booking keeps the location it was given.
+  // already Deployed leaves its location alone. The enquiry's ship-to city
+  // becomes the crane's location and is geocoded from there, so an old pin is
+  // never left pointing at the previous site. A crane with no enquiry booking
+  // keeps the location it was given.
   if (
     nextStatus === CraneStatus.DEPLOYED &&
     existing.currentStatus !== CraneStatus.DEPLOYED

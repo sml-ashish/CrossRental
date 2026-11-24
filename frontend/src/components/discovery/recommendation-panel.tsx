@@ -200,7 +200,7 @@ export function RecommendationPanel({
         {line ? (
           <p className="mt-0.5 truncate text-[13px] text-neutral-400">
             {line.craneTypeName ?? line.craneTypeCode ?? "Crane type not set"} · {capacityText(line)}
-            {line.siteLocation ? ` · ${line.siteLocation}` : ""}
+            {line.shipToCity ? ` · ${line.shipToCity}` : ""}
           </p>
         ) : null}
 

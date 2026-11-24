@@ -1,9 +1,7 @@
 import { prisma } from "../lib/database";
 import { AppError } from "../middleware/errorHandler";
 import { env } from "../config/env";
-import { CoordinateSource } from "../generated/prisma/client";
 import {
-  getGeoProvider,
   straightLineKm,
   tryGeocode,
   tryRoadRoutes,
@@ -22,9 +20,10 @@ import type { Actor } from "./rfq.service";
  * picture of one journey, and the two need different guarantees.
  *
  * **The server owns both ends.** The endpoint takes a line id and a crane id
- * and nothing else. Coordinates are read from the database (or geocoded from
- * the site address), so a caller cannot ask us to draw a line between two
- * points of their choosing and then screenshot it as fact.
+ * and nothing else. The job site is geocoded from the enquiry's ship-to city and
+ * state, and the crane end comes from its stored pin (or its place name), so a
+ * caller cannot ask us to draw a line between two points of their choosing and
+ * then screenshot it as fact.
  *
  * **A straight line is a labelled failure, never a route.** Google's Routes
  * API can decline (quota, key restriction, no drivable path), and `stub` and
@@ -164,7 +163,7 @@ function label(parts: Array<string | null | undefined>, fallback: string): strin
  *
  * A missing pin is a 422, not a 400: the request is well formed and the answer
  * is "this record is not complete enough to draw a route", which is what the
- * screen shows as "No route: the job site has no pin".
+ * screen shows as "No route: the job site could not be placed".
  */
 export async function getLineRoute(
   lineId: string,
@@ -178,12 +177,8 @@ export async function getLineRoute(
     select: {
       enquiry: {
         select: {
-          id: true,
-          siteLocation: true,
+          shipToCity: true,
           siteStateCode: true,
-          sitePincode: true,
-          siteLatitude: true,
-          siteLongitude: true,
           siteState: { select: { name: true } },
         },
       },
@@ -218,18 +213,17 @@ export async function getLineRoute(
     return [...parts, "India"].filter(Boolean).join(", ");
   };
 
-  const storedOrigin = point(line.enquiry.siteLatitude, line.enquiry.siteLongitude);
-  let origin = storedOrigin;
-  let originEstimated = false;
-  if (!origin) {
-    originEstimated = true;
-    const geocoded = await tryGeocode({
-      location: line.enquiry.siteLocation,
-      state: line.enquiry.siteStateCode,
-      pincode: line.enquiry.sitePincode,
-    });
-    if (geocoded.ok) origin = geocoded.point;
-  }
+  // The enquiry stores a city, not a pin, so the job site is placed from the
+  // city and state on every request. This is read-only: a failed lookup costs
+  // the caller an estimate, it never writes a guessed coordinate anywhere.
+  const siteState = line.enquiry.siteState?.name ?? line.enquiry.siteStateCode;
+  let origin: GeoPoint | null = null;
+  let originEstimated = true;
+  const geocoded = await tryGeocode({
+    location: line.enquiry.shipToCity,
+    state: siteState,
+  });
+  if (geocoded.ok) origin = geocoded.point;
 
   let destination = point(crane.latitude, crane.longitude);
   let destinationEstimated = false;
@@ -255,10 +249,7 @@ export async function getLineRoute(
   if (!origin || !destination) {
     if (!env.route.polyline) throw noPin();
     const originWaypoint: RouteWaypoint = origin ?? {
-      address: placeName(
-        line.enquiry.siteLocation,
-        line.enquiry.siteState?.name ?? line.enquiry.siteStateCode,
-      ),
+      address: placeName(line.enquiry.shipToCity, siteState),
     };
     const destinationWaypoint: RouteWaypoint = destination ?? {
       address: placeName(crane.currentLocation, crane.state?.name ?? crane.stateCode),
@@ -271,38 +262,13 @@ export async function getLineRoute(
     if (!origin || !destination) throw noPin();
   }
 
-  const siteLabel = label(
-    [line.enquiry.siteLocation, line.enquiry.siteState?.name ?? line.enquiry.siteStateCode],
-    "Job site",
-  );
+  const siteLabel = label([line.enquiry.shipToCity, siteState], "Job site");
   const craneLabel = label(
     [crane.make, crane.model],
     crane.serialRegistrationNo?.trim() || "Crane",
   );
 
   const ends = { origin, destination, originEstimated, destinationEstimated };
-
-  // The router just placed the job site, so keep that as the site's pin. Without
-  // it every other crane in the list still reads "Distance unavailable", because
-  // list distances need a saved site pin. Only an enquiry with no pin is written
-  // to, and never a crane: a site is one place, a crane's pin is the vendor's.
-  if (!storedOrigin) {
-    try {
-      await prisma.enquiry.update({
-        where: { id: line.enquiry.id },
-        data: {
-          siteLatitude: origin.lat,
-          siteLongitude: origin.lng,
-          siteCoordinateSource: getGeoProvider().isAuthoritative
-            ? CoordinateSource.auto
-            : CoordinateSource.manual,
-        },
-      });
-    } catch (err) {
-      // The route is still good; the next open tries again.
-      console.error("[route] could not save the site pin", err);
-    }
-  }
 
   const key = routeKey(origin, destination);
   const cached = namedRoad ? null : cacheGet(key);
